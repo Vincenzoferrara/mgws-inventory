@@ -789,6 +789,23 @@ class CassaController {
     return completaOperazione();
   }
 
+  /// Legge il progressivo scontrino dalla risposta del checkout.
+  ///
+  /// Il server lo assegna in simulazione; con registratore telematico arriva
+  /// gia' emesso dal dispositivo. Se manca, si torna al fallback locale.
+  /// Reads the receipt number from the checkout response. The server
+  /// allocates it in simulation; with a fiscal register it arrives already
+  /// issued by the device. When missing, the local fallback applies.
+  int? _leggiProgressivoServer(Map<String, dynamic> response) {
+    final valore = response['sequential_number'];
+    if (valore is num && valore.toInt() > 0) return valore.toInt();
+    if (valore is String) {
+      final parsed = int.tryParse(valore);
+      if (parsed != null && parsed > 0) return parsed;
+    }
+    return null;
+  }
+
   Future<bool> completaOperazione() async {
     if (_scontrinoCorrente.isVuoto) {
       AppLogger().w('⚠️ Impossibile completare: scontrino vuoto');
@@ -827,6 +844,11 @@ class CassaController {
       }
 
       final orderId = PlatformManager.pos.checkoutOrderId(response);
+      // Progressivo assegnato dal server: e' il numero che finisce nello
+      // storico, cosi' non dipende da un contatore salvato sul dispositivo.
+      // Server-allocated number: this is what lands in the history, so it no
+      // longer depends on a counter stored on the device.
+      final progressivoServer = _leggiProgressivoServer(response);
       await risolviOperatoreDaLogin();
       _applicaContestoCassa(_scontrinoCorrente);
       if (orderId != null) {
@@ -864,7 +886,10 @@ class CassaController {
       // Storico POS separato dagli ordini Woo: archivia lo scontrino chiuso
       // con righe, pagamenti, operatore, cassa e riferimento ordine.
       try {
-        await storicoStore.registraScontrinoChiuso(_scontrinoCorrente);
+        await storicoStore.registraScontrinoChiuso(
+          _scontrinoCorrente,
+          progressivoServer: progressivoServer,
+        );
       } catch (e) {
         AppLogger().w('Storico POS: archiviazione locale fallita: $e');
       }

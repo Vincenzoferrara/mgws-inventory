@@ -48,6 +48,10 @@
 - `WooConnect` owns authenticated transport and site URL state.
 - MGWS clients must not create separate connectors.
 - `QueryMgwsPos` handles idempotent POS checkout.
+- The receipt number is allocated by MGWS during checkout, not by the app. `mg_pos_receipts` holds one row per POS document, and the unique index on `(business_day_id, register_name, sequential_number)` makes a duplicate number impossible at database level, so two tills cannot produce the same receipt number and a reinstall cannot restart the sequence.
+- Each register keeps an independent sequence per business day, so the daily total for a till is `COUNT(*)` grouped by register. `business_day_id` is also the shift's operating day and stays distinct from the receipt number.
+- With a fiscal register attached the device issues the number and the app sends it as `receipt_number`; the server records it instead of allocating it.
+- The checkout response carries `sequential_number`. When it is missing, the app falls back to a local counter that resumes from the local maximum, so a sale is never lost and the sequence never goes backwards.
 - `cassa/fiscal_register/` isolates the fiscal register behind a driver contract. The POS never speaks a vendor protocol: every manufacturer exposes its own API, so there is no universal driver.
 - `FiscalRegisterRepository` selects the active driver and persists the choice. Simulation mode is a declared way of working, not a fallback: it is what runs when no register is attached.
 - The checkout asks the driver to issue the receipt. In simulation the driver issues nothing and returns no number, so the POS keeps its own receipt sequence. `Scontrino.numeroProgressivoDispositivo` holds the number when a device issues one.

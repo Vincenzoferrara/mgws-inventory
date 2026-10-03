@@ -52,6 +52,14 @@ Map<String, dynamic> buildMgwsCheckoutPayload({
   final payload = <String, dynamic>{
     'operation_type': scontrino.tipoOperazione.value,
     'effective_operation_type': scontrino.tipoOperazioneEffettiva.value,
+    // Con registratore telematico il progressivo lo emette il dispositivo e
+    // viene inviato gia' valorizzato. In simulazione il campo non viaggia e
+    // MGWS assegna il numero. La chiave del documento e' gia' il
+    // `_id_scontrino_locale` sopra, che MGWS usa anche come idempotency key.
+    // With a fiscal register the number is issued by the device and sent
+    // already set. In simulation the field is absent and MGWS allocates it.
+    if ((scontrino.numeroProgressivoDispositivo ?? '').isNotEmpty)
+      'receipt_number': scontrino.numeroProgressivoDispositivo,
     if ((scontrino.turnoId ?? '').isNotEmpty) 'shift_id': scontrino.turnoId,
     'payment_method': scontrino.metodoPagamento,
     'payment_method_title': _paymentMethodTitle(

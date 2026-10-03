@@ -310,10 +310,23 @@ class StoricoCassaStore {
 
   /// Registra uno scontrino POS chiuso. Gli ordini Woo non entrano mai qui:
   /// resta il documento origine solo come riferimento `wooOrderId`.
-  Future<Scontrino> registraScontrinoChiuso(Scontrino scontrino) async {
+  ///
+  /// Il progressivo lo assegna MGWS durante il checkout: il contatore locale
+  /// resta solo come fallback per quando il backend non ha risposto, perche'
+  /// con due casse aperte un contatore locale duplicherebbe i numeri.
+  /// The receipt number is allocated by MGWS during checkout. The local
+  /// counter remains a fallback when the backend did not answer, because with
+  /// two tills open a local counter would duplicate numbers.
+  Future<Scontrino> registraScontrinoChiuso(
+    Scontrino scontrino, {
+    int? progressivoServer,
+  }) async {
     await init();
-    _progressivo += 1;
-    scontrino.numeroProgressivo = _progressivo;
+    final progressivo = progressivoServer != null && progressivoServer > 0
+        ? progressivoServer
+        : _assegnaProgressivoFallback();
+    scontrino.numeroProgressivo = progressivo;
+    _progressivo = progressivo;
     scontrino.canale = 'pos';
     scontrino.dataChiusura = DateTime.now();
     scontrino.giornataId ??= Scontrino.calcolaGiornataId(
@@ -326,9 +339,26 @@ class StoricoCassaStore {
     _scontrini.insert(0, scontrino);
     await _save();
     AppLogger().i(
-      'Storico POS #$_progressivo registrato (${scontrino.righe.length} righe)',
+      'Storico POS #$progressivo registrato (${scontrino.righe.length} righe)',
     );
     return scontrino;
+  }
+
+  /// Counter used only when the server did not return a number.
+  ///
+  /// Non e' il percorso normale: MGWS assegna il progressivo nel checkout. Il
+  /// fallback serve a non perdere la vendita se il numero non arriva, e
+  /// riparte dal massimo gia' locale per non andare indietro nella sequenza.
+  /// This is not the normal path: MGWS allocates the number during checkout.
+  /// The fallback prevents losing a sale when the number does not arrive and
+  /// resumes from the local maximum so the sequence never goes backwards.
+  int _assegnaProgressivoFallback() {
+    var massimo = _progressivo;
+    for (final scontrino in _scontrini) {
+      final numero = scontrino.numeroProgressivo ?? 0;
+      if (numero > massimo) massimo = numero;
+    }
+    return massimo + 1;
   }
 
   List<Scontrino> filtra({
