@@ -12,6 +12,81 @@ class QueryMgwsPos {
     return response['order_id'] ?? response['woo_order_id'];
   }
 
+  /// Elenco scontrini con sintesi, per lo storico e i report.
+  ///
+  /// La sintesi arriva gia' dal server, cosi' il riepilogo di giornata non
+  /// richiede di scaricare ogni documento.
+  /// Receipt list with aggregates, for the history and the reports.
+  Future<Map<String, dynamic>> listReceipts({
+    String? businessDayId,
+    String? registerName,
+    String? operationType,
+    int? limit,
+    int? offset,
+  }) async {
+    if (!await MgwsConnection.instance.ensureConnected()) {
+      return const <String, dynamic>{
+        'success': false,
+        'message': 'Backend MGWS non disponibile',
+      };
+    }
+
+    final response = await _base.get(
+      '/wp-json/mgws/v1/pos/receipts',
+      queryParameters: <String, dynamic>{
+        if (businessDayId != null && businessDayId.isNotEmpty)
+          'business_day_id': businessDayId,
+        if (registerName != null && registerName.isNotEmpty)
+          'register_name': registerName,
+        if (operationType != null && operationType.isNotEmpty)
+          'operation_type': operationType,
+        if (limit != null) 'limit': limit,
+        if (offset != null) 'offset': offset,
+      },
+    );
+
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+
+    _log.w('MGWS POS listReceipts ha restituito una risposta non strutturata');
+    return <String, dynamic>{
+      'success': false,
+      'status_code': response.statusCode,
+      'message': 'Elenco scontrini non strutturato',
+    };
+  }
+
+  /// Dettaglio documento con righe e residuo rendibile.
+  ///
+  /// Il residuo e' calcolato dal server su tutti i resi registrati: e' la
+  /// fonte che vale, perche' conosce anche i resi fatti da altri dispositivi.
+  /// Document detail with lines and the returnable remainder, computed by the
+  /// server from every recorded return.
+  Future<Map<String, dynamic>> getReceipt(String receiptKey) async {
+    if (!await MgwsConnection.instance.ensureConnected()) {
+      return const <String, dynamic>{
+        'success': false,
+        'message': 'Backend MGWS non disponibile',
+      };
+    }
+
+    final response = await _base.get(
+      '/wp-json/mgws/v1/pos/receipts/${Uri.encodeComponent(receiptKey)}',
+    );
+
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+
+    _log.w('MGWS POS getReceipt ha restituito una risposta non strutturata');
+    return <String, dynamic>{
+      'success': false,
+      'status_code': response.statusCode,
+      'message': 'Dettaglio scontrino non strutturato',
+    };
+  }
+
   Future<Map<String, dynamic>> getSettings() async {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{

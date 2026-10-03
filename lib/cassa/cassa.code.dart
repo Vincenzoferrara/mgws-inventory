@@ -407,8 +407,20 @@ class CassaController {
     bool preparaCambio = false,
   }) async {
     await storicoStore.init();
-    final esito = storicoStore.validaReso(
-      scontrinoOrigineId: scontrinoOrigineId,
+    // Il residuo rendibile viene chiesto al server: conosce i resi di tutti i
+    // dispositivi, quindi il controllo non dipende dal telefono che apre il
+    // documento. Se il server non risponde si ricade sullo store locale.
+    // The returnable remainder comes from the server, which sees returns from
+    // every device; without a response the local store is used.
+    var righeRendibili = await storicoStore.righeRendibiliDaServer(
+      scontrinoOrigineId,
+    );
+    if (righeRendibili.isEmpty) {
+      righeRendibili = storicoStore.righeRendibili(scontrinoOrigineId);
+    }
+
+    final esito = _validaResoConRighe(
+      righeRendibili: righeRendibili,
       chiaveRiga: chiaveRiga,
       quantita: quantita,
       motivo: motivo,
@@ -416,12 +428,21 @@ class CassaController {
     if (!esito.ok) return esito.errore ?? 'Reso non consentito.';
 
     final origine = storicoStore.cercaPerId(scontrinoOrigineId);
-    if (origine == null) return 'Scontrino di origine non trovato.';
     RigaScontrino? venduta;
-    for (final r in origine.righe) {
-      if (!r.isReso && r.chiaveRiga == chiaveRiga) venduta = r;
+    if (origine != null) {
+      for (final r in origine.righe) {
+        if (!r.isReso && r.chiaveRiga == chiaveRiga) venduta = r;
+      }
     }
-    if (venduta == null) return 'Riga vendita non trovata.';
+    // Il documento puo' non essere nello store locale, perche' la sua esistenza
+    // e' sul server. In quel caso la riga si ricostruisce dai dati letti.
+    final rigaVenduta = venduta ??
+        _rigaDaRendibile(righeRendibili, chiaveRiga) ??
+        (quantita > 0
+            ? _rigaDaReso(scontrinoOrigineId, chiaveRiga, quantita)
+            : null);
+    if (rigaVenduta == null) return 'Riga vendita non trovata.';
+    venduta = rigaVenduta;
 
     // Nuovo scontrino di reso collegato, con prezzo reale della vendita.
     await risolviOperatoreDaLogin();
@@ -431,11 +452,11 @@ class CassaController {
       tipoOperazione: preparaCambio
           ? TipoOperazioneCassa.cambio
           : TipoOperazioneCassa.reso,
-      metodoPagamento: origine.metodoPagamento,
-      clienteId: origine.clienteId,
-      clienteNome: origine.clienteNome,
-      clienteEmail: origine.clienteEmail,
-      clienteTelefono: origine.clienteTelefono,
+      metodoPagamento: origine?.metodoPagamento ?? 'contanti',
+      clienteId: origine?.clienteId,
+      clienteNome: origine?.clienteNome,
+      clienteEmail: origine?.clienteEmail,
+      clienteTelefono: origine?.clienteTelefono,
     );
     _applicaContestoCassa(_scontrinoCorrente);
     final unitario = venduta.prezzoUnitario;
@@ -455,8 +476,8 @@ class CassaController {
       motivoReso: motivo.trim(),
       esitoMerce: esitoMerce,
     );
-    // Forza il prezzo reale: temporaneamente allinea il listino usato per il
-    // calcolo al prezzo pagato, poi ricalcola.
+    // Forza il prezzo reale: allinea il listino usato per il calcolo al prezzo
+    // effettivamente pagato, poi ricalcola il totale dello scontrino.
     final prezzoReale = unitario;
     final lordo = prezzoReale * quantita;
     double netto = lordo;
@@ -787,6 +808,78 @@ class CassaController {
   /// Completa la vendita tramite checkout MGWS.
   Future<bool> completaVendita() async {
     return completaOperazione();
+  }
+
+  /// Valida un reso sulle righe rendibili, dal server o dallo store locale.
+  ///
+  /// Il controllo resta identico in entrambi i casi: cambia solo da dove
+  /// arrivano le righe.
+  /// Validates a return against the returnable lines.
+  EsitoReso _validaResoConRighe({
+    required List<RigaRendibile> righeRendibili,
+    required String chiaveRiga,
+    required int quantita,
+    required String motivo,
+  }) {
+    if (righeRendibili.isEmpty) {
+      return const EsitoReso.ko(
+        'Scontrino di origine non trovato o non disponibile sul server.',
+      );
+    }
+    if (motivo.trim().isEmpty) {
+      return const EsitoReso.ko('Motivo del reso obbligatorio.');
+    }
+    RigaRendibile? riga;
+    for (final candidate in righeRendibili) {
+      if (candidate.chiaveRiga == chiaveRiga) riga = candidate;
+    }
+    if (riga == null) return const EsitoReso.ko('Riga venduta non trovata.');
+    if (riga.isEsaurita) {
+      return const EsitoReso.ko('Riga gia interamente restituita.');
+    }
+    if (quantita <= 0) {
+      return const EsitoReso.ko('Quantita di reso non valida.');
+    }
+    if (quantita > riga.quantitaRendibile) {
+      return EsitoReso.ko(
+        'Reso superiore al residuo: disponibili ${riga.quantitaRendibile}.',
+      );
+    }
+    return const EsitoReso.ok();
+  }
+
+  /// Ricostruisce la riga venduta dai dati letti dal server.
+  /// Rebuilds the sold line from the data read server-side.
+  RigaScontrino? _rigaDaRendibile(List<RigaRendibile> righe, String chiaveRiga) {
+    for (final candidate in righe) {
+      if (candidate.chiaveRiga != chiaveRiga) continue;
+      return RigaScontrino(
+        prodotto: ProdottoGlobal(
+          nome: candidate.nome,
+          barcodeInterno: candidate.barcodeInterno,
+        ),
+        quantita: candidate.quantitaVenduta,
+        subtotale: 0,
+        riferimentoChiaveRiga: candidate.chiaveRiga,
+      );
+    }
+    return null;
+  }
+
+  /// Riga minima per un reso senza documento locale.
+  /// Minimal line for a return without a local document.
+  RigaScontrino? _rigaDaReso(
+    String scontrinoOrigineId,
+    String chiaveRiga,
+    int quantita,
+  ) {
+    return RigaScontrino(
+      prodotto: ProdottoGlobal(nome: ''),
+      quantita: quantita,
+      subtotale: 0,
+      riferimentoChiaveRiga: chiaveRiga,
+      riferimentoScontrinoId: scontrinoOrigineId,
+    );
   }
 
   /// Legge il progressivo scontrino dalla risposta del checkout.

@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../log_viewer/app_logger.dart';
+import '../login/jwt_api/adapter/platform_manager.dart';
 import 'class_scontrino.dart';
 
 /// Riga vendita con residuo rendibile.
@@ -306,6 +307,64 @@ class StoricoCassaStore {
     _turni[index] = turno.chiudi(chiusura.data);
     await _save();
     return const EsitoReso.ok();
+  }
+
+  /// Righe vendita di uno scontrino con quantita gia resa e residuo.
+///
+/// Il residuo arriva dal server quando disponibile, perche' il server vede i
+/// resi di tutti i dispositivi; senza risposta si ricade sullo store locale.
+/// Sold lines with the already-returned quantity and the remainder.
+Future<List<RigaRendibile>> righeRendibiliDaServer(String receiptKey) async {
+    final chiave = receiptKey.trim();
+    if (chiave.isEmpty) return const [];
+
+    try {
+      final risposta = await PlatformManager.pos.getReceipt(chiave);
+      if (risposta['success'] != true) return const [];
+      final scontrino = risposta['receipt'];
+      if (scontrino is! Map<String, dynamic>) return const [];
+
+      final righe = scontrino['lines'];
+      if (righe is! List) return const [];
+
+      final residui = <String, int>{};
+      final returnable = scontrino['returnable'];
+      if (returnable is Map) {
+        for (final entry in returnable.entries) {
+          final valore = entry.value;
+          if (entry.key is String && valore is num) {
+            residui[entry.key as String] = valore.toInt();
+          }
+        }
+      }
+
+      final risultato = <RigaRendibile>[];
+      for (final riga in righe) {
+        if (riga is! Map) continue;
+        if (riga['movement_type'] != 'sale') continue;
+        final lineKey = riga['line_key'];
+        final quantita = riga['quantity'];
+        if (lineKey is! String || quantita is! num) continue;
+        final nome = riga['name']?.toString() ?? '';
+        final barcode = riga['barcode']?.toString() ?? '';
+        final prezzo = riga['unit_price'];
+        final residuo = residui[lineKey] ?? quantita.toInt();
+        risultato.add(
+          RigaRendibile(
+            chiaveRiga: lineKey,
+            nome: nome,
+            barcodeInterno: barcode,
+            prezzoUnitario: prezzo is num ? prezzo.toDouble() : 0,
+            quantitaVenduta: quantita.toInt(),
+            quantitaGiaResa: quantita.toInt() - residuo,
+          ),
+        );
+      }
+      return risultato;
+    } catch (errore) {
+      AppLogger().w('Storico POS: righe rendibili non lette dal server: $errore');
+      return const [];
+    }
   }
 
   /// Registra uno scontrino POS chiuso. Gli ordini Woo non entrano mai qui:
