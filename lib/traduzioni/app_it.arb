@@ -220,6 +220,59 @@
   "@cassaSalva": {
     "description": "Etichetta del pulsante salva"
   },
+  "cassaPosIdentifierTitolo": "Identificativo POS",
+  "@cassaPosIdentifierTitolo": {
+    "description": "Titolo della sezione identificativo univoco POS nelle impostazioni cassa"
+  },
+  "cassaPosIdentifierDescrizione": "Codice univoco di questo punto vendita, generato dall'app. Usalo nel portale 'Fatture e Corrispettivi' per abbinare questo POS al tuo registratore di cassa. Non cambiarlo dopo l'abbinamento.",
+  "@cassaPosIdentifierDescrizione": {
+    "description": "Spiega a cosa serve l'identificativo univoco del POS"
+  },
+  "cassaPosIdentifierEtichetta": "Identificativo POS",
+  "@cassaPosIdentifierEtichetta": {
+    "description": "Etichetta del campo identificativo univoco POS"
+  },
+  "cassaPosIdentifierAiuto": "Solo lettere, cifre e trattino. Non cambiarlo dopo l'abbinamento nel portale.",
+  "@cassaPosIdentifierAiuto": {
+    "description": "Testo di aiuto sotto il campo identificativo POS"
+  },
+  "cassaPosIdentifierGenerato": "Generato dall'app",
+  "@cassaPosIdentifierGenerato": {
+    "description": "Etichetta mostrata quando l'identificativo POS e stato generato automaticamente"
+  },
+  "cassaPosIdentifierPersonalizzato": "Impostato dall'esercente",
+  "@cassaPosIdentifierPersonalizzato": {
+    "description": "Etichetta mostrata quando l'identificativo POS e stato impostato a mano"
+  },
+  "cassaPosIdentifierRigenera": "Genera nuovo",
+  "@cassaPosIdentifierRigenera": {
+    "description": "Etichetta del pulsante che genera un nuovo identificativo POS"
+  },
+  "cassaPosIdentifierCopia": "Copia",
+  "@cassaPosIdentifierCopia": {
+    "description": "Etichetta del pulsante che copia l'identificativo POS"
+  },
+  "cassaPosIdentifierCopiato": "Identificativo POS copiato",
+  "@cassaPosIdentifierCopiato": {
+    "description": "Conferma mostrata dopo aver copiato l'identificativo POS"
+  },
+  "cassaPosIdentifierVuoto": "il campo e vuoto",
+  "@cassaPosIdentifierVuoto": {
+    "description": "Motivo mostrato quando il campo identificativo POS e lasciato vuoto"
+  },
+  "cassaPosIdentifierNonValido": "Identificativo POS non valido: {motivo}",
+  "@cassaPosIdentifierNonValido": {
+    "description": "Mostrato quando l'identificativo POS non e accettato",
+    "placeholders": {
+      "motivo": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaPosIdentifierRigenerato": "Nuovo identificativo POS generato. Riesegui l'abbinamento nel portale.",
+  "@cassaPosIdentifierRigenerato": {
+    "description": "Conferma mostrata dopo aver generato un nuovo identificativo POS"
+  },
   "cassaSalvataggioFallito": "Impostazione non salvata: {errore}",
   "@cassaSalvataggioFallito": {
     "description": "Mostrato quando un'impostazione cassa non e stata salvata",
