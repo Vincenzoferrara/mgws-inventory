@@ -5,6 +5,7 @@ import 'prodotti_settings.gui.dart';
 import 'ai_settings.gui.dart';
 import 'cassa_settings.dart';
 import 'cassa_settings.gui.dart';
+import '../cassa/fiscal_register/fiscal_register_repository.dart';
 import 'rfid_settings.gui.dart';
 import 'shortcuts_settings.gui.dart';
 import 'app_settings.dart';
@@ -45,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage>
       _productImageSettings.init(),
       inventoryQuickLoadSettings.init(),
       cassaSettings.init(),
+      fiscalRegisterRepository.init(),
     ]);
     if (!mounted) return;
     setState(() {

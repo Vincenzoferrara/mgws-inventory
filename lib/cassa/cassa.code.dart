@@ -7,6 +7,7 @@ import '../prodotti/prodotti_gestisci/product_picker.dart';
 import 'class_scontrino.dart';
 import 'checkout_payload.dart';
 import 'cassa_metrics.dart';
+import 'fiscal_register/fiscal_register_repository.dart';
 import 'storico_cassa.code.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
@@ -842,6 +843,23 @@ class CassaController {
       _scontrinoCorrente.stato = _scontrinoCorrente.totale < 0
           ? 'rimborsato'
           : 'pagato';
+
+      // Emissione sul registratore telematico, se collegato. In modalita'
+      // simulazione nessun numero viene emesso e la sequenza resta quella
+      // dell'app, quindi il comportamento resta identico a prima.
+      // Issues the receipt on the fiscal register when one is attached. In
+      // simulation no number is issued and the app keeps its own sequence.
+      try {
+        final esito = await fiscalRegisterRepository.issueReceipt(
+          _scontrinoCorrente,
+        );
+        final numeroDispositivo = esito.deviceReceiptNumber;
+        if (numeroDispositivo != null && numeroDispositivo.isNotEmpty) {
+          _scontrinoCorrente.numeroProgressivoDispositivo = numeroDispositivo;
+        }
+      } catch (e) {
+        AppLogger().w('Registratore telematico: emissione non riuscita: $e');
+      }
 
       // Storico POS separato dagli ordini Woo: archivia lo scontrino chiuso
       // con righe, pagamenti, operatore, cassa e riferimento ordine.

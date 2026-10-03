@@ -95,6 +95,11 @@ class Scontrino {
   String canale;
   // Progressivo locale dello storico POS (assegnato alla chiusura).
   int? numeroProgressivo;
+  // Progressivo emesso dal registratore telematico, quando collegato.
+  // Resta null in modalita' simulazione, dove nessun dispositivo emette.
+  // Receipt number issued by the fiscal register when one is attached. Stays
+  // null in simulation mode, where no device issues anything.
+  String? numeroProgressivoDispositivo;
   // Operatore legato all'anagrafica dipendenti (ref id + nome/cognome).
   int? operatoreId;
   String? operatoreNome;
@@ -146,6 +151,7 @@ class Scontrino {
     this.aliquotaIva = 22.0,
     this.canale = 'pos',
     this.numeroProgressivo,
+    this.numeroProgressivoDispositivo,
     this.operatoreId,
     this.operatoreNome,
     this.operatoreCognome,
@@ -329,6 +335,7 @@ class Scontrino {
     'aliquotaIva': aliquotaIva,
     'canale': canale,
     'numeroProgressivo': numeroProgressivo,
+    'numeroProgressivoDispositivo': numeroProgressivoDispositivo,
     'operatoreId': operatoreId,
     'operatoreNome': operatoreNome,
     'operatoreCognome': operatoreCognome,
@@ -374,6 +381,7 @@ class Scontrino {
       aliquotaIva: (json['aliquotaIva'] as num?)?.toDouble() ?? 22,
       canale: json['canale']?.toString() ?? 'pos',
       numeroProgressivo: (json['numeroProgressivo'] as num?)?.toInt(),
+      numeroProgressivoDispositivo: json['numeroProgressivoDispositivo'] as String?,
       operatoreId: (json['operatoreId'] as num?)?.toInt(),
       operatoreNome: json['operatoreNome']?.toString(),
       operatoreCognome: json['operatoreCognome']?.toString(),

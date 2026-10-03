@@ -273,6 +273,30 @@
   "@cassaPosIdentifierRigenerato": {
     "description": "Confirmation shown after generating a new POS identifier"
   },
+  "cassaRegistratoreTitolo": "Cash register device",
+  "@cassaRegistratoreTitolo": {
+    "description": "Title of the fiscal register section in the cash register settings"
+  },
+  "cassaRegistratoreDescrizione": "How this till issues receipts. Simulation mode means no fiscal device is attached and the app keeps its own sequence.",
+  "@cassaRegistratoreDescrizione": {
+    "description": "Explanation of the fiscal register selection"
+  },
+  "cassaRegistratoreModalita": "Mode",
+  "@cassaRegistratoreModalita": {
+    "description": "Label of the fiscal register mode selector"
+  },
+  "cassaRegistratoreSimulazione": "Simulation mode (no device)",
+  "@cassaRegistratoreSimulazione": {
+    "description": "Name of the simulation mode fiscal driver"
+  },
+  "cassaRegistratoreSimulazioneDettaglio": "No fiscal device attached. Receipts are recorded by the app and no document is issued by a register.",
+  "@cassaRegistratoreSimulazioneDettaglio": {
+    "description": "Detail text shown for the simulation mode"
+  },
+  "cassaRegistratoreNessuno": "No driver available",
+  "@cassaRegistratoreNessuno": {
+    "description": "Shown when no fiscal register driver can be used"
+  },
   "cassaSalvataggioFallito": "Setting not saved: {errore}",
   "@cassaSalvataggioFallito": {
     "description": "Shown when a cash register setting could not be persisted",

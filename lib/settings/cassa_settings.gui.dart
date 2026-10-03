@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import '../cassa/fiscal_register/fiscal_register_repository.dart';
 import '../theme/theme.dart';
 import '../traduzioni/estensioni.dart';
 import 'cassa_settings.dart';
@@ -164,6 +165,60 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
                   label: Text(context.l10n.cassaPosIdentifierRigenera),
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.l10n.cassaRegistratoreTitolo,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.cassaRegistratoreDescrizione,
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            ChangeNotifierProvider.value(
+              value: fiscalRegisterRepository,
+              child: Consumer<FiscalRegisterRepository>(
+                builder: (context, fiscal, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: fiscal.activeDriverId,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.cassaRegistratoreModalita,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.receipt_long_outlined),
+                      ),
+                      items: fiscal.availableDrivers
+                          .map(
+                            (driver) => DropdownMenuItem<String>(
+                              value: driver.id,
+                              child: Text(
+                                driver.isFiscalDevice
+                                    ? driver.displayName
+                                    : context.l10n.cassaRegistratoreSimulazione,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        fiscal.setActiveDriver(value);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      fiscal.isFiscalDevice
+                          ? fiscal.activeDriver.displayName
+                          : context.l10n.cassaRegistratoreSimulazioneDettaglio,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             SwitchListTile(

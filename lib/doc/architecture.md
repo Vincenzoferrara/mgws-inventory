@@ -48,6 +48,11 @@
 - `WooConnect` owns authenticated transport and site URL state.
 - MGWS clients must not create separate connectors.
 - `QueryMgwsPos` handles idempotent POS checkout.
+- `cassa/fiscal_register/` isolates the fiscal register behind a driver contract. The POS never speaks a vendor protocol: every manufacturer exposes its own API, so there is no universal driver.
+- `FiscalRegisterRepository` selects the active driver and persists the choice. Simulation mode is a declared way of working, not a fallback: it is what runs when no register is attached.
+- The checkout asks the driver to issue the receipt. In simulation the driver issues nothing and returns no number, so the POS keeps its own receipt sequence. `Scontrino.numeroProgressivoDispositivo` holds the number when a device issues one.
+- A failing driver never blocks the till: the sale is recorded and the failure is logged, because losing the receipt is worse than an unissued document.
+- Pairing the till with a register is not an app feature. It is a one-off registration the merchant performs in the "Fatture e Corrispettivi" portal, and the app only exposes the POS identifier it needs for that.
 - `QueryMgwsInventory` handles stock reads, stock writes, movement ledger, suppliers, reordering, purchase orders, receptions and counts.
 - `QueryMgwsLoyalty` handles loyalty service status, customer lookup, cards, points and history.
 - Employee roles/capabilities are managed only for MGWS employees linked to a WordPress user.

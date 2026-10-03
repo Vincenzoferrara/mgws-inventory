@@ -273,6 +273,30 @@
   "@cassaPosIdentifierRigenerato": {
     "description": "Conferma mostrata dopo aver generato un nuovo identificativo POS"
   },
+  "cassaRegistratoreTitolo": "Registratore di cassa",
+  "@cassaRegistratoreTitolo": {
+    "description": "Titolo della sezione registratore nelle impostazioni cassa"
+  },
+  "cassaRegistratoreDescrizione": "Come questa cassa emette gli scontrini. La modalita' simulazione significa che non c'e' un dispositivo fiscale e la sequenza resta dell'app.",
+  "@cassaRegistratoreDescrizione": {
+    "description": "Spiega la scelta del registratore di cassa"
+  },
+  "cassaRegistratoreModalita": "Modalita'",
+  "@cassaRegistratoreModalita": {
+    "description": "Etichetta del selettore modalita' del registratore"
+  },
+  "cassaRegistratoreSimulazione": "Modalita' simulazione (nessun dispositivo)",
+  "@cassaRegistratoreSimulazione": {
+    "description": "Nome del driver registratore in modalita' simulazione"
+  },
+  "cassaRegistratoreSimulazioneDettaglio": "Nessun dispositivo fiscale collegato. Gli scontrini vengono registrati dall'app e nessun documento e emesso da un registratore.",
+  "@cassaRegistratoreSimulazioneDettaglio": {
+    "description": "Testo di dettaglio mostrato per la modalita' simulazione"
+  },
+  "cassaRegistratoreNessuno": "Nessun driver disponibile",
+  "@cassaRegistratoreNessuno": {
+    "description": "Mostrato quando nessun driver registratore e utilizzabile"
+  },
   "cassaSalvataggioFallito": "Impostazione non salvata: {errore}",
   "@cassaSalvataggioFallito": {
     "description": "Mostrato quando un'impostazione cassa non e stata salvata",
