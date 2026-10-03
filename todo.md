@@ -667,6 +667,34 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - priorita: low
   - obiettivo: uniformare i nomi di build desktop
 
+## Conformita' fiscale e registratore telematico
+
+- [ ] Trovare l'adapter corretto per il registratore telematico
+  - tipo: ricerca/app
+  - priorita: medium
+  - obiettivo: scegliere e integrare il modo corretto per pilotare il registratore di cassa dall'app, dietro l'interfaccia con modalita' simulazione gia' prevista
+  - perche: non esiste un protocollo univoco per i registratori telematici e ogni produttore espone API o protocolli propri (Epson, RCH, Custom, Ditron, Axon); senza il dispositivo non e possibile scegliere, quindi la voce resta aperta
+  - riferimento: la localizzazione italiana di Odoo tratta la stampante/registratore come adapter per produttore, con modalita' simulazione come funzionalita' di prima classe e senza driver universale; il trasporto usato e' HTTPS in rete locale, non seriale USB (Epson ePOS richiede certificato self-signed)
+  - nota: non e' un adempimento fiscale. Il collegamento POS-registratore e' amministrativo e si fa una volta sola nel portale "Fatture e Corrispettivi" (Provvedimento del 31 ottobre 2025, guida operativa Agenzia delle Entrate); l'app deve solo esporre l'identificativo POS, gia' fatto, e registrare il metodo di pagamento per corrispettivo, gia' fatto nel checkout
+  - nota: `usb_serial` e Android-only, quindi non e una base per il desktop; la gestione corrente e l'interfaccia con modalita' simulazione
+  - verifica minima: scelto il produttore, adapter implementato dietro l'interfaccia e verificato sull'hardware reale, con la modalita' simulazione ancora funzionante in assenza di dispositivo
+
+- [ ] Documentare la procedura di abbinamento POS-registratore per l'esercente
+  - tipo: documentazione/app
+  - priorita: medium
+  - obiettivo: spiegare nelle impostazioni e in `lib/doc` come usare l'identificativo POS nel portale "Fatture e Corrispettivi", e cosa fare quando si rigenera il codice
+  - perche: l'obbligo di collegamento e' in vigore dal 1 gennaio 2026 e l'abbinamento va fatto dal commerciante, non dall'app; senza istruzioni l'esercente non sa che cosa abbinare ne quando rifarlo
+  - dettagli: finestre temporali per i POS attivati dopo febbraio 2026 (dal 6' all'ultimo giorno del secondo mese successivo), abbinamento multiplo consentito, esclusioni per vending, carburante e ricarica veicoli elettrici, e procedura web "Documento Commerciale on-line" come alternativa al registratore
+  - verifica minima: un esercente puo' eseguire l'abbinamento leggendo solo la schermata impostazioni e la documentazione, senza assistenza
+
+- [ ] Decidere chi assegna il progressivo scontrini in modalita' simulazione
+  - tipo: decisione/prodotto
+  - priorita: high
+  - obiettivo: stabilire se il numero progressivo lo assegna MGWS o resta un contatore locale, quando non c'e' un registratore telematico che lo emette
+  - perche: `lib/cassa/storico_cassa.code.dart:315` incrementa un contatore salvato in SharedPreferences, quindi due dispositivi che vendono lo stesso giorno generano lo stesso progressivo e un reinstall riparte da 1; il numero progressivo e' dato fiscale e la sequenza non puo' ripetersi ne saltare
+  - nota: con registratore telematico o procedura web "Documento Commerciale on-line" il progressivo lo emette il dispositivo e l'app lo registra, non lo genera; il problema riguarda solo la modalita' simulazione
+  - verifica minima: scelta documentata in `lib/doc/architecture.md` e applicata al checkout, senza progressivo duplicato con due casse aperte
+
 ## ERP commerciale 
 -tutto quello che serve per rendelo un prodtto commerciale finito
 
