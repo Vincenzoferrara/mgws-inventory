@@ -35,6 +35,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
   bool _loading = true;
   String _query = '';
 
+  /// Receipts currently shown, loaded from the server.
+  List<Scontrino> _receipts = const [];
+
   @override
   void initState() {
     super.initState();
@@ -51,11 +54,17 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
   Future<void> _reload() async {
     setState(() => _loading = true);
     await widget.controller.storicoStore.init();
-    if (mounted) setState(() => _loading = false);
+    final receipts = await _filtered();
+    if (!mounted) return;
+    setState(() {
+      _receipts = receipts;
+      _loading = false;
+    });
   }
 
-  List<Scontrino> get _filtrati {
-    return widget.controller.storicoStore.filtra(
+  /// Loads the history from the server, keeping the local store as fallback.
+  Future<List<Scontrino>> _filtered() async {
+    return widget.controller.storicoStore.filter(
       queryCliente: _query,
       cassaNome: _cassaFiltroController.text.trim().isEmpty
           ? null
@@ -71,7 +80,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    final filtrati = _filtrati;
+    final receipts = _receipts;
     return Column(
       children: [
         Padding(
@@ -142,7 +151,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      '${filtrati.length} scontrini POS (canale pos, separati dagli ordini Woo)',
+                      '${receipts.length} scontrini POS (canale pos, separati dagli ordini Woo)',
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -163,7 +172,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
         ),
         const Divider(height: 1),
         Expanded(
-          child: filtrati.isEmpty
+          child: receipts.isEmpty
               ? Center(
                   child: Text(
                     'Nessuno scontrino POS archiviato con questi filtri.',
@@ -172,9 +181,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
-                  itemCount: filtrati.length,
+                  itemCount: receipts.length,
                   itemBuilder: (context, i) =>
-                      _cardScontrino(context, filtrati[i]),
+                      _cardScontrino(context, receipts[i]),
                 ),
         ),
       ],
@@ -524,9 +533,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     );
     controller.dispose();
     if (motivo == null) return;
-    final esito = await widget.controller.storicoStore.annullaScontrino(
-      scontrinoId: s.id,
-      motivo: motivo,
+    final esito = await widget.controller.storicoStore.cancelReceipt(
+      receiptId: s.id,
+      reason: motivo,
     );
     if (!mounted) return;
     setState(() {});

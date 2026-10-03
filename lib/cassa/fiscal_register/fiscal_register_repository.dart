@@ -6,22 +6,17 @@ import '../class_scontrino.dart';
 import 'drivers/simulation_driver.dart';
 import 'fiscal_register_driver.dart';
 
-/// Scelta e stato del registratore telematico usato dalla cassa.
+/// Owns the fiscal register selection for the till.
 ///
-/// Finche' non c'e' un dispositivo la cassa lavora in modalita' simulazione,
-/// che e' un modo dichiarato e non un errore.
-///
-/// Cash register fiscal device selection and state.
+/// While no device is attached the till runs in simulation mode, which is a
+/// declared working mode rather than an error state.
 final fiscalRegisterRepository = FiscalRegisterRepository();
 
 class FiscalRegisterRepository extends ChangeNotifier {
   static const _driverKey = 'cassa_fiscal_driver';
 
-  /// Registratori noti. Ogni produttore richiede un adapter proprio: qui
-  /// c'e' solo la simulazione, gli adapter vendor si aggiungono quando si
-  /// sceglie la macchina.
-  /// Known registers: every vendor needs its own adapter, so only simulation
-  /// exists today.
+  /// Known registers. Every vendor needs its own adapter, so simulation is
+  /// the only entry until a device is chosen.
   final List<FiscalRegisterDriver> _drivers = [SimulationDriver()];
 
   String _activeDriverId = 'simulation';
@@ -29,7 +24,6 @@ class FiscalRegisterRepository extends ChangeNotifier {
 
   String get activeDriverId => _activeDriverId;
 
-  /// `true` se la cassa sta emettendo tramite un dispositivo fiscale reale.
   /// `true` when the till issues through a real fiscal device.
   bool get isFiscalDevice => activeDriver.isFiscalDevice;
 
@@ -48,7 +42,6 @@ class FiscalRegisterRepository extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _activeDriverId = prefs.getString(_driverKey) ?? 'simulation';
     // Se il driver salvato non e' piu' disponibile si torna in simulazione
-    // invece di lasciare la cassa senza un driver valido.
     // An unknown saved driver falls back to simulation rather than leaving
     // the till without a valid driver.
     if (!_drivers.any((driver) => driver.id == _activeDriverId)) {
@@ -70,24 +63,19 @@ class FiscalRegisterRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Verifica se il dispositivo del driver attivo e' raggiungibile.
   /// Checks whether the active driver's device is reachable.
   Future<bool> isDeviceAvailable() => activeDriver.isAvailable();
 
-  /// Emette lo scontrino tramite il driver attivo.
   ///
   /// In simulazione non viene emesso nulla e `deviceReceiptNumber` resta
-  /// `null`: il chiamante conserva quindi la sequenza che gia' usa oggi.
   /// Issues the receipt through the active driver. In simulation nothing is
   /// issued and the number stays `null`, so the caller keeps today's sequence.
-  Future<FiscalIssueResult> issueReceipt(Scontrino scontrino) async {
+  Future<FiscalIssueResult> issueReceipt(Scontrino receipt) async {
     await init();
     try {
-      return await activeDriver.issueReceipt(scontrino);
+      return await activeDriver.issueReceipt(receipt);
     } catch (error) {
       AppLogger().w('Emissione scontrino fallita: $error');
-      // Un driver che fallisce non deve bloccare la cassa: si registra la
-      // vendita e si segnala, senza perdere il documento.
       // A failing driver must not block the till: the sale is recorded and
       // flagged, never lost.
       return const FiscalIssueResult(

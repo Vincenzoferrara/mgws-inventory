@@ -412,14 +412,14 @@ class CassaController {
     // documento. Se il server non risponde si ricade sullo store locale.
     // The returnable remainder comes from the server, which sees returns from
     // every device; without a response the local store is used.
-    var righeRendibili = await storicoStore.righeRendibiliDaServer(
+    var righeRendibili = await storicoStore.returnableLinesFromServer(
       scontrinoOrigineId,
     );
     if (righeRendibili.isEmpty) {
       righeRendibili = storicoStore.righeRendibili(scontrinoOrigineId);
     }
 
-    final esito = _validaResoConRighe(
+    final esito = _validateReturnWithLines(
       righeRendibili: righeRendibili,
       chiaveRiga: chiaveRiga,
       quantita: quantita,
@@ -437,9 +437,9 @@ class CassaController {
     // Il documento puo' non essere nello store locale, perche' la sua esistenza
     // e' sul server. In quel caso la riga si ricostruisce dai dati letti.
     final rigaVenduta = venduta ??
-        _rigaDaRendibile(righeRendibili, chiaveRiga) ??
+        _lineFromReturnable(righeRendibili, chiaveRiga) ??
         (quantita > 0
-            ? _rigaDaReso(scontrinoOrigineId, chiaveRiga, quantita)
+            ? _lineForReturn(scontrinoOrigineId, chiaveRiga, quantita)
             : null);
     if (rigaVenduta == null) return 'Riga vendita non trovata.';
     venduta = rigaVenduta;
@@ -815,7 +815,7 @@ class CassaController {
   /// Il controllo resta identico in entrambi i casi: cambia solo da dove
   /// arrivano le righe.
   /// Validates a return against the returnable lines.
-  EsitoReso _validaResoConRighe({
+  EsitoReso _validateReturnWithLines({
     required List<RigaRendibile> righeRendibili,
     required String chiaveRiga,
     required int quantita,
@@ -850,7 +850,7 @@ class CassaController {
 
   /// Ricostruisce la riga venduta dai dati letti dal server.
   /// Rebuilds the sold line from the data read server-side.
-  RigaScontrino? _rigaDaRendibile(List<RigaRendibile> righe, String chiaveRiga) {
+  RigaScontrino? _lineFromReturnable(List<RigaRendibile> righe, String chiaveRiga) {
     for (final candidate in righe) {
       if (candidate.chiaveRiga != chiaveRiga) continue;
       return RigaScontrino(
@@ -868,7 +868,7 @@ class CassaController {
 
   /// Riga minima per un reso senza documento locale.
   /// Minimal line for a return without a local document.
-  RigaScontrino? _rigaDaReso(
+  RigaScontrino? _lineForReturn(
     String scontrinoOrigineId,
     String chiaveRiga,
     int quantita,
@@ -889,7 +889,7 @@ class CassaController {
   /// Reads the receipt number from the checkout response. The server
   /// allocates it in simulation; with a fiscal register it arrives already
   /// issued by the device. When missing, the local fallback applies.
-  int? _leggiProgressivoServer(Map<String, dynamic> response) {
+  int? _readServerNumber(Map<String, dynamic> response) {
     final valore = response['sequential_number'];
     if (valore is num && valore.toInt() > 0) return valore.toInt();
     if (valore is String) {
@@ -941,7 +941,7 @@ class CassaController {
       // storico, cosi' non dipende da un contatore salvato sul dispositivo.
       // Server-allocated number: this is what lands in the history, so it no
       // longer depends on a counter stored on the device.
-      final progressivoServer = _leggiProgressivoServer(response);
+      final serverNumber = _readServerNumber(response);
       await risolviOperatoreDaLogin();
       _applicaContestoCassa(_scontrinoCorrente);
       if (orderId != null) {
@@ -981,7 +981,7 @@ class CassaController {
       try {
         await storicoStore.registraScontrinoChiuso(
           _scontrinoCorrente,
-          progressivoServer: progressivoServer,
+          serverNumber: serverNumber,
         );
       } catch (e) {
         AppLogger().w('Storico POS: archiviazione locale fallita: $e');

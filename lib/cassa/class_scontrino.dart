@@ -514,6 +514,13 @@ class RigaScontrino {
   String?
   esitoMerce; // 'reintegro', 'difettoso', 'buono', 'sostituzione', 'rimborso'
 
+  // Prezzo unitario come lo registra il documento. Serve perche' il prezzo
+  // di listino puo' cambiare dopo la vendita, mentre il documento conserva
+  // quello realmente pagato.
+  // Unit price as recorded on the document, needed because the list price may
+  // change after the sale.
+  double? recordedPrice;
+
   RigaScontrino({
     required this.prodotto,
     this.variante,
@@ -527,10 +534,18 @@ class RigaScontrino {
     this.riferimentoChiaveRiga,
     this.motivoReso,
     this.esitoMerce,
+    this.recordedPrice,
   });
 
   /// Ottiene il prezzo unitario effettivo (variante o prodotto)
+  ///
+  /// Se il documento ha registrato un prezzo, quello vince: la riga letta dal
+  /// server deve mostrare cio' che il cliente ha pagato, non il listino di
+  /// oggi.
+  /// Effective unit price: the recorded price wins over the current list price.
   double get prezzoUnitario {
+    final registrato = recordedPrice;
+    if (registrato != null && registrato > 0) return registrato;
     if (variante != null) {
       return variante!.prezzoEffettivo;
     }
