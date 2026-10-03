@@ -669,6 +669,16 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
 
 ## Conformita' fiscale e registratore telematico
 
+- [ ] Portare lo storico scontrini su MGWS e rimuovere `StoricoCassaStore`
+  - tipo: app/plugin/UI
+  - priorita: high
+  - obiettivo: scontrini, chiusure e progressivo su MGWS come unica fonte, con lettura dello storico da server invece che da SharedPreferences
+  - perche: il progressivo e' gia' assegnato dal server e salvato in `mg_pos_receipts`, ma lo storico completo resta in `storico_cassa_scontrini_pos_v1` su SharedPreferences; se il dispositivo si rompe o l'app viene reinstallata, righe, resi e chiusure di quel giorno spariscono e il backup WordPress non le ripristina, perche' non sono nel database
+  - dipendenze: le tabelle `mg_pos_sales` e `mg_pos_sale_lines` e gli endpoint `GET /pos/sales` e `GET /pos/sales/{receipt_key}` sono gia' stati definiti nel design ma non implementati; `mg_pos_receipts` copre solo l'intestazione del documento
+  - impatti: `validaReso` e `cercaPerId` in `cassa.code.dart` leggono lo store locale, quindi il residuo rendibile per linea deve diventare calcolabile dal server; `totaliGiornata` in `storico_cassa.code.dart` deve diventare la sintesi di `GET /pos/sales`; `cassa_metrics.dart` deriva i suoi otto contatori dagli scontrini server e i contatori locali si eliminano
+  - nota: `architecture.md:80` impone gia' che i dati condivisi persistenti passino da WordPress/MGWS, quindi questa voce allinea il codice a una regola gia' scritta
+  - verifica minima: dopo reinstall dell'app su un dispositivo nuovo lo storico scontrini, le chiusure e il progressivo sono completi e il residuo rendibile di una linea restituita e' corretto
+
 - [ ] Trovare l'adapter corretto per il registratore telematico
   - tipo: ricerca/app
   - priorita: medium
@@ -686,14 +696,6 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - perche: l'obbligo di collegamento e' in vigore dal 1 gennaio 2026 e l'abbinamento va fatto dal commerciante, non dall'app; senza istruzioni l'esercente non sa che cosa abbinare ne quando rifarlo
   - dettagli: finestre temporali per i POS attivati dopo febbraio 2026 (dal 6' all'ultimo giorno del secondo mese successivo), abbinamento multiplo consentito, esclusioni per vending, carburante e ricarica veicoli elettrici, e procedura web "Documento Commerciale on-line" come alternativa al registratore
   - verifica minima: un esercente puo' eseguire l'abbinamento leggendo solo la schermata impostazioni e la documentazione, senza assistenza
-
-- [ ] Decidere chi assegna il progressivo scontrini in modalita' simulazione
-  - tipo: decisione/prodotto
-  - priorita: high
-  - obiettivo: stabilire se il numero progressivo lo assegna MGWS o resta un contatore locale, quando non c'e' un registratore telematico che lo emette
-  - perche: `lib/cassa/storico_cassa.code.dart:315` incrementa un contatore salvato in SharedPreferences, quindi due dispositivi che vendono lo stesso giorno generano lo stesso progressivo e un reinstall riparte da 1; il numero progressivo e' dato fiscale e la sequenza non puo' ripetersi ne saltare
-  - nota: con registratore telematico o procedura web "Documento Commerciale on-line" il progressivo lo emette il dispositivo e l'app lo registra, non lo genera; il problema riguarda solo la modalita' simulazione
-  - verifica minima: scelta documentata in `lib/doc/architecture.md` e applicata al checkout, senza progressivo duplicato con due casse aperte
 
 ## ERP commerciale 
 -tutto quello che serve per rendelo un prodtto commerciale finito
