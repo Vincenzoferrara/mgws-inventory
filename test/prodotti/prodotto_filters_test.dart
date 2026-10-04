@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/class_prodotti.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/prodotto_filters.dart';
+import 'package:mgws_inventory/prodotti/class_prodotti.dart';
+import 'package:mgws_inventory/prodotti/prodotto_filters.dart';
 
 FiltroProdotto _exactFilter(CampoFiltroProdotto campo, String value) {
   return FiltroProdotto(

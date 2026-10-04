@@ -69,7 +69,7 @@ class InventoryPage extends StatefulWidget {
   /// zero a ogni filtro.
   final InventoryMovementController? movementController;
 
-  /// Catalogo prodotti condiviso: serve a risolvere il barcode in un product
+  /// mgws_inventory condiviso: serve a risolvere il barcode in un product
   /// id nei pannelli che non hanno un proprio selettore.
   final InventoryQuickLoadCatalogController? catalogController;
 

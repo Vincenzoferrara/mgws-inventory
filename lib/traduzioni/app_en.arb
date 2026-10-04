@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Clothing Store Manager",
+  "appTitle": "mgws_inventory",
   "@appTitle": {
     "description": "Application name shown in the window title and in the desktop task switcher"
   },
@@ -1215,15 +1215,15 @@
   "@homeAutenticazioneRichiesta": {
     "description": "Title of the login screen shown when a section needs credentials"
   },
-  "homeTitoloDesktop": "Clothing Store Manager",
+  "homeTitoloDesktop": "mgws_inventory",
   "@homeTitoloDesktop": {
     "description": "App bar title of the home screen when the whole home is visible"
   },
-  "homeTitoloMobileBack": "Clothing Store Manager",
+  "homeTitoloMobileBack": "mgws_inventory",
   "@homeTitoloMobileBack": {
     "description": "Fallback app bar title on mobile when the open section has no title"
   },
-  "homeTitoloDrawer": "Clothing Store",
+  "homeTitoloDrawer": "mgws_inventory",
   "@homeTitoloDrawer": {
     "description": "Short app name shown in the navigation drawer header"
   },
@@ -1231,7 +1231,7 @@
   "@homeBenvenutoTitolo": {
     "description": "Hero title at the top of the home landing page"
   },
-  "homeBenvenutoSottotitolo": "Clothing Store",
+  "homeBenvenutoSottotitolo": "mgws_inventory",
   "@homeBenvenutoSottotitolo": {
     "description": "Hero subtitle under the welcome title on the home landing page"
   },

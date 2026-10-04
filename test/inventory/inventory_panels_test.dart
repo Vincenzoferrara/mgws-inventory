@@ -7,15 +7,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_add_products.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_add_products.gui.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_quick_load.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_rettifica.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_rettifica.gui.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_suppliers.code.dart';
-import 'package:gestione_negozio_abbigliamento/login/mgws/query/query_mgws_inventory.dart';
-import 'package:gestione_negozio_abbigliamento/theme/theme.dart';
-import 'package:gestione_negozio_abbigliamento/traduzioni/estensioni.dart';
+import 'package:mgws_inventory/inventory/inventory_add_products.code.dart';
+import 'package:mgws_inventory/inventory/inventory_add_products.gui.dart';
+import 'package:mgws_inventory/inventory/inventory_quick_load.code.dart';
+import 'package:mgws_inventory/inventory/inventory_rettifica.code.dart';
+import 'package:mgws_inventory/inventory/inventory_rettifica.gui.dart';
+import 'package:mgws_inventory/inventory/inventory_suppliers.code.dart';
+import 'package:mgws_inventory/login/mgws/query/query_mgws_inventory.dart';
+import 'package:mgws_inventory/theme/theme.dart';
+import 'package:mgws_inventory/traduzioni/estensioni.dart';
 
 /// I pannelli leggono `AppColorExtension` dal tema: senza il tema reale
 /// l'albero non si costruisce e il test fallisce su finder vuoti, non sul

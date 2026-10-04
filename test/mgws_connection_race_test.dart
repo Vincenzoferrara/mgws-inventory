@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/login/mgws/connection/mgws_auth.dart';
-import 'package:gestione_negozio_abbigliamento/login/mgws/connection/mgws_connection.dart';
+import 'package:mgws_inventory/login/mgws/connection/mgws_auth.dart';
+import 'package:mgws_inventory/login/mgws/connection/mgws_connection.dart';
 
 /// Auth finto: la verifica resta in volo finche [release] non viene chiamato.
 class _SlowAuth implements MgwsAuth {

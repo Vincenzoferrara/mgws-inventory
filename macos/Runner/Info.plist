@@ -13,9 +13,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Gestione Abbigliamento</string>
+	<string>mgws_inventory</string>
 	<key>CFBundleDisplayName</key>
-	<string>Gestione Abbigliamento</string>
+	<string>mgws_inventory</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

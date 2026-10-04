@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/barcode/barcode_generator.dart';
+import 'package:mgws_inventory/reuse_class/barcode/barcode_generator.dart';
 
 void main() {
   test('genera 30 cifre numeriche compatibili Code128', () {

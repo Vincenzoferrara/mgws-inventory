@@ -1,4 +1,4 @@
-import 'package:gestione_negozio_abbigliamento/prodotti/class_prodotti.dart';
+import 'package:mgws_inventory/prodotti/class_prodotti.dart';
 
 /// Local-only catalog for layout and interaction checks. No backend is needed.
 List<ProdottoGlobal> productVisualFixtures() => [

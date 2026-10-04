@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/prodotti_gestisci/prodotti_gestisci.gui.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview_cache.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview.gui.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview_image_preview.dart';
-import 'package:gestione_negozio_abbigliamento/theme/theme.dart';
+import 'package:mgws_inventory/prodotti/prodotti_gestisci/prodotti_gestisci.gui.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview_cache.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview.gui.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview_image_preview.dart';
+import 'package:mgws_inventory/theme/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/product_visual_fixtures.dart';

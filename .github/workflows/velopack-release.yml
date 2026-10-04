@@ -23,7 +23,7 @@ permissions:
 
 env:
   FLUTTER_VERSION: '3.47.5'
-  PROJECT_PATH: src/gestione_negozio_app
+  PROJECT_PATH: src/mgws_inventory
   PACK_ID: mgws_inventory
   APP_EXE: mgws_inventory
   ANDROID_APK_NAME: mgws_inventory.apk

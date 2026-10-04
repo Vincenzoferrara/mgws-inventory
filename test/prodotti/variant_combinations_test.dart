@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/class_prodotti.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/prodotti_crea/variant_combinations.dart';
+import 'package:mgws_inventory/prodotti/class_prodotti.dart';
+import 'package:mgws_inventory/prodotti/prodotti_crea/variant_combinations.dart';
 
 void main() {
   test('la chiave è indipendente da maiuscole e ordine degli attributi', () {

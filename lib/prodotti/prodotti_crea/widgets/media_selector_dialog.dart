@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:gestione_negozio_abbigliamento/log_viewer/app_logger.dart';
+import 'package:mgws_inventory/log_viewer/app_logger.dart';
 import '../../../notification/notification_service.dart';
 import '../../../settings/prodotti_image_settings.dart';
 import '../../../login/jwt_api/query_woocommerce/woo_query_media.dart';

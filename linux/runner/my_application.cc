@@ -1,6 +1,8 @@
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
+#include <limits.h>
+#include <unistd.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif
@@ -14,11 +16,30 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+static void set_window_icon(GtkWindow* window) {
+  char executable_path[PATH_MAX];
+  ssize_t path_length =
+      readlink("/proc/self/exe", executable_path, sizeof(executable_path) - 1);
+  if (path_length <= 0) {
+    return;
+  }
+
+  executable_path[path_length] = '\0';
+  g_autofree gchar* executable_directory = g_path_get_dirname(executable_path);
+  g_autofree gchar* icon_path =
+      g_build_filename(executable_directory, "resources", "app_icon.png", nullptr);
+  if (g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
+    gtk_window_set_icon_from_file(window, icon_path, nullptr);
+  }
+}
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+  gtk_window_set_icon_name(window, APPLICATION_ID);
+  set_window_icon(window);
 
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
@@ -40,11 +61,11 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "gestione_negozio_abigliamento");
+    gtk_header_bar_set_title(header_bar, "mgws_inventory");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "gestione_negozio_abigliamento");
+    gtk_window_set_title(window, "mgws_inventory");
   }
 
   gtk_window_set_default_size(window, 1280, 720);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview.code.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview.gui.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview.code.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview.gui.dart';
 
 /// Regressione per il datagrid vuoto su Android.
 ///

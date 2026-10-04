@@ -5,13 +5,13 @@
 // facilmente e si traduce in magazzino sbagliato.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_add_products.code.dart';
-import 'package:gestione_negozio_abbigliamento/login/mgws/query/query_mgws_inventory.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_quick_load.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_restock_feedback.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_rettifica.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_movement_groups.code.dart';
-import 'package:gestione_negozio_abbigliamento/inventory/inventory_suppliers.code.dart';
+import 'package:mgws_inventory/inventory/inventory_add_products.code.dart';
+import 'package:mgws_inventory/login/mgws/query/query_mgws_inventory.dart';
+import 'package:mgws_inventory/inventory/inventory_quick_load.code.dart';
+import 'package:mgws_inventory/inventory/inventory_restock_feedback.code.dart';
+import 'package:mgws_inventory/inventory/inventory_rettifica.code.dart';
+import 'package:mgws_inventory/inventory/inventory_movement_groups.code.dart';
+import 'package:mgws_inventory/inventory/inventory_suppliers.code.dart';
 
 InventoryQuickLoadLineDraft _line({
   int productId = 10,

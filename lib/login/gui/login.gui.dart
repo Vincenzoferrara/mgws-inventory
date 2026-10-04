@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gestione_negozio_abbigliamento/login/jwt_api/error_list.dart';
-import 'package:gestione_negozio_abbigliamento/login/jwt_api/jwt_connect.dart';
+import 'package:mgws_inventory/login/jwt_api/error_list.dart';
+import 'package:mgws_inventory/login/jwt_api/jwt_connect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/theme.dart';
 import '../../traduzioni/estensioni.dart';

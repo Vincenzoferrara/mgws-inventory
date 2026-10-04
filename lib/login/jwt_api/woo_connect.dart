@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
-import 'package:gestione_negozio_abbigliamento/log_viewer/app_logger.dart';
+import 'package:mgws_inventory/log_viewer/app_logger.dart';
 import 'jwt_connect.dart';
 import 'secure_storage_service.dart';
 import '../wp_admin_api/wordpress_connect.dart';

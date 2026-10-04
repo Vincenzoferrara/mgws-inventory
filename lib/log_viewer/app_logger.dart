@@ -460,7 +460,7 @@ class AppLogger {
 
   Future<Directory> _temporaryLogDirectory() async {
     final directory = await getTemporaryDirectory();
-    return Directory('${directory.path}/gestione_negozio_logs');
+    return Directory('${directory.path}/mgws_inventory_logs');
   }
 }
 

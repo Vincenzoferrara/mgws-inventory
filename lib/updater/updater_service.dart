@@ -25,13 +25,13 @@ class UpdaterReleaseNotes {
 
 class UpdaterService {
   static const String _repoApiLatestRelease =
-      'https://api.github.com/repos/Vincenzoferrara/gestione_negozio_abigliamento/releases/latest';
+      'https://api.github.com/repos/Vincenzoferrara/mgws-inventory/releases/latest';
   static const String _lastShownReleaseNotesKey =
       'updater_last_shown_release_notes_version';
   static const String _defaultUpdateUrl = String.fromEnvironment(
     'UPDATE_URL',
     defaultValue:
-        'https://github.com/Vincenzoferrara/gestione_negozio_abigliamento/releases/latest/download/',
+        'https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/',
   );
 
   static bool _runtimeInitialized = false;

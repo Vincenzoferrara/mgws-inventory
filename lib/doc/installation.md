@@ -7,7 +7,7 @@ Use the [global README](../../README.md#download) for current Android, Windows a
 Android can be installed from GitHub Releases or through Obtainium using the repository URL:
 
 ```text
-https://github.com/Vincenzoferrara/gestione_negozio_abigliamento
+https://github.com/Vincenzoferrara/mgws-inventory
 ```
 
 Google Play and F-Droid pages are planned but are not public yet.

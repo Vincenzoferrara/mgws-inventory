@@ -1,4 +1,4 @@
-name: gestione_negozio_abbigliamento
+name: mgws_inventory
 
 description: "gestisci il tuo negozio di abbigliamento"
 # The following line prevents the package from being accidentally published to
@@ -49,7 +49,7 @@ dependencies:
   # Smartcard support
   nfc_manager: ^4.2.1        # NFC per Android/iOS
   usb_serial: ^0.5.2         # Lettori USB (Desktop/Android OTG)
-    
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -92,7 +92,8 @@ dependencies:
   # ADS_CONNECTOR_DISABLED_FOR_FDROID: escluso temporaneamente dalla build F-Droid.
   # ads_connector:
   #   path: ../../ads_connector_flutter
-    
+
+
  # AI providers
   dart_openai: ^8.0.0             # OpenAI (GPT-4, ChatGPT)
   anthropic_sdk_dart: ^9.0.0      # Anthropic (Claude)
@@ -102,7 +103,7 @@ dependencies:
   ollama_dart: ^4.0.0             # Ollama (locale)
   wordpress_client: ^9.3.0
   enough_icalendar: ^0.17.0
-  
+
    # WordPress packages
 
 dev_dependencies:

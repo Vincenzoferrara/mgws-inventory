@@ -1,6 +1,6 @@
 {
   "@@locale": "it",
-  "appTitle": "Gestione Negozio Abbigliamento",
+  "appTitle": "mgws_inventory",
   "@appTitle": {
     "description": "Nome dell'applicazione mostrato nel titolo della finestra e nel selettore delle finestre del desktop"
   },
@@ -1215,15 +1215,15 @@
   "@homeAutenticazioneRichiesta": {
     "description": "Titolo della schermata di login mostrata quando una sezione richiede le credenziali"
   },
-  "homeTitoloDesktop": "Gestione Negozio Abbigliamento",
+  "homeTitoloDesktop": "mgws_inventory",
   "@homeTitoloDesktop": {
     "description": "Titolo della barra in alto della home quando tutta la home e visibile"
   },
-  "homeTitoloMobileBack": "Gestione Negozio",
+  "homeTitoloMobileBack": "mgws_inventory",
   "@homeTitoloMobileBack": {
     "description": "Titolo di riserva della barra in alto su mobile quando la sezione aperta non ha un titolo"
   },
-  "homeTitoloDrawer": "Gestione Negozio",
+  "homeTitoloDrawer": "mgws_inventory",
   "@homeTitoloDrawer": {
     "description": "Nome breve dell'app mostrato nell'intestazione del menu laterale"
   },

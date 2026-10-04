@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gestione_negozio_abbigliamento/prodotti/class_prodotti.dart';
-import 'package:gestione_negozio_abbigliamento/reuse_class/datagridview/datagridview_cache.dart';
+import 'package:mgws_inventory/prodotti/class_prodotti.dart';
+import 'package:mgws_inventory/reuse_class/datagridview/datagridview_cache.dart';
 
 void main() {
   tearDown(DataGridViewCache.clearAll);

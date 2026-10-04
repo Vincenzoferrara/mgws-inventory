@@ -437,13 +437,12 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - obiettivo: decidere se i metodi RFID placeholder devono essere funzionali o dichiarati non supportati
   - perche: i placeholder attuali possono far sembrare disponibile una funzione che in realta non esiste
 
-- [ ] Correggere le URL dell'updater rotte dal refuso del nome del repository
+- [x] Correggere le URL dell'updater rotte dal refuso del nome del repository
   - tipo: bug/app
   - priorita: high
-  - obiettivo: `lib/updater/updater_service.dart` righe 28 e 34, `lib/doc/installation.md` riga 10 e il badge Obtainium in `README.md` puntano a `gestione_negozio_abbigliamento` con due "b", un nome che non e mai esistito, e vanno portati a `mgws-inventory`
-  - perche: `https://api.github.com/repos/Vincenzoferrara/gestione_negozio_abbigliamento/releases/latest` risponde 404, quindi l'aggiornamento automatico desktop non trova le release da prima del rebrand
-  - stato: i repository sono gia stati rinominati in `mgws-inventory` e `mgws-inventory-wordpress-plugin`, con 30 release conservate e `releases/latest` che risponde con `v1.0.51`; resta solo cambiare le stringhe nel codice e nei documenti
-  - verifica minima: la chiamata all'API delle release restituisce 200 e restituisce l'ultima versione
+  - obiettivo: `lib/updater/updater_service.dart`, `lib/doc/installation.md` e il badge Obtainium in `README.md` puntano a `mgws-inventory`
+  - perche: l'updater desktop deve leggere le release dal repository GitHub reale
+  - stato: completato con la rinomina a `mgws_inventory`; API release verificata su `mgws-inventory`
 
 - [ ] Decidere il destino di `lib/rfid/rfid_gui.dart`
   - tipo: manutenzione/app
@@ -465,11 +464,11 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - obiettivo: evitare update UI dopo dispose nei flussi asincroni
   - perche: alcune inizializzazioni async possono completarsi dopo che il widget e stato smontato
 
-- [ ] Correggere `applicationId` e naming Linux/Windows se definitivo
+- [x] Correggere `applicationId` e naming Linux/Windows se definitivo
   - tipo: devops
   - priorita: low
   - obiettivo: allineare i nomi di pacchetto/binario alla nomenclatura reale del progetto
-  - perche: il placeholder `com.example.gestione_negozio_abigliamento` e il typo persistente possono creare incoerenza nel packaging
+  - perche: gli identificatori tecnici ora usano `it.mgws.mgws_inventory` e i nomi visibili/binari usano `mgws_inventory`
 
 ## Audit esteso 5 - ordini e coupon
 

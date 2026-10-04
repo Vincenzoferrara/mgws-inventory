@@ -2,7 +2,7 @@
 
 ## What the app is for
 
-Gestione Negozio Abbigliamento manages daily work in a clothing store: POS sales, products, orders, customers, loyalty cards, stock operations, reports and configuration.
+mgws_inventory manages daily work in a clothing store: POS sales, products, orders, customers, loyalty cards, stock operations, reports and configuration.
 
 ## Access
 

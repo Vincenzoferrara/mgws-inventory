@@ -1,6 +1,6 @@
 # Project Documentation
 
-Current technical and user documentation for Gestione Negozio Abbigliamento.
+Current technical and user documentation for mgws_inventory.
 
 ## Purpose
 

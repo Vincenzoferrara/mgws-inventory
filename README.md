@@ -1,4 +1,4 @@
-# Gestione Negozio Abbigliamento
+# mgws_inventory
 
 App Flutter gestionale per negozi di abbigliamento: punto cassa, catalogo prodotti, operazioni di magazzino, ordini, clienti, carte fedelta, report e integrazione WordPress/WooCommerce tramite MGWS.
 
@@ -22,9 +22,9 @@ linux flatpack: (inserisci link del release)
 linux aur: (inserisci link del release)
 
 ## Android
-[![Google Play](https://img.shields.io/badge/Google%20Play-Coming%20soon-414141?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=it.mgws.gestione_negozio_abbigliamento)
-[![F-Droid](https://img.shields.io/badge/F--Droid-Coming%20soon-1976d2?style=for-the-badge&logo=fdroid&logoColor=white)](https://f-droid.org/packages/it.mgws.gestione_negozio_abbigliamento/)
-[![Obtainium](https://img.shields.io/badge/Obtainium-Install-2563eb?style=for-the-badge&logo=obtainium&logoColor=white)](obtainium://add?url=https%3A%2F%2Fgithub.com%2FVincenzoferrara%2Fgestione_negozio_abigliamento)
+[![Google Play](https://img.shields.io/badge/Google%20Play-Coming%20soon-414141?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=it.mgws.mgws_inventory)
+[![F-Droid](https://img.shields.io/badge/F--Droid-Coming%20soon-1976d2?style=for-the-badge&logo=fdroid&logoColor=white)](https://f-droid.org/packages/it.mgws.mgws_inventory/)
+[![Obtainium](https://img.shields.io/badge/Obtainium-Install-2563eb?style=for-the-badge&logo=obtainium&logoColor=white)](obtainium://add?url=https%3A%2F%2Fgithub.com%2FVincenzoferrara%2Fmgws-inventory)
 
 ## WordPress plugin
 per sbloccare le complete funzionalita, bisogno installare il plguin, questo plguin creare alunce tabella perosolizate nel db (come tutti i plguin), 

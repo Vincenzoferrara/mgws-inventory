@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gestione_negozio_abbigliamento/theme/theme.dart';
+import 'package:mgws_inventory/theme/theme.dart';
 import 'package:share_plus/share_plus.dart';
 import '../notification/notification_service.dart';
 import 'app_logger.dart';
@@ -258,7 +258,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          subject: 'Log temporaneo Gestione Negozio',
+          subject: 'Log temporaneo mgws_inventory',
         ),
       );
       await log.clearAllLogs();

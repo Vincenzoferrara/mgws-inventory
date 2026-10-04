@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=mgws_inventory
+Comment=Flutter inventory and store management app
+Exec=mgws_inventory
+Icon=it.mgws.mgws_inventory
+Terminal=false
+Categories=Office;
+StartupNotify=true
+StartupWMClass=it.mgws.mgws_inventory

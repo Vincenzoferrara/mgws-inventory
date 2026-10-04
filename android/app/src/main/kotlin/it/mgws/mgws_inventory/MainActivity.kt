@@ -1,4 +1,4 @@
-package it.mgws.gestione_negozio_abbigliamento
+package it.mgws.mgws_inventory
 
 import io.flutter.embedding.android.FlutterActivity
 

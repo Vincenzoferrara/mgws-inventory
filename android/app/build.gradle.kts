@@ -15,12 +15,12 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "it.mgws.gestione_negozio_abbigliamento"
+    namespace = "it.mgws.mgws_inventory"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
-        applicationId = "it.mgws.gestione_negozio_abbigliamento"
+        applicationId = "it.mgws.mgws_inventory"
         minSdk = flutter.minSdkVersion  // ESPlicitO per API 21
         targetSdk = 36
         versionCode = flutter.versionCode

@@ -1,10 +1,10 @@
-# MGWS Inventory rebrand - design
+# mgws_inventory rebrand - design
 
 Data: 2026-10-01
 
 ## Obiettivo
 
-Rinominare l'app Flutter in **MGWS Inventory**, rinominare il plugin WordPress in
+Rinominare l'app Flutter in **mgws_inventory**, rinominare il plugin WordPress in
 **MGWS Inventory Wordpress Plugin**, togliere la scritta "INVENTO" dall'icona e allineare
 tutti gli identificatori tecnici ai nuovi nomi.
 
@@ -12,13 +12,13 @@ tutti gli identificatori tecnici ai nuovi nomi.
 
 | Voce | Valore scelto |
 | --- | --- |
-| Nome visibile app | `MGWS Inventory` (identico in tutte le lingue: e un nome di brand) |
-| Package Dart | `gestione_negozio_abbigliamento` -> `mgws_inventory` |
-| ID Android | `it.mgws.gestione_negozio_abbigliamento` -> `it.mgws.inventory` |
-| ID iOS/macOS/Linux | `com.example.*` -> `it.mgws.inventory` |
+| Nome visibile app | `mgws_inventory` |
+| Package Dart | `mgws_inventory` -> `mgws_inventory` |
+| ID Android | `it.mgws.mgws_inventory` |
+| ID iOS/macOS/Linux | `it.mgws.mgws_inventory` |
 | Nome visibile plugin | `MGWS Inventory Wordpress Plugin` |
 | Slug cartella e text domain plugin | `mg-warehouse-stock` -> `mgws-inventory` |
-| Repo GitHub app | `gestione_negozio_abigliamento` -> `mgws-inventory` |
+| Repo GitHub app | `mgws_inventory` -> `mgws-inventory` |
 | Repo GitHub plugin | `mg-warehouse-stock` -> `mgws-inventory-wordpress-plugin` |
 | Icona | solo il simbolo, nessun testo |
 
@@ -28,9 +28,9 @@ vede e da cui deriva il text domain, il repo e dove vive il codice. Non devono c
 
 ## 1. Nomi visibili dell'app
 
-La stringa `MGWS Inventory` sostituisce i nomi incoerenti oggi presenti: l'AppBar dice
-"Gestione Negozio Abbigliamento", Windows e iOS dicono "Gestione Abbigliamento", il titolo
-della pagina web dice "Catalogo prodotti - verifica locale".
+La stringa `mgws_inventory` sostituisce i nomi incoerenti oggi presenti: l'AppBar dice
+"mgws_inventory", Windows e iOS dicono "mgws_inventory", il titolo
+della pagina web dice "mgws_inventory".
 
 ### Traduzioni
 
@@ -38,14 +38,14 @@ In `lib/traduzioni/app_it.arb` e `app_en.arb`:
 
 | Chiave | Nuovo valore |
 | --- | --- |
-| `appTitle` | `MGWS Inventory` |
-| `homeTitoloDesktop` | `MGWS Inventory` |
-| `homeTitoloMobileBack` | `MGWS Inventory` |
-| `homeTitoloDrawer` | `MGWS` |
-| `homeBenvenutoSottotitolo` | `MGWS Inventory` |
+| `appTitle` | `mgws_inventory` |
+| `homeTitoloDesktop` | `mgws_inventory` |
+| `homeTitoloMobileBack` | `mgws_inventory` |
+| `homeTitoloDrawer` | `mgws_inventory` |
+| `homeBenvenutoSottotitolo` | `mgws_inventory` |
 
 `homeBenvenutoTitolo` resta "Benvenuto nel Sistema di Gestione" / "Welcome to the
-Management System": e un testo localized, non un nome di brand.
+Management System": e un testo localized, non il nome tecnico dell'app.
 
 ### Metadati di piattaforma
 
@@ -60,7 +60,7 @@ Management System": e un testo localized, non un nome di brand.
 ### Package Dart
 
 `pubspec.yaml`: `name: mgws_inventory`. Poi 15 file con import
-`package:gestione_negozio_abbigliamento/...`:
+`package:mgws_inventory/...`:
 
 - `lib/login/gui/login.gui.dart`
 - `lib/login/jwt_api/woo_connect.dart`
@@ -80,14 +80,14 @@ Management System": e un testo localized, non un nome di brand.
 
 ### Android
 
-- `android/app/build.gradle.kts`: `namespace` e `applicationId` -> `it.mgws.inventory`
-- `MainActivity.kt` spostato in `android/app/src/main/kotlin/it/mgws/inventory/` con il
+- `android/app/build.gradle.kts`: `namespace` e `applicationId` -> `it.mgws.mgws_inventory`
+- `MainActivity.kt` spostato in `android/app/src/main/kotlin/it/mgws/mgws_inventory/` con il
   `package` aggiornato
 - `android/app/build.gradle.kts.backup`: file di backup, non va toccato
 
 ### iOS e macOS
 
-Bundle id `com.example.gestioneNegozioAbigliamento` -> `it.mgws.inventory`:
+Bundle id -> `it.mgws.mgws_inventory`:
 
 - `ios/Runner.xcodeproj/project.pbxproj` (6 occorrenze)
 - `macos/Runner.xcodeproj/project.pbxproj` (9 occorrenze)
@@ -98,7 +98,7 @@ Bundle id `com.example.gestioneNegozioAbigliamento` -> `it.mgws.inventory`:
 ### Linux
 
 - `linux/CMakeLists.txt`: `BINARY_NAME` -> `mgws_inventory`,
-  `APPLICATION_ID` -> `it.mgws.inventory`
+  `APPLICATION_ID` -> `it.mgws.mgws_inventory`
 - `linux/runner/my_application.cc`
 
 ### Windows
@@ -113,18 +113,12 @@ Bundle id `com.example.gestioneNegozioAbigliamento` -> `it.mgws.inventory`:
 Velopack scarica le release passano a `mgws-inventory`. Il repo va rinominato su GitHub,
 altrimenti l'updater automatico smette di funzionare.
 
-Attenzione: qui c'e un bug preesistente, non solo una rinomina. Il repository reale si
-chiama `gestione_negozio_abigliamento` con **un solo "b"**, mentre il codice e la
-documentazione usano `gestione_negozio_abbigliamento` con **due "b"**. La URL con due "b"
-risponde 404, quindi l'aggiornamento automatico desktop non trova le release da prima del
-rebrand. Il remote git locale punta gia al nome corretto con un "b", quindi il refuso e
-confinato alle stringhe di codice e documentazione. Applicando la rinomina il bug si risolve
-da solo, ma va verificato con una chiamata all'API delle release.
+Attenzione: il repository GitHub reale dell'app e `mgws-inventory`; le URL dell'updater devono usare il nome del repository, non il package Dart `mgws_inventory`.
 
 ### Cosa NON si tocca
 
 `script/create_android_release_key.sh`: `KEY_ALIAS` e il nome del file keystore restano
-`gestione_negozio_abbigliamento`. Lo stesso alias e nel secret GitHub `ANDROID_KEY_ALIAS`, e
+`mgws_inventory`. Lo stesso alias e nel secret GitHub `ANDROID_KEY_ALIAS`, e
 il keystore esistente contiene un alias con quel nome: rinominarlo romperebbe la firma delle
 release. Non e visibile all'utente.
 
@@ -225,10 +219,10 @@ permessi di contenuto. Senza quel permesso la rinomina va fatta dalla UI GitHub
 
 - `lib/doc/*.md` e i corrispettivi bilingui: nomi, identificatori, rimozione della card RFID,
   icona senza testo
-- `README.md`: titolo in "MGWS Inventory" e i tre badge di distribuzione, che contengono
+- `README.md`: titolo in "mgws_inventory" e i tre badge di distribuzione, che contengono
   l'ID Android e il repo GitHub
-  - Play: `id=it.mgws.gestione_negozio_abigliamento` -> `id=it.mgws.inventory`
-  - F-Droid: `it.mgws.gestione_negozio_abigliamento` -> `it.mgws.inventory`
+  - Play: `id=it.mgws.mgws_inventory`
+  - F-Droid: `it.mgws.mgws_inventory`
   - Obtainium: repo GitHub -> `mgws-inventory`
 - `lib/doc/installation.md`: URL del repository dell'app -> `mgws-inventory`
 - `lib/doc/integrazioni.md`: URL del repository companion del plugin ->
