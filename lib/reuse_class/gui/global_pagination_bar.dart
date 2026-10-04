@@ -154,9 +154,17 @@ class _GlobalPaginationBarState extends State<GlobalPaginationBar> {
                   ),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: _buildRow(isCompact),
+                child: Center(
+                  // Il blocco di navigazione (freccie, selettore righe, indicatore)
+                  // viene centrato orizzontalmente nella barra, invece di essere
+                  // attaccato al lato sinistro. Il Row deve essere min, altrimenti
+                  // occupa tutta la larghezza e il Center non ha effetto.
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: _buildRow(isCompact),
+                  ),
                 ),
               ),
             );
@@ -217,7 +225,8 @@ class _GlobalPaginationBarState extends State<GlobalPaginationBar> {
       ],
       _buildPageSizeField(),
       const SizedBox(width: _kGroupGap),
-      Flexible(
+      ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isCompact ? 54 : 96),
         child: showLoading
             ? const _LoadingHint()
             : _PageIndicator(
