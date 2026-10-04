@@ -1,4 +1,4 @@
-import '../../../../log_viewer/app_logger.dart';
+import '../../../log_viewer/app_logger.dart';
 import '../connection/mgws_auth.dart';
 import '../connection/mgws_connection.dart';
 import 'query_mgws_base.dart';

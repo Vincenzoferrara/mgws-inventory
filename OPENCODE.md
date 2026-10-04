@@ -14,6 +14,7 @@
    - prima riga: titolo breve del commit
    - riga vuota
    - righe successive: descrizioni brevi, una per riga, ciascuna che inizia con `-`
+   - **non fare commit senza che l'utente lo chieda esplicitamente**: anche a lavoro finito, lascia le modifiche non committate e attendi. Vale anche per il plugin WordPress e per la cartella `docker/`.
 - (i commit devno essere in inglese)
 
 12. `lib/doc` e la documentazione tecnica attuale del codice, utile a contributor e IA; non deve contenere backlog o analisi storiche.

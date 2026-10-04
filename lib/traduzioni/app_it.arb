@@ -1612,7 +1612,7 @@
   },
   "cassaCarta": "Carta",
   "@cassaCarta": {
-    "description": "Etichetta del metodo di pagamento con carta"
+    "description": "Etichetta per il campo metodo pagamento carta"
   },
   "cassaBancomat": "Bancomat",
   "@cassaBancomat": {
@@ -4628,7 +4628,7 @@
   },
   "cassaChiudiTurno": "Chiudi turno",
   "@cassaChiudiTurno": {
-    "description": "Localized string cassaChiudiTurno"
+    "description": "Pulsante per chiudere il turno cassa"
   },
   "cassaChiudiTurnoCassa": "Chiudi turno cassa",
   "@cassaChiudiTurnoCassa": {
@@ -4668,7 +4668,7 @@
   },
   "cassaFondoIniziale": "Fondo iniziale",
   "@cassaFondoIniziale": {
-    "description": "Localized string cassaFondoIniziale"
+    "description": "Etichetta per il campo fondo iniziale nella chiusura turno"
   },
   "cassaImportoRicevuto": "Importo Ricevuto",
   "@cassaImportoRicevuto": {
@@ -6031,5 +6031,17 @@
   "mgwsHoCapito": "Ho capito",
   "@mgwsHoCapito": {
     "description": "Pulsante di chiusura dell'avviso MGWS"
+  },
+  "cassaChiudiTitolo": "Chiusura turno",
+  "@cassaChiudiTitolo": {
+    "description": "Titolo della sezione chiusura turno nelle impostazioni cassa"
+  },
+  "cassaTurnoStato": "Stato turno",
+  "@cassaTurnoStato": {
+    "description": "Testo che mostra se il turno e aperto o chiuso"
+  },
+  "cassaAltri": "Altri",
+  "@cassaAltri": {
+    "description": "Etichetta per il campo metodo pagamento altri"
   }
 }

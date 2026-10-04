@@ -1612,7 +1612,7 @@
   },
   "cassaCarta": "Card",
   "@cassaCarta": {
-    "description": "Card payment method label"
+    "description": "Label for the card payment method field"
   },
   "cassaBancomat": "Debit card",
   "@cassaBancomat": {
@@ -4631,7 +4631,7 @@
   },
   "cassaChiudiTurno": "Close shift",
   "@cassaChiudiTurno": {
-    "description": "Localized string cassaChiudiTurno"
+    "description": "Button to close the cash register shift"
   },
   "cassaChiudiTurnoCassa": "Close checkout shift",
   "@cassaChiudiTurnoCassa": {
@@ -4669,9 +4669,9 @@
   "@cassaEsCinquanta": {
     "description": "Localized string cassaEsCinquanta"
   },
-  "cassaFondoIniziale": "Opening float",
+  "cassaFondoIniziale": "Initial float",
   "@cassaFondoIniziale": {
-    "description": "Localized string cassaFondoIniziale"
+    "description": "Label for the initial float field in shift close"
   },
   "cassaImportoRicevuto": "Amount received",
   "@cassaImportoRicevuto": {
@@ -6034,5 +6034,17 @@
   "mgwsHoCapito": "Got it",
   "@mgwsHoCapito": {
     "description": "Dismiss button of the MGWS notice"
+  },
+  "cassaChiudiTitolo": "Close shift",
+  "@cassaChiudiTitolo": {
+    "description": "Title of the close shift section in cash register settings"
+  },
+  "cassaTurnoStato": "Shift status",
+  "@cassaTurnoStato": {
+    "description": "Text showing whether the shift is open or closed"
+  },
+  "cassaAltri": "Other",
+  "@cassaAltri": {
+    "description": "Label for the other payment method field"
   }
 }

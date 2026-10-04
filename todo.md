@@ -44,13 +44,13 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
 
 ## Priorita reale MGWS da portare anche nell'app Flutter
 
-- [ ] MGWS/App: chiusura cassa giornaliera completa
+- [x] MGWS/App: chiusura cassa giornaliera completa
   - tipo: app/plugin/UI
   - priorita: high
   - obiettivo: aggiungere turno cassa, fondo iniziale, totali per metodo pagamento, rimborsi, differenza reale/attesa, note operatore e report di chiusura
   - perche: il gestionale deve riconciliare cassa fisica e POS, non solo creare ordini
   - grafica app: schermata apertura turno, pannello riepilogo giornaliero, form chiusura con contanti reali, differenze evidenziate, stampa/export
-  - stato app/plugin: enforcement turno cassa MGWS completato end-to-end; l'app apre `POST /pos/shifts` prima del turno locale, usa la `shift_key` come `shift_id` checkout, blocca apertura/chiusura locale se MGWS rifiuta, e chiude `POST /pos/shifts/{shift_key}/close` inviando solo contanti/carta contati; MGWS calcola expected totals dagli ordini collegati allo shift e blocca checkout senza shift aperto valido server-side
+  - stato app/plugin: enforcement turno cassa MGWS completato end-to-end; l'app apre `POST /pos/shifts` prima del turno locale, usa la `shift_key` come `shift_id` checkout, blocca apertura/chiusura locale se MGWS rifiuta, e chiude `POST /pos/shifts/{shift_key}/close` inviando solo contanti/carta contati; MGWS calcola expected totals dagli ordini collegati allo shift e blocca checkout senza shift aperto valido server-side. UI chiusura turno aggiunta nelle impostazioni cassa.
   - resta aperta per: stampa/export chiusura e report gestionale storico delle chiusure
   - verifica minima: un turno raccoglie vendite e resi e genera chiusura con totali coerenti
 
