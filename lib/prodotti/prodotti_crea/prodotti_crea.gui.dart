@@ -689,9 +689,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               const SizedBox(height: 8),
               Text(
                 context.l10n.productsPreparingProductsUi,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: context.colors.subtitleColor),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: context.colors.subtitleColor,
+                ),
               ),
             ],
           ),
@@ -842,6 +842,12 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         ).colorScheme.copyWith(primary: Theme.of(context).primaryColor),
       ),
       child: Stepper(
+        // La Stepper verticale usa internamente una ListView. In questa pagina
+        // pero' lo scroll principale e' gia' il CustomScrollView esterno: se la
+        // ListView interna resta scrollabile, su smartphone intercetta il drag e
+        // la pagina sembra non scorrere. Disattiviamo quindi lo scroll interno e
+        // lasciamo scorrere tutta la pagina come un unico form.
+        physics: const NeverScrollableScrollPhysics(),
         currentStep: _currentStep,
         onStepTapped: (step) {
           if (step > 0 && !_ensureProductTypeSelected()) return;
@@ -1531,9 +1537,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                       context.l10n.productsVariantsConfigured(
                         '${_varianti.length}',
                       ),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: context.colors.subtitleColor),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: context.colors.subtitleColor,
+                      ),
                     ),
                   ],
                 );
@@ -1566,21 +1572,25 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Icon(Icons.inventory, size: 48, color: context.colors.neutralColor),
+                  Icon(
+                    Icons.inventory,
+                    size: 48,
+                    color: context.colors.neutralColor,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.productsNoVariants,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(color: context.colors.subtitleColor),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: context.colors.subtitleColor,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     context.l10n.productsNoVariantsHint,
                     textAlign: TextAlign.center,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: context.colors.subtitleColor),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: context.colors.subtitleColor,
+                    ),
                   ),
                 ],
               ),
@@ -2025,9 +2035,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             const SizedBox(height: 4),
             Text(
               context.l10n.productsQuickVariantEntryHint,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: context.colors.subtitleColor),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.subtitleColor,
+              ),
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -2117,9 +2127,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             const SizedBox(height: 6),
             Text(
               'Seleziona o scrivi nome attributo e scegli più valori. Il campo valori mostra i selezionati separati da virgola.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: context.colors.subtitleColor),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.colors.subtitleColor,
+              ),
             ),
             const SizedBox(height: 12),
             if (_attributiProdottoSelezionati.isEmpty)
@@ -2132,7 +2142,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.tune, size: 32, color: context.colors.neutralColor),
+                    Icon(
+                      Icons.tune,
+                      size: 32,
+                      color: context.colors.neutralColor,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Nessun attributo configurato',
@@ -2343,7 +2357,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                 bottom: 4,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.65),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Padding(
@@ -2585,7 +2601,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
-                      Icon(Icons.tune, size: 32, color: context.colors.neutralColor),
+                      Icon(
+                        Icons.tune,
+                        size: 32,
+                        color: context.colors.neutralColor,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Nessun attributo definito',
@@ -2808,7 +2828,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.image_outlined, size: 56, color: context.colors.subtitleColor),
+            Icon(
+              Icons.image_outlined,
+              size: 56,
+              color: context.colors.subtitleColor,
+            ),
             const SizedBox(height: 10),
             Text(
               'Nessuna immagine selezionata',
@@ -3040,7 +3064,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               overflow: TextOverflow.ellipsis,
             ),
             backgroundColor: context.colors.infoColor.withValues(alpha: 0.10),
-            side: BorderSide(color: context.colors.infoColor.withValues(alpha: 0.35)),
+            side: BorderSide(
+              color: context.colors.infoColor.withValues(alpha: 0.35),
+            ),
           ),
         ),
       );
@@ -3159,7 +3185,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     );
     return _buildImageDimensionStatusLabel(
       label: isOversized ? 'Fuori specifica' : 'Conforme',
-      color: isOversized ? context.colors.warningColor : context.colors.successColor,
+      color: isOversized
+          ? context.colors.warningColor
+          : context.colors.successColor,
       tooltip: isOversized
           ? 'Fuori specifica: immagine $width × $height px, soglia $_imageWarningThresholdWidth × $_imageWarningThresholdHeight px.'
           : 'Conforme: immagine $width × $height px, soglia $_imageWarningThresholdWidth × $_imageWarningThresholdHeight px.',
