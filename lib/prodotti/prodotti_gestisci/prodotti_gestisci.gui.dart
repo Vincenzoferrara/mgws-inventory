@@ -26,7 +26,6 @@ import '../../traduzioni/estensioni.dart';
 // ---------------------------------------------------------------------------
 
 const double _kDesktopBreakpoint = 800;
-const double _kWorkstationGap = 16;
 const double _kCardRadius = 18;
 const double _kControlGap = 8;
 
@@ -797,7 +796,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     if (!mounted || selected == null || selected.isEmpty) return;
 
     final next = ProductGridColumnId.values
-        .where((c) => selected.contains(productGridColumnLabel(context.l10n, c)))
+        .where(
+          (c) => selected.contains(productGridColumnLabel(context.l10n, c)),
+        )
         .toSet();
     if (next.isEmpty) return;
 
@@ -875,11 +876,16 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     return Row(
       children: [
         Expanded(flex: 3, child: _buildProductPane()),
-        const SizedBox(width: _kWorkstationGap),
+        VerticalDivider(
+          width: 1,
+          thickness: 1,
+          color: theme.dividerColor.withValues(alpha: 0.45),
+        ),
         Expanded(
           flex: 2,
           // Come il pannello prodotti: a filo, senza cornice. La separazione
-          // fra i due la fa il gap di 16px, dove si vede il gradiente.
+          // fra i due e' solo la linea verticale: niente spazio vuoto tra griglia
+          // e dettaglio.
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface.withValues(alpha: 0.84),
@@ -1795,7 +1801,11 @@ class _FiltersBarState extends State<_FiltersBar> {
     final raw = _valueCtrl.text.trim();
     if (raw.isEmpty) return;
     final resolved =
-        ProdottoFilterEngine.resolveCampoFromInput(context.l10n, _campoCtrl.text) ?? _campo;
+        ProdottoFilterEngine.resolveCampoFromInput(
+          context.l10n,
+          _campoCtrl.text,
+        ) ??
+        _campo;
     if (resolved == CampoFiltroProdotto.ricercaRapida) {
       _searchDebounce?.cancel();
       widget.controller.setFiltroRicerca(raw);
@@ -1984,7 +1994,8 @@ class _FiltersBarState extends State<_FiltersBar> {
                                       initialValue: _campo,
                                       isExpanded: true,
                                       decoration: InputDecoration(
-                                        labelText: context.l10n.prodottiCampoFiltro,
+                                        labelText:
+                                            context.l10n.prodottiCampoFiltro,
                                         isDense: true,
                                       ),
                                       onChanged: (v) {
@@ -1994,7 +2005,9 @@ class _FiltersBarState extends State<_FiltersBar> {
                                           .map(
                                             (c) => DropdownMenuItem(
                                               value: c,
-                                              child: Text(_campoLabel(context, c)),
+                                              child: Text(
+                                                _campoLabel(context, c),
+                                              ),
                                             ),
                                           )
                                           .toList(),
@@ -2011,7 +2024,8 @@ class _FiltersBarState extends State<_FiltersBar> {
                                       initialValue: _operatore,
                                       isExpanded: true,
                                       decoration: InputDecoration(
-                                        labelText: context.l10n.prodottiOperatore,
+                                        labelText:
+                                            context.l10n.prodottiOperatore,
                                         isDense: true,
                                       ),
                                       onChanged: (v) {
@@ -2027,8 +2041,13 @@ class _FiltersBarState extends State<_FiltersBar> {
                                                 waitDuration: const Duration(
                                                   milliseconds: 850,
                                                 ),
-                                                message: _operatoreTooltip(context, o),
-                                                child: Text(_operatoreLabel(context, o)),
+                                                message: _operatoreTooltip(
+                                                  context,
+                                                  o,
+                                                ),
+                                                child: Text(
+                                                  _operatoreLabel(context, o),
+                                                ),
                                               ),
                                             ),
                                           )
@@ -2117,7 +2136,9 @@ class _FiltersBarState extends State<_FiltersBar> {
                                   Icons.inventory_2_outlined,
                                   size: 18,
                                 ),
-                                label: Text(context.l10n.prodottiNonMostrareEsauriti),
+                                label: Text(
+                                  context.l10n.prodottiNonMostrareEsauriti,
+                                ),
                                 onSelected: (value) {
                                   widget.onHideOutOfStockChanged(value);
                                   setState(() {});
@@ -2144,7 +2165,9 @@ class _FiltersBarState extends State<_FiltersBar> {
                               children: [
                                 if (widget.controller.nascondiProdottiEsauriti)
                                   InputChip(
-                                    label: Text(context.l10n.prodottiEsauritiNascosti),
+                                    label: Text(
+                                      context.l10n.prodottiEsauritiNascosti,
+                                    ),
                                     onDeleted: () {
                                       widget.onHideOutOfStockChanged(false);
                                       setState(() {});
@@ -2161,9 +2184,7 @@ class _FiltersBarState extends State<_FiltersBar> {
                                 )
                                   InputChip(
                                     label: Text(
-                                      widget
-                                          .controller
-                                          .filtriProdottoAttivi[i]
+                                      widget.controller.filtriProdottoAttivi[i]
                                           .chipLabel(context.l10n),
                                     ),
                                     onDeleted: () {

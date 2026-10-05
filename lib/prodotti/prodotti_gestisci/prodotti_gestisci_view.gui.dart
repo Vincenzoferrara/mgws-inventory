@@ -919,7 +919,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         color: theme.scaffoldBackgroundColor,
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
-            _kDetailPanePadding,
+            0,
             _kDetailPanePadding,
             _kDetailPanePadding,
             88,
@@ -997,23 +997,26 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                 prodotto: widget.prodotto,
                 prezzoInfo: prezzoInfo,
               ),
-              const SizedBox(height: 8),
-              _VariantFiltersCard(
-                opzioniFiltro: _getOpzioniFiltroDisponibili(),
-                opzioniEsaurite: _getOpzioniFiltroEsaurite(),
-                filtriAttivi: _filtriVariantiAttivi,
-                filtraSoloInStock: _filtraSoloInStock,
-                onFilterSelected: _setFiltroVariante,
-                onClearFilters: _cancellaFiltriVarianti,
-                onToggleStockOnly: (value) {
-                  setState(() {
-                    _filtraSoloInStock = value;
-                    _controller?.setFiltraSoloInStock(value);
-                    _applicaFiltriVarianti();
-                  });
-                },
+              const SizedBox(height: 0),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: _VariantFiltersCard(
+                  opzioniFiltro: _getOpzioniFiltroDisponibili(),
+                  opzioniEsaurite: _getOpzioniFiltroEsaurite(),
+                  filtriAttivi: _filtriVariantiAttivi,
+                  filtraSoloInStock: _filtraSoloInStock,
+                  onFilterSelected: _setFiltroVariante,
+                  onClearFilters: _cancellaFiltriVarianti,
+                  onToggleStockOnly: (value) {
+                    setState(() {
+                      _filtraSoloInStock = value;
+                      _controller?.setFiltraSoloInStock(value);
+                      _applicaFiltriVarianti();
+                    });
+                  },
+                ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 0),
               if (widget.variantsLoading)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -1050,16 +1053,19 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                 ),
                 const SizedBox(height: _kDetailGap),
               ],
-              _VariantsListCard(
-                varianti: _variantiFiltrate,
-                selectedVarianteId: _varianteSelezionata?.id,
-                onSelect: _selezionaVariante,
-                modalitaSelezioneCassa: widget.modalitaSelezioneCassa,
-                variantiSelezionateCassa: _variantiSelezionateCassa,
-                onVarianteCassaChecked: _toggleVarianteCassa,
-                isEditMode: _isEditMode && !_isMultiEdit,
-                variantPriceCtrls: _variantPriceCtrls,
-                variantQtyCtrls: _variantQtyCtrls,
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: _VariantsListCard(
+                  varianti: _variantiFiltrate,
+                  selectedVarianteId: _varianteSelezionata?.id,
+                  onSelect: _selezionaVariante,
+                  modalitaSelezioneCassa: widget.modalitaSelezioneCassa,
+                  variantiSelezionateCassa: _variantiSelezionateCassa,
+                  onVarianteCassaChecked: _toggleVarianteCassa,
+                  isEditMode: _isEditMode && !_isMultiEdit,
+                  variantPriceCtrls: _variantPriceCtrls,
+                  variantQtyCtrls: _variantQtyCtrls,
+                ),
               ),
             ],
           ),
@@ -1482,9 +1488,8 @@ class _VariantFiltersCard extends StatelessWidget {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
     return _PaneCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      showBorder: false,
-      borderRadius: 0,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+      borderRadius: 10,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1796,7 +1801,7 @@ class _VariantsListCard extends StatelessWidget {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
     return _PaneCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.zero,
       showBorder: false,
       borderRadius: 0,
       child: Column(
@@ -1839,10 +1844,7 @@ class _VariantsListCard extends StatelessWidget {
                   onTap: () => onSelect(variante),
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(0, 6, 8, 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: isSelected
@@ -1882,7 +1884,7 @@ class _VariantsListCard extends StatelessWidget {
                                 onChanged: (value) => onVarianteCassaChecked
                                     ?.call(variante, value ?? false),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 0),
                             ],
                             if ((variante.immagineUrl ?? '')
                                 .trim()
