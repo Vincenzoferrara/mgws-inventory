@@ -201,9 +201,9 @@ class _GalleryNavigationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.scrim.withValues(
-        alpha: enabled ? 0.58 : 0.22,
-      ),
+      color: Theme.of(
+        context,
+      ).colorScheme.scrim.withValues(alpha: enabled ? 0.58 : 0.22),
       shape: const CircleBorder(),
       child: IconButton(
         onPressed: enabled ? onPressed : null,
@@ -955,7 +955,8 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                       runSpacing: 8,
                       children: [
                         _StatusPill(
-                          label: ProdottoUtils.getStatusLabel(context.l10n, 
+                          label: ProdottoUtils.getStatusLabel(
+                            context.l10n,
                             widget.prodotto.status,
                           ),
                           color: productStatusColor,
@@ -996,7 +997,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                 prodotto: widget.prodotto,
                 prezzoInfo: prezzoInfo,
               ),
-              const SizedBox(height: _kDetailGap),
+              const SizedBox(height: 8),
               _VariantFiltersCard(
                 opzioniFiltro: _getOpzioniFiltroDisponibili(),
                 opzioniEsaurite: _getOpzioniFiltroEsaurite(),
@@ -1012,7 +1013,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                   });
                 },
               ),
-              const SizedBox(height: _kDetailGap),
+              const SizedBox(height: 6),
               if (widget.variantsLoading)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -1086,11 +1087,15 @@ class _PaneCard extends StatelessWidget {
   final Widget child;
   final bool tinted;
   final EdgeInsetsGeometry padding;
+  final bool showBorder;
+  final double borderRadius;
 
   const _PaneCard({
     required this.child,
     this.tinted = false,
     this.padding = const EdgeInsets.all(_kDetailCardPadding),
+    this.showBorder = true,
+    this.borderRadius = _kDetailCardRadius,
   });
 
   @override
@@ -1104,8 +1109,10 @@ class _PaneCard extends StatelessWidget {
         color: tinted
             ? customColors.variantSelectedBackground.withValues(alpha: 0.55)
             : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(_kDetailCardRadius),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.42)),
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: showBorder
+            ? Border.all(color: theme.dividerColor.withValues(alpha: 0.42))
+            : null,
       ),
       child: child,
     );
@@ -1146,7 +1153,7 @@ class _DettaglioHeader extends StatelessWidget {
           ),
         ),
         if (showBulkEdit)
-           PopupMenuItem(
+          PopupMenuItem(
             value: _DettaglioAction.modificaInMassa,
             child: Row(
               children: [
@@ -1386,7 +1393,10 @@ class _ReadonlyInfoCard extends StatelessWidget {
               Expanded(
                 child: _InlineInfoField(
                   label: 'Stato',
-                  value: ProdottoUtils.getStatusLabel(context.l10n, prodotto.status),
+                  value: ProdottoUtils.getStatusLabel(
+                    context.l10n,
+                    prodotto.status,
+                  ),
                   valueColor: prodotto.status.trim().toLowerCase() == 'draft'
                       ? customColors.warningColor
                       : null,
@@ -1472,8 +1482,9 @@ class _VariantFiltersCard extends StatelessWidget {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
     return _PaneCard(
-      tinted: true,
-      padding: const EdgeInsets.all(_kDetailPanePadding),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      showBorder: false,
+      borderRadius: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1496,7 +1507,7 @@ class _VariantFiltersCard extends StatelessWidget {
           const SizedBox(height: 8),
           ...opzioniFiltro.entries.map((entry) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1714,7 +1725,7 @@ class _QuickEditCard extends StatelessWidget {
                       isDense: true,
                       prefixIcon: Icon(Icons.public),
                     ),
-                    items:  [
+                    items: [
                       DropdownMenuItem(
                         value: 'publish',
                         child: Text(context.l10n.prodottiPubblico),
@@ -1723,7 +1734,10 @@ class _QuickEditCard extends StatelessWidget {
                         value: 'private',
                         child: Text(context.l10n.prodottiPrivato),
                       ),
-                      DropdownMenuItem(value: 'draft', child: Text(context.l10n.prodottiBozza)),
+                      DropdownMenuItem(
+                        value: 'draft',
+                        child: Text(context.l10n.prodottiBozza),
+                      ),
                       DropdownMenuItem(
                         value: 'pending',
                         child: Text(context.l10n.prodottiInRevisione),
@@ -1782,6 +1796,9 @@ class _VariantsListCard extends StatelessWidget {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
     return _PaneCard(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      showBorder: false,
+      borderRadius: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1793,7 +1810,7 @@ class _VariantsListCard extends StatelessWidget {
               color: theme.primaryColor,
             ),
           ),
-          const SizedBox(height: _kDetailGap),
+          const SizedBox(height: 8),
           if (varianti.isEmpty)
             modalitaSelezioneCassa
                 ? Text(
@@ -1810,7 +1827,7 @@ class _VariantsListCard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: varianti.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, __) => const SizedBox(height: 4),
               itemBuilder: (context, index) {
                 final variante = varianti[index];
                 final isSelected = variante.id == selectedVarianteId;
@@ -1820,11 +1837,14 @@ class _VariantsListCard extends StatelessWidget {
                 final isOutOfStock = variante.quantita < 1;
                 return InkWell(
                   onTap: () => onSelect(variante),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(8),
                       color: isSelected
                           ? (isOutOfStock
                                 ? customColors.stockUnavailable.withValues(
@@ -1835,18 +1855,19 @@ class _VariantsListCard extends StatelessWidget {
                                 ? customColors.stockUnavailable.withValues(
                                     alpha: 0.14,
                                   )
-                                : theme.colorScheme.surface.withValues(
-                                    alpha: 0.72,
-                                  )),
+                                : theme.colorScheme.surfaceContainerLowest
+                                      .withValues(alpha: 0.72)),
                       border: Border.all(
                         color: isOutOfStock
                             ? customColors.stockUnavailable.withValues(
                                 alpha: isSelected ? 0.8 : 0.5,
                               )
                             : (isSelected
-                                  ? theme.primaryColor.withValues(alpha: 0.7)
-                                  : theme.dividerColor.withValues(alpha: 0.42)),
-                        width: isSelected ? 2 : 1,
+                                  ? theme.colorScheme.outlineVariant
+                                  : theme.colorScheme.outlineVariant.withValues(
+                                      alpha: 0.55,
+                                    )),
+                        width: isSelected ? 0.8 : 0.6,
                       ),
                     ),
                     child: Column(
@@ -1888,7 +1909,7 @@ class _VariantsListCard extends StatelessWidget {
                                       color: isOutOfStock
                                           ? customColors.stockUnavailable
                                           : (isSelected
-                                                ? theme.primaryColor
+                                                ? theme.colorScheme.onSurface
                                                 : null),
                                     ),
                                   ),
@@ -1915,7 +1936,7 @@ class _VariantsListCard extends StatelessWidget {
                           ],
                         ),
                         if (isEditMode) ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 8),
                           Row(
                             children: [
                               Expanded(
@@ -1949,10 +1970,10 @@ class _VariantsListCard extends StatelessWidget {
                             ],
                           ),
                         ],
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         Wrap(
-                          spacing: 12,
-                          runSpacing: 8,
+                          spacing: 10,
+                          runSpacing: 6,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             _VariantPriceLabel(variante: variante),
