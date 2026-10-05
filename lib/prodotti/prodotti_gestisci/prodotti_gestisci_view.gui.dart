@@ -1872,126 +1872,133 @@ class _VariantsListCard extends StatelessWidget {
                         width: isSelected ? 0.8 : 0.6,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            if (modalitaSelezioneCassa) ...[
-                              Checkbox(
-                                value: isCheckedForCassa,
-                                onChanged: (value) => onVarianteCassaChecked
-                                    ?.call(variante, value ?? false),
-                              ),
-                              const SizedBox(width: 0),
-                            ],
-                            if ((variante.immagineUrl ?? '')
-                                .trim()
-                                .isNotEmpty) ...[
-                              _ImageThumbnail(
-                                imageUrl: variante.immagineUrl!,
-                                isActive: isSelected,
-                                onTap: () => _openImageViewer(
-                                  context,
-                                  variante.immagineUrl,
-                                  title: variante.nomeVisualizzabile,
+                    child: SelectionArea(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (modalitaSelezioneCassa) ...[
+                                Checkbox(
+                                  value: isCheckedForCassa,
+                                  onChanged: (value) => onVarianteCassaChecked
+                                      ?.call(variante, value ?? false),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                            ],
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    variante.nomeVisualizzabile,
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: isOutOfStock
-                                          ? customColors.stockUnavailable
-                                          : (isSelected
-                                                ? theme.colorScheme.onSurface
-                                                : null),
+                                const SizedBox(width: 0),
+                              ],
+                              if ((variante.immagineUrl ?? '')
+                                  .trim()
+                                  .isNotEmpty) ...[
+                                _ImageThumbnail(
+                                  imageUrl: variante.immagineUrl!,
+                                  isActive: isSelected,
+                                  onTap: () => _openImageViewer(
+                                    context,
+                                    variante.immagineUrl,
+                                    title: variante.nomeVisualizzabile,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      variante.nomeVisualizzabile,
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: isOutOfStock
+                                                ? customColors.stockUnavailable
+                                                : (isSelected
+                                                      ? theme
+                                                            .colorScheme
+                                                            .onSurface
+                                                      : null),
+                                          ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Barcode interno: ${variante.barcodeInterno}',
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                  if (variante.attributi.isNotEmpty) ...[
                                     const SizedBox(height: 4),
                                     Text(
-                                      variante.attributi
-                                          .map(
-                                            (item) =>
-                                                '${item.nome}: ${item.opzione}',
-                                          )
-                                          .join(' • '),
+                                      'Barcode interno: ${variante.barcodeInterno}',
                                       style: theme.textTheme.bodySmall,
                                     ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (isEditMode) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: variantPriceCtrls[variante.id],
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
+                                    if (variante.attributi.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        variante.attributi
+                                            .map(
+                                              (item) =>
+                                                  '${item.nome}: ${item.opzione}',
+                                            )
+                                            .join(' • '),
+                                        style: theme.textTheme.bodySmall,
                                       ),
-                                  decoration: InputDecoration(
-                                    labelText: context.l10n.commonPrice,
-                                    prefixIcon: Icon(Icons.euro),
-                                    isDense: true,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: TextField(
-                                  controller: variantQtyCtrls[variante.id],
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: context.l10n.commonQuantity,
-                                    prefixIcon: Icon(
-                                      Icons.inventory_2_outlined,
-                                    ),
-                                    isDense: true,
-                                  ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 6,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            _VariantPriceLabel(variante: variante),
-                            _StatusPill(
-                              label: isOutOfStock ? 'Esaurito' : 'Disponibile',
-                              color: isOutOfStock
-                                  ? customColors.stockUnavailable
-                                  : customColors.stockAvailable,
-                            ),
-                            Text(
-                              'Qty ${variante.quantita}',
-                              style: theme.textTheme.bodySmall,
+                          if (isEditMode) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: variantPriceCtrls[variante.id],
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    decoration: InputDecoration(
+                                      labelText: context.l10n.commonPrice,
+                                      prefixIcon: Icon(Icons.euro),
+                                      isDense: true,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: TextField(
+                                    controller: variantQtyCtrls[variante.id],
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      labelText: context.l10n.commonQuantity,
+                                      prefixIcon: Icon(
+                                        Icons.inventory_2_outlined,
+                                      ),
+                                      isDense: true,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              _VariantPriceLabel(variante: variante),
+                              _StatusPill(
+                                label: isOutOfStock
+                                    ? 'Esaurito'
+                                    : 'Disponibile',
+                                color: isOutOfStock
+                                    ? customColors.stockUnavailable
+                                    : customColors.stockAvailable,
+                              ),
+                              Text(
+                                'Qty ${variante.quantita}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
