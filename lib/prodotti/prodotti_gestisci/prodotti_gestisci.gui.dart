@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:multi_split_view/multi_split_view.dart';
 import 'prodotti_gestisci.code.dart';
 import '../class_prodotti.dart';
 import '../prodotto_filters.dart';
@@ -10,6 +11,7 @@ import 'prodotti_gestisci_view.gui.dart';
 import '../../theme/theme.dart';
 import '../../notification/notification_service.dart';
 import '../../settings/app_settings.dart';
+import '../../settings/machine_ui_preferences.dart';
 import '../../reuse_class/gui/global_pagination_bar.dart';
 import '../../reuse_class/logic/global_pagination_controller.dart';
 import '../../reuse_class/gui/searchable_checkbox_dialog.dart';
@@ -177,6 +179,8 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   // ── Controller e settings ────────────────────────────────────────────────
   final _controller = ProdottiGestioneController();
   final _appSettings = AppSettings();
+  final _machineUiPreferences = MachineUiPreferences();
+  late final MultiSplitViewController _splitViewController;
   final _paginationController = GlobalPaginationController<ProdottoGlobal>();
   final _scrollController = ScrollController();
   final _gridKey = GlobalKey<_ProductsGridState>();
@@ -194,6 +198,8 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   // Unico stato delle colonne: alimenta sia il preselezionato del selettore
   // sia le colonne effettivamente renderizzate dalla griglia.
   Set<ProductGridColumnId> _visibleColumns = defaultProductGridColumns.toSet();
+  double _productPaneRatio =
+      MachineUiPreferences.defaultProductsManageSplitRatio;
 
   // ── Busy overlay ─────────────────────────────────────────────────────────
   int _busyDepth = 0;
@@ -225,6 +231,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   @override
   void initState() {
     super.initState();
+    _splitViewController = MultiSplitViewController(
+      areas: _splitAreasForRatio(_productPaneRatio),
+    );
     _scrollController.addListener(_onScroll);
     // Le varianti agganciate dal datagrid cache cambiano i valori Prezzo/Sconto
     // della griglia: riallinea lo snapshot paginato e ricompone le righe.
@@ -304,6 +313,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     _variantsUpdateSubscription?.cancel();
     _scrollController.dispose();
     _paginationController.dispose();
+    _splitViewController.dispose();
     _selectedProductNotifier.dispose();
     _selectedProductVariantsLoading.dispose();
     _controller.dispose();
@@ -331,6 +341,39 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     if (mounted) setState(() {});
   }
 
+  List<Area> _splitAreasForRatio(double ratio) {
+    final normalized = MachineUiPreferences.normalizeProductsManageSplitRatio(
+      ratio,
+    );
+    return [
+      Area(
+        id: 'products',
+        flex: normalized,
+        min: MachineUiPreferences.minProductsManageSplitRatio,
+        max: MachineUiPreferences.maxProductsManageSplitRatio,
+      ),
+      Area(
+        id: 'details',
+        flex: 1 - normalized,
+        min: 1 - MachineUiPreferences.maxProductsManageSplitRatio,
+        max: 1 - MachineUiPreferences.minProductsManageSplitRatio,
+      ),
+    ];
+  }
+
+  void _saveCurrentSplitRatio() {
+    final productFlex = _splitViewController.getArea(0).flex;
+    final detailFlex = _splitViewController.getArea(1).flex;
+    if (productFlex == null || detailFlex == null) return;
+    final totalFlex = productFlex + detailFlex;
+    if (totalFlex <= 0) return;
+    final ratio = MachineUiPreferences.normalizeProductsManageSplitRatio(
+      productFlex / totalFlex,
+    );
+    _productPaneRatio = ratio;
+    unawaited(_machineUiPreferences.setProductsManageSplitRatio(ratio));
+  }
+
   Future<T> _runBusy<T>(String message, Future<T> Function() action) async {
     _pushBusy(message);
     try {
@@ -345,7 +388,10 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   Future<void> _initSettings() async {
     await _runBusy('Inizializzazione...', () async {
       await _appSettings.init();
+      await _machineUiPreferences.init();
       if (!_alive) return;
+      _productPaneRatio = _machineUiPreferences.productsManageSplitRatio;
+      _splitViewController.areas = _splitAreasForRatio(_productPaneRatio);
       await _paginationController.loadFromSettings(_appSettings);
       if (!_alive) return;
       _controller.setPersistedAdvancedFiltersEnabled(
@@ -873,20 +919,40 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   Widget _buildDesktopLayout() {
     final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(flex: 3, child: _buildProductPane()),
-        VerticalDivider(
-          width: 1,
-          thickness: 1,
-          color: theme.dividerColor.withValues(alpha: 0.45),
+    return MultiSplitViewTheme(
+      data: MultiSplitViewThemeData(
+        dividerThickness: 8,
+        dividerPainter: DividerPainters.background(
+          color: Colors.transparent,
+          highlightedColor: theme.dividerColor.withValues(alpha: 0.12),
         ),
-        Expanded(
-          flex: 2,
+      ),
+      child: MultiSplitView(
+        controller: _splitViewController,
+        axis: Axis.horizontal,
+        onDividerDragEnd: (_) => _saveCurrentSplitRatio(),
+        dividerBuilder: (axis, index, resizable, dragging, highlighted, data) {
+          return MouseRegion(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            child: ColoredBox(
+              color: highlighted || dragging
+                  ? theme.dividerColor.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              child: Center(
+                child: Container(
+                  width: 1,
+                  color: theme.dividerColor.withValues(alpha: 0.45),
+                ),
+              ),
+            ),
+          );
+        },
+        builder: (context, area) {
+          if (area.index == 0) return _buildProductPane();
           // Come il pannello prodotti: a filo, senza cornice. La separazione
-          // fra i due e' solo la linea verticale: niente spazio vuoto tra griglia
-          // e dettaglio.
-          child: DecoratedBox(
+          // fra i due e' solo la linea verticale trascinabile: niente spazio
+          // vuoto tra griglia e dettaglio.
+          return DecoratedBox(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface.withValues(alpha: 0.84),
             ),
@@ -943,9 +1009,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
                 );
               },
             ),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 
