@@ -25,6 +25,7 @@
 - Dimensione pagina predefinita
 - Magazzini e stanze condivisi, scaffali e ripiani proposti per le singole righe nel modulo `Aggiungi`, con valori predefiniti opzionali. Lascia vuota la lista di un livello per disattivarlo e nasconderlo dal flusso
 - Colonne visibili nella griglia prodotti
+- Larghezza del pannello prodotti/dettaglio in `Prodotti`: preferenza locale della macchina, salvata fuori dalle impostazioni sincronizzate e non mostrata nella UI impostazioni
 - Shortcut della pagina prodotti per attivare la modifica rapida, salvare, selezionare le righe visibili, eliminare e annullare/uscire
 - Persistenza filtri nella pagina prodotti
 - Modalita testo per i parametri attributo
@@ -32,7 +33,7 @@
 - Connessione RFID tramite USB o WiFi; Bluetooth non e disponibile finche il modulo RFID resta in alpha
 - Sede in uso in `Impostazioni > Generale`: se vuota, lo storico POS non salva una sede sugli scontrini
 - Nome/numero cassa in `Impostazioni > Cassa`: se vuoto, lo storico POS usa un nome neutro; la giornata operativa resta `giorno|cassa`
-- `Turno cassa obbligatorio` in `Impostazioni > Cassa`: quando attivo, la cassa richiede un turno aperto per aggiungere prodotti e completare il checkout; quando disattivo, apri/chiudi turno resta disponibile ma non blocca la vendita. La modifica e globale lato MGWS e richiede un utente con permessi di gestione WooCommerce/WordPress.
+- `Turno cassa obbligatorio` in `Impostazioni > Cassa`: quando attivo, la cassa mostra apri/chiudi turno e richiede un turno aperto per aggiungere prodotti e completare il checkout; quando disattivo, il turno non viene usato nella schermata cassa e non blocca la vendita. La modifica e globale lato MGWS e richiede un utente con permessi di gestione WooCommerce/WordPress.
 - Lingua interfaccia in `Impostazioni > Generale`: combobox con `Lingua di sistema` in cima, che mostra fra parentesi la lingua effettiva, poi le lingue supportate con nome nativo. Con `Lingua di sistema` l'app passa `null` a `MaterialApp.locale` e lascia risolvere a Flutter, con fallback su inglese
 - Un cambio lingua deve raggiungere ogni stringa visibile senza riavvio. Un widget che resta montato dopo il cambio deve leggere le traduzioni nel proprio `build`: leggerle una volta e salvarle in un campo, o in una lista catturata da un widget inserito una sola volta nel docking layout, mantiene le stringhe della lingua precedente. Per questo la pagina iniziale della home riceve un builder di sezioni invece di una lista gia costruita, cosi la lettura di `Localizations` avviene durante il suo build e la pagina si ricostruisce con la lingua nuova
 - I titoli delle schede sono l'eccezione, perche la libreria docking li legge da `DockingItem.name`, una stringa semplice, e non espone un builder per l'etichetta. `HomeLogic.aggiornaTitoli` risolve di nuovo il titolo di ogni scheda aperta e riscrive il nome sul mentre l'albero dei widget si ricostruisce, quindi la stessa ricostruzione rilegge le etichette nuove senza `setState`. Il suffisso dell'istanza (`#2`, `#3`) viene salvato una volta per scheda in `HomeTabMeta.istanza` e riapplicato a ogni aggiornamento, cosi chiudere una scheda non rinumera quelle rimaste aperte

@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "it.mgws.mgws_inventory"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "30.0.16248370"
 
     defaultConfig {
         applicationId = "it.mgws.mgws_inventory"
