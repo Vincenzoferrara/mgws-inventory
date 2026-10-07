@@ -4594,6 +4594,18 @@
   "@cassaAggiungiManualmente": {
     "description": "Localized string cassaAggiungiManualmente"
   },
+  "cassaTotaleMobile": "Totale",
+  "@cassaTotaleMobile": {
+    "description": "Etichetta del totale nella barra checkout mobile della cassa"
+  },
+  "cassaOpzioniMobile": "Opzioni cassa",
+  "@cassaOpzioniMobile": {
+    "description": "Tooltip del pulsante che apre le opzioni cassa su smartphone"
+  },
+  "cassaPaga": "Paga",
+  "@cassaPaga": {
+    "description": "Etichetta del pulsante di pagamento nella cassa"
+  },
   "cassaApplica": "Applica",
   "@cassaApplica": {
     "description": "Localized string cassaApplica"

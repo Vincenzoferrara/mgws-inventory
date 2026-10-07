@@ -35,7 +35,7 @@ class CassaSettings extends ChangeNotifier {
 
   String _nomeCassa = '';
   String _sede = '';
-  bool _turnoObbligatorio = true;
+  bool _turnoObbligatorio = false;
   String _posIdentifier = '';
   bool _initialized = false;
 
@@ -55,14 +55,15 @@ class CassaSettings extends ChangeNotifier {
   /// Indica se l'identificativo e' stato generato dall'app o impostato
   /// manualmente dall'esercente.
   /// Whether the identifier was generated or set by the merchant.
-  bool get posIdentifierIsGenerated => _posIdentifier.startsWith('$_identifierPrefix-');
+  bool get posIdentifierIsGenerated =>
+      _posIdentifier.startsWith('$_identifierPrefix-');
 
   Future<void> init({bool force = false}) async {
     if (_initialized && !force) return;
     final prefs = await SharedPreferences.getInstance();
     _nomeCassa = (prefs.getString(_nomeCassaKey) ?? '').trim();
     _sede = (prefs.getString(_sedeKey) ?? '').trim();
-    _turnoObbligatorio = prefs.getBool(_turnoObbligatorioKey) ?? true;
+    _turnoObbligatorio = prefs.getBool(_turnoObbligatorioKey) ?? false;
     _posIdentifier = (prefs.getString(_posIdentifierKey) ?? '').trim();
     // Genera l'identificativo al primo avvio, così l'esercente non deve
     // inventarlo e l'app ha subito un valore da abbinare nel portale.

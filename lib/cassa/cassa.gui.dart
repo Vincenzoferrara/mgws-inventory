@@ -58,15 +58,21 @@ class CassaPageState extends State<CassaPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-            context.l10n.cassaEtichettaOperatore(
-              '${_controller.operatoreLabel}',
-            ),
-          ),
+                context.l10n.cassaEtichettaOperatore(
+                  '${_controller.operatoreLabel}',
+                ),
+              ),
               Text(
-            context.l10n.cassaEtichettaCassa('${_controller.cassaCorrenteLabel}'),
-          ),
+                context.l10n.cassaEtichettaCassa(
+                  '${_controller.cassaCorrenteLabel}',
+                ),
+              ),
               if (_controller.sedeCorrenteLabel.isNotEmpty)
-                Text(context.l10n.cassaEtichettaSede('${_controller.sedeCorrenteLabel}')),
+                Text(
+                  context.l10n.cassaEtichettaSede(
+                    '${_controller.sedeCorrenteLabel}',
+                  ),
+                ),
               const SizedBox(height: 16),
               TextField(
                 controller: fondoController,
@@ -140,7 +146,11 @@ class CassaPageState extends State<CassaPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(context.l10n.cassaEtichettaTurno('${turno.id}')),
-                Text(context.l10n.cassaEtichettaOperatore('${turno.operatoreLabel}')),
+                Text(
+                  context.l10n.cassaEtichettaOperatore(
+                    '${turno.operatoreLabel}',
+                  ),
+                ),
                 Text(
                   'Fondo iniziale: €${turno.fondoIniziale.toStringAsFixed(2)}',
                 ),
@@ -243,9 +253,9 @@ class CassaPageState extends State<CassaPage>
             color: Theme.of(context).cardColor,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Row(
-                children: [
-                  SegmentedButton<bool>(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final selector = SegmentedButton<bool>(
                     segments: [
                       ButtonSegment<bool>(
                         value: false,
@@ -261,78 +271,22 @@ class CassaPageState extends State<CassaPage>
                     selected: {_mostraStorico},
                     onSelectionChanged: (s) =>
                         setState(() => _mostraStorico = s.first),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Wrap(
-                      alignment: WrapAlignment.end,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 260),
-                          child: Text(
-                            'Operatore: ${_controller.operatoreLabel}'
-                            '${cassaSettings.hasCassa ? ' · ${cassaSettings.nomeCassa}' : ''}'
-                            '${cassaSettings.hasSede ? ' · ${cassaSettings.sede}' : ''}',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 170),
-                          child: Tooltip(
-                            message: cassaSettings.turnoObbligatorio
-                                ? _controller.turnoLabel
-                                : 'Turno cassa non obbligatorio',
-                            child: Chip(
-                              avatar: Icon(
-                                !cassaSettings.turnoObbligatorio
-                                    ? Icons.lock_open_outlined
-                                    : _controller.hasTurnoAperto
-                                    ? Icons.lock_open
-                                    : Icons.lock_outline,
-                                size: 16,
-                              ),
-                              label: Text(
-                                cassaSettings.turnoObbligatorio
-                                    ? _controller.turnoBreve
-                                    : 'Turno opzionale',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        ),
-                        FilledButton.tonalIcon(
-                          onPressed: _controller.hasTurnoAperto
-                              ? _dialogChiudiTurno
-                              : _dialogApriTurno,
-                          icon: Icon(
-                            _controller.hasTurnoAperto
-                                ? Icons.lock
-                                : Icons.lock_open,
-                          ),
-                          label: Text(
-                            _controller.hasTurnoAperto
-                                ? 'Chiudi turno'
-                                : 'Apri turno',
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: context.l10n.cassaRileggiOperatore,
-                          icon: const Icon(Icons.refresh, size: 18),
-                          onPressed: () async {
-                            await _controller.risolviOperatoreDaLogin(
-                              force: true,
-                            );
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  );
+                  final actions = _buildCashierHeaderActions();
+                  if (constraints.maxWidth < 600) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [selector, const SizedBox(height: 8), actions],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      selector,
+                      const SizedBox(width: 12),
+                      Expanded(child: actions),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -397,27 +351,108 @@ class CassaPageState extends State<CassaPage>
   Widget _buildMobileLayout() {
     return Column(
       children: [
-        // Ricerca prodotti
         Expanded(
-          flex: 2,
           child: _LatoSinistroWidget(
             controller: _controller,
             searchController: _searchController,
             onStateChanged: _updateState,
           ),
         ),
-
-        Divider(height: 1, color: Theme.of(context).dividerColor),
-
-        // Scontrino (collapsible)
-        Expanded(
-          flex: 1,
-          child: _LatoDestroWidget(
-            controller: _controller,
-            onStateChanged: _updateState,
-          ),
+        _MobileCheckoutBar(
+          controller: _controller,
+          onStateChanged: _updateState,
+          onOpenOptions: _showMobileCheckoutOptions,
         ),
       ],
+    );
+  }
+
+  Widget _buildCashierHeaderActions() {
+    return Wrap(
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 6,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 260),
+          child: Text(
+            'Operatore: ${_controller.operatoreLabel}'
+            '${cassaSettings.hasCassa ? ' · ${cassaSettings.nomeCassa}' : ''}'
+            '${cassaSettings.hasSede ? ' · ${cassaSettings.sede}' : ''}',
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12),
+          ),
+        ),
+        if (cassaSettings.turnoObbligatorio) ...[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 170),
+            child: Tooltip(
+              message: _controller.turnoLabel,
+              child: Chip(
+                avatar: Icon(
+                  _controller.hasTurnoAperto
+                      ? Icons.lock_open
+                      : Icons.lock_outline,
+                  size: 16,
+                ),
+                label: Text(
+                  _controller.turnoBreve,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+          FilledButton.tonalIcon(
+            onPressed: _controller.hasTurnoAperto
+                ? _dialogChiudiTurno
+                : _dialogApriTurno,
+            icon: Icon(
+              _controller.hasTurnoAperto ? Icons.lock : Icons.lock_open,
+            ),
+            label: Text(
+              _controller.hasTurnoAperto ? 'Chiudi turno' : 'Apri turno',
+            ),
+          ),
+        ],
+        IconButton(
+          tooltip: context.l10n.cassaRileggiOperatore,
+          icon: const Icon(Icons.refresh, size: 18),
+          onPressed: () async {
+            await _controller.risolviOperatoreDaLogin(force: true);
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showMobileCheckoutOptions() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: FractionallySizedBox(
+            heightFactor: 0.82,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + 16,
+              ),
+              child: _LatoDestroWidget(
+                controller: _controller,
+                onStateChanged: () {
+                  _updateState();
+                  setSheetState(() {});
+                },
+                showHeader: false,
+                showTotals: false,
+                fillAvailableSpace: false,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -614,81 +649,72 @@ class _LatoSinistroWidget extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Campo barcode + pulsanti
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: searchController,
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        hintText: context.l10n.inventoryHintInserisciOscansionaBarcode,
-                        hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.qr_code,
-                          color: Colors.white,
-                        ),
-                        suffixIcon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              tooltip: context.l10n.cassaAggiungiBarcode,
-                              icon: const Icon(
-                                Icons.add_shopping_cart,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => _aggiungiBarcodeDiretto(context),
-                            ),
-                            IconButton(
-                              tooltip: context.l10n.cassaCancellaBarcode,
-                              icon: const Icon(
-                                Icons.clear,
-                                color: Colors.white,
-                              ),
-                              onPressed: () => searchController.clear(),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.qr_code_scanner,
-                                color: Colors.white,
-                              ),
-                              onPressed: () async {
-                                // Apri lo scanner
-                                final String? scannedCode =
-                                    await showBarcodeScanner(context);
-
-                                if (scannedCode != null &&
-                                    scannedCode.isNotEmpty) {
-                                  searchController.text = scannedCode;
-                                  await _aggiungiBarcodeDiretto(context);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.2),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final barcodeField = TextField(
+                    controller: searchController,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: InputDecoration(
+                      hintText:
+                          context.l10n.inventoryHintInserisciOscansionaBarcode,
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
-                      onSubmitted: (_) => _aggiungiBarcodeDiretto(context),
+                      prefixIcon: const Icon(
+                        Icons.qr_code,
+                        color: Colors.white,
+                      ),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: context.l10n.cassaAggiungiBarcode,
+                            icon: const Icon(
+                              Icons.add_shopping_cart,
+                              color: Colors.white,
+                            ),
+                            onPressed: () => _aggiungiBarcodeDiretto(context),
+                          ),
+                          IconButton(
+                            tooltip: context.l10n.cassaCancellaBarcode,
+                            icon: const Icon(Icons.clear, color: Colors.white),
+                            onPressed: () => searchController.clear(),
+                          ),
+                          IconButton(
+                            tooltip: context.l10n.cassaScansiona,
+                            icon: const Icon(
+                              Icons.qr_code_scanner,
+                              color: Colors.white,
+                            ),
+                            onPressed: () async {
+                              final scannedCode = await showBarcodeScanner(
+                                context,
+                              );
+                              if (scannedCode != null &&
+                                  scannedCode.isNotEmpty) {
+                                searchController.text = scannedCode;
+                                await _aggiungiBarcodeDiretto(context);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  // "Aggiungi manualmente": apre il selettore prodotti
-                  // condiviso, lo stesso usato dall'inventario.
-                  FilledButton.tonalIcon(
+                    onSubmitted: (_) => _aggiungiBarcodeDiretto(context),
+                  );
+                  final manualButton = FilledButton.tonalIcon(
                     onPressed: () async {
                       final prodotti = await openProdottoPicker(context);
                       if (prodotti == null || prodotti.isEmpty) return;
@@ -702,8 +728,26 @@ class _LatoSinistroWidget extends StatelessWidget {
                     },
                     icon: const Icon(Icons.add_shopping_cart),
                     label: Text(context.l10n.cassaAggiungiManualmente),
-                  ),
-                ],
+                  );
+                  if (constraints.maxWidth < 520) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        barcodeField,
+                        const SizedBox(height: 8),
+                        manualButton,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: barcodeField),
+                      const SizedBox(width: 8),
+                      manualButton,
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -741,32 +785,61 @@ class _CarrelloScontrinoWidget extends StatelessWidget {
     final scontrino = controller.scontrinoCorrente;
 
     if (scontrino.isVuoto) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.shopping_cart_outlined,
-              size: 64,
-              color: theme.colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Carrello vuoto',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: context.colors.subtitleColor,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final isTight = constraints.maxHeight < 150;
+          final iconSize = isTight ? 36.0 : 64.0;
+          final titleStyle =
+              (isTight
+                      ? theme.textTheme.bodyMedium
+                      : theme.textTheme.titleMedium)
+                  ?.copyWith(color: context.colors.subtitleColor);
+
+          if (isTight) {
+            return Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: iconSize,
+                    color: theme.colorScheme.outline,
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(child: Text('Carrello vuoto', style: titleStyle)),
+                ],
               ),
+            );
+          }
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.shopping_cart_outlined,
+                  size: iconSize,
+                  color: theme.colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                Text('Carrello vuoto', style: titleStyle),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'Aggiungi prodotti con barcode, QR o selezione manuale',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: context.colors.subtitleColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Aggiungi prodotti con barcode, QR o selezione manuale',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: context.colors.subtitleColor,
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       );
     }
 
@@ -786,14 +859,143 @@ class _CarrelloScontrinoWidget extends StatelessWidget {
   }
 }
 
+class _MobileCheckoutBar extends StatelessWidget {
+  final CassaController controller;
+  final VoidCallback onStateChanged;
+  final VoidCallback onOpenOptions;
+
+  const _MobileCheckoutBar({
+    required this.controller,
+    required this.onStateChanged,
+    required this.onOpenOptions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final customColors = theme.extension<AppColorExtension>()!;
+    final receipt = controller.scontrinoCorrente;
+    final actions = _LatoDestroWidget(
+      controller: controller,
+      onStateChanged: onStateChanged,
+    );
+
+    return SafeArea(
+      top: false,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(alpha: 0.18),
+              blurRadius: 12,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          context.l10n.cassaTotaleMobile,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: context.colors.subtitleColor,
+                          ),
+                        ),
+                        Text(
+                          '€${receipt.totale.toStringAsFixed(2)}',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: receipt.totale < 0
+                                ? customColors.errorColorStatus
+                                : customColors.successColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Chip(
+                    avatar: const Icon(Icons.shopping_cart_outlined, size: 16),
+                    label: Text('${receipt.numeroArticoli}'),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filledTonal(
+                    tooltip: context.l10n.cassaOpzioniMobile,
+                    onPressed: onOpenOptions,
+                    icon: const Icon(Icons.tune),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  IconButton.outlined(
+                    tooltip: context.l10n.cassaSvuotaCarrello,
+                    onPressed: receipt.isVuoto
+                        ? null
+                        : () => actions._confermaVuotaCarrello(
+                            context,
+                            controller,
+                            onStateChanged,
+                          ),
+                    color: customColors.errorColorStatus,
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: receipt.isVuoto
+                          ? null
+                          : () => actions._confermaPagamento(
+                              context,
+                              controller,
+                              onStateChanged,
+                            ),
+                      icon: const Icon(Icons.payment),
+                      label: Text(
+                        context.l10n.cassaPaga,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: customColors.successColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Widget lato destro - Scontrino
 class _LatoDestroWidget extends StatelessWidget {
   final CassaController controller;
   final VoidCallback onStateChanged;
+  final bool showHeader;
+  final bool showTotals;
+  final bool fillAvailableSpace;
 
   const _LatoDestroWidget({
     required this.controller,
     required this.onStateChanged,
+    this.showHeader = true,
+    this.showTotals = true,
+    this.fillAvailableSpace = true,
   });
 
   @override
@@ -803,65 +1005,67 @@ class _LatoDestroWidget extends StatelessWidget {
     final scontrino = controller.scontrinoCorrente;
 
     return Column(
+      mainAxisSize: fillAvailableSpace ? MainAxisSize.max : MainAxisSize.min,
       children: [
         // Header scontrino
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                customColors.headerGradientStart,
-                customColors.headerGradientEnd,
+        if (showHeader)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  customColors.headerGradientStart,
+                  customColors.headerGradientEnd,
+                ],
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.receipt_long, color: Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SCONTRINO',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '#${scontrino.id.substring(scontrino.id.length - 6)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Badge numero articoli
+                if (!scontrino.isVuoto)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${scontrino.numeroArticoli}',
+                      style: TextStyle(
+                        color: theme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          child: Row(
-            children: [
-              const Icon(Icons.receipt_long, color: Colors.white, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'SCONTRINO',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '#${scontrino.id.substring(scontrino.id.length - 6)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Badge numero articoli
-              if (!scontrino.isVuoto)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '${scontrino.numeroArticoli}',
-                    style: TextStyle(
-                      color: theme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
 
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -901,7 +1105,7 @@ class _LatoDestroWidget extends StatelessWidget {
         ),
 
         // Spazio riepilogo: la lista carrello è mostrata nel lato sinistro.
-        const Expanded(child: SizedBox.shrink()),
+        if (fillAvailableSpace) const Expanded(child: SizedBox.shrink()),
 
         // Sezione cliente (TODO: solo UI)
         if (!scontrino.isVuoto) ...[
@@ -1068,149 +1272,149 @@ class _LatoDestroWidget extends StatelessWidget {
         ],
 
         // Totali e azioni
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Subtotale
-              _RigaTotale(
-                label: 'Vendite:',
-                valore: '€${scontrino.totaleVendite.toStringAsFixed(2)}',
-              ),
-
-              if (scontrino.totaleResi > 0)
+        if (showTotals)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Subtotale
                 _RigaTotale(
-                  label: 'Resi:',
-                  valore: '-€${scontrino.totaleResi.toStringAsFixed(2)}',
-                  colore: customColors.errorColorStatus,
+                  label: 'Vendite:',
+                  valore: '€${scontrino.totaleVendite.toStringAsFixed(2)}',
                 ),
 
-              _RigaTotale(
-                label: 'Subtotale netto:',
-                valore: '€${scontrino.subtotale.toStringAsFixed(2)}',
-              ),
-
-              // Sconto fisso (se presente)
-              if (scontrino.sconto > 0)
-                _RigaTotale(
-                  label: 'Sconto:',
-                  valore: '-€${scontrino.sconto.toStringAsFixed(2)}',
-                  colore: customColors.errorColorStatus,
-                ),
-
-              // Sconto percentuale (se presente)
-              if (scontrino.scontoPercentuale > 0)
-                _RigaTotale(
-                  label:
-                      'Sconto ${scontrino.scontoPercentuale.toStringAsFixed(0)}%:',
-                  valore:
-                      '-€${(scontrino.subtotale * scontrino.scontoPercentuale / 100).toStringAsFixed(2)}',
-                  colore: customColors.errorColorStatus,
-                ),
-
-              // Coupon (se presente)
-              if (scontrino.couponSconto > 0)
-                _RigaTotale(
-                  label: 'Coupon (${scontrino.couponCode}):',
-                  valore: '-€${scontrino.couponSconto.toStringAsFixed(2)}',
-                  colore: customColors.errorColorStatus,
-                ),
-
-              // IVA (scorporata)
-              if (scontrino.iva > 0)
-                _RigaTotale(
-                  label: 'IVA (${scontrino.aliquotaIva.toStringAsFixed(0)}%):',
-                  valore: '€${scontrino.iva.toStringAsFixed(2)}',
-                ),
-
-              const Divider(height: 24, thickness: 2),
-
-              // TOTALE
-              _RigaTotale(
-                label: scontrino.totale < 0 ? 'RIMBORSO:' : 'TOTALE:',
-                valore: '€${scontrino.totale.toStringAsFixed(2)}',
-                isGrande: true,
-                colore: scontrino.totale < 0
-                    ? (customColors.errorColorStatus)
-                    : (customColors.successColor),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Bottoni azione
-              Row(
-                children: [
-                  // Bottone Svuota
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: scontrino.isVuoto
-                          ? null
-                          : () {
-                              _confermaVuotaCarrello(
-                                context,
-                                controller,
-                                onStateChanged,
-                              );
-                            },
-                      icon: const Icon(Icons.delete_outline),
-                      label: Text(context.l10n.reportSvuota),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor:
-                            customColors.errorColorStatus,
-                        side: BorderSide(
-                          color: customColors.errorColorStatus,
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
+                if (scontrino.totaleResi > 0)
+                  _RigaTotale(
+                    label: 'Resi:',
+                    valore: '-€${scontrino.totaleResi.toStringAsFixed(2)}',
+                    colore: customColors.errorColorStatus,
                   ),
 
-                  const SizedBox(width: 12),
+                _RigaTotale(
+                  label: 'Subtotale netto:',
+                  valore: '€${scontrino.subtotale.toStringAsFixed(2)}',
+                ),
 
-                  // Bottone Paga
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: scontrino.isVuoto
-                          ? null
-                          : () {
-                              _confermaPagamento(
-                                context,
-                                controller,
-                                onStateChanged,
-                              );
-                            },
-                      icon: const Icon(Icons.payment, size: 24),
-                      label: const Text(
-                        'PAGA',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                // Sconto fisso (se presente)
+                if (scontrino.sconto > 0)
+                  _RigaTotale(
+                    label: 'Sconto:',
+                    valore: '-€${scontrino.sconto.toStringAsFixed(2)}',
+                    colore: customColors.errorColorStatus,
+                  ),
+
+                // Sconto percentuale (se presente)
+                if (scontrino.scontoPercentuale > 0)
+                  _RigaTotale(
+                    label:
+                        'Sconto ${scontrino.scontoPercentuale.toStringAsFixed(0)}%:',
+                    valore:
+                        '-€${(scontrino.subtotale * scontrino.scontoPercentuale / 100).toStringAsFixed(2)}',
+                    colore: customColors.errorColorStatus,
+                  ),
+
+                // Coupon (se presente)
+                if (scontrino.couponSconto > 0)
+                  _RigaTotale(
+                    label: 'Coupon (${scontrino.couponCode}):',
+                    valore: '-€${scontrino.couponSconto.toStringAsFixed(2)}',
+                    colore: customColors.errorColorStatus,
+                  ),
+
+                // IVA (scorporata)
+                if (scontrino.iva > 0)
+                  _RigaTotale(
+                    label:
+                        'IVA (${scontrino.aliquotaIva.toStringAsFixed(0)}%):',
+                    valore: '€${scontrino.iva.toStringAsFixed(2)}',
+                  ),
+
+                const Divider(height: 24, thickness: 2),
+
+                // TOTALE
+                _RigaTotale(
+                  label: scontrino.totale < 0 ? 'RIMBORSO:' : 'TOTALE:',
+                  valore: '€${scontrino.totale.toStringAsFixed(2)}',
+                  isGrande: true,
+                  colore: scontrino.totale < 0
+                      ? (customColors.errorColorStatus)
+                      : (customColors.successColor),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Bottoni azione
+                Row(
+                  children: [
+                    // Bottone Svuota
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: scontrino.isVuoto
+                            ? null
+                            : () {
+                                _confermaVuotaCarrello(
+                                  context,
+                                  controller,
+                                  onStateChanged,
+                                );
+                              },
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text(context.l10n.reportSvuota),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: customColors.errorColorStatus,
+                          side: BorderSide(
+                            color: customColors.errorColorStatus,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            customColors.successColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Bottone Paga
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: scontrino.isVuoto
+                            ? null
+                            : () {
+                                _confermaPagamento(
+                                  context,
+                                  controller,
+                                  onStateChanged,
+                                );
+                              },
+                        icon: const Icon(Icons.payment, size: 24),
+                        label: const Text(
+                          'PAGA',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: customColors.successColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -1396,7 +1600,9 @@ class _LatoDestroWidget extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
-          final customColors = Theme.of(context).extension<AppColorExtension>()!;
+          final customColors = Theme.of(
+            context,
+          ).extension<AppColorExtension>()!;
 
           return AlertDialog(
             title: Text(dialogTitle),
@@ -1410,8 +1616,7 @@ class _LatoDestroWidget extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: (customColors.successColor)
-                          .withValues(alpha: 0.1),
+                      color: (customColors.successColor).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -1461,8 +1666,7 @@ class _LatoDestroWidget extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.attach_money,
-                                  color:
-                                      customColors.successColor,
+                                  color: customColors.successColor,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(context.l10n.cassaContanti),
@@ -1538,8 +1742,9 @@ class _LatoDestroWidget extends StatelessWidget {
                         ActionChip(
                           label: Text('€${totale.toStringAsFixed(2)}'),
                           avatar: const Icon(Icons.check, size: 16),
-                          backgroundColor: customColors.successColor
-                              .withValues(alpha: 0.2),
+                          backgroundColor: customColors.successColor.withValues(
+                            alpha: 0.2,
+                          ),
                           onPressed: () {
                             setState(() {
                               importoRicevuto = totale;
@@ -1861,8 +2066,10 @@ class _LatoDestroWidget extends StatelessWidget {
                   leading: const Icon(Icons.receipt),
                   title: Text('€${scontrino.totale.toStringAsFixed(2)}'),
                   subtitle: Text(
-          context.l10n.cassaNumeroArticoli('${scontrino.numeroArticoli}'),
-        ),
+                    context.l10n.cassaNumeroArticoli(
+                      '${scontrino.numeroArticoli}',
+                    ),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -2056,7 +2263,8 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                               return Container(
                                 width: 48,
                                 height: 48,
-                                color: theme.colorScheme.surfaceContainerHighest,
+                                color:
+                                    theme.colorScheme.surfaceContainerHighest,
                                 child: const Icon(
                                   Icons.image_not_supported,
                                   size: 24,
@@ -2092,9 +2300,9 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color:
-                                  (customColors.errorColorStatus)
-                                      .withValues(alpha: 0.12),
+                              color: (customColors.errorColorStatus).withValues(
+                                alpha: 0.12,
+                              ),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
@@ -2236,8 +2444,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                             child: Icon(
                               Icons.delete_outline,
                               size: 20,
-                              color:
-                                  customColors.errorColorStatus,
+                              color: customColors.errorColorStatus,
                             ),
                           );
                         },

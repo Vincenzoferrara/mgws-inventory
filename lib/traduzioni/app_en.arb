@@ -4597,6 +4597,18 @@
   "@cassaAggiungiManualmente": {
     "description": "Localized string cassaAggiungiManualmente"
   },
+  "cassaTotaleMobile": "Total",
+  "@cassaTotaleMobile": {
+    "description": "Label for the checkout total in the mobile POS bar"
+  },
+  "cassaOpzioniMobile": "Checkout options",
+  "@cassaOpzioniMobile": {
+    "description": "Tooltip for the button that opens mobile POS options"
+  },
+  "cassaPaga": "Pay",
+  "@cassaPaga": {
+    "description": "Payment button label in the POS"
+  },
   "cassaApplica": "Apply",
   "@cassaApplica": {
     "description": "Localized string cassaApplica"
