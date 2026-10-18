@@ -15,6 +15,10 @@ import '../../login/jwt_api/woo_connect.dart';
 import '../../login/jwt_api/jwt_connect.dart';
 import '../../log_viewer/app_logger.dart';
 import '../../traduzioni/estensioni.dart';
+import '../../inventory/inventory_movement_key.code.dart';
+import '../../inventory/inventory_rettifica.code.dart';
+import '../../login/mgws/connection/mgws_connection.dart';
+import '../../login/mgws/query/query_mgws_inventory.dart';
 
 // Re-export del layer datagrid: consumer della .code.dart accedono a
 // DataGridViewCache (pricing) e ProdottoPricingInfo senza import diretti.
@@ -53,21 +57,23 @@ extension ProductGridColumnIdX on ProductGridColumnId {
 ///
 /// Fuori dall'estensione perche' la traduzione ha bisogno delle localizzazioni,
 /// che l'enum non puo' raggiungere.
-String productGridColumnLabel(AppLocalizations l10n, ProductGridColumnId colonna) =>
-    switch (colonna) {
-      ProductGridColumnId.preview => l10n.prodottiColonnaAnteprima,
-      ProductGridColumnId.nome => l10n.prodottiColonnaNome,
-      ProductGridColumnId.sku => l10n.prodottiColonnaSkuV,
-      ProductGridColumnId.barcode => l10n.prodottiColonnaBarcodeV,
-      ProductGridColumnId.categoria => l10n.prodottiColonnaCategoria,
-      ProductGridColumnId.prezzo => l10n.prodottiColonnaPrezzo,
-      ProductGridColumnId.sconto => l10n.prodottiColonnaSconto,
-      ProductGridColumnId.disponibilita => l10n.prodottiColonnaDisponibilitaV,
-      ProductGridColumnId.quantita => l10n.prodottiColonnaQuantitaV,
-      ProductGridColumnId.varianti => l10n.prodottiColonnaVarianti,
-      ProductGridColumnId.stato => l10n.prodottiColonnaStatoV,
-      ProductGridColumnId.marca => l10n.prodottiColonnaMarca,
-    };
+String productGridColumnLabel(
+  AppLocalizations l10n,
+  ProductGridColumnId colonna,
+) => switch (colonna) {
+  ProductGridColumnId.preview => l10n.prodottiColonnaAnteprima,
+  ProductGridColumnId.nome => l10n.prodottiColonnaNome,
+  ProductGridColumnId.sku => l10n.prodottiColonnaSkuV,
+  ProductGridColumnId.barcode => l10n.prodottiColonnaBarcodeV,
+  ProductGridColumnId.categoria => l10n.prodottiColonnaCategoria,
+  ProductGridColumnId.prezzo => l10n.prodottiColonnaPrezzo,
+  ProductGridColumnId.sconto => l10n.prodottiColonnaSconto,
+  ProductGridColumnId.disponibilita => l10n.prodottiColonnaDisponibilitaV,
+  ProductGridColumnId.quantita => l10n.prodottiColonnaQuantitaV,
+  ProductGridColumnId.varianti => l10n.prodottiColonnaVarianti,
+  ProductGridColumnId.stato => l10n.prodottiColonnaStatoV,
+  ProductGridColumnId.marca => l10n.prodottiColonnaMarca,
+};
 
 const List<ProductGridColumnId> defaultProductGridColumns =
     <ProductGridColumnId>[
@@ -105,6 +111,9 @@ typedef ProductVariationLoader =
       List<AttributoVariante>? attributiProdotto,
     });
 
+typedef ProductsByIdsLoader =
+    Future<List<ProdottoGlobal>> Function(List<int> ids);
+
 typedef ProductLoadProgress = void Function(List<ProdottoGlobal> products);
 
 /// Classe per la gestione della logica dei prodotti
@@ -136,13 +145,17 @@ class ProdottiGestioneController {
   static const int prefetchWindowConcurrency = 8;
   final ProductPageLoader _productPageLoader;
   final ProductVariationLoader _variationLoader;
+  final ProductsByIdsLoader _productsByIdsLoader;
   final bool _usesPlatformVariationLoader;
 
   ProdottiGestioneController({
     ProductPageLoader? productPageLoader,
     ProductVariationLoader? variationLoader,
+    ProductsByIdsLoader? productsByIdsLoader,
   }) : _productPageLoader = productPageLoader ?? _loadProductPageFromPlatform,
        _variationLoader = variationLoader ?? _loadProductVariationsFromPlatform,
+       _productsByIdsLoader =
+           productsByIdsLoader ?? _loadProductsByIdsFromPlatform,
        _usesPlatformVariationLoader = variationLoader == null {
     _activeInstances++;
   }
@@ -157,6 +170,13 @@ class ProdottiGestioneController {
       perPage: perPage,
       includeAllStatus: includeAllStatus,
     );
+    return List<ProdottoGlobal>.from(result as List);
+  }
+
+  static Future<List<ProdottoGlobal>> _loadProductsByIdsFromPlatform(
+    List<int> ids,
+  ) async {
+    final result = await PlatformManager.prodotti.getProductsByIds(ids);
     return List<ProdottoGlobal>.from(result as List);
   }
 
@@ -363,6 +383,34 @@ class ProdottiGestioneController {
     );
   }
 
+  /// [products] with their variants: variable products whose variants are
+  /// not cached yet are downloaded first. Used to print labels.
+  Future<List<ProdottoGlobal>> productsWithVariants(
+    List<ProdottoGlobal> products,
+  ) async {
+    final missing = products
+        .where(
+          (product) =>
+              product.id != null &&
+              product.isVariabile &&
+              !product.hasVarianti &&
+              _cachedVariants(product.id!) == null,
+        )
+        .toList();
+    if (missing.isNotEmpty) {
+      await prefetchVariantiVisibili(missing, maxProdotti: missing.length);
+    }
+    return [
+      for (final product in products)
+        if (!product.hasVarianti &&
+            product.id != null &&
+            (_cachedVariants(product.id!)?.isNotEmpty ?? false))
+          product.copyWith(varianti: _cachedVariants(product.id!))
+        else
+          product,
+    ];
+  }
+
   List<VarianteProductGlobal>? _cachedVariants(int productId) {
     return DataGridViewCache.readVariants(productId, _variantsTtl);
   }
@@ -371,25 +419,83 @@ class ProdottiGestioneController {
     DataGridViewCache.removeVariants(productId);
   }
 
-  /// Applica solo varianti gia presenti in cache globale: nessuna rete qui.
-  Future<void> _caricaVariantiTuttiProdotti({int startIndex = 0}) async {
-    try {
-      for (int i = startIndex; i < _prodotti.length; i++) {
-        final prodotto = _prodotti[i];
-        final productId = prodotto.id;
-        if (productId == null) continue;
-        final cachedVariants = _cachedVariants(productId);
-        if (cachedVariants == null) continue;
-        DataGridViewCache.replaceVariants(
-          productId,
-          cachedVariants,
-          _prodotti,
-          _prodottiFiltrati,
-        );
+  /// Rimette sulle righe le varianti gia presenti in cache: nessuna rete,
+  /// nessun evento. Serve perche ogni pagina di prodotti in arrivo ricrea
+  /// la lista dalle copie appena scaricate, che non hanno varianti: senza
+  /// questo passaggio le varianti gia scaricate per le righe visibili si
+  /// staccavano a ogni pagina, e il prefetch non le riscaricava perche in
+  /// cache c'erano gia.
+  void _riattaccaVariantiDaCache(List<ProdottoGlobal> lista) {
+    for (int i = 0; i < lista.length; i++) {
+      final prodotto = lista[i];
+      final productId = prodotto.id;
+      if (productId == null || productId <= 0 || !prodotto.isVariabile) {
+        continue;
       }
-    } catch (e) {
-      log.e('❌ Errore applicazione cache varianti prodotti', e);
+      if (prodotto.varianti?.isNotEmpty ?? false) continue;
+      if (!DataGridViewCache.hasVariants(productId, _variantsTtl)) continue;
+      final cached = _cachedVariants(productId);
+      if (cached != null) lista[i] = prodotto.copyWith(varianti: cached);
     }
+  }
+
+  /// Toglie le varianti dalle righe fuori dalla pagina visibile, insieme
+  /// alla pulizia della cache: cosi la RAM resta legata alla pagina corrente
+  /// e, tornando su una pagina, le varianti vengono riscaricate fresche.
+  void staccaVariantiFuori(Set<int> keepIds) {
+    void stacca(List<ProdottoGlobal> lista) {
+      for (int i = 0; i < lista.length; i++) {
+        final prodotto = lista[i];
+        final id = prodotto.id;
+        if (id == null || keepIds.contains(id)) continue;
+        if (prodotto.varianti?.isNotEmpty ?? false) {
+          lista[i] = prodotto.copyWith(varianti: const []);
+        }
+      }
+    }
+
+    stacca(_prodotti);
+    stacca(_prodottiFiltrati);
+  }
+
+  /// Riscarica dal server i prodotti della pagina visibile e ne invalida le
+  /// varianti, cosi chi cambia pagina vede le modifiche fatte nel frattempo
+  /// da altri. Il prodotto selezionato resta fuori: potrebbe essere in
+  /// modifica. Un prodotto eliminato sul server resta in lista fino al
+  /// prossimo aggiornamento completo.
+  Future<bool> aggiornaProdottiVisibili(List<int> ids) async {
+    final selezionato = _prodottoSelezionato?.id;
+    final daAggiornare = ids
+        .where((id) => id > 0 && id != selezionato)
+        .toList();
+    if (daAggiornare.isEmpty) return false;
+
+    final List<ProdottoGlobal> freschi;
+    try {
+      freschi = await _productsByIdsLoader(daAggiornare);
+    } catch (e) {
+      log.w('Aggiornamento pagina prodotti non riuscito', e);
+      return false;
+    }
+
+    final perId = <int, ProdottoGlobal>{
+      for (final prodotto in freschi)
+        if (prodotto.id != null) prodotto.id!: prodotto,
+    };
+    for (final id in perId.keys) {
+      DataGridViewCache.removeVariants(id);
+    }
+    void sostituisci(List<ProdottoGlobal> lista) {
+      for (int i = 0; i < lista.length; i++) {
+        final fresco = perId[lista[i].id];
+        if (fresco != null) lista[i] = fresco;
+      }
+    }
+
+    sostituisci(_prodotti);
+    sostituisci(_prodottiFiltrati);
+    _publishSharedCache();
+    return true;
   }
 
   final Set<int> _prefetchVariantiInCorso = <int>{};
@@ -739,8 +845,8 @@ class ProdottiGestioneController {
               .map(
                 (f) =>
                     // nel log vanno gli slug dei campi: le etichette cambiano con la
-                // lingua e renderebbero i log non confrontabili.
-                '${f.campo.name}${_opSymbol(f.operatore)}${f.valori.join('|')}',
+                    // lingua e renderebbero i log non confrontabili.
+                    '${f.campo.name}${_opSymbol(f.operatore)}${f.valori.join('|')}',
               )
               .join(' AND ');
     log.d(
@@ -979,6 +1085,7 @@ class ProdottiGestioneController {
 
       if (!forceRefresh && _canUseSharedCache()) {
         _prodotti = DataGridViewCache.readProducts() ?? <ProdottoGlobal>[];
+        _riattaccaVariantiDaCache(_prodotti);
         _applicaFiltroEOrdinamento();
         onProgress?.call(List<ProdottoGlobal>.unmodifiable(_prodottiFiltrati));
         unawaited(_prefetchWithLimit(_prodottiFiltrati, prefetchLimit));
@@ -1002,10 +1109,9 @@ class ProdottiGestioneController {
             includeAllStatus: true,
           );
           if (chunk.isEmpty) break;
-          final chunkStart = loaded.length;
           loaded.addAll(chunk);
+          _riattaccaVariantiDaCache(loaded);
           _prodotti = List<ProdottoGlobal>.from(loaded);
-          await _caricaVariantiTuttiProdotti(startIndex: chunkStart);
           _applicaFiltroEOrdinamento();
           onProgress?.call(
             List<ProdottoGlobal>.unmodifiable(_prodottiFiltrati),
@@ -1022,6 +1128,7 @@ class ProdottiGestioneController {
       }
 
       if (loaded.isNotEmpty) {
+        _riattaccaVariantiDaCache(loaded);
         _prodotti = List<ProdottoGlobal>.from(loaded);
         log.i('✅ Caricati ${_prodotti.length} prodotti da WooCommerce');
         if (partial) {
@@ -1822,6 +1929,143 @@ class ProdottiGestioneController {
     );
   }
 
+  /// Deletes [variants] of the product [productId].
+  ///
+  /// Each variant is first brought to 0 on MGWS, on every site that holds
+  /// pieces, with a stock movement explained by [stockReason]; all the
+  /// variants of one deletion share one movement. Only then the variant is
+  /// deleted from WooCommerce, for good (`force: true`, variations have no
+  /// trash). When MGWS is unavailable or refuses the movement, the variant is
+  /// not deleted: a variant left in place is better than stock with no
+  /// product. The product and the other variants stay; the cache and the shown
+  /// product lose the deleted ones.
+  Future<VariantDeleteResult> deleteVariants({
+    required int productId,
+    required List<VarianteProductGlobal> variants,
+    required String stockReason,
+    MgwsInventoryGateway? inventory,
+  }) async {
+    final deletedIds = <int>{};
+    var failed = 0;
+    var stockNotZeroed = 0;
+    if (!await MgwsConnection.instance.ensureConnected()) {
+      return VariantDeleteResult(
+        deleted: 0,
+        failed: variants.length,
+        stockNotZeroed: variants.length,
+      );
+    }
+    final gateway = inventory ?? QueryMgwsInventory();
+    final movementKey = newInventoryMovementKey();
+    for (final variant in variants) {
+      final zeroed = await _zeroVariantStock(
+        gateway: gateway,
+        productId: productId,
+        variationId: variant.id,
+        reason: stockReason,
+        movementKey: movementKey,
+      );
+      if (!zeroed) {
+        failed++;
+        stockNotZeroed++;
+        continue;
+      }
+      try {
+        final deleted = await PlatformManager.varianti.deleteVariation(
+          productId: productId,
+          variationId: variant.id,
+          force: true,
+        );
+        if (deleted == true) {
+          deletedIds.add(variant.id);
+        } else {
+          failed++;
+        }
+      } catch (error) {
+        failed++;
+        log.e('❌ Errore eliminazione variante ${variant.id}', error);
+      }
+    }
+
+    if (deletedIds.isNotEmpty) {
+      final productIndex = _prodotti.indexWhere((p) => p.id == productId);
+      if (productIndex >= 0) {
+        final remaining = (_prodotti[productIndex].varianti ??
+                const <VarianteProductGlobal>[])
+            .where((variant) => !deletedIds.contains(variant.id))
+            .toList();
+        DataGridViewCache.replaceVariants(
+          productId,
+          remaining,
+          _prodotti,
+          _prodottiFiltrati,
+        );
+        if (_prodottoSelezionato?.id == productId) {
+          _prodottoSelezionato = _prodotti[productIndex];
+          if (deletedIds.contains(_varianteSelezionata?.id)) {
+            _varianteSelezionata = null;
+          }
+          _applicaFiltriVarianti();
+        }
+      } else {
+        _removeVariantsFromCache(productId);
+      }
+      _markSharedDirty();
+    }
+    return VariantDeleteResult(
+      deleted: deletedIds.length,
+      failed: failed,
+      stockNotZeroed: stockNotZeroed,
+    );
+  }
+
+  /// Rewrites to 0 the MGWS total of one variant on every site holding
+  /// pieces. True when nothing is left in stock.
+  Future<bool> _zeroVariantStock({
+    required MgwsInventoryGateway gateway,
+    required int productId,
+    required int variationId,
+    required String reason,
+    required String movementKey,
+  }) async {
+    try {
+      final snapshot = InventoryStockSnapshot.fromRecord(
+        await gateway.getProductStock(productId, variationId: variationId),
+      );
+      final piecesBySite = <int, int>{};
+      for (final level in snapshot?.levels ?? const <InventoryStockLevel>[]) {
+        piecesBySite[level.siteId] = (piecesBySite[level.siteId] ?? 0) + level.qty;
+      }
+      // A total without per-site detail still has to go: on a single-site
+      // shop site 0 stands for the only site.
+      if (piecesBySite.isEmpty && (snapshot?.currentStock ?? 0) != 0) {
+        piecesBySite[0] = snapshot!.currentStock;
+      }
+      for (final entry in piecesBySite.entries) {
+        if (entry.value == 0) continue;
+        final result = await gateway.reconcileStock(
+          productId: productId,
+          variationId: variationId,
+          correctStock: 0,
+          siteId: entry.key,
+          reason: reason,
+          movementKey: movementKey,
+        );
+        if (!result.success || result.errors.isNotEmpty) {
+          log.w(
+            '⚠️ Stock MGWS della variante $variationId non azzerato '
+            '(sede ${entry.key}): ${result.message}',
+          );
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
+      log.e('❌ Azzeramento stock MGWS variante $variationId fallito', error);
+      return false;
+    }
+  }
+
   Future<QuickVariantSaveResult> saveVariantQuickEdits({
     required int productId,
     required Map<int, QuickVariantEdit> edits,
@@ -1912,6 +2156,20 @@ class BulkCategoryUpdateResult {
     required this.successCount,
     required this.failedCount,
     required this.message,
+  });
+}
+
+class VariantDeleteResult {
+  final int deleted;
+  final int failed;
+
+  /// Variants kept because their MGWS stock could not be brought to 0.
+  final int stockNotZeroed;
+
+  const VariantDeleteResult({
+    required this.deleted,
+    required this.failed,
+    this.stockNotZeroed = 0,
   });
 }
 

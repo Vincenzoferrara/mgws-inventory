@@ -11,6 +11,8 @@ import '../../reuse_class/class_formtter.dart';
 import '../prodotti_crea/prodotti_crea.gui.dart';
 import 'prodotti_gestisci.code.dart';
 import '../../traduzioni/estensioni.dart';
+import '../../home/home_section_requests.dart';
+import '../../report/print_job.dart';
 
 const double _kDetailGap = 16;
 const double _kDetailCardRadius = 18;
@@ -224,6 +226,10 @@ class ProdottoDettagliView extends StatefulWidget {
   final bool showCloseButton;
   final VoidCallback? onProductDeleted;
   final VoidCallback? onVariantDeleted;
+
+  /// Called after the variants actions bar changed or deleted variants, so
+  /// the page shows the updated product.
+  final VoidCallback? onVariantsChanged;
   final bool requiresDeleteConfirmation;
   final ProdottiGestioneController? controller;
   final bool modalitaSelezioneCassa;
@@ -248,6 +254,7 @@ class ProdottoDettagliView extends StatefulWidget {
     this.showCloseButton = false,
     this.onProductDeleted,
     this.onVariantDeleted,
+    this.onVariantsChanged,
     this.requiresDeleteConfirmation = true,
     this.controller,
     this.modalitaSelezioneCassa = false,
@@ -272,6 +279,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
   Map<String, String> _filtriVariantiAttivi = <String, String>{};
   List<VarianteProductGlobal> _variantiFiltrate = <VarianteProductGlobal>[];
   Set<int> _variantiSelezionateCassa = <int>{};
+
+  /// Variants ticked in the variants list (outside the till picker): the
+  /// variant actions bar works on these only.
+  Set<int> _checkedVariantIds = <int>{};
   bool _filtraSoloInStock = false;
   bool _isEditMode = false;
   bool _isSaving = false;
@@ -315,6 +326,15 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
   @override
   void didUpdateWidget(covariant ProdottoDettagliView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.prodotto.id != widget.prodotto.id) {
+      _checkedVariantIds = <int>{};
+    } else {
+      // A reload may have removed variants: keep only the ones still there.
+      final existing = (widget.prodotto.varianti ?? const <VarianteProductGlobal>[])
+          .map((variant) => variant.id)
+          .toSet();
+      _checkedVariantIds = _checkedVariantIds.where(existing.contains).toSet();
+    }
     if (!identical(oldWidget.prodotto, widget.prodotto) ||
         oldWidget.prodotto.id != widget.prodotto.id ||
         oldWidget.varianteSelezionata?.id != widget.varianteSelezionata?.id) {
@@ -726,6 +746,146 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
     widget.onVarianteCassaChecked?.call(variante, selected);
   }
 
+  void _toggleCheckedVariant(VarianteProductGlobal variante, bool selected) {
+    setState(() {
+      if (selected) {
+        _checkedVariantIds.add(variante.id);
+      } else {
+        _checkedVariantIds.remove(variante.id);
+      }
+    });
+  }
+
+  List<VarianteProductGlobal> get _checkedVariants =>
+      (widget.prodotto.varianti ?? const <VarianteProductGlobal>[])
+          .where((variant) => _checkedVariantIds.contains(variant.id))
+          .toList();
+
+  /// Opens "Templates and print" on the ticked variants only.
+  void _printCheckedVariants() {
+    final job = PrintJob.fromProducts([
+      widget.prodotto.copyWith(varianti: _checkedVariants),
+    ]);
+    if (job.items.isEmpty) {
+      NotificationService.instance.messageBar(
+        'warning',
+        'prodotti_gestisci',
+        context.l10n.productsPrintLabelsNoStock,
+      );
+      return;
+    }
+    pendingPrintJob.value = job;
+    requestHomeSection(printSectionId);
+  }
+
+  /// Changes price, sale price or quantity of every ticked variant at once.
+  Future<void> _bulkEditCheckedVariants() async {
+    final controller = _controller;
+    final productId = widget.prodotto.id;
+    if (controller == null || productId == null) return;
+    final l10n = context.l10n;
+    final variants = _checkedVariants;
+    final change = await showDialog<_VariantBulkChange>(
+      context: context,
+      builder: (_) => _VariantBulkEditDialog(count: variants.length),
+    );
+    if (change == null || !mounted) return;
+    final edits = <int, QuickVariantEdit>{
+      for (final variant in variants)
+        variant.id: QuickVariantEdit(
+          nome: variant.nome,
+          attributi: variant.attributi,
+          barcodeInterno: variant.barcodeInterno,
+          prezzo: change.price ?? variant.prezzo,
+          prezzoScontato: change.salePrice ?? variant.prezzoScontato,
+          quantita: change.quantity ?? variant.quantita,
+          immagineUrl: variant.immagineUrl,
+          immaginiAggiuntive: variant.immaginiAggiuntive,
+          peso: variant.peso,
+          dimensioni: variant.dimensioni,
+          attiva: change.quantity == null ? variant.attiva : change.quantity! > 0,
+        ),
+    };
+    setState(() => _isSaving = true);
+    try {
+      final result = await controller.saveVariantQuickEdits(
+        productId: productId,
+        edits: edits,
+      );
+      NotificationService.instance.messageBar(
+        result.failed == 0 ? 'successo' : 'warning',
+        'prodotti_gestisci',
+        l10n.productsVariantsUpdated(result.updated, result.failed),
+      );
+      if (result.updated > 0) widget.onVariantsChanged?.call();
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  /// Deletes the ticked variants from WooCommerce after a confirmation.
+  Future<void> _deleteCheckedVariants() async {
+    final controller = _controller;
+    final productId = widget.prodotto.id;
+    if (controller == null || productId == null) return;
+    final l10n = context.l10n;
+    final variants = _checkedVariants;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.productsVariantsDeleteTitle),
+        content: Text(
+          l10n.productsVariantsDeleteMessage(
+            variants.length,
+            widget.prodotto.nome ?? '',
+            variants.map((variant) => variant.nomeVisualizzabile).join(', '),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: context.colors.errorColorStatus,
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _isSaving = true);
+    try {
+      final result = await controller.deleteVariants(
+        productId: productId,
+        variants: variants,
+        stockReason: l10n.productsVariantsDeleteStockReason(
+          widget.prodotto.nome ?? '',
+        ),
+      );
+      if (!mounted) return;
+      setState(() => _checkedVariantIds = <int>{});
+      NotificationService.instance.messageBar(
+        result.failed == 0 ? 'successo' : 'warning',
+        'prodotti_gestisci',
+        [
+          l10n.productsVariantsDeleted(result.deleted, result.failed),
+          if (result.stockNotZeroed > 0)
+            l10n.productsVariantsStockNotZeroed(result.stockNotZeroed),
+        ].join(' '),
+      );
+      if (result.deleted > 0) {
+        widget.onVariantDeleted?.call();
+        widget.onVariantsChanged?.call();
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   String _getCurrentImageUrl() {
     if (_varianteSelezionata?.immagineUrl != null &&
         _varianteSelezionata!.immagineUrl!.trim().isNotEmpty) {
@@ -941,12 +1101,16 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        _DettaglioHeader(
-                          onAction: _handleAction,
-                          showBulkEdit:
-                              (_controller?.selectedProductsCount ?? 0) > 1,
-                        ),
+                        // In cassa si sceglie cosa vendere: creare, modificare
+                        // o eliminare prodotti da qui sarebbe fuori posto.
+                        if (!widget.modalitaSelezioneCassa) ...[
+                          const SizedBox(width: 8),
+                          _DettaglioHeader(
+                            onAction: _handleAction,
+                            showBulkEdit:
+                                (_controller?.selectedProductsCount ?? 0) > 1,
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -1053,6 +1217,18 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                 ),
                 const SizedBox(height: _kDetailGap),
               ],
+              if (!widget.modalitaSelezioneCassa &&
+                  _checkedVariantIds.isNotEmpty) ...[
+                _VariantActionsBar(
+                  count: _checkedVariantIds.length,
+                  busy: _isSaving,
+                  onPrint: _printCheckedVariants,
+                  onBulkEdit: _controller == null ? null : _bulkEditCheckedVariants,
+                  onDelete: _controller == null ? null : _deleteCheckedVariants,
+                  onClear: () => setState(() => _checkedVariantIds = <int>{}),
+                ),
+                const SizedBox(height: _kDetailGap),
+              ],
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: _VariantsListCard(
@@ -1060,8 +1236,15 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                   selectedVarianteId: _varianteSelezionata?.id,
                   onSelect: _selezionaVariante,
                   modalitaSelezioneCassa: widget.modalitaSelezioneCassa,
-                  variantiSelezionateCassa: _variantiSelezionateCassa,
-                  onVarianteCassaChecked: _toggleVarianteCassa,
+                  // Outside the till picker the boxes choose the variants for
+                  // the actions bar.
+                  showCheckboxes: true,
+                  variantiSelezionateCassa: widget.modalitaSelezioneCassa
+                      ? _variantiSelezionateCassa
+                      : _checkedVariantIds,
+                  onVarianteCassaChecked: widget.modalitaSelezioneCassa
+                      ? _toggleVarianteCassa
+                      : _toggleCheckedVariant,
                   isEditMode: _isEditMode && !_isMultiEdit,
                   variantPriceCtrls: _variantPriceCtrls,
                   variantQtyCtrls: _variantQtyCtrls,
@@ -1777,6 +1960,10 @@ class _VariantsListCard extends StatelessWidget {
   final int? selectedVarianteId;
   final ValueChanged<VarianteProductGlobal> onSelect;
   final bool modalitaSelezioneCassa;
+
+  /// Shows a box on every variant, ticked when its id is in
+  /// [variantiSelezionateCassa].
+  final bool showCheckboxes;
   final Set<int> variantiSelezionateCassa;
   final void Function(VarianteProductGlobal variante, bool selected)?
   onVarianteCassaChecked;
@@ -1789,6 +1976,7 @@ class _VariantsListCard extends StatelessWidget {
     required this.selectedVarianteId,
     required this.onSelect,
     this.modalitaSelezioneCassa = false,
+    this.showCheckboxes = false,
     this.variantiSelezionateCassa = const <int>{},
     this.onVarianteCassaChecked,
     required this.isEditMode,
@@ -1879,7 +2067,7 @@ class _VariantsListCard extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              if (modalitaSelezioneCassa) ...[
+                              if (modalitaSelezioneCassa || showCheckboxes) ...[
                                 Checkbox(
                                   value: isCheckedForCassa,
                                   onChanged: (value) => onVarianteCassaChecked
@@ -2391,6 +2579,179 @@ class _ImagePlaceholder extends StatelessWidget {
         color: theme.primaryColor.withValues(alpha: 0.55),
         size: 36,
       ),
+    );
+  }
+}
+
+
+/// Actions on the variants ticked in the variants list.
+class _VariantActionsBar extends StatelessWidget {
+  const _VariantActionsBar({
+    required this.count,
+    required this.busy,
+    required this.onPrint,
+    required this.onBulkEdit,
+    required this.onDelete,
+    required this.onClear,
+  });
+
+  final int count;
+  final bool busy;
+  final VoidCallback onPrint;
+  final VoidCallback? onBulkEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    return _PaneCard(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            l10n.productsVariantsSelected(count),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: scheme.primary,
+            ),
+          ),
+          TextButton(
+            onPressed: busy ? null : onClear,
+            child: Text(l10n.productsVariantsClearSelection),
+          ),
+          FilledButton.tonalIcon(
+            onPressed: busy ? null : onPrint,
+            icon: const Icon(Icons.print_outlined),
+            label: Text(l10n.productsPrintLabels),
+          ),
+          OutlinedButton.icon(
+            onPressed: busy ? null : onBulkEdit,
+            icon: const Icon(Icons.edit_note_outlined),
+            label: Text(l10n.productsVariantsBulkEdit),
+          ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: context.colors.errorColorStatus,
+            ),
+            onPressed: busy ? null : onDelete,
+            icon: const Icon(Icons.delete_outline),
+            label: Text(l10n.commonDelete),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// New values for the ticked variants; null leaves the value as it is.
+class _VariantBulkChange {
+  final double? price;
+  final double? salePrice;
+  final int? quantity;
+
+  const _VariantBulkChange({this.price, this.salePrice, this.quantity});
+
+  bool get isEmpty => price == null && salePrice == null && quantity == null;
+}
+
+class _VariantBulkEditDialog extends StatefulWidget {
+  const _VariantBulkEditDialog({required this.count});
+
+  final int count;
+
+  @override
+  State<_VariantBulkEditDialog> createState() => _VariantBulkEditDialogState();
+}
+
+class _VariantBulkEditDialogState extends State<_VariantBulkEditDialog> {
+  final TextEditingController _price = TextEditingController();
+  final TextEditingController _salePrice = TextEditingController();
+  final TextEditingController _quantity = TextEditingController();
+  bool _invalid = false;
+
+  @override
+  void dispose() {
+    _price.dispose();
+    _salePrice.dispose();
+    _quantity.dispose();
+    super.dispose();
+  }
+
+  /// Empty means "unchanged"; a value that is not a valid number makes the
+  /// whole change invalid.
+  ({bool valid, double? value}) _decimal(TextEditingController field) {
+    final text = field.text.trim().replaceAll(',', '.');
+    if (text.isEmpty) return (valid: true, value: null);
+    final value = double.tryParse(text);
+    return (valid: value != null && value >= 0, value: value);
+  }
+
+  void _submit() {
+    final price = _decimal(_price);
+    final salePrice = _decimal(_salePrice);
+    final quantityText = _quantity.text.trim();
+    final quantity = quantityText.isEmpty ? null : int.tryParse(quantityText);
+    final quantityValid = quantityText.isEmpty || (quantity != null && quantity >= 0);
+    final change = _VariantBulkChange(
+      price: price.value,
+      salePrice: salePrice.value,
+      quantity: quantity,
+    );
+    if (!price.valid || !salePrice.valid || !quantityValid || change.isEmpty) {
+      setState(() => _invalid = true);
+      return;
+    }
+    Navigator.pop(context, change);
+  }
+
+  Widget _field(TextEditingController controller, String label, {bool decimal = true}) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.numberWithOptions(decimal: decimal),
+      decoration: InputDecoration(labelText: label),
+      onChanged: (_) => setState(() => _invalid = false),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(l10n.productsVariantsBulkEditTitle(widget.count)),
+      content: SizedBox(
+        width: 380,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.productsVariantsBulkEditHelp),
+            const SizedBox(height: 12),
+            _field(_price, l10n.productsVariantsBulkPrice),
+            const SizedBox(height: 8),
+            _field(_salePrice, l10n.productsVariantsBulkSalePrice),
+            const SizedBox(height: 8),
+            _field(_quantity, l10n.productsVariantsBulkQuantity, decimal: false),
+            if (_invalid) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.productsVariantsBulkInvalid,
+                style: TextStyle(color: context.colors.errorColorStatus),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l10n.productsVariantsBulkApply)),
+      ],
     );
   }
 }

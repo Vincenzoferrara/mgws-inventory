@@ -89,11 +89,15 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
   }
 
   @override
-  Future<Map<String, dynamic>> getProductStock(int productId) async {
+  Future<Map<String, dynamic>> getProductStock(
+    int productId, {
+    int variationId = 0,
+  }) async {
     if (!await _availability.ensureConnected())
       return const <String, dynamic>{};
+    final variation = variationId > 0 ? '?variation_id=$variationId' : '';
     final response = await _base.get(
-      '/wp-json/mgws/v1/inventory/stock/product/$productId',
+      '/wp-json/mgws/v1/inventory/stock/product/$productId$variation',
     );
     return parseMapResponse(response.data);
   }
@@ -158,6 +162,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     required int siteId,
     required String reason,
     String? movementKey,
+    int variationId = 0,
   }) async {
     if (!await _availability.ensureConnected()) {
       return const MgwsReconcileResult(
@@ -174,6 +179,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       '/wp-json/mgws/v1/inventory/stock/reconcile',
       data: _query({
         'product_id': productId,
+        'variation_id': variationId > 0 ? variationId : null,
         'correct_stock': correctStock,
         'site_id': siteId,
         'reason': reason,

@@ -1,6 +1,11 @@
 abstract class MgwsInventoryGateway {
   Future<bool> isInventoryServiceAvailable();
-  Future<Map<String, dynamic>> getProductStock(int productId);
+  /// Stock of a product; [variationId] reads one variant of a variable
+  /// product (0 for simple products).
+  Future<Map<String, dynamic>> getProductStock(
+    int productId, {
+    int variationId = 0,
+  });
   Future<List<Map<String, dynamic>>> getAllStock();
   Future<Map<String, dynamic>> getStatistics();
   Future<List<Map<String, dynamic>>> getLowStockItems();
@@ -24,6 +29,10 @@ abstract class MgwsInventoryGateway {
     /// Stessa chiave su tutte le righe di una rettifica: e' cio' che tiene
     /// insieme i prodotti corretti nella stessa operazione.
     String? movementKey,
+
+    /// Variant of a variable product whose total is rewritten; 0 for simple
+    /// products.
+    int variationId = 0,
   });
   Future<MgwsRfidScanResult> resolveRfidScan({required List<String> tagIds});
 

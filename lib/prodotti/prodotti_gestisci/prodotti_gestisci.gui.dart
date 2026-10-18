@@ -22,6 +22,8 @@ import '../../reuse_class/datagridview/datagridview_image_preview.dart';
 import '../../reuse_class/image_url_resolver.dart';
 import '../../log_viewer/app_logger.dart';
 import '../../traduzioni/estensioni.dart';
+import '../../home/home_section_requests.dart';
+import '../../report/print_job.dart';
 
 // ---------------------------------------------------------------------------
 // Costanti
@@ -58,7 +60,7 @@ const double _kEdgeInsetVertical = 4;
 // Enum azioni contesto
 // ---------------------------------------------------------------------------
 
-enum _ProductContextAction { crea, modifica, modificaInMassa, elimina }
+enum _ProductContextAction { crea, modifica, modificaInMassa, printLabels, elimina }
 
 // ---------------------------------------------------------------------------
 // Utility globale: viewer immagine
@@ -188,6 +190,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       ValueNotifier<ProdottoGlobal?>(null);
   final ValueNotifier<bool> _selectedProductVariantsLoading =
       ValueNotifier<bool>(false);
+
+  /// Cambia a ogni spunta della cassa. La pagina di dettaglio su telefono è
+  /// una route a parte: il setState di questa pagina non la ricostruisce,
+  /// quindi le caselle restavano ferme senza questo segnale.
+  final ValueNotifier<int> _cassaSelectionVersion = ValueNotifier<int>(0);
   final Map<int, Set<int>> _selectedCassaVariantIdsByProductId =
       <int, Set<int>>{};
 
@@ -250,8 +257,12 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   void _scheduleCacheRefresh() {
     if (_disposed) return;
-    _cacheRefreshDebounce?.cancel();
-    _cacheRefreshDebounce = Timer(const Duration(milliseconds: 500), _refresh);
+    // Throttle, non debounce: le varianti arrivano una dopo l'altra a pochi
+    // ms di distanza, e un debounce che riparte a ogni arrivo ridisegnava la
+    // griglia solo dopo l'ultima. Cosi le righe si riempiono man mano, al
+    // massimo ogni 300 ms, e l'ultimo arrivo resta coperto dal timer attivo.
+    if (_cacheRefreshDebounce?.isActive ?? false) return;
+    _cacheRefreshDebounce = Timer(const Duration(milliseconds: 300), _refresh);
   }
 
   // Pre-fetch varianti della pagina visibile (valore esatto del dropdown),
@@ -266,6 +277,10 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       _prefetchCurrentWindow,
     );
   }
+
+  /// Righe visibili all'ultimo aggiornamento dal server, per riconoscere un
+  /// vero cambio pagina dai ridisegni dovuti all'arrivo delle varianti.
+  String? _ultimaFinestraAggiornata;
 
   void _prefetchCurrentWindow() {
     if (!_alive) return;
@@ -282,26 +297,44 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     final selectedId = _controller.prodottoSelezionato?.id;
     if (selectedId is int && selectedId > 0) keepIds.add(selectedId);
     final rimossi = DataGridViewCache.pruneVariantsOutside(keepIds);
+    _controller.staccaVariantiFuori(keepIds);
+
+    // Questo metodo parte a ogni ridisegno, anche per ogni variante che
+    // arriva: il server si interroga solo quando cambia l'insieme di righe
+    // visibili (cambio pagina, filtro, ordinamento). Durante il primo
+    // caricamento i prodotti sono appena scaricati, quindi si annota solo
+    // la finestra.
+    final firma = (keepIds.toList()..sort()).join(',');
+    final finestraNuova = firma != _ultimaFinestraAggiornata;
+    _ultimaFinestraAggiornata = firma;
+    final aggiornaDalServer = finestraNuova && !_productsLoading;
+
     _cacheRefillDepth++;
     setState(() {});
     unawaited(
-      _controller
-          .prefetchVariantiVisibili(
-            items,
-            concurrency: ProdottiGestioneController.prefetchWindowConcurrency,
-          )
-          .whenComplete(() {
-            if (!_alive) return;
-            if (rimossi > 0) {
-              log.i(
-                '[perf-trace] cache finestra prune rimossi=$rimossi '
-                'keep=${keepIds.length} '
-                'rssMb=${(ProcessInfo.currentRss / (1024 * 1024)).round()}',
-              );
-            }
-            _cacheRefillDepth--;
-            setState(() {});
-          }),
+      Future<void>(() async {
+        if (aggiornaDalServer) {
+          final aggiornati = await _controller.aggiornaProdottiVisibili(
+            keepIds.toList(),
+          );
+          if (aggiornati && _alive) setState(() => _syncPagination());
+        }
+        await _controller.prefetchVariantiVisibili(
+          items,
+          concurrency: ProdottiGestioneController.prefetchWindowConcurrency,
+        );
+      }).whenComplete(() {
+        if (!_alive) return;
+        if (rimossi > 0) {
+          log.i(
+            '[perf-trace] cache finestra prune rimossi=$rimossi '
+            'keep=${keepIds.length} '
+            'rssMb=${(ProcessInfo.currentRss / (1024 * 1024)).round()}',
+          );
+        }
+        _cacheRefillDepth--;
+        setState(() {});
+      }),
     );
   }
 
@@ -316,6 +349,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     _splitViewController.dispose();
     _selectedProductNotifier.dispose();
     _selectedProductVariantsLoading.dispose();
+    _cassaSelectionVersion.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -629,8 +663,41 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         _controller.selezionaProdotto(product);
         _syncSelectedProductDisplay();
 
+      case _ProductContextAction.printLabels:
+        final selected = _controller.selectedProducts;
+        final useSelection = selected.any((entry) => entry.id == product.id);
+        await _printLabels(useSelection ? selected : [product]);
+
       case _ProductContextAction.elimina:
         await _deleteProducts(product);
+    }
+  }
+
+  /// Opens "Templates and print" on labels for [products]: one line per
+  /// variant, one label per piece in stock. Missing variants are loaded first.
+  Future<void> _printLabels(List<ProdottoGlobal> products) async {
+    if (products.isEmpty) return;
+    try {
+      final withVariants = await _controller.productsWithVariants(products);
+      final job = PrintJob.fromProducts(withVariants);
+      if (job.items.isEmpty) {
+        if (!mounted) return;
+        NotificationService.instance.messageBar(
+          'warning',
+          'prodotti',
+          context.l10n.productsPrintLabelsNoStock,
+        );
+        return;
+      }
+      pendingPrintJob.value = job;
+      requestHomeSection(printSectionId);
+    } catch (error) {
+      if (!mounted) return;
+      NotificationService.instance.messageBar(
+        'errore',
+        'prodotti',
+        context.l10n.productsPrintLabelsError(error.toString()),
+      );
     }
   }
 
@@ -734,6 +801,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       ids.remove(variante.id);
       if (ids.isEmpty) _selectedCassaVariantIdsByProductId.remove(productId);
     }
+    _cassaSelectionVersion.value++;
     setState(() {});
   }
 
@@ -750,6 +818,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         _selectedCassaSimpleProductIds.remove(productId);
       }
     });
+    _cassaSelectionVersion.value++;
   }
 
   List<ProdottoGlobal> _buildCassaSelectedProducts() {
@@ -811,6 +880,16 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         ),
       );
     }
+    actions.add(
+      DataGridViewContextAction<ProdottoGlobal>(
+        label: context.l10n.productsPrintLabels,
+        icon: Icons.print_outlined,
+        onSelected: (product) => _handleProductAction(
+          _ProductContextAction.printLabels,
+          product,
+        ),
+      ),
+    );
     actions.add(
       DataGridViewContextAction<ProdottoGlobal>(
         label: 'Elimina',
@@ -1001,6 +1080,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
                                 onReload: () =>
                                     _loadProducts(forceRefresh: true),
                                 onProductDeleted: _refresh,
+                                onVariantsChanged: _refresh,
                               );
                             },
                           )
@@ -1097,6 +1177,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
           onHideOutOfStockChanged: _setHideOutOfStockProducts,
           onRefresh: () => _loadProducts(forceRefresh: true),
           onOpenColumns: _openColumnPicker,
+          onPrintLabels: widget.modalitaCassa
+              ? null
+              : () => _printLabels(_controller.selectedProducts),
         ),
         Expanded(
           child: _ProductsGrid(
@@ -1123,38 +1206,59 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
                 ? (product) async {
                     await Navigator.of(context).push<void>(
                       MaterialPageRoute(
-                        builder: (_) => ProdottoDettagliView(
-                          prodotto: product,
-                          varianteSelezionata: _controller.varianteSelezionata,
-                          controller: _controller,
-                          modalitaSelezioneCassa: widget.modalitaCassa,
-                          variantiSelezionateCassa: _selectedCassaVariantIdsFor(
-                            product,
-                          ),
-                          onVarianteCassaChecked: (variante, selected) =>
-                              _toggleCassaVariantSelection(
-                                product,
-                                variante,
-                                selected,
-                              ),
-                          prodottoSempliceSelezionatoCassa:
-                              _selectedCassaSimpleProductIds.contains(
-                                product.id ?? -1,
-                              ),
-                          onProdottoSempliceCassaChecked: widget.modalitaCassa
-                              ? (selected) =>
-                                    _toggleCassaSimpleProductSelection(
-                                      product,
-                                      selected,
-                                    )
-                              : null,
-                          variantsLoading: false,
-                          shortcutToggleEdit: _appSettings.shortcutToggleEdit,
-                          shortcutSave: _appSettings.shortcutSave,
-                          shortcutEscape: _appSettings.shortcutEscape,
-                          showCloseButton: true,
-                          onReload: () => _loadProducts(forceRefresh: true),
-                          onProductDeleted: _refresh,
+                        // Ascolta gli stessi segnali del pannello desktop: il
+                        // prodotto arriva senza varianti e le riceve dopo il
+                        // caricamento, e le spunte della cassa cambiano qui.
+                        builder: (_) => ListenableBuilder(
+                          listenable: Listenable.merge([
+                            _selectedProductNotifier,
+                            _selectedProductVariantsLoading,
+                            _cassaSelectionVersion,
+                          ]),
+                          builder: (context, _) {
+                            final caricato = _selectedProductNotifier.value;
+                            final prodotto = caricato?.id == product.id
+                                ? caricato!
+                                : product;
+                            return ProdottoDettagliView(
+                              prodotto: prodotto,
+                              varianteSelezionata:
+                                  _controller.varianteSelezionata,
+                              controller: _controller,
+                              modalitaSelezioneCassa: widget.modalitaCassa,
+                              variantiSelezionateCassa:
+                                  _selectedCassaVariantIdsFor(prodotto),
+                              onVarianteCassaChecked: (variante, selected) =>
+                                  _toggleCassaVariantSelection(
+                                    prodotto,
+                                    variante,
+                                    selected,
+                                  ),
+                              prodottoSempliceSelezionatoCassa:
+                                  _selectedCassaSimpleProductIds.contains(
+                                    prodotto.id ?? -1,
+                                  ),
+                              onProdottoSempliceCassaChecked:
+                                  widget.modalitaCassa
+                                  ? (selected) =>
+                                        _toggleCassaSimpleProductSelection(
+                                          prodotto,
+                                          selected,
+                                        )
+                                  : null,
+                              variantsLoading:
+                                  caricato?.id == product.id &&
+                                  _selectedProductVariantsLoading.value,
+                              shortcutToggleEdit:
+                                  _appSettings.shortcutToggleEdit,
+                              shortcutSave: _appSettings.shortcutSave,
+                              shortcutEscape: _appSettings.shortcutEscape,
+                              showCloseButton: true,
+                              onReload: () => _loadProducts(forceRefresh: true),
+                              onProductDeleted: _refresh,
+                              onVariantsChanged: _refresh,
+                            );
+                          },
                         ),
                       ),
                     );
@@ -1457,15 +1561,31 @@ class _ProductsGridState extends State<_ProductsGrid> {
       onRowSelected: (product) {
         Future<void>(() => _selectProduct(product));
       },
-      onRowDoubleTap: (product) {
-        if (widget.onOpenProductDetails == null) return;
-        Future<void>(() async {
-          await _selectProduct(product);
-          await widget.onOpenProductDetails!(product);
-        });
-      },
+      onRowDoubleTap: _openDetails,
+      // Su telefono il dettaglio non ha un pannello accanto alla tabella:
+      // senza tocco singolo si aprirebbe solo con un doppio tocco, che
+      // nessuno prova. È anche l'unico modo di spuntare le varianti in cassa.
+      onRowTap: widget.onOpenProductDetails == null ? null : _openDetails,
       contextActions: widget.contextActions,
     );
+  }
+
+  bool _openingDetails = false;
+
+  void _openDetails(ProdottoGlobal product) {
+    final open = widget.onOpenProductDetails;
+    // Il doppio tocco arriva dopo il tocco singolo: senza guardia la
+    // pagina di dettaglio si aprirebbe due volte.
+    if (open == null || _openingDetails) return;
+    _openingDetails = true;
+    Future<void>(() async {
+      try {
+        await _selectProduct(product);
+        await open(product);
+      } finally {
+        _openingDetails = false;
+      }
+    });
   }
 
   @override
@@ -1765,6 +1885,9 @@ class _FiltersBar extends StatefulWidget {
   final Future<void> Function()? onRefresh;
   final VoidCallback? onOpenColumns;
 
+  /// Prints labels for the selected products; null hides the button.
+  final VoidCallback? onPrintLabels;
+
   const _FiltersBar({
     required this.controller,
     required this.selectedCount,
@@ -1772,6 +1895,7 @@ class _FiltersBar extends StatefulWidget {
     required this.onHideOutOfStockChanged,
     this.onRefresh,
     this.onOpenColumns,
+    this.onPrintLabels,
   });
 
   @override
@@ -2137,6 +2261,17 @@ class _FiltersBarState extends State<_FiltersBar> {
                                 tooltip: context.l10n.prodottiAggiornaCache,
                                 color: theme.colorScheme.secondary,
                               ),
+                              if (widget.onPrintLabels != null)
+                                _CommandIconButton(
+                                  onPressed: widget.selectedCount == 0
+                                      ? null
+                                      : widget.onPrintLabels,
+                                  icon: Icons.print_outlined,
+                                  tooltip: widget.selectedCount == 0
+                                      ? context.l10n.productsPrintLabelsSelect
+                                      : context.l10n.productsPrintLabels,
+                                  color: theme.colorScheme.primary,
+                                ),
                             ],
                           ),
                           const SizedBox(height: _kControlGap),

@@ -43,6 +43,25 @@ class ProductFilters {
   });
 }
 
+/// Prodotto o variante sotto la soglia scorte basse impostata sul prodotto.
+class ProdottoSottoScorta {
+  const ProdottoSottoScorta({
+    required this.id,
+    required this.parentId,
+    required this.nome,
+    required this.giacenza,
+    required this.soglia,
+  });
+
+  final int id;
+
+  /// Prodotto padre per le varianti, 0 per i prodotti semplici.
+  final int parentId;
+  final String nome;
+  final int giacenza;
+  final int soglia;
+}
+
 class _ResolvedProductRelations {
   final List<CategoriaProdotto>? categorie;
   final List<TagProdotto>? tag;
@@ -151,7 +170,10 @@ class WooQueryProdotti {
       if ((prodotto.barcodeProduttore?.isNotEmpty ?? false))
         {'key': 'barcode_manufacturer', 'value': prodotto.barcodeProduttore},
       if (prodotto.costoAcquisto != null)
-        {'key': '_purchase_cost', 'value': prodotto.costoAcquisto!.toStringAsFixed(4)},
+        {
+          'key': '_purchase_cost',
+          'value': prodotto.costoAcquisto!.toStringAsFixed(4),
+        },
     ];
 
     final payload = <String, dynamic>{
@@ -410,7 +432,9 @@ class WooQueryProdotti {
       prezzoScontato:
           wooProduct.salePrice ??
           (wooProduct.onSale == true ? wooProduct.price : null),
-      costoAcquisto: handleDouble(_extractMetaData(wooProduct, '_purchase_cost')),
+      costoAcquisto: handleDouble(
+        _extractMetaData(wooProduct, '_purchase_cost'),
+      ),
       descrizioneBreve: wooProduct.shortDescription,
       descrizioneCompleta: handleEmptyString(wooProduct.description),
       immagineUrl: wooProduct.images?.isNotEmpty == true
@@ -936,6 +960,74 @@ class WooQueryProdotti {
       log.e('❌ Errore getProducts', e);
       rethrow;
     }
+  }
+
+  /// Riscarica i prodotti indicati in una sola richiesta (`include`), con
+  /// qualunque stato. Serve a mostrare l'ultima versione della pagina
+  /// visibile: un prodotto eliminato sul server semplicemente non torna.
+  Future<List<ProdottoGlobal>> getProductsByIds(List<int> ids) async {
+    if (ids.isEmpty) return const <ProdottoGlobal>[];
+    final response = await _woo.dio.get(
+      '/products',
+      queryParameters: {
+        'include': ids.join(','),
+        'per_page': ids.length,
+        'status': 'any',
+      },
+    );
+    final converted = <ProdottoGlobal>[];
+    for (final productData in response.data as List<dynamic>) {
+      try {
+        converted.add(
+          convert_wooproduct_To_ProdottoGlobal(
+            WooProduct.fromJson(productData),
+            productData: productData as Map<String, dynamic>,
+          ),
+        );
+      } catch (e) {
+        log.e('❌ Errore conversione prodotto da JSON: $e');
+      }
+    }
+    return converted;
+  }
+
+  /// Prodotti e varianti sotto la propria soglia "scorte basse".
+  ///
+  /// Usa `wc-analytics/products/low-in-stock`, lo stesso elenco del pannello
+  /// WooCommerce, tramite il client del pacchetto (stesse credenziali). Il
+  /// modello `WooProduct` non ha `low_stock_amount`, quindi si legge il JSON.
+  /// Restano solo gli elementi con soglia impostata sul prodotto: quelli che
+  /// ricadono sulla soglia generale del negozio vengono scartati.
+  Future<List<ProdottoSottoScorta>> getProdottiSottoScorta({
+    int maxPagine = 5,
+  }) async {
+    final siteUrl = _woo.baseUrl.replaceAll(RegExp(r'/+$'), '');
+    final url = '$siteUrl/wp-json/wc-analytics/products/low-in-stock';
+    final risultato = <ProdottoSottoScorta>[];
+    for (var pagina = 1; pagina <= maxPagine; pagina++) {
+      final response = await _woo.dio.get(
+        url,
+        queryParameters: {'page': pagina, 'per_page': 100},
+      );
+      final items = response.data as List<dynamic>;
+      for (final item in items.cast<Map<String, dynamic>>()) {
+        final soglia = item['low_stock_amount'];
+        if (soglia is! num) continue;
+        risultato.add(
+          ProdottoSottoScorta(
+            id: (item['id'] as num?)?.toInt() ?? 0,
+            parentId: (item['parent_id'] as num?)?.toInt() ?? 0,
+            nome: (item['name'] as String?) ?? '',
+            giacenza: (item['stock_quantity'] as num?)?.toInt() ?? 0,
+            soglia: soglia.toInt(),
+          ),
+        );
+      }
+      final pagine =
+          int.tryParse(response.headers.value('x-wp-totalpages') ?? '') ?? 1;
+      if (pagina >= pagine) break;
+    }
+    return risultato;
   }
 
   Future<PaginatedResult<ProdottoGlobal>> getProductsPaginated({
