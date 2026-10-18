@@ -80,7 +80,7 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return  Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -112,7 +112,7 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
     }
 
     if (_reportVendite == null || _reportVendite!.topProdotti.isEmpty) {
-      return  Center(child: Text(context.l10n.dashboardNessunDato));
+      return Center(child: Text(context.l10n.dashboardNessunDato));
     }
 
     return RefreshIndicator(
@@ -384,7 +384,7 @@ class _PerformanceTimelineReportPageState
 
   Widget _buildBody() {
     if (_isLoading) {
-      return  Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -416,7 +416,7 @@ class _PerformanceTimelineReportPageState
     }
 
     if (_reportVendite == null) {
-      return  Center(child: Text(context.l10n.dashboardNessunDato));
+      return Center(child: Text(context.l10n.dashboardNessunDato));
     }
 
     return RefreshIndicator(
@@ -712,7 +712,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return  Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -744,7 +744,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
     }
 
     if (_ordersByStatus == null) {
-      return  Center(child: Text(context.l10n.dashboardNessunDato));
+      return Center(child: Text(context.l10n.dashboardNessunDato));
     }
 
     return RefreshIndicator(

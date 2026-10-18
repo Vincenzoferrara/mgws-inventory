@@ -425,7 +425,10 @@ class ReportExporter implements DashboardExportGateway {
             // Andamento giornaliero
             if (dashboard.vendite.andamentoGiornaliero.isNotEmpty) ...[
               pw.SizedBox(height: 16),
-              pw.Header(level: 1, child: pw.Text(l10n.dashboardAndamentoGiornaliero)),
+              pw.Header(
+                level: 1,
+                child: pw.Text(l10n.dashboardAndamentoGiornaliero),
+              ),
               pw.TableHelper.fromTextArray(
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 headers: ['Data', 'Vendite', 'Ordini'],
@@ -541,7 +544,10 @@ class ReportExporter implements DashboardExportGateway {
 
             // Vendite per categoria
             if (report.venditePerCategoria.isNotEmpty) ...[
-              pw.Header(level: 1, child: pw.Text(l10n.dashboardVenditePerCategoria)),
+              pw.Header(
+                level: 1,
+                child: pw.Text(l10n.dashboardVenditePerCategoria),
+              ),
               pw.TableHelper.fromTextArray(
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 headers: ['Categoria', 'Totale'],
@@ -554,7 +560,10 @@ class ReportExporter implements DashboardExportGateway {
 
             // Tendenze
             if (report.tendenze.isNotEmpty) ...[
-              pw.Header(level: 1, child: pw.Text(l10n.dashboardTendenzeGiornaliere)),
+              pw.Header(
+                level: 1,
+                child: pw.Text(l10n.dashboardTendenzeGiornaliere),
+              ),
               pw.TableHelper.fromTextArray(
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 headers: ['Data', 'Vendite', 'Ordini', 'Ticket'],

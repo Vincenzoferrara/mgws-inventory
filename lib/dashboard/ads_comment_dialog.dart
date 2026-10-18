@@ -174,7 +174,7 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
           children: [
             TextField(
               controller: _commentController,
-              decoration:  InputDecoration(
+              decoration: InputDecoration(
                 labelText: context.l10n.dashboardCommento,
                 hintText: context.l10n.dashboardInserisciCommento,
                 border: OutlineInputBorder(),
@@ -208,7 +208,10 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
           TextButton.icon(
             onPressed: _isSaving ? null : _deleteComment,
             icon: const Icon(Icons.delete, color: Colors.red),
-            label: Text(context.l10n.commonDelete, style: TextStyle(color: Colors.red)),
+            label: Text(
+              context.l10n.commonDelete,
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         const Spacer(),
         TextButton(

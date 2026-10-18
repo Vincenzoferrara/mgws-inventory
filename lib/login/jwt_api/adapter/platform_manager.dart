@@ -13,6 +13,8 @@ import '../query_woocommerce/woo_query_marchi.dart';
 import '../../mgws/query/query_mgws_pos.dart';
 import '../../mgws/query/query_mgws_employees.dart';
 import '../../mgws/query/query_mgws_user_settings.dart';
+import '../../mgws/query/query_mgws_dashboards.dart';
+import '../../mgws/query/query_mgws_reports.dart';
 import '../../mgws/connection/mgws_auth.dart';
 import '../../mgws/connection/mgws_connection.dart';
 import '../query_wordpress/query_user_wordpress.dart';
@@ -42,6 +44,8 @@ class PlatformManager {
   static QueryMgwsPos? _mgwsPos;
   static QueryMgwsEmployees? _mgwsEmployees;
   static QueryMgwsUserSettings? _mgwsUserSettings;
+  static QueryMgwsDashboards? _mgwsDashboards;
+  static QueryMgwsReports? _mgwsReports;
   static QueryUserWordPress? _permessiUtente;
 
   /// Ottiene la piattaforma attualmente attiva
@@ -222,6 +226,18 @@ class PlatformManager {
   static dynamic get userSettings {
     _mgwsUserSettings ??= QueryMgwsUserSettings();
     return _mgwsUserSettings;
+  }
+
+  /// Personal and shared dashboards stored in MGWS.
+  static QueryMgwsDashboards get dashboards {
+    _mgwsDashboards ??= QueryMgwsDashboards();
+    return _mgwsDashboards!;
+  }
+
+  /// MGWS report engine: measures split by dimensions, aggregated server-side.
+  static QueryMgwsReports get reports {
+    _mgwsReports ??= QueryMgwsReports();
+    return _mgwsReports!;
   }
 
   /// Username dell'utente autenticato, se noto. La cassa lo usa come

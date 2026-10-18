@@ -8,6 +8,8 @@
 // - ReportService (coordinatore principale)
 // - Helper per calcoli e formattazione
 
+import 'package:intl/intl.dart';
+
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
 import '../login/jwt_api/class_prodotti.dart';
 import '../log_viewer/app_logger.dart';
@@ -137,9 +139,53 @@ class PeriodoReport {
     );
   }
 
-  /// Numero di giorni nel periodo
-  int get giorniTotali => dataFine.difference(dataInizio).inDays + 1;
+  /// Numero di giorni di calendario nel periodo (estremi inclusi).
+  int get giorniTotali =>
+      DateTime(dataFine.year, dataFine.month, dataFine.day)
+          .difference(
+            DateTime(dataInizio.year, dataInizio.month, dataInizio.day),
+          )
+          .inDays +
+      1;
 
+  /// Stesso tratto del periodo precedente, per un confronto alla pari:
+  /// oggi -> ieri, settimana -> stessi giorni della settimana scorsa,
+  /// mese -> stessi giorni del mese scorso, anno -> stessi giorni dell'anno
+  /// scorso. Un periodo custom si confronta con i giorni immediatamente prima.
+  PeriodoReport get periodoPrecedente {
+    DateTime giorno(DateTime d) => DateTime(d.year, d.month, d.day);
+    DateTime clampMese(int anno, int mese, int giorno) {
+      final ultimo = DateTime(anno, mese + 1, 0).day;
+      return DateTime(anno, mese, giorno > ultimo ? ultimo : giorno);
+    }
+
+    final inizio = giorno(dataInizio);
+    final fine = giorno(dataFine);
+    switch (tipo) {
+      case TipoPeriodo.oggi:
+      case TipoPeriodo.settimana:
+        final giorni = tipo == TipoPeriodo.oggi ? 1 : 7;
+        return PeriodoReport(
+          dataInizio: inizio.subtract(Duration(days: giorni)),
+          dataFine: fine.subtract(Duration(days: giorni)),
+        );
+      case TipoPeriodo.mese:
+        return PeriodoReport(
+          dataInizio: DateTime(inizio.year, inizio.month - 1, 1),
+          dataFine: clampMese(fine.year, fine.month - 1, fine.day),
+        );
+      case TipoPeriodo.anno:
+        return PeriodoReport(
+          dataInizio: DateTime(inizio.year - 1, 1, 1),
+          dataFine: clampMese(fine.year - 1, fine.month, fine.day),
+        );
+      case TipoPeriodo.custom:
+        return PeriodoReport(
+          dataInizio: inizio.subtract(Duration(days: giorniTotali)),
+          dataFine: inizio.subtract(const Duration(days: 1)),
+        );
+    }
+  }
 }
 
 /// Etichetta tradotta del periodo.
@@ -219,13 +265,34 @@ class VenditeData {
   variazionePrecedente; // Percentuale rispetto al periodo precedente
   final List<VenditaGiornaliera> andamentoGiornaliero;
 
+  /// true quando WooCommerce ha raggruppato l'andamento per mese
+  /// (succede con intervalli lunghi, es. "Quest'anno").
+  final bool andamentoMensile;
+
+  /// Valori del periodo di confronto; null se non disponibili.
+  final PeriodoReport? periodoPrecedente;
+  final double? totalePrecedente;
+  final int? ordiniPrecedenti;
+
   VenditeData({
     required this.totaleVendite,
     required this.numeroOrdini,
     required this.ticketMedio,
     this.variazionePrecedente = 0.0,
     this.andamentoGiornaliero = const [],
+    this.andamentoMensile = false,
+    this.periodoPrecedente,
+    this.totalePrecedente,
+    this.ordiniPrecedenti,
   });
+
+  /// Il confronto ha senso solo se il periodo precedente ha venduto qualcosa.
+  bool get haConfronto => (totalePrecedente ?? 0) > 0;
+
+  double? get ticketMedioPrecedente {
+    final ordini = ordiniPrecedenti ?? 0;
+    return ordini > 0 ? totalePrecedente! / ordini : null;
+  }
 
   bool get isInCrescita => variazionePrecedente > 0;
   bool get isInCalo => variazionePrecedente < 0;
@@ -271,14 +338,20 @@ class ProdottiData {
 
 /// Dati ordini per dashboard
 class OrdiniData {
+  /// Ordini creati nel periodo selezionato, per stato.
   final Map<String, int> ordiniPerStato;
+
+  /// Ordini di sempre per stato: serve a sapere cosa resta da evadere oggi,
+  /// indipendentemente da quando l'ordine e' arrivato.
+  final Map<String, int> ordiniDiSempre;
   final int totaleOrdini;
   final int ordiniCompletati;
   final int ordiniInElaborazione;
   final int ordiniInAttesa;
 
-  OrdiniData({required this.ordiniPerStato})
-    : totaleOrdini = ordiniPerStato.values.fold(0, (sum, count) => sum + count),
+  OrdiniData({required this.ordiniPerStato, Map<String, int>? ordiniDiSempre})
+    : ordiniDiSempre = ordiniDiSempre ?? ordiniPerStato,
+      totaleOrdini = ordiniPerStato.values.fold(0, (sum, count) => sum + count),
       ordiniCompletati = ordiniPerStato['completed'] ?? 0,
       ordiniInElaborazione = ordiniPerStato['processing'] ?? 0,
       ordiniInAttesa = ordiniPerStato['pending'] ?? 0;
@@ -286,7 +359,12 @@ class OrdiniData {
   double get tassoCompletamento =>
       totaleOrdini > 0 ? (ordiniCompletati / totaleOrdini) * 100 : 0;
 
-  int get ordiniDaGestire => ordiniInElaborazione + ordiniInAttesa;
+  /// Ordini ancora da evadere adesso: in lavorazione + in sospeso.
+  /// I "pending" (pagamento non ricevuto) non richiedono azione del negozio.
+  int get ordiniDaGestire =>
+      (ordiniDiSempre['processing'] ?? 0) + (ordiniDiSempre['on-hold'] ?? 0);
+
+  int get ordiniInAttesaPagamento => ordiniDiSempre['pending'] ?? 0;
 }
 
 /// Dati clienti per dashboard
@@ -353,6 +431,11 @@ abstract interface class DashboardReportGateway {
 
   Future<ReportVenditeDettagliato> getReportVendite({PeriodoReport? periodo});
 
+  Future<List<Map<String, dynamic>>> getProdottiStockBasso({int soglia});
+
+  /// Published products per category name.
+  Future<Map<String, int>> getProductsByCategory();
+
   Future<bool> isServiceAvailable();
 }
 
@@ -364,6 +447,8 @@ abstract interface class DashboardReportSource {
   });
 
   Future<Map<String, dynamic>> getStockStatistics({int lowStockThreshold});
+
+  Future<List<Map<String, dynamic>>> getLowStockProducts({int threshold});
 
   Future<Map<String, int>> getProductsByCategory();
 
@@ -412,6 +497,11 @@ class _WooQueryReportSource implements DashboardReportSource {
   @override
   Future<Map<String, dynamic>> getStockStatistics({int lowStockThreshold = 5}) {
     return _query.getStockStatistics(lowStockThreshold: lowStockThreshold);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getLowStockProducts({int threshold = 5}) {
+    return _query.getLowStockProducts(threshold: threshold);
   }
 
   @override
@@ -544,11 +634,18 @@ class ReportService implements DashboardReportGateway {
         dataFine: periodo.dataFine,
       );
 
-      final giorniPeriodo = periodo.giorniTotali;
-      final reportPrecedenteFuture = _reportSource.getSalesReport(
-        dataInizio: periodo.dataInizio.subtract(Duration(days: giorniPeriodo)),
-        dataFine: periodo.dataInizio.subtract(const Duration(days: 1)),
-      );
+      final periodoPrecedente = periodo.periodoPrecedente;
+      final reportPrecedenteFuture = _reportSource
+          .getSalesReport(
+            dataInizio: periodoPrecedente.dataInizio,
+            dataFine: periodoPrecedente.dataFine,
+          )
+          .then<ReportVendite?>((r) => r)
+          .catchError((Object e) {
+            // Il confronto e' facoltativo: non deve bloccare la dashboard.
+            log.w('Confronto periodo precedente non disponibile: $e');
+            return null;
+          });
 
       final summary = await summaryFuture;
       final reportPrecedente = await reportPrecedenteFuture;
@@ -557,36 +654,36 @@ class ReportService implements DashboardReportGateway {
       // Costruisci dati vendite
       final salesData = summary['sales'] as Map<String, dynamic>;
 
-      final andamentoGiornaliero = trendsRaw.map((t) {
-        return VenditaGiornaliera(
-          data:
-              DateTime.tryParse(t['date']?.toString() ?? '') ?? DateTime.now(),
-          totale: _parseDouble(t['total_sales']),
-          ordini: _parseInt(t['total_orders']),
-        );
-      }).toList();
+      final andamentoGiornaliero = <VenditaGiornaliera>[
+        for (final t in trendsRaw)
+          if (parseReportDate(t['date']) case final data?)
+            VenditaGiornaliera(
+              data: data,
+              totale: _parseDouble(t['total_sales']),
+              ordini: _parseInt(t['total_orders']),
+            ),
+      ]..sort((a, b) => a.data.compareTo(b.data));
+      final andamentoMensile = trendsRaw.any((t) => t['monthly'] == true);
 
-      // Calcola variazione rispetto al periodo precedente. A failure in this
-      // optional comparison must not make the dashboard unusable.
+      final totaleCorrente = _parseDouble(salesData['total']);
       double variazionePrecedente = 0.0;
-      try {
-        if (reportPrecedente.totaleVendite > 0) {
-          final totaleCorrente = _parseDouble(salesData['total']);
-          variazionePrecedente =
-              ((totaleCorrente - reportPrecedente.totaleVendite) /
-                  reportPrecedente.totaleVendite) *
-              100;
-        }
-      } catch (e) {
-        log.w('Impossibile calcolare variazione periodo precedente: $e');
+      if (reportPrecedente != null && reportPrecedente.totaleVendite > 0) {
+        variazionePrecedente =
+            ((totaleCorrente - reportPrecedente.totaleVendite) /
+                reportPrecedente.totaleVendite) *
+            100;
       }
 
       final vendite = VenditeData(
-        totaleVendite: _parseDouble(salesData['total']),
+        totaleVendite: totaleCorrente,
         numeroOrdini: _parseInt(salesData['orders']),
         ticketMedio: _parseDouble(salesData['average_order']),
         variazionePrecedente: variazionePrecedente,
         andamentoGiornaliero: andamentoGiornaliero,
+        andamentoMensile: andamentoMensile,
+        periodoPrecedente: reportPrecedente == null ? null : periodoPrecedente,
+        totalePrecedente: reportPrecedente?.totaleVendite,
+        ordiniPrecedenti: reportPrecedente?.numeroOrdini,
       );
 
       // The summary source already returns the inexpensive product counters.
@@ -600,8 +697,11 @@ class ReportService implements DashboardReportGateway {
 
       // Costruisci dati ordini
       final ordersData = summary['orders_by_status'] as Map<String, dynamic>;
+      final ordersAllTime =
+          summary['orders_all_time'] as Map<String, dynamic>? ?? ordersData;
       final ordini = OrdiniData(
         ordiniPerStato: ordersData.map((k, v) => MapEntry(k, _parseInt(v))),
+        ordiniDiSempre: ordersAllTime.map((k, v) => MapEntry(k, _parseInt(v))),
       );
 
       // Costruisci dati clienti (opzionali)
@@ -677,7 +777,7 @@ class ReportService implements DashboardReportGateway {
           dataFine: periodo.dataFine,
         ),
         _reportSource.getTopSellingProducts(
-          limit: 10,
+          limit: 20,
           dataInizio: periodo.dataInizio,
           dataFine: periodo.dataFine,
         ),
@@ -702,14 +802,15 @@ class ReportService implements DashboardReportGateway {
       }).toList();
 
       // Converti tendenze
-      final tendenze = trendsRaw.map((t) {
-        return TendenzaVendite(
-          data:
-              DateTime.tryParse(t['date']?.toString() ?? '') ?? DateTime.now(),
-          vendite: _parseDouble(t['total_sales']),
-          ordini: _parseInt(t['total_orders']),
-        );
-      }).toList();
+      final tendenze = <TendenzaVendite>[
+        for (final t in trendsRaw)
+          if (parseReportDate(t['date']) case final data?)
+            TendenzaVendite(
+              data: data,
+              vendite: _parseDouble(t['total_sales']),
+              ordini: _parseInt(t['total_orders']),
+            ),
+      ];
 
       // Costruisci VenditeData
       final vendite = VenditeData(
@@ -734,6 +835,18 @@ class ReportService implements DashboardReportGateway {
       rethrow;
     }
   }
+
+  /// Prodotti con stock basso, ordinati per quantita' crescente.
+  ///
+  /// Separato da [getDashboard] perche' scarica le schede prodotto: la
+  /// dashboard lo carica dopo aver mostrato i numeri principali.
+  @override
+  Future<List<Map<String, dynamic>>> getProdottiStockBasso({int soglia = 5}) =>
+      _reportSource.getLowStockProducts(threshold: soglia);
+
+  @override
+  Future<Map<String, int>> getProductsByCategory() =>
+      _reportSource.getProductsByCategory();
 
   /// Ottiene statistiche prodotti
   Future<Statistiche> getStatisticheProdotti() async {
@@ -828,12 +941,28 @@ class ReportService implements DashboardReportGateway {
 // ==              HELPER E UTILITY                     ==
 // =======================================================
 
+/// Data di una riga di `/reports/sales`: "2026-10-17" se raggruppata per
+/// giorno, "2026-10" se raggruppata per mese. Prima le chiavi mensili
+/// finivano tutte su `DateTime.now()`, schiacciando il grafico annuale.
+DateTime? parseReportDate(Object? raw) {
+  final text = raw?.toString() ?? '';
+  final mese = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(text);
+  if (mese != null) {
+    return DateTime(int.parse(mese[1]!), int.parse(mese[2]!));
+  }
+  return DateTime.tryParse(text);
+}
+
 /// Formatter per valori report
 class ReportFormatter {
-  /// Formatta valuta in euro
-  static String formatCurrency(double value) {
-    return '€${value.toStringAsFixed(2)}';
-  }
+  static final _euro = NumberFormat.currency(locale: 'it_IT', symbol: '€');
+  static final _intero = NumberFormat.decimalPattern('it_IT');
+
+  /// Formatta valuta in euro (1.234,50 €)
+  static String formatCurrency(double value) => _euro.format(value);
+
+  /// Formatta un intero con separatore delle migliaia (1.234)
+  static String formatInt(int value) => _intero.format(value);
 
   /// Formatta valuta compatta (es. 1.5K, 2.3M)
   static String formatCurrencyCompact(double value) {

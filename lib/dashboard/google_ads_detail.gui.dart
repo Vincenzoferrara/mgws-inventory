@@ -130,9 +130,7 @@ class _GoogleAdsDetailPageState extends State<GoogleAdsDetailPage> {
               color: context.colors.subtitleColor,
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Nessun dato disponibile. Configura il Customer ID.",
-            ),
+            const Text("Nessun dato disponibile. Configura il Customer ID."),
           ],
         ),
       );

@@ -299,7 +299,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     if (_isLoading) {
-      return  Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -338,7 +338,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     if (_dashboard == null) {
-      return  Center(child: Text(context.l10n.dashboardNessunDato));
+      return Center(child: Text(context.l10n.dashboardNessunDato));
     }
 
     return RefreshIndicator(
@@ -852,7 +852,10 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 12, color: context.colors.subtitleColor),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.subtitleColor,
+              ),
             ),
             Text(
               value,
@@ -1064,7 +1067,10 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(fontSize: 12, color: context.colors.subtitleColor),
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.subtitleColor,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -1443,9 +1449,7 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(height: 16),
               Text(
                 'La dashboard contiene informazioni riservate che richiedono l\'autenticazione',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: context.colors.subtitleColor,
                 ),
                 textAlign: TextAlign.center,

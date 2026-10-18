@@ -187,10 +187,10 @@ class _TikTokAdsDetailPageState extends State<TikTokAdsDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-              context.l10n.dashboardEtichettaId(
-                '${campaign['campaign_id'] ?? 'N/A'}',
-              ),
-            ),
+                            context.l10n.dashboardEtichettaId(
+                              '${campaign['campaign_id'] ?? 'N/A'}',
+                            ),
+                          ),
                           Text(
                             'Obiettivo: ${campaign['objective_type'] ?? 'N/A'}',
                           ),

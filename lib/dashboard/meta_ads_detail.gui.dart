@@ -258,7 +258,7 @@ class _MetaAdsDetailPageState extends State<MetaAdsDetailPage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
-        columns:  [
+        columns: [
           DataColumn(label: Text(context.l10n.dashboardCampagna)),
           DataColumn(label: Text(context.l10n.dashboardImpressioni)),
           DataColumn(label: Text(context.l10n.dashboardClick)),

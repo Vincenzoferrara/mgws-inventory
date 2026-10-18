@@ -151,51 +151,27 @@ class WooQueryReport {
   }
 
   /// Ottiene statistiche prodotti
+  ///
+  /// `/reports/products/totals` raggruppa per *tipo* di prodotto (simple,
+  /// variable...), non per stato o disponibilità: i conteggi vengono quindi
+  /// letti dall'header `X-WP-Total` di richieste `/products` con `per_page=1`.
   Future<Statistiche> getProductStats() async {
     try {
-      final woo = _woo;
-
-      // Usa l'API nativa del package
-      final List<WooProductTotalReport> reports = await woo
-          .getProductsTotalReport();
-
-      int totaleProdotti = 0;
-      int prodottiPubblicati = 0;
-      int prodottiBozza = 0;
-      int prodottiInStock = 0;
-      int prodottiOutOfStock = 0;
-
-      for (final report in reports) {
-        final slug = report.slug ?? '';
-        final total = int.tryParse(report.total ?? '0') ?? 0;
-
-        switch (slug) {
-          case 'publish':
-            prodottiPubblicati = total;
-            totaleProdotti += total;
-            break;
-          case 'draft':
-            prodottiBozza = total;
-            break;
-          case 'pending':
-            totaleProdotti += total;
-            break;
-          case 'instock':
-            prodottiInStock = total;
-            break;
-          case 'outofstock':
-            prodottiOutOfStock = total;
-            break;
-        }
-      }
+      final counts = await Future.wait([
+        _countProducts({'status': 'publish'}),
+        _countProducts({'status': 'draft'}),
+        _countProducts({'status': 'publish', 'stock_status': 'instock'}),
+        _countProducts({'status': 'publish', 'stock_status': 'outofstock'}),
+        _countProducts({'status': 'publish', 'type': 'variable'}),
+      ]);
 
       return Statistiche(
-        totaleProdotti: totaleProdotti,
-        prodottiPubblicati: prodottiPubblicati,
-        prodottiBozza: prodottiBozza,
-        prodottiConVarianti: 0,
-        prodottiInStock: prodottiInStock,
-        prodottiOutOfStock: prodottiOutOfStock,
+        totaleProdotti: counts[0],
+        prodottiPubblicati: counts[0],
+        prodottiBozza: counts[1],
+        prodottiConVarianti: counts[4],
+        prodottiInStock: counts[2],
+        prodottiOutOfStock: counts[3],
         valoreInventarioTotale: 0.0,
         prodottiPerCategoria: {},
         prodottiPerTag: {},
@@ -203,6 +179,59 @@ class WooQueryReport {
     } catch (e) {
       throw Exception('Errore nel caricamento statistiche prodotti: $e');
     }
+  }
+
+  Future<int> _countProducts(Map<String, dynamic> filters) =>
+      _countResource('/products', filters);
+
+  /// Numero di record che soddisfano i filtri, senza scaricarli.
+  Future<int> _countResource(String path, Map<String, dynamic> filters) async {
+    final response = await _woo.dio.get(
+      path,
+      queryParameters: {...filters, 'per_page': 1, '_fields': 'id'},
+    );
+    return int.tryParse(response.headers.value('x-wp-total') ?? '') ?? 0;
+  }
+
+  /// Stati ordine conteggiati nel periodo.
+  static const orderStatuses = [
+    'completed',
+    'processing',
+    'on-hold',
+    'pending',
+    'cancelled',
+    'refunded',
+    'failed',
+  ];
+
+  /// Ordini creati nel periodo, per stato.
+  ///
+  /// `/reports/orders/totals` restituisce invece i totali di sempre, che non
+  /// sono confrontabili con le vendite del periodo.
+  Future<Map<String, int>> getOrdersByStatusInPeriod({
+    required DateTime dataInizio,
+    required DateTime dataFine,
+  }) async {
+    final after = _isoDay(dataInizio, endOfDay: false);
+    final before = _isoDay(dataFine, endOfDay: true);
+    final counts = await Future.wait([
+      for (final status in orderStatuses)
+        _countResource('/orders', {
+          'status': status,
+          'after': after,
+          'before': before,
+        }),
+    ]);
+    return {
+      for (var i = 0; i < orderStatuses.length; i++)
+        if (counts[i] > 0) orderStatuses[i]: counts[i],
+    };
+  }
+
+  static String _isoDay(DateTime d, {required bool endOfDay}) {
+    final day =
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    return endOfDay ? '${day}T23:59:59' : '${day}T00:00:00';
   }
 
   /// Ottiene top prodotti più venduti
@@ -287,6 +316,7 @@ class WooQueryReport {
       int totaleClienti = 0;
       int payingCustomers = 0;
       int newCustomers = 0;
+      int nonPayingCustomers = 0;
 
       for (final report in reports) {
         final slug = report.slug ?? '';
@@ -300,10 +330,18 @@ class WooQueryReport {
           case 'paying':
             payingCustomers = total;
             break;
+          case 'non_paying':
+            nonPayingCustomers = total;
+            break;
           case 'new':
             newCustomers = total;
             break;
         }
+      }
+
+      // L'endpoint non espone un totale: e' la somma di paganti e non paganti.
+      if (totaleClienti == 0) {
+        totaleClienti = payingCustomers + nonPayingCustomers;
       }
 
       return {
@@ -380,12 +418,17 @@ class WooQueryReport {
         getProductStats(),
         getOrdersByStatus(),
         getCustomerStats(),
+        getOrdersByStatusInPeriod(
+          dataInizio: dataInizio ?? DateTime.now(),
+          dataFine: dataFine ?? DateTime.now(),
+        ),
       ]);
 
       final salesReport = results[0] as ReportVendite;
       final productStats = results[1] as Statistiche;
-      final ordersByStatus = results[2] as Map<String, int>;
+      final ordersAllTime = results[2] as Map<String, int>;
       final customerStats = results[3] as Map<String, dynamic>;
+      final ordersInPeriod = results[4] as Map<String, int>;
 
       return {
         'sales': {
@@ -398,7 +441,8 @@ class WooQueryReport {
           'in_stock': productStats.prodottiInStock,
           'out_of_stock': productStats.prodottiOutOfStock,
         },
-        'orders_by_status': ordersByStatus,
+        'orders_by_status': ordersInPeriod,
+        'orders_all_time': ordersAllTime,
         'customers': customerStats,
         'period': {
           'start': dataInizio?.toIso8601String(),
@@ -468,6 +512,7 @@ class WooQueryReport {
             if (dayData is Map<String, dynamic>) {
               trends.add({
                 'date': dateKey,
+                'monthly': RegExp(r'^\d{4}-\d{2}$').hasMatch(dateKey),
                 'total_sales': parseDoubleSafe(dayData['sales']) ?? 0.0,
                 'total_orders': parseIntSafe(dayData['orders']) ?? 0,
                 'total_items': parseIntSafe(dayData['items']) ?? 0,
