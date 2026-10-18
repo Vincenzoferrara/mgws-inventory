@@ -292,7 +292,21 @@ class _InventoryMovementLedgerPanelState
     );
   }
 
-  Widget _filters() => Wrap(
+  /// Larghezza dei campi filtro: 180 px, ma su telefono due per riga, così
+  /// non resta mezza riga vuota accanto a ogni campo.
+  double _larghezzaCampo = 180;
+
+  Widget _filters() => LayoutBuilder(
+    builder: (context, constraints) {
+      const spacing = 12.0;
+      _larghezzaCampo = constraints.maxWidth < 180 * 2 + spacing
+          ? (constraints.maxWidth - spacing) / 2
+          : 180;
+      return _filtersWrap();
+    },
+  );
+
+  Widget _filtersWrap() => Wrap(
     spacing: 12,
     runSpacing: 12,
     crossAxisAlignment: WrapCrossAlignment.center,
@@ -391,6 +405,8 @@ class _InventoryMovementLedgerPanelState
         selectedRowId: _selected?.key,
         onRowSelected: (group) => setState(() => _selected = group),
         onRowDoubleTap: _openGroup,
+        // Su telefono il doppio tocco non lo prova nessuno: basta un tocco.
+        onRowTap: MediaQuery.sizeOf(context).width < 600 ? _openGroup : null,
         contextActions: [
           DataGridViewContextAction<InventoryMovementGroup>(
             label: context.l10n.inventoryApriMovimento,
@@ -422,16 +438,14 @@ class _InventoryMovementLedgerPanelState
     // della tipologia, quindi qui basta il numero senza segno: il segno
     // suggerirebbe una variazione che non c'e' stata.
     final deltaCell = group.isMove
-        ? Text(
-            '${group.movedQuantity} ${context.l10n.inventoryParolaPezzi}',
-          )
+        ? Text('${group.movedQuantity} ${context.l10n.inventoryParolaPezzi}')
         : Text(movementSigned(group.quantityDelta));
     return DataGridViewRowData(
       id: group.key,
       value: group,
       foregroundColor: tone,
       cells: {
-        'time': Text(group.occurredAtGmt),
+        'time': Text(formatMovementDate(group.occurredAtGmt)),
         // Il tipo che MGWS scrive resta visibile accanto all'etichetta quando
         // non e' uno che l'app conosce: meglio una parola grezza che un
         //-etichetta indovinata.
@@ -443,7 +457,7 @@ class _InventoryMovementLedgerPanelState
         'operator': Text('#${group.operatorUserId}'),
         'delta': deltaCell,
         'products': Text('${group.productCount}'),
-        'last': Text(group.lastModifiedGmt),
+        'last': Text(formatMovementDate(group.lastModifiedGmt)),
         'reason': Text(group.reasonAndDetails),
       },
     );
@@ -451,7 +465,7 @@ class _InventoryMovementLedgerPanelState
 
   Widget _field(TextEditingController controller, String label, String key) {
     return SizedBox(
-      width: 180,
+      width: _larghezzaCampo,
       child: TextField(
         key: ValueKey(key),
         controller: controller,

@@ -491,7 +491,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
             // La card di posizione serve solo se le impostazioni hanno
             // qualcosa da far scegliere: i dettagli stanno a pagina, quindi
             // una card vuota non avrebbe piu' niente dentro.
-            if (_settings.warehouseEnabled || _settings.roomEnabled) ...[
+            if (_showLocationCard) ...[
               _buildLocationCard(),
               const SizedBox(height: 10),
             ],
@@ -617,40 +617,40 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                       child: LinearProgressIndicator(),
                     )
                   : suppliers.isEmpty
-                      ? _buildNoSuppliers(colors)
-                      : DropdownButtonFormField<MgwsSupplier>(
-                          key: ValueKey(
-                            'inventory-add-supplier-${_supplier?.id ?? 0}-${suppliers.length}',
-                          ),
-                          initialValue: _supplier,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: context.l10n
-                                .inventoryEtichettaFornitoreObbligatorio,
-                            prefixIcon: const Icon(
-                              Icons.local_shipping_outlined,
+                  ? _buildNoSuppliers(colors)
+                  : DropdownButtonFormField<MgwsSupplier>(
+                      key: ValueKey(
+                        'inventory-add-supplier-${_supplier?.id ?? 0}-${suppliers.length}',
+                      ),
+                      initialValue: _supplier,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: context
+                            .l10n
+                            .inventoryEtichettaFornitoreObbligatorio,
+                        prefixIcon: const Icon(Icons.local_shipping_outlined),
+                      ),
+                      items: [
+                        for (final supplier in suppliers)
+                          DropdownMenuItem<MgwsSupplier>(
+                            value: supplier,
+                            child: Text(
+                              supplier.name,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          items: [
-                            for (final supplier in suppliers)
-                              DropdownMenuItem<MgwsSupplier>(
-                                value: supplier,
-                                child: Text(
-                                  supplier.name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                          ],
-                          onChanged: (value) => setState(() {
-                            _supplier = value;
-                            _feedback = null;
-                          }),
-                        );
+                      ],
+                      onChanged: (value) => setState(() {
+                        _supplier = value;
+                        _feedback = null;
+                      }),
+                    );
               final documentField = TextField(
                 key: const ValueKey('inventory-add-document-field'),
                 controller: _documentController,
                 decoration: InputDecoration(
-                  labelText: context.l10n
+                  labelText: context
+                      .l10n
                       .inventoryEtichettaNumeroDocumentoObbligatorio,
                   prefixIcon: const Icon(Icons.numbers),
                 ),
@@ -691,12 +691,27 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     );
   }
 
+  bool get _showLocationCard =>
+      _settings.warehouseEnabled || _settings.roomEnabled;
+
+  /// Numera le sezioni in base a quelle davvero mostrate: fornitore e
+  /// posizione compaiono solo in certi casi, e un numero fisso saltava da
+  /// "1." a "3." quando una delle due era nascosta. Le traduzioni restano le
+  /// stesse; qui si sostituisce solo il numero iniziale.
+  String _titoloPasso(int numero, String titolo) =>
+      titolo.replaceFirst(RegExp(r'^\d+\.\s*'), '$numero. ');
+
+  int get _passoPosizione => _mode == InventoryAddMode.order ? 3 : 2;
+
+  int get _passoProdotti => _passoPosizione + (_showLocationCard ? 1 : 0);
+
   Widget _buildLocationCard() {
     return InventorySectionCard(
       icon: Icons.location_on_outlined,
-      title: _mode == InventoryAddMode.order
-          ? context.l10n.inventorySezionePosizione3
-          : context.l10n.inventorySezionePosizione2,
+      title: _titoloPasso(
+        _passoPosizione,
+        context.l10n.inventorySezionePosizione2,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth >= 540
@@ -721,9 +736,11 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                         )
                       : DropdownButtonFormField<String>(
                           key: const ValueKey('inventory-add-warehouse-field'),
-                          initialValue: _warehouses.any(
-                            (warehouse) => warehouse.id.toString() == _warehouse,
-                          )
+                          initialValue:
+                              _warehouses.any(
+                                (warehouse) =>
+                                    warehouse.id.toString() == _warehouse,
+                              )
                               ? _warehouse
                               : null,
                           isExpanded: true,
@@ -749,7 +766,8 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                                 child: Text(warehouse.name),
                               ),
                           ],
-                          onChanged: (value) => setState(() => _warehouse = value),
+                          onChanged: (value) =>
+                              setState(() => _warehouse = value),
                         ),
                 ),
               if (_settings.roomEnabled)
@@ -772,12 +790,12 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   }
 
   Widget _buildSelectionCard() {
-    final order = _mode == InventoryAddMode.order;
     return InventoryProductSection(
       icon: Icons.inventory_2_outlined,
-      title: order
-          ? context.l10n.inventorySezioneProdotti4
-          : context.l10n.inventorySezioneProdotti3,
+      title: _titoloPasso(
+        _passoProdotti,
+        context.l10n.inventorySezioneProdotti3,
+      ),
       keyPrefix: 'inventory-add',
       lines: _lines,
       autoAdd: _autoAdd,
@@ -890,8 +908,13 @@ class InventoryAddProductsDeltaPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // In modalità Semplice non c'è niente da convalidare: il titolo e
+          // le voci sulla convalida (sempre 0, "nessuna differenza") non
+          // dicevano nulla, restano righe e pezzi inseriti.
           Text(
-            context.l10n.inventoryTitoloInseritiControConvalida,
+            plan.isOrder
+                ? context.l10n.inventoryTitoloInseritiControConvalida
+                : context.l10n.inventoryTitoloRiepilogoCarico,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w800,
             ),
@@ -913,22 +936,26 @@ class InventoryAddProductsDeltaPanel extends StatelessWidget {
                 ),
                 tone: colors.successColor,
               ),
-              _DeltaChip(
-                key: const ValueKey('inventory-add-validated'),
-                icon: Icons.verified_outlined,
-                label: context.l10n.inventoryEtichettaConvalidati(
-                  plan.validatedQuantity,
+              if (plan.isOrder) ...[
+                _DeltaChip(
+                  key: const ValueKey('inventory-add-validated'),
+                  icon: Icons.verified_outlined,
+                  label: context.l10n.inventoryEtichettaConvalidati(
+                    plan.validatedQuantity,
+                  ),
+                  tone: deltaTone,
                 ),
-                tone: deltaTone,
-              ),
-              _DeltaChip(
-                key: const ValueKey('inventory-add-difference'),
-                icon: pending == 0 ? Icons.check_circle : Icons.difference,
-                label: pending == 0
-                    ? context.l10n.inventoryNessunaDifferenza
-                    : context.l10n.inventoryEtichettaDifferenza(pending),
-                tone: pending == 0 ? colors.successColor : colors.warningColor,
-              ),
+                _DeltaChip(
+                  key: const ValueKey('inventory-add-difference'),
+                  icon: pending == 0 ? Icons.check_circle : Icons.difference,
+                  label: pending == 0
+                      ? context.l10n.inventoryNessunaDifferenza
+                      : context.l10n.inventoryEtichettaDifferenza(pending),
+                  tone: pending == 0
+                      ? colors.successColor
+                      : colors.warningColor,
+                ),
+              ],
             ],
           ),
           if (!plan.isOrder) ...[
@@ -970,7 +997,9 @@ class _DeltaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = tone ?? Theme.of(context).colorScheme.primary;
+    // Senza un tono esplicito la voce è informativa: nel primario (rosso in
+    // questo tema) "Righe: 0" sembrava un errore.
+    final color = tone ?? Theme.of(context).colorScheme.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -1093,12 +1122,7 @@ Future<bool?> showInventoryAddProductsConfirmDialog({
             if (plan.warehouseId != null || (plan.room ?? '').isNotEmpty)
               Text(
                 '${context.l10n.inventoryEtichettaPosizione} '
-                '${[
-                  if (plan.warehouseId != null)
-                    '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}',
-                  if ((plan.room ?? '').isNotEmpty)
-                    '${context.l10n.inventoryEtichettaStanza} ${plan.room}',
-                ].join(' · ')}',
+                '${[if (plan.warehouseId != null) '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}', if ((plan.room ?? '').isNotEmpty) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
               ),
             if (plan.note.trim().isNotEmpty)
               Text('${context.l10n.inventoryLabelDettagli}: ${plan.note}'),

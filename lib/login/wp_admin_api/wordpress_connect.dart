@@ -205,6 +205,14 @@ class WordPressConnect implements AuthConnector {
     }
 
     try {
+      // Nel browser il login via cookie non e' possibile (niente dart:io,
+      // cookie cross-origin non leggibili): la build web, usata solo per lo
+      // sviluppo, accetta direttamente un'Application Password.
+      if (kIsWeb) {
+        await _connectWithApplicationPassword(siteUrl, username, password);
+        return;
+      }
+
       // Step 1: Login via /wp-login.php (cookie-based)
       final cookies = await _loginWithCookies(siteUrl, username, password);
 
@@ -267,6 +275,50 @@ class WordPressConnect implements AuthConnector {
   }
 
   // --- METODI PRIVATI ---
+
+  /// Login solo web: la password inserita e' un'Application Password creata
+  /// dal profilo WordPress, verificata con una chiamata REST in Basic Auth.
+  Future<void> _connectWithApplicationPassword(
+    String siteUrl,
+    String username,
+    String appPassword,
+  ) async {
+    log.d('WordPress (web): verifica Application Password');
+    final base = siteUrl.endsWith('/')
+        ? siteUrl.substring(0, siteUrl.length - 1)
+        : siteUrl;
+    final credentials = base64Encode(utf8.encode('$username:$appPassword'));
+    try {
+      await Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 20),
+          receiveTimeout: const Duration(seconds: 20),
+          headers: {'Authorization': 'Basic $credentials'},
+        ),
+      ).get('$base/wp-json/wp/v2/users/me');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        throw InvalidCredentialsException(
+          'Sul web serve un\'Application Password (WordPress > Utenti > '
+          'Profilo > Password applicazione), non la password di accesso.',
+        );
+      }
+      throw ConnectionException('di rete');
+    }
+
+    final session = WordPressSession(
+      username: username,
+      appPassword: appPassword,
+      siteUrl: siteUrl,
+      deviceId: await _getDeviceId(),
+    );
+    await SecureStorageService.saveWpSession(session);
+    _currentSession = session;
+    _autoConnectAttempts = 0;
+    _dioInstance = null;
+    _dioInitialized = false;
+    log.i('WordPress (web): login completato con Application Password');
+  }
 
   /// Login via /wp-login.php e estrazione cookie
   Future<Map<String, String>> _loginWithCookies(
@@ -499,7 +551,7 @@ class WordPressConnect implements AuthConnector {
   /// Ottiene un ID univoco per questo dispositivo
   Future<String> _getDeviceId() async {
     // Usa un identificatore basato sul platform
-    final platform = Platform.operatingSystem;
+    final platform = kIsWeb ? 'web' : Platform.operatingSystem;
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '$platform-$timestamp';
   }

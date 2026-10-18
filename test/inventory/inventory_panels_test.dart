@@ -296,10 +296,13 @@ void main() {
         _app(InventoryAddProductsDeltaPanel(plan: plan())),
       );
 
+      expect(find.text('Riepilogo carico'), findsOneWidget);
       expect(find.text('Righe: 2'), findsOneWidget);
       expect(find.text('Inseriti: 5'), findsOneWidget);
-      expect(find.text('Convalidati: 0'), findsOneWidget);
-      expect(find.text('Differenza: 5'), findsOneWidget);
+      // Senza ordine non c'e' convalida: niente "Convalidati" ne'
+      // "Differenza", che facevano sembrare mancante merce gia' caricata.
+      expect(find.textContaining('Convalidati'), findsNothing);
+      expect(find.textContaining('Differenza'), findsNothing);
     });
 
     testWidgets('ordine convalidato: differenza zero', (tester) async {

@@ -5,6 +5,9 @@ import '../login/jwt_api/adapter/platform_manager.dart';
 class Dipendente {
   final int id;
   final int wpUserId;
+
+  /// Sede dell'utente WordPress collegato (0 = nessuna assegnata).
+  final int siteId;
   final String nome;
   final String cognome;
   final String email;
@@ -31,6 +34,7 @@ class Dipendente {
   Dipendente({
     required this.id,
     this.wpUserId = 0,
+    this.siteId = 0,
     required this.nome,
     required this.cognome,
     required this.email,
@@ -60,6 +64,7 @@ class Dipendente {
     return Dipendente(
       id: (json['id'] as num?)?.toInt() ?? 0,
       wpUserId: (json['wp_user_id'] as num?)?.toInt() ?? 0,
+      siteId: (json['site_id'] as num?)?.toInt() ?? 0,
       nome: firstName,
       cognome: lastName,
       email: (json['email'] ?? '').toString(),
@@ -101,6 +106,7 @@ class Dipendente {
     return {
       'id': id,
       'wp_user_id': wpUserId,
+      'site_id': siteId,
       'nome': nome,
       'cognome': cognome,
       'email': email,
@@ -130,6 +136,9 @@ class Dipendente {
       'last_name': cognome.trim(),
       'email': email.trim(),
       'wp_user_id': wpUserId,
+      // La sede vive sull'utente WordPress: senza utente collegato non c'e'
+      // nessuno a cui assegnarla.
+      if (wpUserId > 0) 'site_id': siteId,
       'role_label': ruolo.trim(),
       'salary_cents': (stipendio * 100).round(),
       'salary_currency': stipendioValuta.trim().isEmpty

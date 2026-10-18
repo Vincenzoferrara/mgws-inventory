@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../inventory/inventory_site_panel.gui.dart';
+import '../login/mgws/query/query_mgws_inventory.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 import 'inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
 import '../traduzioni/estensioni.dart';
@@ -19,6 +22,31 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
   final _shelfController = TextEditingController();
   bool _didSeed = false;
   bool _saving = false;
+
+  /// Magazzini registrati sul server per la sede in uso. `null` finche' non
+  /// c'e' una sede o mentre si leggono.
+  List<MgwsInventoryWarehouse>? _magazzini;
+  bool _magazziniInCaricamento = false;
+
+  Future<void> _onSede(MgwsSiteStatus? stato) async {
+    if (stato == null) {
+      setState(() => _magazzini = null);
+      return;
+    }
+    setState(() => _magazziniInCaricamento = true);
+    final result = await QueryMgwsInventory().listWarehouses(
+      siteId: stato.siteId,
+    );
+    if (!mounted) return;
+    setState(() {
+      _magazziniInCaricamento = false;
+      _magazzini = result.success
+          ? (result.data ?? const <MgwsInventoryWarehouse>[])
+                .where((magazzino) => magazzino.active)
+                .toList()
+          : null;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -86,6 +114,49 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
+                  // La sede in uso vale anche qui: i magazzini che contano
+                  // sono quelli della sede, letti dal server.
+                  Card(
+                    child: Padding(
+                      padding: context.spacing.iL,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          InventorySitePanel(onStatusChanged: _onSede),
+                          if (_magazziniInCaricamento) ...[
+                            const SizedBox(height: 16),
+                            const LinearProgressIndicator(),
+                          ] else if (_magazzini != null) ...[
+                            const SizedBox(height: 16),
+                            Text(
+                              context.l10n.sedeMagazzini,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 8),
+                            if (_magazzini!.isEmpty)
+                              Text(context.l10n.sedeNessunMagazzino)
+                            else
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final magazzino in _magazzini!)
+                                    Chip(
+                                      avatar: const Icon(
+                                        Icons.warehouse_outlined,
+                                        size: 18,
+                                      ),
+                                      label: Text(magazzino.name),
+                                    ),
+                                ],
+                              ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Card(
                     child: Padding(
                       padding: context.spacing.iL,
@@ -98,9 +169,7 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settingsInventorySelectableHint,
-                          ),
+                          Text(context.l10n.settingsInventorySelectableHint),
                           const SizedBox(height: 16),
                           _OptionsField(
                             controller: _warehouseController,
@@ -138,7 +207,9 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                                       ),
                                     )
                                   : const Icon(Icons.save_outlined),
-                              label: Text(context.l10n.settingsInventorySaveOptions),
+                              label: Text(
+                                context.l10n.settingsInventorySaveOptions,
+                              ),
                             ),
                           ),
                         ],
@@ -164,7 +235,9 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                             children: [
                               if (settings.warehouseEnabled)
                                 _defaultSelector(
-                                  label: context.l10n.settingsInventoryDefaultWarehouse,
+                                  label: context
+                                      .l10n
+                                      .settingsInventoryDefaultWarehouse,
                                   options: settings.warehouseOptions,
                                   value: settings.defaultWarehouse,
                                   onChanged: (value) => settings.setDefaults(
@@ -176,7 +249,8 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                                 ),
                               if (settings.roomEnabled)
                                 _defaultSelector(
-                                  label: context.l10n.settingsInventoryDefaultRoom,
+                                  label:
+                                      context.l10n.settingsInventoryDefaultRoom,
                                   options: settings.roomOptions,
                                   value: settings.defaultRoom,
                                   onChanged: (value) => settings.setDefaults(
@@ -188,7 +262,8 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                                 ),
                               if (settings.rackEnabled)
                                 _defaultSelector(
-                                  label: context.l10n.settingsInventoryDefaultRack,
+                                  label:
+                                      context.l10n.settingsInventoryDefaultRack,
                                   options: settings.rackOptions,
                                   value: settings.defaultRack,
                                   onChanged: (value) => settings.setDefaults(
@@ -200,7 +275,9 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                                 ),
                               if (settings.shelfEnabled)
                                 _defaultSelector(
-                                  label: context.l10n.settingsInventoryDefaultShelf,
+                                  label: context
+                                      .l10n
+                                      .settingsInventoryDefaultShelf,
                                   options: settings.shelfOptions,
                                   value: settings.defaultShelf,
                                   onChanged: (value) => settings.setDefaults(

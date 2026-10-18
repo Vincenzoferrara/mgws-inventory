@@ -14,6 +14,8 @@
 // aveva prima, accanto a quello che lo aveva cambiato. La storia resta
 // intera e l'operatore vede entrambi i fatti.
 
+import 'package:intl/intl.dart';
+
 import '../login/mgws/query/query_mgws_inventory.dart';
 import 'inventory.code.dart';
 import 'inventory_module.code.dart';
@@ -208,9 +210,8 @@ class InventoryMovementGroup {
   /// un'operazione in cui due codici su cinque hanno perso la rotta resta
   /// annullabile per gli altri tre, e il dialogo mostra i due che restano
   /// indietro.
-  bool get canRevert => isMove
-      ? products.any((item) => item.hasRoute)
-      : products.isNotEmpty;
+  bool get canRevert =>
+      isMove ? products.any((item) => item.hasRoute) : products.isNotEmpty;
 
   /// Perche' l'annullamento non si puo' fare, quando non si puo' fare tutto.
   ///
@@ -302,8 +303,9 @@ class InventoryMovementProduct {
 
   /// "3 -> 5", la rotta di uno spostamento. Vuota quando non e' uno
   /// spostamento o quando MGWS non ha scritto la rotta.
-  String get routeText =>
-      warehouseFrom > 0 && warehouseTo > 0 ? '$warehouseFrom -> $warehouseTo' : '';
+  String get routeText => warehouseFrom > 0 && warehouseTo > 0
+      ? '$warehouseFrom -> $warehouseTo'
+      : '';
 
   /// `true` se questo prodotto puo' essere riportato indietro.
   ///
@@ -332,9 +334,7 @@ List<InventoryMovementProduct> _mergeProducts(List<MgwsMovement> movements) {
         .putIfAbsent('${item.productId}:${item.variationId}', () => [])
         .add(item);
   }
-  return [
-    for (final rows in byProduct.values) _toProduct(rows),
-  ];
+  return [for (final rows in byProduct.values) _toProduct(rows)];
 }
 
 /// Costruisce il prodotto dalle sue righe.
@@ -356,7 +356,8 @@ InventoryMovementProduct _toProduct(List<MgwsMovement> rows) {
   // che la merce cambia magazzino, quindi non si confonde con due movimenti
   // distinti dello stesso codetto finiti nella stessa operazione, che vanno
   // sommati per davvero.
-  final isRoute = warehouseFrom > 0 &&
+  final isRoute =
+      warehouseFrom > 0 &&
       warehouseTo > 0 &&
       rows.every((item) => item.warehouseFrom == warehouseFrom);
   // Una riga che non e' uno spostamento resta dove e', e la sua sede e' quella
@@ -374,10 +375,7 @@ InventoryMovementProduct _toProduct(List<MgwsMovement> rows) {
   return InventoryMovementProduct(
     productId: rows.first.productId,
     variationId: rows.first.variationId,
-    quantityDelta: rows.fold<int>(
-      0,
-      (sum, item) => sum + item.quantityDelta,
-    ),
+    quantityDelta: rows.fold<int>(0, (sum, item) => sum + item.quantityDelta),
     quantity: isRoute
         ? rows.first.quantityDelta.abs()
         : rows.fold<int>(0, (sum, item) => sum + item.quantityDelta.abs()),
@@ -1022,4 +1020,14 @@ class InventoryPanelSeed {
     details,
     for (final item in products) '${item.productId}:${item.variationId}',
   ]);
+}
+
+final DateFormat _formatoDataMovimento = DateFormat('dd/MM/yyyy HH:mm');
+
+/// MGWS scrive le date in GMT come "2026-09-27 15:47:09": per l'operatore
+/// diventano ora locale nel formato usato nel resto dell'app. Un valore che
+/// non si legge resta com'e', invece di sparire.
+String formatMovementDate(String gmt) {
+  final parsed = DateTime.tryParse('${gmt.trim().replaceFirst(' ', 'T')}Z');
+  return parsed == null ? gmt : _formatoDataMovimento.format(parsed.toLocal());
 }

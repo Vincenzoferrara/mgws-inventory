@@ -146,13 +146,13 @@ class _InventoryMovementDialog extends StatelessWidget {
         _chip(
           context,
           Icons.event,
-          '${context.l10n.commonDate} ${group.occurredAtGmt}',
+          '${context.l10n.commonDate} ${formatMovementDate(group.occurredAtGmt)}',
         ),
         _chip(
           context,
           Icons.history,
           '${context.l10n.inventoryEtichettaUltimaModifica} '
-          '${group.lastModifiedGmt}',
+          '${formatMovementDate(group.lastModifiedGmt)}',
           keyName: 'inventory-movement-last-modified',
         ),
         _chip(
@@ -247,7 +247,11 @@ class _InventoryMovementDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        line(Icons.help_outline, context.l10n.inventoryEtichettaMotivo, group.reason.trim()),
+        line(
+          Icons.help_outline,
+          context.l10n.inventoryEtichettaMotivo,
+          group.reason.trim(),
+        ),
         line(
           Icons.notes_outlined,
           context.l10n.inventoryLabelDettagli,
@@ -350,17 +354,13 @@ class _InventoryMovementDialog extends StatelessWidget {
               : movementSigned(product.quantityDelta),
         ),
         if (group.isMove)
-          'route': Text(
-            product.routeText.isEmpty ? '-' : product.routeText,
-          )
+          'route': Text(product.routeText.isEmpty ? '-' : product.routeText)
         else ...{
           'stock': Text(
             '${movementStock(product.stockBefore)} -> '
             '${movementStock(product.stockAfter)}',
           ),
-          'location': Text(
-            _locationText(product.movements.first.location),
-          ),
+          'location': Text(_locationText(product.movements.first.location)),
         },
         'effect': Text(product.movements.first.stockEffect),
         'reason': Text(product.movements.first.reasonCode),
@@ -407,14 +407,17 @@ class _InventoryMovementDialog extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          // Wrap e non Row: su telefono i tre pulsanti non stanno in una
+          // riga e andavano in overflow; cosi' vanno a capo.
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(context.l10n.commonClose),
               ),
-              const SizedBox(width: 8),
               OutlinedButton.icon(
                 key: const ValueKey('inventory-movement-revert'),
                 onPressed: canRevert
@@ -425,7 +428,6 @@ class _InventoryMovementDialog extends StatelessWidget {
                 icon: const Icon(Icons.undo),
                 label: Text(context.l10n.inventoryAnnullaMovimento),
               ),
-              const SizedBox(width: 8),
               FilledButton.icon(
                 key: const ValueKey('inventory-movement-reopen'),
                 onPressed: canReopen

@@ -24,9 +24,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../login/gui/login.code.dart';
 import '../theme/theme.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 import '../traduzioni/estensioni.dart';
+import 'inventory_site_panel.gui.dart';
 import 'inventory.code.dart';
 import 'inventory_add_products.gui.dart';
 import 'inventory_module.code.dart';
@@ -106,16 +107,9 @@ class _InventoryPageState extends State<InventoryPage> {
   /// sedi diverse per lo stesso movimento.
   final _siteController = TextEditingController();
 
-  /// Sede di riferimento dell'operatore, se ne ha una.
-  ///
-  /// Va letta dal profilo e non dedotta dal prodotto: chi ha una sede di
-  /// riferimento lavora su quella e il backend rifiuta ogni altra, quindi
-  /// lasciargliela scegliere sarebbe proporre una scelta che non puo' fare. Il
-  /// valore arriva presto e in modo asincrono, per cui i pannelli devono poter
-  /// lavorare anche senza: per quello il campo resta semplicemente vuoto e
-  /// obbligatorio, che e' la condizione in cui nessuna sede e' stata dichiarata
-  /// e quindi va detta.
-  int _operatorSiteId = 0;
+  /// Sede in uso, dal server. Finche' e' `null` l'inventario non si usa:
+  /// il pannello della sede mostra perche' e, a chi puo', come rimediare.
+  MgwsSiteStatus? _site;
 
   /// Riapertura di un movimento dal ledger, in attesa che il pannello di
   /// destinazione la consumi.
@@ -144,27 +138,13 @@ class _InventoryPageState extends State<InventoryPage> {
     _catalogController =
         widget.catalogController ?? InventoryQuickLoadCatalogController();
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkReadiness());
-    _loadOperatorSite();
   }
 
-  /// Legge la sede di riferimento dal profilo WordPress.
-  ///
-  /// Va letta qui e non passata dalla Home perche' la pagina e' costruita anche
-  /// da solo, e un valore che arriva da fuori sarebbe nullo in quel caso: la
-  /// sede di un operatore che non e' quella non e' una sede, e' una sede
-  /// sbagliata. Costa una richiesta per apertura di pagina; il pannello resta
-  /// utilizzabile mentre arriva, perche' il campo sede obbligatorio e' gia' la
-  /// condizione giusta quando la sede non e' ancora nota.
-  Future<void> _loadOperatorSite() async {
-    final profile = await loginCode.currentUserProfile();
-    if (!mounted) return;
-    final siteId = profile?.defaultSiteId ?? 0;
-    if (siteId == 0 || siteId == _operatorSiteId) return;
-    setState(() => _operatorSiteId = siteId);
-    // Il campo della pagina lo scrive come farebbe l'operatore: i pannelli
-    // che lo leggono (magazzini da caricare, piano da inviare) reagiscono da
-    // soli al cambiamento.
-    _siteController.text = '$siteId';
+  /// La sede arriva dal pannello: i pannelli dei moduli la leggono dal
+  /// campo condiviso per costruire il piano da inviare.
+  void _onSiteStatus(MgwsSiteStatus? status) {
+    setState(() => _site = status);
+    _siteController.text = status == null ? '' : '${status.siteId}';
   }
 
   @override
@@ -215,97 +195,98 @@ class _InventoryPageState extends State<InventoryPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [colors.gradientStart, colors.gradientEnd],
+      // Lo Scaffold da' al corpo un'altezza massima, non fissa, e lo scroll
+      // dentro si ferma all'altezza del contenuto: senza expand lo sfondo
+      // finiva a meta' schermo quando il modulo e' corto.
+      body: SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [colors.gradientStart, colors.gradientEnd],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isSmall = constraints.maxWidth < 760;
-              return SingleChildScrollView(
-                key: const ValueKey('inventory-shell'),
-                padding: EdgeInsets.all(isSmall ? 12 : 16),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1180),
-                    child: Column(
-                      key: ValueKey(
-                        isSmall
-                            ? 'inventory-small-layout'
-                            : 'inventory-desktop-layout',
-                      ),
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _BackendStatus(controller: _controller),
-                        const SizedBox(height: 10),
-                        // Selettore modulo: mostra solo il pannello
-                        // selezionato, le operazioni non sono mai visibili
-                        // insieme.
-                        _ModuleSelector(
-                          activeModule: _activeModule,
-                          onModuleChanged: _setModule,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isSmall = constraints.maxWidth < 760;
+                return SingleChildScrollView(
+                  key: const ValueKey('inventory-shell'),
+                  padding: EdgeInsets.all(isSmall ? 12 : 16),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1180),
+                      child: Column(
+                        key: ValueKey(
+                          isSmall
+                              ? 'inventory-small-layout'
+                              : 'inventory-desktop-layout',
                         ),
-                        // La sede sta sopra i dettagli e vale per i moduli
-                        // che la usano (Aggiungi e Rettifica): Sposta sceglie
-                        // sede d'arrivo riga per riga e non ne ha una sola.
-                        // Sul ledger non ha dove finire, quindi non c'e'.
-                        if (_activeModule == InventoryModule.add ||
-                            _activeModule == InventoryModule.fix) ...[
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _BackendStatus(controller: _controller),
                           const SizedBox(height: 10),
-                          _ModuleSiteField(
-                            controller: _siteController,
-                            operatorSiteId: _operatorSiteId,
-                          ),
+                          // La sede e' obbligatoria: senza, i moduli non
+                          // compaiono e il pannello dice perche'.
+                          InventorySitePanel(onStatusChanged: _onSiteStatus),
+                          if (_site != null) ...[
+                            const SizedBox(height: 10),
+                            // Selettore modulo: mostra solo il pannello
+                            // selezionato, le operazioni non sono mai visibili
+                            // insieme.
+                            _ModuleSelector(
+                              activeModule: _activeModule,
+                              onModuleChanged: _setModule,
+                            ),
+                            // I dettagli stanno sopra il pannello, non dentro:
+                            // valgono per il movimento qualunque modulo sia attivo.
+                            // Sul ledger non hanno dove finire, quindi non ci sono:
+                            // un campo che raccoglie testo e poi lo perde e' peggio
+                            // di non averlo.
+                            if (_activeModule?.writesStock == true) ...[
+                              const SizedBox(height: 10),
+                              _ModuleDetailsCard(
+                                controller: _detailsController,
+                              ),
+                            ],
+                            const SizedBox(height: 10),
+                            if (_activeModule == InventoryModule.add)
+                              InventoryAddProductsPanel(
+                                controller: _addProductsController,
+                                supplierController: _supplierController,
+                                detailsController: _detailsController,
+                                siteController: _siteController,
+                              ),
+                            if (_activeModule == InventoryModule.fix)
+                              InventoryRettificaPanel(
+                                controller: _rettificaController,
+                                catalogController: _catalogController,
+                                detailsController: _detailsController,
+                                siteController: _siteController,
+                                seed: _pendingSeed,
+                              ),
+                            if (_activeModule == InventoryModule.move)
+                              InventoryMovePanel(
+                                controller: _moveController,
+                                catalogController: _catalogController,
+                                detailsController: _detailsController,
+                                seed: _pendingSeed,
+                              ),
+                            if (_activeModule == InventoryModule.ledger)
+                              InventoryMovementLedgerPanel(
+                                controller: _movementController,
+                                onReopen: _resumeMovement,
+                              ),
+                            if (_activeModule == null) _EmptyModulePrompt(),
+                          ],
                         ],
-                        // I dettagli stanno sopra il pannello, non dentro:
-                        // valgono per il movimento qualunque modulo sia attivo.
-                        // Sul ledger non hanno dove finire, quindi non ci sono:
-                        // un campo che raccoglie testo e poi lo perde e' peggio
-                        // di non averlo.
-                        if (_activeModule?.writesStock == true) ...[
-                          const SizedBox(height: 10),
-                          _ModuleDetailsCard(controller: _detailsController),
-                        ],
-                        const SizedBox(height: 10),
-                        if (_activeModule == InventoryModule.add)
-                          InventoryAddProductsPanel(
-                            controller: _addProductsController,
-                            supplierController: _supplierController,
-                            detailsController: _detailsController,
-                            siteController: _siteController,
-                          ),
-                        if (_activeModule == InventoryModule.fix)
-                          InventoryRettificaPanel(
-                            controller: _rettificaController,
-                            catalogController: _catalogController,
-                            detailsController: _detailsController,
-                            siteController: _siteController,
-                            seed: _pendingSeed,
-                          ),
-                        if (_activeModule == InventoryModule.move)
-                          InventoryMovePanel(
-                            controller: _moveController,
-                            catalogController: _catalogController,
-                            detailsController: _detailsController,
-                            seed: _pendingSeed,
-                          ),
-                        if (_activeModule == InventoryModule.ledger)
-                          InventoryMovementLedgerPanel(
-                            controller: _movementController,
-                            onReopen: _resumeMovement,
-                          ),
-                        if (_activeModule == null) _EmptyModulePrompt(),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -387,7 +368,8 @@ class _ModuleSelector extends StatelessWidget {
           // Descrizione del modulo selezionato, sotto la barra: resta in
           // piccolo perche' ripete quello che la scelta del modulo ha gia'
           // detto.
-          if (activeModule != null && activeModule != InventoryModule.choose) ...[
+          if (activeModule != null &&
+              activeModule != InventoryModule.choose) ...[
             const SizedBox(height: 6),
             Text(
               inventoryModuleDescription(context.l10n, activeModule!) ?? '',
@@ -397,53 +379,6 @@ class _ModuleSelector extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// Campo "Sede *" unico per la pagina.
-///
-/// Sta sopra i dettagli e vale per il modulo attivo quando questo la usa
-/// (Aggiungi e Rettifica): e' la stessa operazione di magazzino, quindi la si
-/// dichiara una volta e non in due pannelli. Chi ha una sede di riferimento la
-/// trova gia' scritta e non puo' cambiarla: il backend accetta solo quella per
-/// quell'operatore, quindi offrire la scelta proporrebbe una scelta che non
-/// puo' fare. Quando la sede non e' assegnata, il campo e' suo e la sede va
-/// dichiarata: senza, il backend rifiuta il totale.
-class _ModuleSiteField extends StatelessWidget {
-  const _ModuleSiteField({
-    required this.controller,
-    required this.operatorSiteId,
-  });
-
-  final TextEditingController controller;
-  final int operatorSiteId;
-
-  @override
-  Widget build(BuildContext context) {
-    final locked = operatorSiteId > 0;
-    return Container(
-      key: const ValueKey('inventory-site-card'),
-      child: TextField(
-        key: const ValueKey('inventory-site-field'),
-        controller: controller,
-        readOnly: locked,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: context.l10n.inventoryLabelSede,
-          hintText: locked
-              ? context.l10n.inventoryHintSedeRiferimento
-              : context.l10n.inventoryHintNumeroSede,
-          prefixIcon: Icon(
-            locked ? Icons.lock_outline : Icons.public,
-            size: 18,
-          ),
-          helperText: locked
-              ? context.l10n.inventoryHelperSedeBloccata
-              : context.l10n.inventoryHelperSedeObbligatoria,
-          helperMaxLines: 2,
-        ),
       ),
     );
   }
@@ -498,17 +433,21 @@ class _EmptyModulePrompt extends StatelessWidget {
               color: theme.colorScheme.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
+            // Testi nei colori del tema per il testo, non nel primario
+            // trasparente: rosso scuro su fondo scuro non si leggeva.
             Text(
               context.l10n.inventoryEmptyStateTitle,
+              textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               context.l10n.inventoryEmptyStateDescription,
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],

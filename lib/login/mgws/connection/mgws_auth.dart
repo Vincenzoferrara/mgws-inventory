@@ -20,6 +20,9 @@ enum MgwsUnavailableReason {
 
   /// Le rotte rispondono ma il servizio e' disabilitato (`enabled: false`).
   serviceDisabled,
+
+  /// Il plugin dichiara una versione piu' vecchia di [MgwsAuth.minPluginVersion].
+  pluginOutdated,
 }
 
 /// Verifica di stato dei servizi MGWS.
@@ -34,8 +37,13 @@ class MgwsAuth {
   final WooConnect _woo;
   final AppLogger _log = AppLogger();
 
-  static const String _inventoryStatusPath = '/wp-json/mgws/v1/inventory/status';
+  static const String _inventoryStatusPath =
+      '/wp-json/mgws/v1/inventory/status';
   static const String _loyaltyStatusPath = '/wp-json/mgws/v1/loyalty/status';
+
+  /// Versione minima del plugin MGWS che questa app sa usare. Va alzata
+  /// quando l'app comincia a dipendere da una rotta o da un campo nuovo.
+  static const String minPluginVersion = '2.4.0';
 
   /// Verifica MGWS e restituisce l'esito con il motivo dell'eventuale
   /// fallimento. Non solleva eccezioni: un errore di rete e' un esito
@@ -67,6 +75,21 @@ class MgwsAuth {
       // loyalty sono le due funzionalita' che i moduli MGWS espongono, e
       // un'installazione parziale produrrebbe errori a meta' operazione.
       final failed = results.where((result) => !result.usable).toList();
+
+      // I plugin precedenti a `plugin_version` non lo inviano: in quel caso
+      // la versione non e' nota e non blocca, per non rompere i siti che
+      // funzionano gia'.
+      final installata = results.first.pluginVersion;
+      if (installata != null &&
+          !isVersionAtLeast(installata, minPluginVersion)) {
+        _log.w('Plugin MGWS $installata < $minPluginVersion richiesta');
+        return MgwsAuthResult(
+          available: false,
+          reason: MgwsUnavailableReason.pluginOutdated,
+          pluginVersion: installata,
+        );
+      }
+
       if (failed.isEmpty) {
         return const MgwsAuthResult(
           available: true,
@@ -100,9 +123,12 @@ class MgwsAuth {
       if (response.statusCode != 200) {
         return const _ServiceProbe(reachable: false, usable: false);
       }
+      final data = response.data;
+      final version = data is Map ? data['plugin_version'] : null;
       return _ServiceProbe(
         reachable: true,
-        usable: isServiceBodyUsable(response.data),
+        usable: isServiceBodyUsable(data),
+        pluginVersion: version is String && version.isNotEmpty ? version : null,
       );
     } catch (_) {
       return const _ServiceProbe(reachable: false, usable: false);
@@ -131,21 +157,53 @@ class MgwsAuth {
     if (ok is bool) return ok;
     return true;
   }
+
+  /// Confronta due versioni `x.y.z`; le parti mancanti o non numeriche
+  /// valgono 0 (`2.3` equivale a `2.3.0`, `2.4.0-beta` a `2.4.0`).
+  static bool isVersionAtLeast(String version, String minimum) {
+    List<int> parti(String v) => v
+        .split(RegExp(r'[^0-9]+'))
+        .where((p) => p.isNotEmpty)
+        .map(int.parse)
+        .toList();
+    final a = parti(version);
+    final b = parti(minimum);
+    for (var i = 0; i < 3; i++) {
+      final x = i < a.length ? a[i] : 0;
+      final y = i < b.length ? b[i] : 0;
+      if (x != y) return x > y;
+    }
+    return true;
+  }
 }
 
 class MgwsAuthResult {
-  const MgwsAuthResult({required this.available, required this.reason});
+  const MgwsAuthResult({
+    required this.available,
+    required this.reason,
+    this.pluginVersion,
+  });
 
   final bool available;
   final MgwsUnavailableReason reason;
+
+  /// Versione dichiarata dal plugin, se la invia.
+  final String? pluginVersion;
 }
 
 class _ServiceProbe {
-  const _ServiceProbe({required this.reachable, required this.usable});
+  const _ServiceProbe({
+    required this.reachable,
+    required this.usable,
+    this.pluginVersion,
+  });
 
   /// La rotta ha risposto qualcosa, anche se il servizio e' spento.
   final bool reachable;
 
   /// Il servizio dichiara di poter operare.
   final bool usable;
+
+  /// Versione del plugin letta dalla rotta di stato, se presente.
+  final String? pluginVersion;
 }

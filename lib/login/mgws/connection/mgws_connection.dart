@@ -23,6 +23,7 @@ class MgwsConnection {
   bool _isConnected = false;
   bool _isChecked = false;
   MgwsUnavailableReason _lastFailure = MgwsUnavailableReason.unknown;
+  String? _pluginVersion;
   Future<bool>? _inFlight;
 
   /// Generazione dello stato, incrementata a ogni invalidazione.
@@ -45,6 +46,9 @@ class MgwsConnection {
 
   /// Motivo dell'ultimo fallimento, per l'avviso all'utente.
   MgwsUnavailableReason get lastFailure => _lastFailure;
+
+  /// Versione del plugin MGWS dichiarata dal sito all'ultima verifica.
+  String? get pluginVersion => _pluginVersion;
 
   /// Verifica MGWS colpendo la rete e aggiorna lo stato.
   ///
@@ -71,6 +75,7 @@ class MgwsConnection {
 
     _isConnected = result.available;
     _isChecked = true;
+    _pluginVersion = result.pluginVersion;
     _lastFailure = result.available
         ? MgwsUnavailableReason.unknown
         : result.reason;

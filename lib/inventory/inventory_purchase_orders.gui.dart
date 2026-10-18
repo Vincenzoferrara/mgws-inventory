@@ -495,12 +495,12 @@ class _InventoryPurchaseOrderPanelState
     children: [
       _field(
         _lineProductController,
-        'Product ID *',
+        '${context.l10n.inventoryEtichettaProductId} *',
         'inventory-po-line-product-field',
       ),
       _field(
         _lineVariationController,
-        'Variation ID',
+        context.l10n.inventoryEtichettaVariationId,
         'inventory-po-line-variation-field',
       ),
       _field(

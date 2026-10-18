@@ -145,12 +145,12 @@ class InventoryCountLineFields extends StatelessWidget {
       ),
       inventoryCountField(
         productController,
-        'Product ID',
+        context.l10n.inventoryEtichettaProductId,
         'inventory-count-product-field',
       ),
       inventoryCountField(
         variationController,
-        'Variation ID',
+        context.l10n.inventoryEtichettaVariationId,
         'inventory-count-variation-field',
       ),
       inventoryCountField(
@@ -170,7 +170,7 @@ class InventoryCountLineFields extends StatelessWidget {
       ),
       inventoryCountField(
         reasonController,
-        'Reason',
+        context.l10n.inventoryEtichettaReason,
         'inventory-count-reason-field',
       ),
       ElevatedButton.icon(

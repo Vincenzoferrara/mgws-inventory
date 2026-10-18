@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../login/jwt_api/query_wordpress/query_user_wordpress.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 import '../theme/theme.dart';
 import 'dipendenti.code.dart'; // Import the code file for logic
 import '../traduzioni/estensioni.dart';
@@ -175,9 +176,10 @@ class _DipendentiGuiState extends State<DipendentiGui> {
                                       ),
                                     if (dipendente.produzioneTotale != null)
                                       Text(
-                                        context.l10n.employeesTotalProductionValue(
-                                          dipendente.produzioneTotale!,
-                                        ),
+                                        context.l10n
+                                            .employeesTotalProductionValue(
+                                              dipendente.produzioneTotale!,
+                                            ),
                                         style: TextStyle(
                                           color: context.colors.infoColor,
                                         ),
@@ -316,10 +318,39 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
   final _ruoloController = TextEditingController();
   final _stipendioController = TextEditingController();
 
+  /// Sedi del negozio e sede scelta per l'utente collegato. Con piu' sedi e'
+  /// obbligatoria: senza, quell'utente non puo' usare l'inventario.
+  MgwsSiteStatus? _sedi;
+  int? _siteId;
+
+  bool get _haUtente =>
+      (int.tryParse(_wpUserIdController.text.trim()) ?? 0) > 0;
+
+  Future<void> _caricaSedi() async {
+    try {
+      final stato = await QueryMgwsSite().getMySite();
+      if (!mounted) return;
+      setState(() {
+        _sedi = stato;
+        if (_siteId == null && stato.sites.length == 1) {
+          _siteId = stato.sites.first.id;
+        }
+      });
+    } on MgwsSiteException {
+      // Senza sedi leggibili il campo non compare: il server rifiutera'
+      // comunque un dipendente senza sede quando e' obbligatoria.
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _wpUserIdController.addListener(() => setState(() {}));
+    _caricaSedi();
     if (widget.isEdit && widget.dipendente != null) {
+      if (widget.dipendente!.siteId > 0) {
+        _siteId = widget.dipendente!.siteId;
+      }
       _nomeController.text = widget.dipendente!.nome;
       _cognomeController.text = widget.dipendente!.cognome;
       _emailController.text = widget.dipendente!.email;
@@ -468,6 +499,45 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
                           return null;
                         },
                       ),
+                      if (_sedi != null && _sedi!.sites.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<int>(
+                          key: const ValueKey('employee-site-field'),
+                          initialValue:
+                              _sedi!.sites.any((sede) => sede.id == _siteId)
+                              ? _siteId
+                              : null,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: context.l10n.sedeDipendente,
+                            helperText: !_haUtente
+                                ? context.l10n.sedeDipendenteSenzaUtente
+                                : (_sedi!.sitesCount > 1
+                                      ? context.l10n.sedeDipendenteObbligatoria
+                                      : null),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixIcon: const Icon(Icons.store_outlined),
+                          ),
+                          items: [
+                            for (final sede in _sedi!.sites)
+                              DropdownMenuItem(
+                                value: sede.id,
+                                child: Text(sede.name),
+                              ),
+                          ],
+                          onChanged: _haUtente
+                              ? (value) => setState(() => _siteId = value)
+                              : null,
+                          validator: (value) =>
+                              _haUtente &&
+                                  _sedi!.sitesCount > 1 &&
+                                  value == null
+                              ? context.l10n.sedeDipendenteObbligatoria
+                              : null,
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _ruoloController,
@@ -531,6 +601,7 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
       final dipendente = Dipendente(
         id: widget.isEdit ? widget.dipendente!.id : 0,
         wpUserId: wpUserId,
+        siteId: wpUserId > 0 ? (_siteId ?? 0) : 0,
         nome: _nomeController.text,
         cognome: _cognomeController.text,
         email: _emailController.text,
@@ -546,8 +617,7 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.service.errore ??
-                  context.l10n.employeesOperationFailed,
+              widget.service.errore ?? context.l10n.employeesOperationFailed,
             ),
           ),
         );
@@ -1021,6 +1091,7 @@ class _DipendenteAccessoPermessiCardState
     'mgws_stock_read',
     'mgws_stock_move',
     'mgws_order_accept',
+    'mgws_reports_read',
   };
 
   final QueryUserWordPress _userApi = PlatformManager.permessiUtente;
@@ -1216,9 +1287,8 @@ class _DipendenteAccessoPermessiCardState
           final truncated = (item['truncated_key'] ?? '').toString();
           return _CredenzialeRiga(
             id: keyId.toString(),
-            titolo:
-                (item['description'] ?? context.l10n.employeesNoDescription)
-                    .toString(),
+            titolo: (item['description'] ?? context.l10n.employeesNoDescription)
+                .toString(),
             dettaglio: truncated.isEmpty
                 ? permissions.toUpperCase()
                 : '${permissions.toUpperCase()} - ...$truncated',
@@ -1270,9 +1340,7 @@ class _DipendenteAccessoPermessiCardState
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.employeesRevokeTitle),
-        content: Text(
-          context.l10n.employeesRevokeBody(riga.titolo),
-        ),
+        content: Text(context.l10n.employeesRevokeBody(riga.titolo)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -1544,7 +1612,10 @@ class _DipendenteAccessoPermessiCardState
         else ...[
           if (_appPasswords.isNotEmpty) ...[
             // "Application Password" e il nome della feature WordPress: non si traduce.
-            Text(context.l10n.employeesApplicationPassword, style: const TextStyle(fontSize: 13)),
+            Text(
+              context.l10n.employeesApplicationPassword,
+              style: const TextStyle(fontSize: 13),
+            ),
             ..._appPasswords.map(
               (riga) => _buildCredenzialeTile(riga, isAppPassword: true),
             ),
