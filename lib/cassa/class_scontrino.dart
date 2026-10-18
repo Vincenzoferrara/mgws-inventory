@@ -1,6 +1,7 @@
 // class_scontrino.dart
 
 import '../prodotti/class_prodotti.dart';
+import 'coupon_cassa.dart';
 import '../traduzioni/estensioni.dart';
 
 enum TipoOperazioneCassa { vendita, reso, cambio }
@@ -122,6 +123,11 @@ class Scontrino {
   String? couponCode;
   double couponSconto;
 
+  /// Regole del coupon applicato in questa sessione di cassa. Non viene
+  /// serializzato: uno scontrino riletto dallo storico conserva solo
+  /// `couponCode` e `couponSconto`, che non vanno ricalcolati.
+  CouponCassa? coupon;
+
   // Per calcolo resto
   double importoRicevuto;
 
@@ -171,23 +177,43 @@ class Scontrino {
     // Subtotale netto = vendite - resi, con sconti di riga già applicati.
     subtotale = righe.fold(0.0, (sum, riga) => sum + riga.subtotaleSigned);
 
-    // Calcola sconto totale (percentuale + fisso + coupon)
-    double scontoTotale = sconto + couponSconto;
-    if (scontoPercentuale > 0 && subtotale > 0) {
-      scontoTotale += subtotale * (scontoPercentuale / 100);
-    }
+    final couponAttivo = coupon;
+    if (couponAttivo != null) couponSconto = couponAttivo.calcolaSconto(righe);
 
-    // Subtotale dopo sconti
-    double subtotaleScontato = subtotale - scontoTotale;
-    if (subtotaleScontato < 0) subtotaleScontato = 0;
+    // Un saldo negativo è un rimborso (reso, o cambio con resi maggiori
+    // delle vendite): resta negativo, perché checkout e storico lo
+    // riconoscono da totale < 0. Gli sconti globali valgono solo sulle
+    // vendite, quindi su un rimborso non si applicano.
+    double subtotaleScontato = subtotale;
+    if (subtotale > 0) {
+      // Calcola sconto totale (percentuale + fisso + coupon)
+      subtotaleScontato -= _scontoGlobale;
+      if (subtotaleScontato < 0) subtotaleScontato = 0;
+    }
 
     // Calcola IVA (l'IVA è già inclusa nel prezzo, scorporiamo per mostrare)
     // Formula: IVA = Prezzo - (Prezzo / (1 + aliquota/100))
-    iva = subtotaleScontato - (subtotaleScontato / (1 + aliquotaIva / 100));
+    iva = _arrotondaCentesimi(
+      subtotaleScontato - (subtotaleScontato / (1 + aliquotaIva / 100)),
+    );
 
-    // Totale finale
-    totale = subtotaleScontato;
+    // Totale finale, al centesimo: evita residui come 0.30000000000000004
+    // che falserebbero il confronto con l'importo ricevuto.
+    totale = _arrotondaCentesimi(subtotaleScontato);
   }
+
+  /// Sconto globale (fisso + coupon + percentuale), solo su saldo positivo.
+  double get _scontoGlobale {
+    if (subtotale <= 0) return 0;
+    double scontoGlobale = sconto + couponSconto;
+    if (scontoPercentuale > 0) {
+      scontoGlobale += subtotale * (scontoPercentuale / 100);
+    }
+    return scontoGlobale;
+  }
+
+  static double _arrotondaCentesimi(double valore) =>
+      (valore * 100).round() / 100;
 
   /// Applica uno sconto percentuale globale
   void applicaScontoPercentualeGlobale(double percentuale) {
@@ -207,11 +233,7 @@ class Scontrino {
       0.0,
       (sum, riga) => sum + riga.totaleSconto,
     );
-    double scontoGlobale = sconto + couponSconto;
-    if (scontoPercentuale > 0 && subtotale > 0) {
-      scontoGlobale += subtotale * (scontoPercentuale / 100);
-    }
-    return scontoRighe + scontoGlobale;
+    return scontoRighe + _scontoGlobale;
   }
 
   double get totaleVendite {
@@ -273,6 +295,7 @@ class Scontrino {
     stato = 'aperto';
     couponCode = null;
     couponSconto = 0.0;
+    coupon = null;
     importoRicevuto = 0.0;
     rettifiche.clear();
   }
@@ -589,7 +612,7 @@ class RigaScontrino {
     // Applica sconto fisso
     totaleRiga -= scontoRiga;
 
-    subtotale = totaleRiga > 0 ? totaleRiga : 0;
+    subtotale = totaleRiga > 0 ? (totaleRiga * 100).round() / 100 : 0;
   }
 
   /// Applica uno sconto percentuale alla riga

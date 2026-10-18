@@ -2,9 +2,12 @@
 
 import 'dart:async';
 
+import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart' show WooCoupon;
+
 import '../prodotti/class_prodotti.dart';
 import '../prodotti/prodotti_gestisci/product_picker.dart';
 import 'class_scontrino.dart';
+import 'coupon_cassa.dart';
 import 'checkout_payload.dart';
 import 'cassa_metrics.dart';
 import 'fiscal_register/fiscal_register_repository.dart';
@@ -1161,54 +1164,52 @@ class CassaController {
     AppLogger().d('🏷️ Sconto globale ${percentuale}% applicato');
   }
 
-  /// Applica un coupon WooCommerce
-  Future<bool> applicaCoupon(String codice) async {
+  /// Applica un coupon WooCommerce.
+  ///
+  /// Restituisce `null` se il coupon è stato applicato, altrimenti il motivo
+  /// del rifiuto da mostrare all'operatore.
+  Future<String?> applicaCoupon(String codice) async {
+    final codiceNormalizzato = codice.trim().toLowerCase();
     try {
-      AppLogger().i('🎟️ Verifica coupon: $codice');
+      AppLogger().i('🎟️ Verifica coupon: $codiceNormalizzato');
 
-      // Verifica il coupon su WooCommerce
-      final coupon = await PlatformManager.coupon.getCouponByCode(codice);
-
-      if (coupon == null) {
-        AppLogger().w('⚠️ Coupon non trovato: $codice');
-        return false;
+      final WooCoupon coupon;
+      try {
+        coupon = await PlatformManager.coupon.getCouponByCode(
+          codiceNormalizzato,
+        );
+      } catch (e) {
+        AppLogger().w('⚠️ Coupon non trovato: $codiceNormalizzato');
+        return 'coupon non trovato';
       }
 
-      // Verifica validità
-      if (coupon.dateExpires != null &&
-          coupon.dateExpires!.isBefore(DateTime.now())) {
-        AppLogger().w('⚠️ Coupon scaduto: $codice');
-        return false;
+      final regole = CouponCassa.daWoo(coupon, codiceNormalizzato);
+      final motivo = regole.motivoNonValido(
+        righe: _scontrinoCorrente.righe,
+        emailCliente: _scontrinoCorrente.clienteEmail,
+      );
+      if (motivo != null) {
+        AppLogger().w('⚠️ Coupon $codiceNormalizzato rifiutato: $motivo');
+        return motivo;
       }
 
-      // Calcola lo sconto
-      double scontoCoupon = 0.0;
-      if (coupon.discountType == 'percent') {
-        scontoCoupon =
-            _scontrinoCorrente.subtotale *
-            (double.tryParse(coupon.amount ?? '0') ?? 0) /
-            100;
-      } else {
-        scontoCoupon = double.tryParse(coupon.amount ?? '0') ?? 0;
-      }
-
-      // Applica il coupon
-      _scontrinoCorrente.couponCode = codice;
-      _scontrinoCorrente.couponSconto = scontoCoupon;
+      _scontrinoCorrente.coupon = regole;
+      _scontrinoCorrente.couponCode = codiceNormalizzato;
       _scontrinoCorrente.calcolaTotale();
 
       AppLogger().i(
-        '✅ Coupon applicato: $codice - Sconto: €${scontoCoupon.toStringAsFixed(2)}',
+        '✅ Coupon applicato: $codiceNormalizzato - Sconto: €${_scontrinoCorrente.couponSconto.toStringAsFixed(2)}',
       );
-      return true;
+      return null;
     } catch (e) {
       AppLogger().e('❌ Errore applicazione coupon', e);
-      return false;
+      return 'errore di verifica del coupon';
     }
   }
 
   /// Rimuove il coupon applicato
   void rimuoviCoupon() {
+    _scontrinoCorrente.coupon = null;
     _scontrinoCorrente.couponCode = null;
     _scontrinoCorrente.couponSconto = 0.0;
     _scontrinoCorrente.calcolaTotale();

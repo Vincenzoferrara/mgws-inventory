@@ -80,7 +80,10 @@ Map<String, dynamic> buildMgwsCheckoutPayload({
     'totals': {
       'subtotale': scontrino.subtotale,
       'iva': scontrino.iva,
+      'aliquota_iva': scontrino.aliquotaIva,
       'sconto': scontrino.sconto,
+      if ((scontrino.couponCode ?? '').isNotEmpty)
+        'coupon_code': scontrino.couponCode,
       'coupon_sconto': scontrino.couponSconto,
       'totale': scontrino.totale,
       'totale_vendite': scontrino.totaleVendite,

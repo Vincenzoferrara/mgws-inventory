@@ -2017,9 +2017,9 @@ class _LatoDestroWidget extends StatelessWidget {
 
               Navigator.pop(context);
 
-              final success = await controller.applicaCoupon(codice);
+              final motivo = await controller.applicaCoupon(codice);
               if (context.mounted) {
-                if (success) {
+                if (motivo == null) {
                   onStateChanged();
                   NotificationService.instance.messageBar(
                     'successo',
@@ -2030,7 +2030,7 @@ class _LatoDestroWidget extends StatelessWidget {
                   NotificationService.instance.messageBar(
                     'errore',
                     'cassa',
-                    'Coupon "$codice" non valido',
+                    'Coupon "$codice" non valido: $motivo',
                   );
                 }
               }
