@@ -608,15 +608,23 @@ class WooQueryOrdini {
   /// Helper: ottiene il conteggio ordini per stato
   Future<int> _getOrderCountByStatus(String status) async {
     try {
-      final response = await _woo.dio.get(
-        '/orders',
-        queryParameters: {'per_page': 1, 'status': status},
-      );
-
-      return int.tryParse(response.headers.value('x-wp-total') ?? '0') ?? 0;
+      return await countOrdersByStatus(status);
     } catch (e) {
       return 0;
     }
+  }
+
+  /// Numero di ordini nello stato WooCommerce [status] (es. `processing`,
+  /// `on-hold`). Chiede una sola riga e legge il totale da `x-wp-total`, quindi
+  /// e leggero da ripetere. A differenza di [getOrderStats] gli errori
+  /// arrivano al chiamante: la campanella notifiche non deve scambiare un
+  /// errore di rete per "nessun ordine".
+  Future<int> countOrdersByStatus(String status) async {
+    final response = await _woo.dio.get(
+      '/orders',
+      queryParameters: {'per_page': 1, 'status': status},
+    );
+    return int.tryParse(response.headers.value('x-wp-total') ?? '0') ?? 0;
   }
 
   /// Operazioni batch sugli ordini

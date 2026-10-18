@@ -69,6 +69,10 @@ class NotificationService {
             borderRadius: BorderRadius.circular(10),
           ),
           duration: style.duration,
+          // Con un'azione (Copia) Flutter tiene lo SnackBar a schermo finche
+          // non lo si chiude: il messaggio restava sopra la barra delle
+          // pagine. Deve sparire dopo `duration` come gli altri.
+          persist: false,
         ),
       );
   }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'cassa_settings.dart';
+import '../notification/app_notification.dart';
+import '../notification/notification_bell.gui.dart';
+import '../notification/notification_center.dart';
 import '../theme/theme.dart';
 import '../traduzioni/estensioni.dart';
 import '../traduzioni/locale_settings.dart';
@@ -72,15 +75,15 @@ class _GeneralSettingsTabState extends State<GeneralSettingsTab> {
                 await settings.setValori(sede: _sedeController.text);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.l10n.settingsGeneralSaved),
-                    ),
+                    SnackBar(content: Text(context.l10n.settingsGeneralSaved)),
                   );
                 }
               },
               icon: const Icon(Icons.save),
               label: Text(context.l10n.commonSave),
             ),
+            const SizedBox(height: 28),
+            const _SezioneNotifiche(),
           ],
         ),
       ),
@@ -161,13 +164,48 @@ class _SezioneLingua extends StatelessWidget {
           onChanged: (valore) {
             if (valore == null) return;
             impostazioni.impostaLingua(
-              valore == _valoreSistema
-                  ? null
-                  : Locale(valore),
+              valore == _valoreSistema ? null : Locale(valore),
             );
           },
         ),
       ],
+    );
+  }
+}
+
+/// Interruttori dei tipi di notifica mostrati nella campanella in AppBar.
+class _SezioneNotifiche extends StatelessWidget {
+  const _SezioneNotifiche();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final center = NotificationCenter.instance;
+    return ListenableBuilder(
+      listenable: center,
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.notificationsSettingsTitle,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.l10n.notificationsSettingsDescription,
+            style: theme.textTheme.bodySmall,
+          ),
+          for (final kind in AppNotificationKind.values)
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(notificationKindLabel(context.l10n, kind)),
+              value: center.isEnabled(kind),
+              onChanged: (enabled) => center.setEnabled(kind, enabled),
+            ),
+        ],
+      ),
     );
   }
 }
