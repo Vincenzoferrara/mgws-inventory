@@ -28,6 +28,8 @@ class UpdaterService {
       'https://api.github.com/repos/Vincenzoferrara/mgws-inventory/releases/latest';
   static const String _lastShownReleaseNotesKey =
       'updater_last_shown_release_notes_version';
+  static const String _lastNotifiedUpdateKey =
+      'updater_last_notified_update_version';
   static const String _defaultUpdateUrl = String.fromEnvironment(
     'UPDATE_URL',
     defaultValue:
@@ -40,6 +42,19 @@ class UpdaterService {
     if (kIsWeb) return false;
     return Platform.isWindows || Platform.isLinux;
   }
+
+  /// Android riceve gli aggiornamenti da F-Droid, Obtainium o dallo store:
+  /// l'app non scarica ne installa nulla, avvisa soltanto che esiste una
+  /// versione piu recente.
+  static bool get isNotifyOnlyPlatform {
+    if (kIsWeb) return false;
+    return Platform.isAndroid;
+  }
+
+  /// La piattaforma ha almeno un controllo aggiornamenti, con installazione
+  /// (desktop Velopack) o con il solo avviso (Android).
+  static bool get canCheckForUpdates =>
+      isDesktopUpdateSupported || isNotifyOnlyPlatform;
 
   static String platformLabel(AppLocalizations l10n) {
     if (kIsWeb) return 'Web';
@@ -82,9 +97,58 @@ class UpdaterService {
     return info.version;
   }
 
+  /// Controlla se esiste una versione piu recente di quella installata.
+  ///
+  /// Su desktop chiede a Velopack; su Android confronta la versione installata
+  /// con l'ultima release GitHub, che e' la stessa da cui partono F-Droid e
+  /// Obtainium.
   Future<bool> checkForUpdates() async {
+    if (isNotifyOnlyPlatform) {
+      return await latestNewerRelease() != null;
+    }
     _ensureSupported();
     return isUpdateAvailable(url: updateUrl);
+  }
+
+  /// Ultima release GitHub se e' piu recente della versione installata.
+  Future<UpdaterReleaseNotes?> latestNewerRelease() async {
+    final release = await _fetchLatestRelease();
+    if (release == null) return null;
+    final installed = _normalizeVersion(await installedVersion());
+    if (!isNewerVersion(release.version, installed)) return null;
+    return release;
+  }
+
+  /// Versione piu recente installabile, o `null` se l'app e aggiornata o la
+  /// piattaforma non prevede aggiornamenti. Non ricorda nulla: la usa anche
+  /// la campanella notifiche, che resta accesa finche non si aggiorna.
+  Future<String?> availableUpdateVersion() async {
+    if (!canCheckForUpdates) return null;
+    if (isNotifyOnlyPlatform) {
+      return (await latestNewerRelease())?.version;
+    }
+    if (!_runtimeInitialized) return null;
+    if (!await isUpdateAvailable(url: updateUrl)) return null;
+    // Il numero di versione serve per l'avviso e per non ripeterlo.
+    return (await _fetchLatestRelease())?.version;
+  }
+
+  /// Controllo silenzioso all'avvio: restituisce la versione da segnalare
+  /// solo la prima volta che compare, cosi l'avviso non si ripete a ogni
+  /// apertura dell'app per la stessa release.
+  Future<String?> pendingUpdateNotice() async {
+    try {
+      final version = await availableUpdateVersion();
+      if (version == null) return null;
+
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(_lastNotifiedUpdateKey) == version) return null;
+      await prefs.setString(_lastNotifiedUpdateKey, version);
+      return version;
+    } catch (error) {
+      log.d('Startup update check failed: $error');
+      return null;
+    }
   }
 
   Future<void> installAndRestart() async {
@@ -102,40 +166,81 @@ class UpdaterService {
   }
 
   Future<UpdaterReleaseNotes?> releaseNotesForInstalledUpdate() async {
-    if (!isDesktopUpdateSupported) return null;
+    if (!canCheckForUpdates) return null;
 
     try {
-      final installed = await installedVersion();
-      final currentVersion = _normalizeVersion(installed);
-      final response = await http.get(Uri.parse(_repoApiLatestRelease));
+      final currentVersion = _normalizeVersion(await installedVersion());
+      final release = await _fetchLatestRelease();
+      if (release == null ||
+          !_matchesInstalledVersion(release.version, currentVersion)) {
+        return null;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final lastShown = prefs.getString(_lastShownReleaseNotesKey);
+      await prefs.setString(_lastShownReleaseNotesKey, release.version);
+      // Prima installazione: non c'e' stato alcun aggiornamento da raccontare.
+      if (lastShown == null || lastShown == release.version) return null;
+      return release;
+    } catch (error) {
+      log.d('Release notes check failed: $error');
+      return null;
+    }
+  }
+
+  Future<UpdaterReleaseNotes?> _fetchLatestRelease() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(_repoApiLatestRelease),
+            headers: const {'Accept': 'application/vnd.github+json'},
+          )
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) return null;
 
       final data = jsonDecode(response.body);
       if (data is! Map<String, dynamic>) return null;
 
       final tag = (data['tag_name'] as String? ?? '').trim();
-      final releaseVersion = _normalizeVersion(tag);
-      if (!_matchesInstalledVersion(releaseVersion, currentVersion)) {
-        return null;
-      }
-
-      final prefs = await SharedPreferences.getInstance();
-      if (prefs.getString(_lastShownReleaseNotesKey) == releaseVersion) {
-        return null;
-      }
-
-      await prefs.setString(_lastShownReleaseNotesKey, releaseVersion);
+      final version = _normalizeVersion(tag);
+      if (version.isEmpty) return null;
       final htmlUrl = (data['html_url'] as String? ?? '').trim();
       return UpdaterReleaseNotes(
-        version: releaseVersion,
+        version: version,
         title: (data['name'] as String? ?? tag).trim(),
         body: (data['body'] as String? ?? '').trim(),
         url: Uri.tryParse(htmlUrl) ?? Uri.parse(_repoApiLatestRelease),
       );
     } catch (error) {
-      log.d('Release notes check failed: $error');
+      log.d('Latest release fetch failed: $error');
       return null;
     }
+  }
+
+  /// `true` se [candidate] e' una versione successiva a [current].
+  ///
+  /// Confronta i segmenti numerici uno a uno (`1.0.10` > `1.0.9`); i
+  /// segmenti mancanti valgono zero e quelli non numerici vengono ignorati.
+  @visibleForTesting
+  static bool isNewerVersion(String candidate, String current) {
+    final a = _versionParts(_normalizeVersion(candidate));
+    final b = _versionParts(_normalizeVersion(current));
+    if (a.isEmpty || b.isEmpty) return false;
+    final length = a.length > b.length ? a.length : b.length;
+    for (var i = 0; i < length; i++) {
+      final x = i < a.length ? a[i] : 0;
+      final y = i < b.length ? b[i] : 0;
+      if (x != y) return x > y;
+    }
+    return false;
+  }
+
+  static List<int> _versionParts(String version) {
+    final core = version.split('-').first;
+    return [
+      for (final part in core.split('.'))
+        if (int.tryParse(part) != null) int.parse(part),
+    ];
   }
 
   static String _normalizeVersion(String version) {

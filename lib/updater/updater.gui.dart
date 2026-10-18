@@ -35,7 +35,6 @@ class _UpdaterPageState extends State<UpdaterPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final canInstall = _logic.status == UpdaterStatus.updateAvailable;
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.updaterTitolo)),
@@ -71,7 +70,11 @@ class _UpdaterPageState extends State<UpdaterPage> {
                         ? context.l10n.updaterLoading
                         : _logic.installedVersion,
                   ),
-                  _InfoRow(label: context.l10n.updaterUpdateSource, value: _logic.updateUrl),
+                  if (!_logic.isNotifyOnly)
+                    _InfoRow(
+                      label: context.l10n.updaterUpdateSource,
+                      value: _logic.updateUrl,
+                    ),
                   if (_logic.error != null) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -101,13 +104,14 @@ class _UpdaterPageState extends State<UpdaterPage> {
                 icon: const Icon(Icons.search),
                 label: Text(context.l10n.updaterControlla),
               ),
-              FilledButton.tonalIcon(
-                onPressed: canInstall && !_logic.isBusy
-                    ? () => _logic.installAndRestart(context.l10n)
-                    : null,
-                icon: const Icon(Icons.restart_alt),
-                label: Text(context.l10n.updaterInstalla),
-              ),
+              if (!_logic.isNotifyOnly)
+                FilledButton.tonalIcon(
+                  onPressed: _logic.canInstall && !_logic.isBusy
+                      ? () => _logic.installAndRestart(context.l10n)
+                      : null,
+                  icon: const Icon(Icons.restart_alt),
+                  label: Text(context.l10n.updaterInstalla),
+                ),
             ],
           ),
           const SizedBox(height: 16),

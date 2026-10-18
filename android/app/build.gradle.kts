@@ -45,10 +45,14 @@ android {
 
     buildTypes {
         release {
+            // Senza key.properties la release resta non firmata (come la
+            // vuole F-Droid, che firma da sé) invece di finire firmata con
+            // la chiave di debug, che non si può aggiornare né distribuire.
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
-                signingConfigs.getByName("debug")
+                logger.warn("key.properties assente: APK release NON firmato")
+                null
             }
         }
     }
@@ -58,10 +62,6 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
     }
-}
-
-dependencies {
-    implementation("com.android.billingclient:billing:7.1.1")
 }
 
 flutter {
