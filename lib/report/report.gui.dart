@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:report_flutter/report_flutter.dart';
-import '../notification/notification_service.dart';
-import '../theme/theme.dart';
-import '../prodotti/class_prodotti.dart';
-import 'report.code.dart';
-import '../traduzioni/estensioni.dart';
 
-class EtichettePage extends StatefulWidget {
-  const EtichettePage({super.key});
+import '../theme/theme.dart';
+import '../traduzioni/estensioni.dart';
+import 'print_job.dart';
+import 'print_library.dart';
+import 'print_tab.gui.dart';
+import 'report.code.dart';
+import 'template_tab.gui.dart';
+
+/// "Templates and print" section: the Print tab prints labels, signs and
+/// reports; the Template tab manages templates, categories and paper formats.
+/// Everything is stored by MGWS, so the section opens only when MGWS works.
+class PrintCenterPage extends StatefulWidget {
+  const PrintCenterPage({super.key});
 
   @override
-  State<EtichettePage> createState() => _EtichettePageState();
+  State<PrintCenterPage> createState() => _PrintCenterPageState();
 }
 
-class _EtichettePageState extends State<EtichettePage>
+class _PrintCenterPageState extends State<PrintCenterPage>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  late TabController _tabController;
-  final EtichetteController _controller = EtichetteService().controller;
-
-  // Report Designer
-  late ReportTemplate _reportTemplate;
+  final PrintCenterController _controller = PrintCenterController();
+  late final TabController _tabs = TabController(length: 2, vsync: this);
 
   @override
   bool get wantKeepAlive => true;
@@ -27,229 +29,117 @@ class _EtichettePageState extends State<EtichettePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-
-    // Inizializza template di default
-    _reportTemplate = ReportTemplate(
-      id: 'etichetta_default',
-      name: 'Etichetta Prodotto',
-      itemWidth: 50,
-      itemHeight: 30,
-    );
+    printLibrary.addListener(_controller.syncWithLibrary);
+    pendingPrintJob.addListener(_takePendingJob);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      printLibrary.load(context.l10n);
+      _takePendingJob();
+    });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    printLibrary.removeListener(_controller.syncWithLibrary);
+    pendingPrintJob.removeListener(_takePendingJob);
+    _controller.dispose();
+    _tabs.dispose();
     super.dispose();
+  }
+
+  /// A job sent from another section (e.g. the products list) opens the
+  /// Print tab on it.
+  void _takePendingJob() {
+    final job = pendingPrintJob.value;
+    if (job == null) return;
+    pendingPrintJob.value = null;
+    _controller.startJob(job);
+    _tabs.animateTo(0);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final customColors = Theme.of(context).extension<AppColorExtension>()!;
-
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.reportEtichette),
         automaticallyImplyLeading: false,
+        title: Text(l10n.reportPrintCenterTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.reportReload,
+            icon: const Icon(Icons.refresh),
+            onPressed: () => printLibrary.load(l10n, force: true),
+          ),
+        ],
         bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.create), text: 'Crea'),
-            Tab(icon: Icon(Icons.preview), text: 'Visualizza'),
+          controller: _tabs,
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.print_outlined),
+              text: l10n.reportTabPrint,
+            ),
+            Tab(
+              icon: const Icon(Icons.dashboard_customize_outlined),
+              text: l10n.reportTabTemplates,
+            ),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildCreaTab(customColors),
-          _buildVisualizzaTab(customColors),
-        ],
-      ),
-    );
-  }
-
-  /// Tab per creare la grafica di una singola etichetta con il designer drag-and-drop
-  Widget _buildCreaTab(AppColorExtension customColors) {
-    return ReportBuilder(
-      template: _reportTemplate,
-      sampleData: ProdottoGlobal(),
-      onTemplateChanged: (template) {
-        setState(() => _reportTemplate = template);
-      },
-      onSave: (template) {
-        NotificationService.instance.messageBar(
-          'successo',
-          'report',
-          'Template "${template.name}" salvato!',
-        );
-        // TODO: Salvare template su storage
-      },
-    );
-  }
-
-  /// Tab per visualizzare la coda di stampa
-  Widget _buildVisualizzaTab(AppColorExtension customColors) {
-    final etichette = _controller.etichetteDaStampare;
-
-    return Column(
-      children: [
-        // Barra azioni
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+      body: ListenableBuilder(
+        listenable: Listenable.merge([printLibrary, _controller]),
+        builder: (context, _) {
+          if (!printLibrary.loaded) {
+            return _LoadState(
+              loading: printLibrary.loading || printLibrary.error == null,
+              onRetry: () => printLibrary.load(l10n, force: true),
+            );
+          }
+          return TabBarView(
+            controller: _tabs,
             children: [
-              Text(
-                'Coda di stampa: ${etichette.length} etichette',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Spacer(),
-              if (etichette.isNotEmpty) ...[
-                ElevatedButton.icon(
-                  onPressed: _stampaEtichette,
-                  icon: const Icon(Icons.print),
-                  label: Text(context.l10n.commonPrint),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: _esportaPdf,
-                  icon: const Icon(Icons.save),
-                  label: Text(context.l10n.reportEsportaPdf),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: _svuotaCoda,
-                  icon: const Icon(Icons.delete_sweep),
-                  tooltip: context.l10n.reportSvuotaCoda,
-                  color: customColors.errorColorStatus,
-                ),
-              ],
+              PrintTab(controller: _controller),
+              TemplateTab(library: printLibrary),
             ],
-          ),
-        ),
-
-        const Divider(height: 1),
-
-        // Lista etichette
-        Expanded(
-          child: etichette.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.label_off,
-                        size: 64,
-                        color: context.colors.neutralColor,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nessuna etichetta in coda',
-                        style: TextStyle(color: context.colors.subtitleColor),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Aggiungi etichette dalla tab "Crea"',
-                        style: TextStyle(
-                          color: context.colors.subtitleColor,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: etichette.length,
-                  itemBuilder: (context, index) {
-                    final etichetta = etichette[index];
-                    return Card(
-                      child: ListTile(
-                        leading: CircleAvatar(child: Text('${index + 1}')),
-                        title: Text(etichetta.nome),
-                        subtitle: Text(
-                          '${etichetta.prezzo.toStringAsFixed(2)} EUR'
-                          '${etichetta.barcodeInterno != null ? ' - ${context.l10n.reportBarcodeInterno(etichetta.barcodeInterno!)}' : ''}',
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            color: customColors.errorColorStatus,
-                          ),
-                          onPressed: () => _rimuoviEtichetta(index),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  void _rimuoviEtichetta(int index) {
-    _controller.rimuoviEtichetta(index);
-    setState(() {});
-  }
-
-  void _svuotaCoda() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.reportConfermaSvuotaTitolo),
-        content: Text(context.l10n.reportConfermaSvuotaTesto),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              _controller.svuotaCoda();
-              setState(() {});
-              Navigator.pop(context);
-            },
-            child: Text(context.l10n.reportSvuota),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
+}
 
-  Future<void> _stampaEtichette() async {
-    try {
-      await _controller.stampa();
-    } catch (e) {
-      if (mounted) {
-        NotificationService.instance.messageBar(
-          'errore',
-          'report',
-          'Errore durante la stampa: $e',
-        );
-      }
-    }
-  }
+class _LoadState extends StatelessWidget {
+  const _LoadState({required this.loading, required this.onRetry});
 
-  Future<void> _esportaPdf() async {
-    try {
-      final filePath = await _controller.esportaPdf();
-      if (mounted) {
-        NotificationService.instance.messageBar(
-          'successo',
-          'report',
-          'PDF salvato: $filePath',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        NotificationService.instance.messageBar(
-          'errore',
-          'report',
-          'Errore durante l\'esportazione: $e',
-        );
-      }
-    }
+  final bool loading;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    if (loading) return const Center(child: CircularProgressIndicator());
+    return Center(
+      child: Padding(
+        padding: context.spacing.iXL,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cloud_off_outlined,
+              size: 48,
+              color: context.colors.subtitleColor,
+            ),
+            SizedBox(height: context.spacing.m),
+            Text(l10n.reportLoadError, textAlign: TextAlign.center),
+            SizedBox(height: context.spacing.m),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.reportReload),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

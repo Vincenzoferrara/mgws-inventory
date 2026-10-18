@@ -1,241 +1,222 @@
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'dart:io';
-import 'class_report.dart';
 
-/// Controller per la gestione delle etichette
-class EtichetteController {
-  final List<Etichetta> _etichetteDaStampare = [];
-  EtichetteSettings _settings = const EtichetteSettings();
+import '../traduzioni/estensioni.dart';
+import 'paper_format.dart';
+import 'print_job.dart';
+import 'print_library.dart';
+import 'print_pdf_renderer.dart';
+import 'print_sample_data.dart';
+import 'print_template.dart';
 
-  List<Etichetta> get etichetteDaStampare =>
-      List.unmodifiable(_etichetteDaStampare);
-  EtichetteSettings get settings => _settings;
+/// State of the Print tab: the chosen template, the print settings and, when
+/// labels were requested from the products list, the products to label.
+///
+/// Print settings (copies, used positions, paper) belong to one print only:
+/// they never change the stored template.
+class PrintCenterController extends ChangeNotifier {
+  PrintCenterController({PrintLibrary? library})
+    : library = library ?? printLibrary;
 
-  /// Aggiunge un'etichetta alla coda di stampa
-  void aggiungiEtichetta(Etichetta etichetta) {
-    _etichetteDaStampare.add(etichetta);
+  final PrintLibrary library;
+
+  PrintTemplate? _template;
+  String? _paperOverrideId;
+  int _copies = 1;
+  List<int> _skippedPerSheet = const [];
+  PrintJob? _job;
+
+  PrintTemplate? get template => _template;
+  int get copies => _job?.totalLabels ?? _copies;
+
+  /// Positions skipped on each sheet that will be printed (one entry per
+  /// sheet). Empty for rolls and single-page formats.
+  List<int> get sheetSkips {
+    final format = paper;
+    if (format == null || _template?.kind == PrintTemplateKind.report)
+      return const [];
+    return format.sheetSkips(copies, _skippedPerSheet);
   }
 
-  /// Aggiunge multiple etichette
-  void aggiungiEtichette(List<Etichetta> etichette) {
-    _etichetteDaStampare.addAll(etichette);
+  PrintJob? get job => _job;
+
+  /// True while the chosen template is shown with its print settings.
+  bool get isPrinting => _template != null;
+
+  /// Templates the current job can use: product labels only when printing
+  /// labels for real products.
+  bool accepts(PrintTemplate template) =>
+      _job == null || template.kind == PrintTemplateKind.productLabel;
+
+  PaperFormat? get paper {
+    final template = _template;
+    if (template == null) return null;
+    return library.paperFormatOf(template, overrideId: _paperOverrideId);
   }
 
-  /// Rimuove un'etichetta dalla coda
-  void rimuoviEtichetta(int index) {
-    if (index >= 0 && index < _etichetteDaStampare.length) {
-      _etichetteDaStampare.removeAt(index);
+  void chooseTemplate(PrintTemplate template) {
+    _template = template;
+    _paperOverrideId = null;
+    _resetQuantities();
+    notifyListeners();
+  }
+
+  /// Back to the template list.
+  void closeTemplate() {
+    _template = null;
+    notifyListeners();
+  }
+
+  void setPaper(String formatId) {
+    _paperOverrideId = formatId;
+    _resetQuantities();
+    notifyListeners();
+  }
+
+  void setCopies(int value) {
+    _copies = value.clamp(1, 999);
+    notifyListeners();
+  }
+
+  /// Sets how many positions are already used at the start of sheet
+  /// [sheetIndex] (0-based).
+  void setSkippedCells(int sheetIndex, int value) {
+    final maxSkipped = (paper?.cellsPerPage ?? 1) - 1;
+    final skips = List<int>.of(sheetSkips);
+    while (skips.length <= sheetIndex) {
+      skips.add(0);
     }
+    skips[sheetIndex] = value.clamp(0, maxSkipped);
+    _skippedPerSheet = skips;
+    notifyListeners();
   }
 
-  /// Svuota la coda di stampa
-  void svuotaCoda() {
-    _etichetteDaStampare.clear();
+  /// Starts printing labels for real products. A chosen template that is not
+  /// a product label is dropped.
+  void startJob(PrintJob job) {
+    _job = job;
+    if (_template != null && !accepts(_template!)) _template = null;
+    _skippedPerSheet = const [];
+    notifyListeners();
   }
 
-  /// Aggiorna le impostazioni
-  void aggiornaSettings(EtichetteSettings newSettings) {
-    _settings = newSettings;
-  }
-
-  /// Genera il PDF delle etichette
-  Future<Uint8List> generaPdf() async {
-    final pdf = pw.Document();
-
-    final pageFormat = PdfPageFormat(
-      _settings.larghezzaEtichetta *
-              PdfPageFormat.mm *
-              _settings.etichettaPerRiga +
-          20 * PdfPageFormat.mm,
-      _settings.altezzaEtichetta *
-              PdfPageFormat.mm *
-              _settings.etichettaPerColonna +
-          20 * PdfPageFormat.mm,
-      marginAll: 5 * PdfPageFormat.mm,
-    );
-
-    // Calcola quante etichette per pagina
-    final etichettaPerPagina =
-        _settings.etichettaPerRiga * _settings.etichettaPerColonna;
-    final numPagine = (_etichetteDaStampare.length / etichettaPerPagina).ceil();
-
-    for (int pagina = 0; pagina < numPagine; pagina++) {
-      final startIndex = pagina * etichettaPerPagina;
-      final endIndex = (startIndex + etichettaPerPagina).clamp(
-        0,
-        _etichetteDaStampare.length,
-      );
-      final etichettePagina = _etichetteDaStampare.sublist(
-        startIndex,
-        endIndex,
-      );
-
-      pdf.addPage(
-        pw.Page(
-          pageFormat: pageFormat,
-          build: (pw.Context context) {
-            return pw.GridView(
-              crossAxisCount: _settings.etichettaPerRiga,
-              childAspectRatio:
-                  _settings.larghezzaEtichetta / _settings.altezzaEtichetta,
-              children: etichettePagina
-                  .map((e) => _buildEtichettaPdf(e))
-                  .toList(),
-            );
-          },
-        ),
-      );
+  /// Adds the lines of [more] that are not in the labels yet and returns how
+  /// many were added. Without a job yet, it starts one: the template stays
+  /// when it is a product label.
+  int addToJob(PrintJob more) {
+    final current = _job;
+    if (current == null) {
+      startJob(more);
+      return more.items.length;
     }
-
-    return pdf.save();
+    final merged = current.merge(more);
+    _job = merged;
+    notifyListeners();
+    return merged.items.length - current.items.length;
   }
 
-  /// Costruisce una singola etichetta per il PDF
-  pw.Widget _buildEtichettaPdf(Etichetta etichetta) {
-    return pw.Container(
-      width: _settings.larghezzaEtichetta * PdfPageFormat.mm,
-      height: _settings.altezzaEtichetta * PdfPageFormat.mm,
-      padding: pw.EdgeInsets.only(
-        top: _settings.margineSup * PdfPageFormat.mm,
-        bottom: _settings.margineInf * PdfPageFormat.mm,
-        left: _settings.margineSx * PdfPageFormat.mm,
-        right: _settings.margineDx * PdfPageFormat.mm,
-      ),
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
-      ),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          // Nome prodotto
-          pw.Text(
-            etichetta.nome,
-            style: pw.TextStyle(
-              fontSize: _settings.fontSizeNome,
-              fontWeight: pw.FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: pw.TextOverflow.clip,
+  /// Removes one product or variant from the labels to print.
+  void removeJobItem(String itemKey) {
+    final job = _job;
+    if (job == null) return;
+    _job = job.without(itemKey);
+    notifyListeners();
+  }
+
+  void clearJob() {
+    _job = null;
+    _resetQuantities();
+    notifyListeners();
+  }
+
+  /// The templates were reloaded or changed: keep showing the stored version
+  /// of the chosen one, or go back to the list if it was deleted.
+  void syncWithLibrary() {
+    final template = _template;
+    if (template == null) return;
+    _template = library.templates
+        .where((entry) => entry.id == template.id)
+        .firstOrNull;
+    notifyListeners();
+  }
+
+  PrintRequest request(
+    AppLocalizations l10n, {
+    bool preview = false,
+    bool singleCell = false,
+  }) {
+    final template = _template!;
+    final job = _job;
+    List<Map<String, dynamic>>? cells;
+    if (job != null && template.kind == PrintTemplateKind.productLabel) {
+      final labels = job.expanded;
+      final source = singleCell && labels.isNotEmpty ? [labels.first] : labels;
+      cells = [
+        for (final item in source)
+          PrintSampleData.labelData(
+            item,
+            l10n.localeName,
+            separator: template.variantSeparator,
           ),
-          pw.SizedBox(height: 2),
-
-          // Riga con taglia e colore
-          if (_settings.mostraTaglia || _settings.mostraColore)
-            pw.Row(
-              children: [
-                if (_settings.mostraTaglia && etichetta.taglia != null)
-                  pw.Text(
-                    'Tg: ${etichetta.taglia}',
-                    style: const pw.TextStyle(fontSize: 8),
-                  ),
-                if (_settings.mostraTaglia &&
-                    _settings.mostraColore &&
-                    etichetta.taglia != null &&
-                    etichetta.colore != null)
-                  pw.Text(' | ', style: const pw.TextStyle(fontSize: 8)),
-                if (_settings.mostraColore && etichetta.colore != null)
-                  pw.Text(
-                    'Col: ${etichetta.colore}',
-                    style: const pw.TextStyle(fontSize: 8),
-                  ),
-              ],
-            ),
-
-          // Barcode interno
-          if (_settings.mostraBarcodeInterno &&
-              etichetta.barcodeInterno != null)
-            pw.Text(
-              'Barcode interno: ${etichetta.barcodeInterno}',
-              style: const pw.TextStyle(fontSize: 7),
-            ),
-
-          pw.Spacer(),
-
-          // Riga inferiore con prezzo e QR/Barcode
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: pw.CrossAxisAlignment.end,
-            children: [
-              if (_settings.mostraPrezzo)
-                pw.Text(
-                  '${etichetta.prezzo.toStringAsFixed(2)} EUR',
-                  style: pw.TextStyle(
-                    fontSize: _settings.fontSizePrezzo,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              if (_settings.mostraQrCode)
-                pw.BarcodeWidget(
-                  barcode: pw.Barcode.qrCode(),
-                  data: etichetta.generaContenutoQr(),
-                  width: _settings.dimensioneQr * PdfPageFormat.mm,
-                  height: _settings.dimensioneQr * PdfPageFormat.mm,
-                )
-              else if (_settings.mostraBarcode &&
-                  etichetta.barcodeInterno != null)
-                pw.BarcodeWidget(
-                  barcode: pw.Barcode.code128(),
-                  data: etichetta.barcodeInterno!,
-                  width: _settings.dimensioneQr * PdfPageFormat.mm * 2,
-                  height: _settings.dimensioneQr * PdfPageFormat.mm * 0.6,
-                ),
-            ],
-          ),
-        ],
-      ),
+      ];
+    }
+    return PrintRequest(
+      template: template,
+      paper: paper!,
+      l10n: l10n,
+      localeName: l10n.localeName,
+      copies: singleCell ? 1 : _copies,
+      cellData: cells,
+      skippedPerSheet: singleCell ? const [] : _skippedPerSheet,
+      showCutGuides: preview,
+      singleCellPage: singleCell,
     );
   }
 
-  /// Stampa direttamente sulla stampante
-  Future<void> stampa() async {
-    final pdfData = await generaPdf();
+  /// True when there is something to print (a job may have every quantity
+  /// set to zero).
+  bool get canPrint =>
+      _template != null && (_job == null || _job!.totalLabels > 0);
+
+  Future<void> printSelected(AppLocalizations l10n) async {
+    final bytes = await PrintPdfRenderer.render(request(l10n));
+    final format = paper!;
     await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdfData,
-      name: 'Etichette_${DateTime.now().millisecondsSinceEpoch}',
+      name: _fileName,
+      // Labels and signs carry their own page size: the document is not
+      // re-laid out on the printer format, or labels drift off the sheet.
+      format: PdfPageFormat(
+        format.pageWidthMm * PdfPageFormat.mm,
+        format.pageHeightMm * PdfPageFormat.mm,
+      ),
+      dynamicLayout: false,
+      onLayout: (_) async => bytes,
     );
   }
 
-  /// Esporta il PDF come file
-  Future<String> esportaPdf() async {
-    final pdfData = await generaPdf();
-    final directory = await getApplicationDocumentsDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath = '${directory.path}/etichette_$timestamp.pdf';
-    final file = File(filePath);
-    await file.writeAsBytes(pdfData);
-    return filePath;
+  Future<void> shareSelected(AppLocalizations l10n) async {
+    final bytes = await PrintPdfRenderer.render(request(l10n));
+    await Printing.sharePdf(bytes: bytes, filename: '$_fileName.pdf');
   }
 
-  /// Condivide il PDF
-  Future<void> condividiPdf() async {
-    final filePath = await esportaPdf();
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(filePath)], subject: 'Etichette Prodotti'),
-    );
+  String get _fileName {
+    final name = (_template?.name ?? 'print')
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    return name.isEmpty ? 'print' : name;
   }
 
-  /// Anteprima di stampa
-  Future<void> mostraAnteprima(BuildContext context) async {
-    final pdfData = await generaPdf();
-    await Printing.sharePdf(
-      bytes: pdfData,
-      filename: 'etichette_anteprima.pdf',
-    );
+  void _resetQuantities() {
+    final format = paper;
+    _skippedPerSheet = const [];
+    // Adhesive sheets default to a full sheet, everything else to one copy.
+    _copies =
+        format != null &&
+            format.kind == PrintTemplateKind.productLabel &&
+            format.isMultiCellSheet
+        ? format.cellsPerPage
+        : 1;
   }
-}
-
-/// Servizio singleton per la gestione delle etichette
-class EtichetteService {
-  static final EtichetteService _instance = EtichetteService._internal();
-  factory EtichetteService() => _instance;
-  EtichetteService._internal();
-
-  final EtichetteController _controller = EtichetteController();
-  EtichetteController get controller => _controller;
 }
