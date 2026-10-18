@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../login/gui/login.code.dart';
 import '../login/mgws/connection/mgws_auth.dart';
 import '../log_viewer/app_logger.dart';
+import '../notification/notification_center.dart';
 import '../utenti/class_user_global.dart';
 
 const double homeSmallScreenBreakpoint = 768;
@@ -151,6 +152,8 @@ class HomeLogic extends ChangeNotifier {
 
   Future<void> onLoginSuccess() async {
     _emit();
+    // Ordini e scorte si leggono solo con la sessione WooCommerce attiva.
+    NotificationCenter.instance.refresh();
     await _loadCurrentUser();
     _emit();
   }
@@ -178,6 +181,7 @@ class HomeLogic extends ChangeNotifier {
   Future<void> logout() async {
     await loginCode.logout();
     _currentUser = null;
+    NotificationCenter.instance.refresh();
     _emit();
   }
 

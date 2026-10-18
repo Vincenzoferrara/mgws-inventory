@@ -370,11 +370,11 @@
   "@homeSottotitoloCarteFedelta": {
     "description": "Subtitle of the loyalty cards section"
   },
-  "homeTitoloReport": "Reports",
+  "homeTitoloReport": "Templates and print",
   "@homeTitoloReport": {
     "description": "Title of the reports section"
   },
-  "homeSottotitoloReport": "View reports",
+  "homeSottotitoloReport": "Labels, signs and reports",
   "@homeSottotitoloReport": {
     "description": "Subtitle of the reports section"
   },
@@ -446,7 +446,7 @@
   "@updaterCanaliGestiti": {
     "description": "Title of the section listing the update channels"
   },
-  "updaterCanaliDescrizione": "Velopack handles Windows and Linux AppImage. Android, iOS, apt and AUR are handled by separate channels.",
+  "updaterCanaliDescrizione": "Velopack installs updates on Windows and Linux AppImage. On Android the app only notifies: F-Droid, Obtainium or the store perform the update. iOS, apt and AUR are handled by their own channels.",
   "@updaterCanaliDescrizione": {
     "description": "Explanation of which platforms the updater supports"
   },
@@ -1077,38 +1077,9 @@
   "@logRicaricaLog": {
     "description": "Label of the button that reloads the log"
   },
-  "reportEtichette": "Labels",
-  "@reportEtichette": {
-    "description": "Title of the labels screen"
-  },
-  "reportSvuotaCoda": "Empty queue",
-  "@reportSvuotaCoda": {
-    "description": "Tooltip and title of the action that empties the label queue"
-  },
-  "reportBarcodeInterno": "Internal barcode: {barcode}",
-  "@reportBarcodeInterno": {
-    "description": "Label of the internal barcode of a label",
-    "placeholders": {
-      "barcode": {
-        "type": "String"
-      }
-    }
-  },
-  "reportConfermaSvuotaTitolo": "Empty queue",
-  "@reportConfermaSvuotaTitolo": {
-    "description": "Title of the dialog confirming the label queue emptying"
-  },
-  "reportConfermaSvuotaTesto": "Are you sure you want to remove all labels from the queue?",
-  "@reportConfermaSvuotaTesto": {
-    "description": "Question asked before emptying the label queue"
-  },
   "reportSvuota": "Empty",
   "@reportSvuota": {
     "description": "Label of the button confirming the queue emptying"
-  },
-  "reportEsportaPdf": "Export PDF",
-  "@reportEsportaPdf": {
-    "description": "Label of the button that exports the labels as a PDF file"
   },
   "sharedPaginaPrima": "First page",
   "@sharedPaginaPrima": {
@@ -3471,7 +3442,7 @@
       "message": {}
     }
   },
-  "inventoryMovimentiSottotitolo": "One row per operation, with the products it touched. Double click to open it.",
+  "inventoryMovimentiSottotitolo": "One row per operation, with the products it touched. Open it with a double click, or a tap on a phone.",
   "@inventoryMovimentiSottotitolo": {
     "description": "Localized string inventoryMovimentiSottotitolo"
   },
@@ -3703,6 +3674,10 @@
   "inventoryTitoloCaricoRapido": "Quick stock-in",
   "@inventoryTitoloCaricoRapido": {
     "description": "Localized string inventoryTitoloCaricoRapido"
+  },
+  "inventoryTitoloRiepilogoCarico": "Load summary",
+  "@inventoryTitoloRiepilogoCarico": {
+    "description": "Titolo del riepilogo di Aggiungi in modalità Semplice"
   },
   "inventoryTitoloInseritiControConvalida": "Entered vs validated",
   "@inventoryTitoloInseritiControConvalida": {
@@ -6027,6 +6002,32 @@
   "@updaterInstallFailedMessage": {
     "description": "Localized string updaterInstallFailedMessage"
   },
+  "updaterReadyNotifyOnlyMessage": "Ready to check for new versions. On Android updates come from F-Droid, Obtainium or the store.",
+  "@updaterReadyNotifyOnlyMessage": {
+    "description": "Initial message of the updates screen on Android, where the app only notifies"
+  },
+  "updaterUpdateAvailableNotifyOnlyMessage": "Version {version} is available. Update it from F-Droid, Obtainium or the store you installed the app from.",
+  "@updaterUpdateAvailableNotifyOnlyMessage": {
+    "description": "New version notice on Android: installing is up to the store",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAggiornamentoDisponibile": "Version {version} of the app is available.",
+  "@homeAggiornamentoDisponibile": {
+    "description": "Startup notice for an available desktop update",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApriAggiornamenti": "Update",
+  "@homeApriAggiornamenti": {
+    "description": "Notice action that opens the Updates section"
+  },
   "mgwsNonDisponibileTitolo": "MGWS backend unavailable",
   "@mgwsNonDisponibileTitolo": {
     "description": "Title of the notice shown when a section requires MGWS and the backend is unavailable"
@@ -6043,6 +6044,18 @@
   "@mgwsServizioSpento": {
     "description": "Message of the MGWS notice when the service is disabled"
   },
+  "mgwsPluginDaAggiornare": "The MGWS plugin installed on the site (version {installata}) is too old for this app, which requires at least version {minima}. Update the plugin from WordPress.",
+  "@mgwsPluginDaAggiornare": {
+    "description": "Message of the MGWS notice when the plugin is older than the required version",
+    "placeholders": {
+      "installata": {
+        "type": "String"
+      },
+      "minima": {
+        "type": "String"
+      }
+    }
+  },
   "mgwsHoCapito": "Got it",
   "@mgwsHoCapito": {
     "description": "Dismiss button of the MGWS notice"
@@ -6058,5 +6071,2466 @@
   "cassaAltri": "Other",
   "@cassaAltri": {
     "description": "Label for the other payment method field"
+  },
+  "welcomeSkip": "Skip",
+  "@welcomeSkip": {
+    "description": "Label of the welcome action that closes onboarding without reading it"
+  },
+  "welcomeBack": "Back",
+  "@welcomeBack": {
+    "description": "Label of the welcome action that returns to the previous welcome page"
+  },
+  "welcomeNext": "Next",
+  "@welcomeNext": {
+    "description": "Label of the welcome action that advances to the next welcome page"
+  },
+  "welcomeStart": "Start",
+  "@welcomeStart": {
+    "description": "Label of the welcome action that closes onboarding and opens the app"
+  },
+  "welcomeSkipSemantic": "Skip the welcome pages and open the app",
+  "@welcomeSkipSemantic": {
+    "description": "Screen reader label of the welcome skip action"
+  },
+  "welcomeBackSemantic": "Go back to the previous welcome page",
+  "@welcomeBackSemantic": {
+    "description": "Screen reader label of the welcome back action"
+  },
+  "welcomeNextSemantic": "Go to the next welcome page",
+  "@welcomeNextSemantic": {
+    "description": "Screen reader label of the welcome next action"
+  },
+  "welcomeStartSemantic": "Finish the welcome and open the app",
+  "@welcomeStartSemantic": {
+    "description": "Screen reader label of the welcome start action"
+  },
+  "welcomeProgressSemantic": "Page {current} of {total}",
+  "@welcomeProgressSemantic": {
+    "description": "Screen reader label of the welcome progress dots",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "welcomePurposeTitle": "Welcome to your shop",
+  "@welcomePurposeTitle": {
+    "description": "Title of the first welcome page, which states what the app is for"
+  },
+  "welcomePurposeBody": "One app runs the clothing shop: catalogue, stock, till, orders and customers, with your WordPress site as the only backend.",
+  "@welcomePurposeBody": {
+    "description": "Body of the first welcome page, which states the purpose of the app"
+  },
+  "welcomePurposePointCatalogue": "Products with variants, sizes and colours, always aligned with the online shop.",
+  "@welcomePurposePointCatalogue": {
+    "description": "First point of the first welcome page, about the product catalogue"
+  },
+  "welcomePurposePointStock": "Stock, movements, purchase orders and suppliers in one place.",
+  "@welcomePurposePointStock": {
+    "description": "Second point of the first welcome page, about stock and purchasing"
+  },
+  "welcomePurposePointTill": "Cash register, orders, customers and loyalty cards ready for the daily work.",
+  "@welcomePurposePointTill": {
+    "description": "Third point of the first welcome page, about the daily shop work"
+  },
+  "welcomeGuidesTitle": "Interactive guides",
+  "@welcomeGuidesTitle": {
+    "description": "Title of the welcome page that explains the contextual guides"
+  },
+  "welcomeGuidesBody": "From now on the app can offer a short guide on the screens you use most. You decide whether to follow it.",
+  "@welcomeGuidesBody": {
+    "description": "Body of the welcome page that explains the contextual guides"
+  },
+  "welcomeGuidesPointRealControls": "A guide points at the real controls of the screen, one step at a time, and never shows simulated data.",
+  "@welcomeGuidesPointRealControls": {
+    "description": "First point of the guides welcome page, about how a guide behaves"
+  },
+  "welcomeGuidesPointSafeActions": "Safe actions can be run from a guide; anything with real consequences on the shop is only explained.",
+  "@welcomeGuidesPointSafeActions": {
+    "description": "Second point of the guides welcome page, about which actions a guide may run"
+  },
+  "welcomeGuidesPointReplay": "Finishing or skipping a guide stops it from starting again on its own: reopen it from Help whenever you want.",
+  "@welcomeGuidesPointReplay": {
+    "description": "Third point of the guides welcome page, about finishing, skipping and replaying"
+  },
+  "welcomeGuidesPointLocalState": "Which guides you have already seen is stored on this device only and is never sent to the site.",
+  "@welcomeGuidesPointLocalState": {
+    "description": "Fourth point of the guides welcome page, about the local-only guide state"
+  },
+  "welcomeLanguageTitle": "Language",
+  "@welcomeLanguageTitle": {
+    "description": "Title of the welcome page that selects the interface language"
+  },
+  "welcomeLanguageBody": "Choose the language of the interface. The change applies immediately, and you can change it again at any time in Settings.",
+  "@welcomeLanguageBody": {
+    "description": "Body of the welcome page that selects the interface language"
+  },
+  "welcomeLanguageSystem": "System language",
+  "@welcomeLanguageSystem": {
+    "description": "Language option that follows the operating system setting"
+  },
+  "welcomeLanguageSystemDescription": "Follow the language of this device. Right now it resolves to {language}.",
+  "@welcomeLanguageSystemDescription": {
+    "description": "Description of the system language option, showing the language it resolves to",
+    "placeholders": {
+      "language": {
+        "type": "String",
+        "example": "English"
+      }
+    }
+  },
+  "welcomeSelected": "Selected",
+  "@welcomeSelected": {
+    "description": "Badge shown on the welcome option that is currently active"
+  },
+  "welcomeOptionalNote": "Optional: continue without choosing anything and the settings you already have are kept.",
+  "@welcomeOptionalNote": {
+    "description": "Note that reminds the user the welcome preferences are not required"
+  },
+  "welcomeAppearanceTitle": "Appearance",
+  "@welcomeAppearanceTitle": {
+    "description": "Title of the welcome page that selects the primary colour and the theme mode"
+  },
+  "welcomeAppearanceBody": "Make the app look the way you prefer. Every choice here is optional: continue without changing anything and the current settings are kept.",
+  "@welcomeAppearanceBody": {
+    "description": "Body of the welcome page that selects the primary colour and the theme mode"
+  },
+  "welcomeAppearancePrimaryColor": "Primary colour",
+  "@welcomeAppearancePrimaryColor": {
+    "description": "Label of the primary colour selector in the welcome appearance page"
+  },
+  "welcomeAppearancePickColor": "Pick colour",
+  "@welcomeAppearancePickColor": {
+    "description": "Title of the colour picker dialog opened from the welcome appearance page"
+  },
+  "welcomeAppearanceResetColor": "Reset to default colour",
+  "@welcomeAppearanceResetColor": {
+    "description": "Action that restores the default primary colour"
+  },
+  "welcomeAppearanceThemeMode": "Theme mode",
+  "@welcomeAppearanceThemeMode": {
+    "description": "Label of the theme mode selector in the welcome appearance page"
+  },
+  "welcomeAppearanceModeLight": "Light",
+  "@welcomeAppearanceModeLight": {
+    "description": "Light theme mode option in the welcome appearance page"
+  },
+  "welcomeAppearanceModeLightDescription": "Always use the light theme",
+  "@welcomeAppearanceModeLightDescription": {
+    "description": "Description of the light theme mode option"
+  },
+  "welcomeAppearanceModeDark": "Dark",
+  "@welcomeAppearanceModeDark": {
+    "description": "Dark theme mode option in the welcome appearance page"
+  },
+  "welcomeAppearanceModeDarkDescription": "Always use the dark theme",
+  "@welcomeAppearanceModeDarkDescription": {
+    "description": "Description of the dark theme mode option"
+  },
+  "welcomeAppearanceModeSystem": "System",
+  "@welcomeAppearanceModeSystem": {
+    "description": "System theme mode option in the welcome appearance page"
+  },
+  "welcomeAppearanceModeSystemDescription": "Follow the light or dark theme of the device",
+  "@welcomeAppearanceModeSystemDescription": {
+    "description": "Description of the system theme mode option"
+  },
+  "welcomeAppearanceBackground": "Decorative backgrounds",
+  "@welcomeAppearanceBackground": {
+    "description": "Label of the decorative background selector in the welcome appearance page"
+  },
+  "welcomeAppearanceBackgroundFollowsTheme": "Follow the light/dark theme",
+  "@welcomeAppearanceBackgroundFollowsTheme": {
+    "description": "Toggle label for decorative backgrounds following light/dark theme"
+  },
+  "welcomeAppearanceBackgroundFollowsThemeDescription": "On: backgrounds follow the light or dark theme. Off: backgrounds use the selected colour.",
+  "@welcomeAppearanceBackgroundFollowsThemeDescription": {
+    "description": "Toggle description for decorative backgrounds following light/dark theme"
+  },
+  "welcomeHelpButton": "Guide",
+  "@welcomeHelpButton": {
+    "description": "Label of the button that replays the guided tour of the current screen"
+  },
+  "welcomeHelpButtonSemantic": "Show the guide of this screen",
+  "@welcomeHelpButtonSemantic": {
+    "description": "Screen reader label of the button that replays the guided tour of the current screen"
+  },
+  "welcomeStepOf": "Step {current} of {total}",
+  "@welcomeStepOf": {
+    "description": "Visible progress of a guided tour step, shown inside the guide tooltip",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "welcomeTourSkipSemantic": "Skip this guide",
+  "@welcomeTourSkipSemantic": {
+    "description": "Screen reader label of the action that skips the guided tour of the current screen"
+  },
+  "welcomeTourBackSemantic": "Go back to the previous step of this guide",
+  "@welcomeTourBackSemantic": {
+    "description": "Screen reader label of the action that returns to the previous step of a guided tour"
+  },
+  "welcomeTourNextSemantic": "Go to the next step of this guide",
+  "@welcomeTourNextSemantic": {
+    "description": "Screen reader label of the action that advances to the next step of a guided tour"
+  },
+  "welcomeTourFinish": "Finish",
+  "@welcomeTourFinish": {
+    "description": "Label of the action that closes a guided tour from its last step"
+  },
+  "welcomeTourFinishSemantic": "Finish this guide",
+  "@welcomeTourFinishSemantic": {
+    "description": "Screen reader label of the action that closes a guided tour from its last step"
+  },
+  "sedeCaricamento": "Loading the site in use…",
+  "@sedeCaricamento": {
+    "description": "Sede in uso: sedeCaricamento"
+  },
+  "sedeRiprova": "Retry",
+  "@sedeRiprova": {
+    "description": "Sede in uso: sedeRiprova"
+  },
+  "sedeNessunaTitolo": "No site in the shop",
+  "@sedeNessunaTitolo": {
+    "description": "Sede in uso: sedeNessunaTitolo"
+  },
+  "sedeNessunaTesto": "Inventory works only inside a site, the physical shop. Ask an administrator to create one.",
+  "@sedeNessunaTesto": {
+    "description": "Sede in uso: sedeNessunaTesto"
+  },
+  "sedeCreaPrimaTitolo": "Create the first site",
+  "@sedeCreaPrimaTitolo": {
+    "description": "Sede in uso: sedeCreaPrimaTitolo"
+  },
+  "sedeCreaPrimaTesto": "Every stock movement belongs to a site, the physical shop. While it is the only one, it applies to every user.",
+  "@sedeCreaPrimaTesto": {
+    "description": "Sede in uso: sedeCreaPrimaTesto"
+  },
+  "sedeNome": "Site name",
+  "@sedeNome": {
+    "description": "Sede in uso: sedeNome"
+  },
+  "sedeCrea": "Create site",
+  "@sedeCrea": {
+    "description": "Sede in uso: sedeCrea"
+  },
+  "sedeNuova": "New site…",
+  "@sedeNuova": {
+    "description": "Sede in uso: sedeNuova"
+  },
+  "sedeSceltaTitolo": "Choose the site in use",
+  "@sedeSceltaTitolo": {
+    "description": "Sede in uso: sedeSceltaTitolo"
+  },
+  "sedeSceltaTesto": "The shop has more than one site: choose the one you work in. You can change it later.",
+  "@sedeSceltaTesto": {
+    "description": "Sede in uso: sedeSceltaTesto"
+  },
+  "sedeNonAssegnataTitolo": "No site assigned",
+  "@sedeNonAssegnataTitolo": {
+    "description": "Sede in uso: sedeNonAssegnataTitolo"
+  },
+  "sedeNonAssegnataTesto": "The shop has more than one site and none is assigned to your user. Ask whoever manages employees to assign one.",
+  "@sedeNonAssegnataTesto": {
+    "description": "Sede in uso: sedeNonAssegnataTesto"
+  },
+  "sedeInUso": "Site in use",
+  "@sedeInUso": {
+    "description": "Sede in uso: sedeInUso"
+  },
+  "sedeBloccata": "Only employee managers can change it.",
+  "@sedeBloccata": {
+    "description": "Sede in uso: sedeBloccata"
+  },
+  "sedeModificabile": "It applies to every movement you record.",
+  "@sedeModificabile": {
+    "description": "Sede in uso: sedeModificabile"
+  },
+  "sedeMagazzini": "Warehouses of the site",
+  "@sedeMagazzini": {
+    "description": "Sede in uso: sedeMagazzini"
+  },
+  "sedeNessunMagazzino": "No warehouse registered for this site: the manual lists below apply.",
+  "@sedeNessunMagazzino": {
+    "description": "Sede in uso: sedeNessunMagazzino"
+  },
+  "sedeDipendente": "Site",
+  "@sedeDipendente": {
+    "description": "Sede in uso: sedeDipendente"
+  },
+  "sedeDipendenteObbligatoria": "Required: the shop has more than one site.",
+  "@sedeDipendenteObbligatoria": {
+    "description": "Sede in uso: sedeDipendenteObbligatoria"
+  },
+  "sedeDipendenteSenzaUtente": "Link a WordPress user to assign a site.",
+  "@sedeDipendenteSenzaUtente": {
+    "description": "Sede in uso: sedeDipendenteSenzaUtente"
+  },
+  "dashboardConfrontoCon": "Compared with {periodo}",
+  "@dashboardConfrontoCon": {
+    "description": "Dashboard: dashboardConfrontoCon",
+    "placeholders": {
+      "periodo": {}
+    }
+  },
+  "dashboardAggiornatoAlle": "Updated at {ora}",
+  "@dashboardAggiornatoAlle": {
+    "description": "Dashboard: dashboardAggiornatoAlle",
+    "placeholders": {
+      "ora": {}
+    }
+  },
+  "dashboardKpiVendite": "Gross sales",
+  "@dashboardKpiVendite": {
+    "description": "Dashboard: dashboardKpiVendite"
+  },
+  "dashboardKpiOrdini": "Orders",
+  "@dashboardKpiOrdini": {
+    "description": "Dashboard: dashboardKpiOrdini"
+  },
+  "dashboardKpiScontrinoMedio": "Average order",
+  "@dashboardKpiScontrinoMedio": {
+    "description": "Dashboard: dashboardKpiScontrinoMedio"
+  },
+  "dashboardKpiDaEvadere": "To fulfil now",
+  "@dashboardKpiDaEvadere": {
+    "description": "Dashboard: dashboardKpiDaEvadere"
+  },
+  "dashboardKpiDaEvadereNota": "Processing or on hold, any date",
+  "@dashboardKpiDaEvadereNota": {
+    "description": "Dashboard: dashboardKpiDaEvadereNota"
+  },
+  "dashboardNessunConfronto": "No sales to compare with",
+  "@dashboardNessunConfronto": {
+    "description": "Dashboard: dashboardNessunConfronto"
+  },
+  "dashboardVenditePerGiorno": "Sales by day",
+  "@dashboardVenditePerGiorno": {
+    "description": "Dashboard: dashboardVenditePerGiorno"
+  },
+  "dashboardVenditePerMese": "Sales by month",
+  "@dashboardVenditePerMese": {
+    "description": "Dashboard: dashboardVenditePerMese"
+  },
+  "dashboardAndamentoSoloOggi": "Choose a longer period to see the trend",
+  "@dashboardAndamentoSoloOggi": {
+    "description": "Dashboard: dashboardAndamentoSoloOggi"
+  },
+  "dashboardNessunaVendita": "No sales in this period",
+  "@dashboardNessunaVendita": {
+    "description": "Dashboard: dashboardNessunaVendita"
+  },
+  "dashboardOrdiniDelPeriodo": "Orders in the period",
+  "@dashboardOrdiniDelPeriodo": {
+    "description": "Dashboard: dashboardOrdiniDelPeriodo"
+  },
+  "dashboardOrdiniDelPeriodoNota": "Created in the selected period, by current status",
+  "@dashboardOrdiniDelPeriodoNota": {
+    "description": "Dashboard: dashboardOrdiniDelPeriodoNota"
+  },
+  "dashboardInAttesaPagamento": "{n} awaiting payment",
+  "@dashboardInAttesaPagamento": {
+    "description": "Dashboard: dashboardInAttesaPagamento",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardMagazzino": "Stock",
+  "@dashboardMagazzino": {
+    "description": "Dashboard: dashboardMagazzino"
+  },
+  "dashboardDisponibili": "In stock",
+  "@dashboardDisponibili": {
+    "description": "Dashboard: dashboardDisponibili"
+  },
+  "dashboardEsauriti": "Out of stock",
+  "@dashboardEsauriti": {
+    "description": "Dashboard: dashboardEsauriti"
+  },
+  "dashboardProdottiPubblicati": "{n} published products",
+  "@dashboardProdottiPubblicati": {
+    "description": "Dashboard: dashboardProdottiPubblicati",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardScorteBasse": "Running low (≤ {soglia} pcs)",
+  "@dashboardScorteBasse": {
+    "description": "Dashboard: dashboardScorteBasse",
+    "placeholders": {
+      "soglia": {}
+    }
+  },
+  "dashboardScorteBasseNota": "Only products with stock managed on the product, not on variations",
+  "@dashboardScorteBasseNota": {
+    "description": "Dashboard: dashboardScorteBasseNota"
+  },
+  "dashboardNessunaScortaBassa": "No products running low",
+  "@dashboardNessunaScortaBassa": {
+    "description": "Dashboard: dashboardNessunaScortaBassa"
+  },
+  "dashboardPezzi": "{n} pcs",
+  "@dashboardPezzi": {
+    "description": "Dashboard: dashboardPezzi",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardClientiRegistrati": "Registered customers",
+  "@dashboardClientiRegistrati": {
+    "description": "Dashboard: dashboardClientiRegistrati"
+  },
+  "dashboardClientiPaganti": "{n} have bought at least once",
+  "@dashboardClientiPaganti": {
+    "description": "Dashboard: dashboardClientiPaganti",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardTopProdottiNota": "By revenue in the period",
+  "@dashboardTopProdottiNota": {
+    "description": "Dashboard: dashboardTopProdottiNota"
+  },
+  "dashboardMostraTabella": "Show as table",
+  "@dashboardMostraTabella": {
+    "description": "Dashboard: dashboardMostraTabella"
+  },
+  "dashboardMostraGrafico": "Show as chart",
+  "@dashboardMostraGrafico": {
+    "description": "Dashboard: dashboardMostraGrafico"
+  },
+  "dashboardColonnaData": "Date",
+  "@dashboardColonnaData": {
+    "description": "Dashboard: dashboardColonnaData"
+  },
+  "dashboardSezioni": "Show sections",
+  "@dashboardSezioni": {
+    "description": "Dashboard: dashboardSezioni"
+  },
+  "dashboardReportDettagliati": "Detailed reports",
+  "@dashboardReportDettagliati": {
+    "description": "Dashboard: dashboardReportDettagliati"
+  },
+  "dashboardImpossibileCaricare": "Unable to load the dashboard",
+  "@dashboardImpossibileCaricare": {
+    "description": "Dashboard: dashboardImpossibileCaricare"
+  },
+  "dashboardReportGenerato": "Report created: {percorso}",
+  "@dashboardReportGenerato": {
+    "description": "Dashboard: dashboardReportGenerato",
+    "placeholders": {
+      "percorso": {}
+    }
+  },
+  "dashboardExportFallito": "Export failed: {errore}",
+  "@dashboardExportFallito": {
+    "description": "Dashboard: dashboardExportFallito",
+    "placeholders": {
+      "errore": {}
+    }
+  },
+  "reportPrintCenterTitle": "Templates and print",
+  "@reportPrintCenterTitle": {
+    "description": "Title of the labels, signs and reports screen"
+  },
+  "reportKindLabelsTitle": "Product labels",
+  "@reportKindLabelsTitle": {
+    "description": "Card title: product price tags"
+  },
+  "reportKindSignsTitle": "Shop signs",
+  "@reportKindSignsTitle": {
+    "description": "Card title: shop and window signs"
+  },
+  "reportKindReportsTitle": "Printable reports",
+  "@reportKindReportsTitle": {
+    "description": "Card title: A4 reports"
+  },
+  "reportTemplateQuestion": "Choose a template",
+  "@reportTemplateQuestion": {
+    "description": "Title of wizard step 2"
+  },
+  "reportTemplateActions": "Template options",
+  "@reportTemplateActions": {
+    "description": "Tooltip of the template menu"
+  },
+  "reportRename": "Rename",
+  "@reportRename": {
+    "description": "Menu action that renames a template"
+  },
+  "reportDeleteTemplateTitle": "Delete template",
+  "@reportDeleteTemplateTitle": {
+    "description": "Title of the delete template dialog"
+  },
+  "reportDeleteTemplateMessage": "Delete the template \"{name}\"? The ready-made templates are not affected.",
+  "@reportDeleteTemplateMessage": {
+    "description": "Body of the delete template dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateNameLabel": "Template name",
+  "@reportTemplateNameLabel": {
+    "description": "Label of the template name field"
+  },
+  "reportTemplateSaved": "Template \"{name}\" saved",
+  "@reportTemplateSaved": {
+    "description": "Confirmation after saving a template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSavePdf": "Save PDF",
+  "@reportSavePdf": {
+    "description": "Button saving or sharing the PDF"
+  },
+  "reportPrintError": "Printing failed: {error}",
+  "@reportPrintError": {
+    "description": "Error shown when printing or saving fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPreviewTitle": "Preview",
+  "@reportPreviewTitle": {
+    "description": "Title of the preview panel"
+  },
+  "reportPreviewOneLabel": "One",
+  "@reportPreviewOneLabel": {
+    "description": "Preview switch: show a single label enlarged"
+  },
+  "reportPreviewWholeSheet": "Whole sheet",
+  "@reportPreviewWholeSheet": {
+    "description": "Preview switch: show the whole sheet"
+  },
+  "reportPreviewSampleNotice": "Example data: the print will look exactly like this.",
+  "@reportPreviewSampleNotice": {
+    "description": "Notice under the preview title"
+  },
+  "reportPreviewSheetNotice": "Dashed lines and grey boxes show the label edges and the used positions: they are not printed.",
+  "@reportPreviewSheetNotice": {
+    "description": "Notice under the preview title when the whole sheet is shown"
+  },
+  "reportPreviewError": "Preview not available: {error}",
+  "@reportPreviewError": {
+    "description": "Error shown in the preview panel",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportReportSampleExplanation": "This report shows example figures for now, so you can choose how it looks. Shop data will be filled in once the report is connected to MGWS.",
+  "@reportReportSampleExplanation": {
+    "description": "Info box in the report editor"
+  },
+  "reportSectionQuantity": "How many",
+  "@reportSectionQuantity": {
+    "description": "Editor section: number of copies"
+  },
+  "reportSectionPaper": "Paper format",
+  "@reportSectionPaper": {
+    "description": "Editor section: paper format"
+  },
+  "reportCopiesQuestion": "How many copies to print?",
+  "@reportCopiesQuestion": {
+    "description": "Label of the copies stepper"
+  },
+  "reportFullSheet": "Whole sheet ({count})",
+  "@reportFullSheet": {
+    "description": "Chip filling a whole sheet of labels",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportSkipQuestion": "Positions already used on each sheet",
+  "@reportSkipQuestion": {
+    "description": "Label of the skipped positions stepper"
+  },
+  "reportSkipHelp": "For each sheet, enter how many labels are missing at the start: printing on that sheet begins right after them. Rolls always start from the first label.",
+  "@reportSkipHelp": {
+    "description": "Help of the skipped positions stepper"
+  },
+  "reportSheetsNeeded": "{count, plural, =1{1 sheet to print} other{{count} sheets to print}}",
+  "@reportSheetsNeeded": {
+    "description": "Number of sheets the print needs",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportDecrease": "Decrease",
+  "@reportDecrease": {
+    "description": "Tooltip of the minus button"
+  },
+  "reportIncrease": "Increase",
+  "@reportIncrease": {
+    "description": "Tooltip of the plus button"
+  },
+  "reportPaperGroupSheets": "Adhesive A4 sheets (normal printer)",
+  "@reportPaperGroupSheets": {
+    "description": "Paper group title"
+  },
+  "reportPaperGroupRolls": "Roll (label printer)",
+  "@reportPaperGroupRolls": {
+    "description": "Paper group title"
+  },
+  "reportPaperLabelSheet": "A4 sheet · {count} labels {size} mm",
+  "@reportPaperLabelSheet": {
+    "description": "Paper format: adhesive A4 sheet",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPaperRoll": "Roll · label {size} mm",
+  "@reportPaperRoll": {
+    "description": "Paper format: thermal roll",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPaperSignA4Portrait": "A4 portrait · 1 per sheet",
+  "@reportPaperSignA4Portrait": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA4Landscape": "A4 landscape · 1 per sheet",
+  "@reportPaperSignA4Landscape": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA5": "A5 · 2 per A4 sheet",
+  "@reportPaperSignA5": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA6": "A6 · 4 per A4 sheet",
+  "@reportPaperSignA6": {
+    "description": "Paper format"
+  },
+  "reportPaperReportPortrait": "A4 portrait",
+  "@reportPaperReportPortrait": {
+    "description": "Paper format"
+  },
+  "reportPaperReportLandscape": "A4 landscape",
+  "@reportPaperReportLandscape": {
+    "description": "Paper format"
+  },
+  "reportTemplateLabelClassic": "Classic",
+  "@reportTemplateLabelClassic": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBigPrice": "Big price",
+  "@reportTemplateLabelBigPrice": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelSale": "Sale",
+  "@reportTemplateLabelSale": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelMinimal": "Minimal",
+  "@reportTemplateLabelMinimal": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBoutique": "Boutique",
+  "@reportTemplateLabelBoutique": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBarcode": "Barcode",
+  "@reportTemplateLabelBarcode": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignSale": "Sale sign",
+  "@reportTemplateSignSale": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignNewArrivals": "New arrivals",
+  "@reportTemplateSignNewArrivals": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignShelfPrice": "Shelf price",
+  "@reportTemplateSignShelfPrice": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignPromo": "Special offer",
+  "@reportTemplateSignPromo": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateDailyClosing": "Daily cash closing",
+  "@reportTemplateDailyClosing": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSales": "Sales of the period",
+  "@reportTemplateSales": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateInventory": "Stock on hand",
+  "@reportTemplateInventory": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateStockMovements": "Stock movements",
+  "@reportTemplateStockMovements": {
+    "description": "Built-in template name"
+  },
+  "reportDefaultShopName": "Your shop",
+  "@reportDefaultShopName": {
+    "description": "Default shop name printed by templates"
+  },
+  "reportDefaultSaleTitle": "Sale",
+  "@reportDefaultSaleTitle": {
+    "description": "Default title of sale templates"
+  },
+  "reportDefaultSaleSubtitle": "on the whole collection",
+  "@reportDefaultSaleSubtitle": {
+    "description": "Default subtitle of the sale sign"
+  },
+  "reportDefaultSaleFooter": "While stocks last",
+  "@reportDefaultSaleFooter": {
+    "description": "Default footer of the sale sign"
+  },
+  "reportDefaultNewArrivalsTitle": "New arrivals",
+  "@reportDefaultNewArrivalsTitle": {
+    "description": "Default title of the new arrivals sign"
+  },
+  "reportDefaultNewArrivalsSubtitle": "Discover the new collection",
+  "@reportDefaultNewArrivalsSubtitle": {
+    "description": "Default subtitle of the new arrivals sign"
+  },
+  "reportDefaultNewArrivalsFooter": "Ask our staff",
+  "@reportDefaultNewArrivalsFooter": {
+    "description": "Default footer of the new arrivals sign"
+  },
+  "reportDefaultShelfTitle": "Special price",
+  "@reportDefaultShelfTitle": {
+    "description": "Default title of the shelf price sign"
+  },
+  "reportDefaultShelfSubtitle": "Sizes S - XL",
+  "@reportDefaultShelfSubtitle": {
+    "description": "Default subtitle of the shelf price sign"
+  },
+  "reportDefaultShelfFooter": "Price valid while stocks last",
+  "@reportDefaultShelfFooter": {
+    "description": "Default footer of the shelf price sign"
+  },
+  "reportDefaultPromoTitle": "3x2",
+  "@reportDefaultPromoTitle": {
+    "description": "Default title of the offer sign"
+  },
+  "reportDefaultPromoSubtitle": "Take 3, pay for 2",
+  "@reportDefaultPromoSubtitle": {
+    "description": "Default subtitle of the offer sign"
+  },
+  "reportDefaultPromoFooter": "The cheapest item is free",
+  "@reportDefaultPromoFooter": {
+    "description": "Default footer of the offer sign"
+  },
+  "reportSampleDataNotice": "Example data",
+  "@reportSampleDataNotice": {
+    "description": "Report footer: the figures are examples"
+  },
+  "reportNotesTitle": "Notes",
+  "@reportNotesTitle": {
+    "description": "Title of the notes box in reports"
+  },
+  "reportSignatureOperator": "Cashier signature",
+  "@reportSignatureOperator": {
+    "description": "Signature line label"
+  },
+  "reportSignatureManager": "Manager signature",
+  "@reportSignatureManager": {
+    "description": "Signature line label"
+  },
+  "reportSignatureCountedBy": "Counted by",
+  "@reportSignatureCountedBy": {
+    "description": "Signature line label"
+  },
+  "reportFigureTakings": "Total takings",
+  "@reportFigureTakings": {
+    "description": "Report summary figure"
+  },
+  "reportFigureReceipts": "Receipts",
+  "@reportFigureReceipts": {
+    "description": "Report summary figure"
+  },
+  "reportFigureAverageReceipt": "Average receipt",
+  "@reportFigureAverageReceipt": {
+    "description": "Report summary figure"
+  },
+  "reportFigureCashDifference": "Cash difference",
+  "@reportFigureCashDifference": {
+    "description": "Report summary figure"
+  },
+  "reportFigureRevenue": "Revenue",
+  "@reportFigureRevenue": {
+    "description": "Report summary figure"
+  },
+  "reportFigureItemsSold": "Items sold",
+  "@reportFigureItemsSold": {
+    "description": "Report summary figure"
+  },
+  "reportFigureReturns": "Returns",
+  "@reportFigureReturns": {
+    "description": "Report summary figure"
+  },
+  "reportFigureArticles": "Articles",
+  "@reportFigureArticles": {
+    "description": "Report summary figure"
+  },
+  "reportFigurePieces": "Pieces in stock",
+  "@reportFigurePieces": {
+    "description": "Report summary figure"
+  },
+  "reportFigureStockValue": "Stock value",
+  "@reportFigureStockValue": {
+    "description": "Report summary figure"
+  },
+  "reportFigureLowStock": "Low stock",
+  "@reportFigureLowStock": {
+    "description": "Report summary figure"
+  },
+  "reportFigureLoads": "Pieces loaded",
+  "@reportFigureLoads": {
+    "description": "Report summary figure"
+  },
+  "reportFigureUnloads": "Pieces unloaded",
+  "@reportFigureUnloads": {
+    "description": "Report summary figure"
+  },
+  "reportFigureAdjustments": "Adjustments",
+  "@reportFigureAdjustments": {
+    "description": "Report summary figure"
+  },
+  "reportTablePaymentMethods": "Takings by payment method",
+  "@reportTablePaymentMethods": {
+    "description": "Report table title"
+  },
+  "reportTableCashCount": "Cash count",
+  "@reportTableCashCount": {
+    "description": "Report table title"
+  },
+  "reportTableTopProducts": "Best-selling products",
+  "@reportTableTopProducts": {
+    "description": "Report table title"
+  },
+  "reportTableStock": "Stock by variant",
+  "@reportTableStock": {
+    "description": "Report table title"
+  },
+  "reportTableMovements": "Movements",
+  "@reportTableMovements": {
+    "description": "Report table title"
+  },
+  "reportColumnPaymentMethod": "Payment method",
+  "@reportColumnPaymentMethod": {
+    "description": "Report column header"
+  },
+  "reportColumnAmount": "Amount",
+  "@reportColumnAmount": {
+    "description": "Report column header"
+  },
+  "reportColumnItem": "Item",
+  "@reportColumnItem": {
+    "description": "Report column header"
+  },
+  "reportColumnProduct": "Product",
+  "@reportColumnProduct": {
+    "description": "Report column header"
+  },
+  "reportColumnQuantity": "Qty",
+  "@reportColumnQuantity": {
+    "description": "Report column header"
+  },
+  "reportColumnRevenue": "Revenue",
+  "@reportColumnRevenue": {
+    "description": "Report column header"
+  },
+  "reportColumnVariant": "Variant",
+  "@reportColumnVariant": {
+    "description": "Report column header"
+  },
+  "reportColumnCode": "Code",
+  "@reportColumnCode": {
+    "description": "Report column header"
+  },
+  "reportColumnValue": "Value",
+  "@reportColumnValue": {
+    "description": "Report column header"
+  },
+  "reportColumnDate": "Date",
+  "@reportColumnDate": {
+    "description": "Report column header"
+  },
+  "reportColumnMovementType": "Type",
+  "@reportColumnMovementType": {
+    "description": "Report column header"
+  },
+  "reportSampleProduct1": "Basic cotton T-shirt",
+  "@reportSampleProduct1": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct2": "Slim fit jeans",
+  "@reportSampleProduct2": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct3": "Hooded sweatshirt",
+  "@reportSampleProduct3": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct4": "White sneakers",
+  "@reportSampleProduct4": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct5": "Linen shirt",
+  "@reportSampleProduct5": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct6": "Leather ankle boots",
+  "@reportSampleProduct6": {
+    "description": "Example product name"
+  },
+  "reportSampleColorNavy": "Navy blue",
+  "@reportSampleColorNavy": {
+    "description": "Example colour"
+  },
+  "reportSampleColorBlack": "Black",
+  "@reportSampleColorBlack": {
+    "description": "Example colour"
+  },
+  "reportSampleColorGrey": "Grey",
+  "@reportSampleColorGrey": {
+    "description": "Example colour"
+  },
+  "reportSampleColorWhite": "White",
+  "@reportSampleColorWhite": {
+    "description": "Example colour"
+  },
+  "reportSampleColorBeige": "Beige",
+  "@reportSampleColorBeige": {
+    "description": "Example colour"
+  },
+  "reportSamplePaymentCash": "Cash",
+  "@reportSamplePaymentCash": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentCard": "Card",
+  "@reportSamplePaymentCard": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentVoucher": "Gift vouchers",
+  "@reportSamplePaymentVoucher": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentReturns": "Refunds",
+  "@reportSamplePaymentReturns": {
+    "description": "Example payment line"
+  },
+  "reportSampleOpeningFloat": "Opening float",
+  "@reportSampleOpeningFloat": {
+    "description": "Example cash count line"
+  },
+  "reportSampleExpectedCash": "Expected cash",
+  "@reportSampleExpectedCash": {
+    "description": "Example cash count line"
+  },
+  "reportSampleCountedCash": "Counted cash",
+  "@reportSampleCountedCash": {
+    "description": "Example cash count line"
+  },
+  "reportSampleDifference": "Difference",
+  "@reportSampleDifference": {
+    "description": "Example cash count line"
+  },
+  "reportSampleMovementLoad": "Load",
+  "@reportSampleMovementLoad": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementSale": "Sale",
+  "@reportSampleMovementSale": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementAdjustment": "Adjustment",
+  "@reportSampleMovementAdjustment": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementTransfer": "Transfer",
+  "@reportSampleMovementTransfer": {
+    "description": "Example movement type"
+  },
+  "reportEditDesign": "Edit template",
+  "@reportEditDesign": {
+    "description": "Button opening the drag-and-drop designer"
+  },
+  "reportDesignerTitle": "Edit: {name}",
+  "@reportDesignerTitle": {
+    "description": "Title of the designer screen",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportApplyDesign": "Use these changes",
+  "@reportApplyDesign": {
+    "description": "Button closing the designer and applying the layout"
+  },
+  "reportDiscardDesignTitle": "Discard changes?",
+  "@reportDiscardDesignTitle": {
+    "description": "Title of the dialog shown when closing the designer with changes"
+  },
+  "reportDiscardDesignMessage": "The changes made in the designer will be lost.",
+  "@reportDiscardDesignMessage": {
+    "description": "Body of the discard changes dialog"
+  },
+  "reportKeepEditing": "Keep editing",
+  "@reportKeepEditing": {
+    "description": "Button that keeps the designer open"
+  },
+  "reportDiscardDesign": "Discard",
+  "@reportDiscardDesign": {
+    "description": "Button that closes the designer without applying"
+  },
+  "reportPrefixPrintedOn": "Printed on",
+  "@reportPrefixPrintedOn": {
+    "description": "Text before the print date in reports"
+  },
+  "reportPrefixBusinessDay": "Business day",
+  "@reportPrefixBusinessDay": {
+    "description": "Text before the business day in reports"
+  },
+  "reportPrefixPeriod": "Period:",
+  "@reportPrefixPeriod": {
+    "description": "Text before the period in reports"
+  },
+  "reportPrefixStockOn": "Stock on",
+  "@reportPrefixStockOn": {
+    "description": "Text before the stock date in reports"
+  },
+  "reportPrefixFrom": "From",
+  "@reportPrefixFrom": {
+    "description": "Text before the start date in reports"
+  },
+  "reportPrefixTo": "to",
+  "@reportPrefixTo": {
+    "description": "Text before the end date in reports"
+  },
+  "reportSampleBrand": "Example brand",
+  "@reportSampleBrand": {
+    "description": "Example brand name"
+  },
+  "reportSampleRegister": "Till 1",
+  "@reportSampleRegister": {
+    "description": "Example till name"
+  },
+  "dashboardWidgetCustomersWithOrders": "With orders",
+  "@dashboardWidgetCustomersWithOrders": {
+    "description": "Dashboard: dashboardWidgetCustomersWithOrders"
+  },
+  "dashboardWidgetCustomersWithoutOrders": "Without orders",
+  "@dashboardWidgetCustomersWithoutOrders": {
+    "description": "Dashboard: dashboardWidgetCustomersWithoutOrders"
+  },
+  "dashboardWidgetMetricProductsPublished": "Published products",
+  "@dashboardWidgetMetricProductsPublished": {
+    "description": "Dashboard: dashboardWidgetMetricProductsPublished"
+  },
+  "dashboardWidgetMetricProductsOutOfStock": "Out-of-stock products",
+  "@dashboardWidgetMetricProductsOutOfStock": {
+    "description": "Dashboard: dashboardWidgetMetricProductsOutOfStock"
+  },
+  "dashboardWidgetMetricCustomersPaying": "Customers with orders",
+  "@dashboardWidgetMetricCustomersPaying": {
+    "description": "Dashboard: dashboardWidgetMetricCustomersPaying"
+  },
+  "dashboardWidgetMetricOrdersTrend": "Orders over time",
+  "@dashboardWidgetMetricOrdersTrend": {
+    "description": "Dashboard: dashboardWidgetMetricOrdersTrend"
+  },
+  "dashboardWidgetMetricAverageTicketTrend": "Average ticket over time",
+  "@dashboardWidgetMetricAverageTicketTrend": {
+    "description": "Dashboard: dashboardWidgetMetricAverageTicketTrend"
+  },
+  "dashboardWidgetMetricTopProductsQuantity": "Top products by pieces",
+  "@dashboardWidgetMetricTopProductsQuantity": {
+    "description": "Dashboard: dashboardWidgetMetricTopProductsQuantity"
+  },
+  "dashboardWidgetMetricSalesByCategory": "Sales by category",
+  "@dashboardWidgetMetricSalesByCategory": {
+    "description": "Dashboard: dashboardWidgetMetricSalesByCategory"
+  },
+  "dashboardWidgetMetricProductsByCategory": "Products by category",
+  "@dashboardWidgetMetricProductsByCategory": {
+    "description": "Dashboard: dashboardWidgetMetricProductsByCategory"
+  },
+  "dashboardWidgetMetricCustomersActivity": "Customers with and without orders",
+  "@dashboardWidgetMetricCustomersActivity": {
+    "description": "Dashboard: dashboardWidgetMetricCustomersActivity"
+  },
+  "dashboardWidgetMetricLowStockProducts": "Low-stock products",
+  "@dashboardWidgetMetricLowStockProducts": {
+    "description": "Dashboard: dashboardWidgetMetricLowStockProducts"
+  },
+  "dashboardWidgetChartNumber": "Number",
+  "@dashboardWidgetChartNumber": {
+    "description": "Dashboard: dashboardWidgetChartNumber"
+  },
+  "dashboardWidgetChartGauge": "Gauge",
+  "@dashboardWidgetChartGauge": {
+    "description": "Dashboard: dashboardWidgetChartGauge"
+  },
+  "dashboardWidgetChartBar": "Columns",
+  "@dashboardWidgetChartBar": {
+    "description": "Dashboard: dashboardWidgetChartBar"
+  },
+  "dashboardWidgetChartHorizontalBar": "Bars",
+  "@dashboardWidgetChartHorizontalBar": {
+    "description": "Dashboard: dashboardWidgetChartHorizontalBar"
+  },
+  "dashboardWidgetChartLine": "Line",
+  "@dashboardWidgetChartLine": {
+    "description": "Dashboard: dashboardWidgetChartLine"
+  },
+  "dashboardWidgetChartArea": "Area",
+  "@dashboardWidgetChartArea": {
+    "description": "Dashboard: dashboardWidgetChartArea"
+  },
+  "dashboardWidgetChartPie": "Pie",
+  "@dashboardWidgetChartPie": {
+    "description": "Dashboard: dashboardWidgetChartPie"
+  },
+  "dashboardWidgetChartDonut": "Donut",
+  "@dashboardWidgetChartDonut": {
+    "description": "Dashboard: dashboardWidgetChartDonut"
+  },
+  "dashboardWidgetChartTable": "Table",
+  "@dashboardWidgetChartTable": {
+    "description": "Dashboard: dashboardWidgetChartTable"
+  },
+  "dashboardWidgetFilteredBy": "Filter: \"{text}\"",
+  "@dashboardWidgetFilteredBy": {
+    "description": "Dashboard: dashboardWidgetFilteredBy",
+    "placeholders": {
+      "text": {}
+    }
+  },
+  "dashboardWidgetNotPeriodBound": "Current state, not tied to the period",
+  "@dashboardWidgetNotPeriodBound": {
+    "description": "Dashboard: dashboardWidgetNotPeriodBound"
+  },
+  "dashboardWidgetDataUnavailable": "Data not available",
+  "@dashboardWidgetDataUnavailable": {
+    "description": "Dashboard: dashboardWidgetDataUnavailable"
+  },
+  "dashboardWidgetShareOfTotal": "{percent} of {total}",
+  "@dashboardWidgetShareOfTotal": {
+    "description": "Dashboard: dashboardWidgetShareOfTotal",
+    "placeholders": {
+      "percent": {},
+      "total": {}
+    }
+  },
+  "dashboardWidgetVersus": "vs {value}",
+  "@dashboardWidgetVersus": {
+    "description": "Dashboard: dashboardWidgetVersus",
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "dashboardWidgetOther": "Other",
+  "@dashboardWidgetOther": {
+    "description": "Dashboard: dashboardWidgetOther"
+  },
+  "dashboardLayoutSaved": "Dashboard saved",
+  "@dashboardLayoutSaved": {
+    "description": "Dashboard: dashboardLayoutSaved"
+  },
+  "dashboardLayoutSaveFailed": "Could not save the dashboard: {error}",
+  "@dashboardLayoutSaveFailed": {
+    "description": "Dashboard: dashboardLayoutSaveFailed",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "dashboardLayoutResetTitle": "Restore the standard layout?",
+  "@dashboardLayoutResetTitle": {
+    "description": "Dashboard: dashboardLayoutResetTitle"
+  },
+  "dashboardLayoutResetMessage": "The widgets of this dashboard are replaced with the standard overview. Nothing is saved until you press Save.",
+  "@dashboardLayoutResetMessage": {
+    "description": "Dashboard: dashboardLayoutResetMessage"
+  },
+  "dashboardLayoutReset": "Restore standard",
+  "@dashboardLayoutReset": {
+    "description": "Dashboard: dashboardLayoutReset"
+  },
+  "dashboardLayoutNew": "New dashboard",
+  "@dashboardLayoutNew": {
+    "description": "Dashboard: dashboardLayoutNew"
+  },
+  "dashboardLayoutDuplicate": "Duplicate dashboard",
+  "@dashboardLayoutDuplicate": {
+    "description": "Dashboard: dashboardLayoutDuplicate"
+  },
+  "dashboardLayoutCopyName": "{name} (copy)",
+  "@dashboardLayoutCopyName": {
+    "description": "Dashboard: dashboardLayoutCopyName",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardLayoutSettings": "Name and visibility",
+  "@dashboardLayoutSettings": {
+    "description": "Dashboard: dashboardLayoutSettings"
+  },
+  "dashboardLayoutDeleteTitle": "Delete dashboard?",
+  "@dashboardLayoutDeleteTitle": {
+    "description": "Dashboard: dashboardLayoutDeleteTitle"
+  },
+  "dashboardLayoutDeleteMessage": "\"{name}\" will be deleted for everyone who can see it.",
+  "@dashboardLayoutDeleteMessage": {
+    "description": "Dashboard: dashboardLayoutDeleteMessage",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardLayoutChoose": "Choose dashboard",
+  "@dashboardLayoutChoose": {
+    "description": "Dashboard: dashboardLayoutChoose"
+  },
+  "dashboardLayoutReadOnly": "Shared dashboard: only shop managers can change it. Duplicate it to make your own version.",
+  "@dashboardLayoutReadOnly": {
+    "description": "Dashboard: dashboardLayoutReadOnly"
+  },
+  "dashboardLayoutMore": "More options",
+  "@dashboardLayoutMore": {
+    "description": "Dashboard: dashboardLayoutMore"
+  },
+  "dashboardLayoutDelete": "Delete dashboard",
+  "@dashboardLayoutDelete": {
+    "description": "Dashboard: dashboardLayoutDelete"
+  },
+  "dashboardLayoutEdit": "Customize dashboard",
+  "@dashboardLayoutEdit": {
+    "description": "Dashboard: dashboardLayoutEdit"
+  },
+  "dashboardLayoutEditingHint": "Drag widgets by the handle to move them",
+  "@dashboardLayoutEditingHint": {
+    "description": "Dashboard: dashboardLayoutEditingHint"
+  },
+  "dashboardLayoutEmpty": "This dashboard has no widgets",
+  "@dashboardLayoutEmpty": {
+    "description": "Dashboard: dashboardLayoutEmpty"
+  },
+  "dashboardLayoutEmptyHint": "Add widgets and choose what each one shows and how.",
+  "@dashboardLayoutEmptyHint": {
+    "description": "Dashboard: dashboardLayoutEmptyHint"
+  },
+  "dashboardWidgetAdd": "Add widget",
+  "@dashboardWidgetAdd": {
+    "description": "Dashboard: dashboardWidgetAdd"
+  },
+  "dashboardVisibilityTitle": "Who can see it",
+  "@dashboardVisibilityTitle": {
+    "description": "Dashboard: dashboardVisibilityTitle"
+  },
+  "dashboardVisibilityPersonal": "Only me",
+  "@dashboardVisibilityPersonal": {
+    "description": "Dashboard: dashboardVisibilityPersonal"
+  },
+  "dashboardVisibilityEveryone": "Everyone",
+  "@dashboardVisibilityEveryone": {
+    "description": "Dashboard: dashboardVisibilityEveryone"
+  },
+  "dashboardVisibilityAdmins": "Admins only",
+  "@dashboardVisibilityAdmins": {
+    "description": "Dashboard: dashboardVisibilityAdmins"
+  },
+  "dashboardVisibilityPersonalHelp": "Personal dashboard, visible only to you",
+  "@dashboardVisibilityPersonalHelp": {
+    "description": "Dashboard: dashboardVisibilityPersonalHelp"
+  },
+  "dashboardVisibilityEveryoneHelp": "Every user of the shop sees it; only managers can change it",
+  "@dashboardVisibilityEveryoneHelp": {
+    "description": "Dashboard: dashboardVisibilityEveryoneHelp"
+  },
+  "dashboardVisibilityAdminsHelp": "Only shop managers see it and can change it",
+  "@dashboardVisibilityAdminsHelp": {
+    "description": "Dashboard: dashboardVisibilityAdminsHelp"
+  },
+  "dashboardVisibilityLocalOnly": "MGWS is not reachable: the dashboard is saved on this device only and cannot be shared.",
+  "@dashboardVisibilityLocalOnly": {
+    "description": "Dashboard: dashboardVisibilityLocalOnly"
+  },
+  "dashboardVisibilityManagersOnly": "Only shop managers can share dashboards.",
+  "@dashboardVisibilityManagersOnly": {
+    "description": "Dashboard: dashboardVisibilityManagersOnly"
+  },
+  "dashboardFilterPeriod": "Period",
+  "@dashboardFilterPeriod": {
+    "description": "Dashboard: dashboardFilterPeriod"
+  },
+  "dashboardFilterCompare": "Compare with previous period",
+  "@dashboardFilterCompare": {
+    "description": "Dashboard: dashboardFilterCompare"
+  },
+  "dashboardFilterOrderStatus": "Order statuses",
+  "@dashboardFilterOrderStatus": {
+    "description": "Dashboard: dashboardFilterOrderStatus"
+  },
+  "dashboardFilterAllStatuses": "All order statuses",
+  "@dashboardFilterAllStatuses": {
+    "description": "Dashboard: dashboardFilterAllStatuses"
+  },
+  "dashboardFilterStatusesCount": "{count} order statuses",
+  "@dashboardFilterStatusesCount": {
+    "description": "Dashboard: dashboardFilterStatusesCount",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dashboardFilterReset": "Reset filters",
+  "@dashboardFilterReset": {
+    "description": "Dashboard: dashboardFilterReset"
+  },
+  "dashboardFilterLast7Days": "Last 7 days",
+  "@dashboardFilterLast7Days": {
+    "description": "Dashboard: dashboardFilterLast7Days"
+  },
+  "dashboardFilterLast30Days": "Last 30 days",
+  "@dashboardFilterLast30Days": {
+    "description": "Dashboard: dashboardFilterLast30Days"
+  },
+  "dashboardFilterLast90Days": "Last 90 days",
+  "@dashboardFilterLast90Days": {
+    "description": "Dashboard: dashboardFilterLast90Days"
+  },
+  "dashboardFilterCustomRange": "Custom range…",
+  "@dashboardFilterCustomRange": {
+    "description": "Dashboard: dashboardFilterCustomRange"
+  },
+  "dashboardWidgetDragHint": "Drag to move",
+  "@dashboardWidgetDragHint": {
+    "description": "Dashboard: dashboardWidgetDragHint"
+  },
+  "dashboardWidgetOptions": "Widget options",
+  "@dashboardWidgetOptions": {
+    "description": "Dashboard: dashboardWidgetOptions"
+  },
+  "dashboardWidgetEdit": "Edit widget",
+  "@dashboardWidgetEdit": {
+    "description": "Dashboard: dashboardWidgetEdit"
+  },
+  "dashboardWidgetMoveBefore": "Move before",
+  "@dashboardWidgetMoveBefore": {
+    "description": "Dashboard: dashboardWidgetMoveBefore"
+  },
+  "dashboardWidgetMoveAfter": "Move after",
+  "@dashboardWidgetMoveAfter": {
+    "description": "Dashboard: dashboardWidgetMoveAfter"
+  },
+  "dashboardWidgetRemove": "Remove widget",
+  "@dashboardWidgetRemove": {
+    "description": "Dashboard: dashboardWidgetRemove"
+  },
+  "dashboardWidgetDropAtEnd": "Drop here to move to the end",
+  "@dashboardWidgetDropAtEnd": {
+    "description": "Dashboard: dashboardWidgetDropAtEnd"
+  },
+  "dashboardWidgetWidthQuarter": "Width 1/4",
+  "@dashboardWidgetWidthQuarter": {
+    "description": "Dashboard: dashboardWidgetWidthQuarter"
+  },
+  "dashboardWidgetWidthThird": "Width 1/3",
+  "@dashboardWidgetWidthThird": {
+    "description": "Dashboard: dashboardWidgetWidthThird"
+  },
+  "dashboardWidgetWidthHalf": "Width 1/2",
+  "@dashboardWidgetWidthHalf": {
+    "description": "Dashboard: dashboardWidgetWidthHalf"
+  },
+  "dashboardWidgetWidthTwoThirds": "Width 2/3",
+  "@dashboardWidgetWidthTwoThirds": {
+    "description": "Dashboard: dashboardWidgetWidthTwoThirds"
+  },
+  "dashboardWidgetWidthThreeQuarters": "Width 3/4",
+  "@dashboardWidgetWidthThreeQuarters": {
+    "description": "Dashboard: dashboardWidgetWidthThreeQuarters"
+  },
+  "dashboardWidgetWidthFull": "Full width",
+  "@dashboardWidgetWidthFull": {
+    "description": "Dashboard: dashboardWidgetWidthFull"
+  },
+  "dashboardWidgetHeightCompact": "Compact height",
+  "@dashboardWidgetHeightCompact": {
+    "description": "Dashboard: dashboardWidgetHeightCompact"
+  },
+  "dashboardWidgetHeightMedium": "Medium height",
+  "@dashboardWidgetHeightMedium": {
+    "description": "Dashboard: dashboardWidgetHeightMedium"
+  },
+  "dashboardWidgetHeightTall": "Tall height",
+  "@dashboardWidgetHeightTall": {
+    "description": "Dashboard: dashboardWidgetHeightTall"
+  },
+  "dashboardWidgetSortNatural": "Default order",
+  "@dashboardWidgetSortNatural": {
+    "description": "Dashboard: dashboardWidgetSortNatural"
+  },
+  "dashboardWidgetSortValueDesc": "Highest first",
+  "@dashboardWidgetSortValueDesc": {
+    "description": "Dashboard: dashboardWidgetSortValueDesc"
+  },
+  "dashboardWidgetSortValueAsc": "Lowest first",
+  "@dashboardWidgetSortValueAsc": {
+    "description": "Dashboard: dashboardWidgetSortValueAsc"
+  },
+  "dashboardWidgetSortLabel": "Alphabetical",
+  "@dashboardWidgetSortLabel": {
+    "description": "Dashboard: dashboardWidgetSortLabel"
+  },
+  "dashboardWidgetGroupNumbers": "Numbers",
+  "@dashboardWidgetGroupNumbers": {
+    "description": "Dashboard: dashboardWidgetGroupNumbers"
+  },
+  "dashboardWidgetGroupTrends": "Trends over time",
+  "@dashboardWidgetGroupTrends": {
+    "description": "Dashboard: dashboardWidgetGroupTrends"
+  },
+  "dashboardWidgetGroupRankings": "Rankings and breakdowns",
+  "@dashboardWidgetGroupRankings": {
+    "description": "Dashboard: dashboardWidgetGroupRankings"
+  },
+  "dashboardWidgetData": "Data to show",
+  "@dashboardWidgetData": {
+    "description": "Dashboard: dashboardWidgetData"
+  },
+  "dashboardWidgetChartType": "Display as",
+  "@dashboardWidgetChartType": {
+    "description": "Dashboard: dashboardWidgetChartType"
+  },
+  "dashboardWidgetTitle": "Title (optional)",
+  "@dashboardWidgetTitle": {
+    "description": "Dashboard: dashboardWidgetTitle"
+  },
+  "dashboardWidgetWidth": "Width",
+  "@dashboardWidgetWidth": {
+    "description": "Dashboard: dashboardWidgetWidth"
+  },
+  "dashboardWidgetHeight": "Height",
+  "@dashboardWidgetHeight": {
+    "description": "Dashboard: dashboardWidgetHeight"
+  },
+  "dashboardWidgetItemLimit": "Items shown",
+  "@dashboardWidgetItemLimit": {
+    "description": "Dashboard: dashboardWidgetItemLimit"
+  },
+  "dashboardWidgetSort": "Order",
+  "@dashboardWidgetSort": {
+    "description": "Dashboard: dashboardWidgetSort"
+  },
+  "dashboardWidgetItemFilter": "Show only items containing",
+  "@dashboardWidgetItemFilter": {
+    "description": "Dashboard: dashboardWidgetItemFilter"
+  },
+  "dashboardWidgetItemFilterHelp": "Leave empty to show everything",
+  "@dashboardWidgetItemFilterHelp": {
+    "description": "Dashboard: dashboardWidgetItemFilterHelp"
+  },
+  "dashboardWidgetStockThreshold": "Low-stock threshold (pieces)",
+  "@dashboardWidgetStockThreshold": {
+    "description": "Dashboard: dashboardWidgetStockThreshold"
+  },
+  "dashboardWidgetUsesStatusFilter": "Follows the order status filter of the dashboard.",
+  "@dashboardWidgetUsesStatusFilter": {
+    "description": "Dashboard: dashboardWidgetUsesStatusFilter"
+  },
+  "dashboardWidgetPreview": "Preview",
+  "@dashboardWidgetPreview": {
+    "description": "Dashboard: dashboardWidgetPreview"
+  },
+  "dashboardReportCustom": "Custom report (MGWS)",
+  "@dashboardReportCustom": {
+    "description": "Dashboard report: dashboardReportCustom"
+  },
+  "dashboardReportTitleBy": "{measure} by {dimension}",
+  "@dashboardReportTitleBy": {
+    "description": "Dashboard report: dashboardReportTitleBy",
+    "placeholders": {
+      "measure": {},
+      "dimension": {}
+    }
+  },
+  "dashboardReportDaysValue": "{days} days",
+  "@dashboardReportDaysValue": {
+    "description": "Dashboard report: dashboardReportDaysValue",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "dashboardReportNeedsMgws": "Needs MGWS with the report engine",
+  "@dashboardReportNeedsMgws": {
+    "description": "Dashboard report: dashboardReportNeedsMgws"
+  },
+  "dashboardReportForbidden": "You are not allowed to see reports",
+  "@dashboardReportForbidden": {
+    "description": "Dashboard report: dashboardReportForbidden"
+  },
+  "dashboardReportAnonymous": "Anonymous customer",
+  "@dashboardReportAnonymous": {
+    "description": "Dashboard report: dashboardReportAnonymous"
+  },
+  "dashboardReportChannelStore": "Store",
+  "@dashboardReportChannelStore": {
+    "description": "Dashboard report: dashboardReportChannelStore"
+  },
+  "dashboardReportChannelOnline": "Online",
+  "@dashboardReportChannelOnline": {
+    "description": "Dashboard report: dashboardReportChannelOnline"
+  },
+  "dashboardReportPresets": "Ready-made questions",
+  "@dashboardReportPresets": {
+    "description": "Dashboard report: dashboardReportPresets"
+  },
+  "dashboardReportMeasure": "What to measure",
+  "@dashboardReportMeasure": {
+    "description": "Dashboard report: dashboardReportMeasure"
+  },
+  "dashboardReportSplitBy": "Split by",
+  "@dashboardReportSplitBy": {
+    "description": "Dashboard report: dashboardReportSplitBy"
+  },
+  "dashboardReportNoSplit": "Total (no split)",
+  "@dashboardReportNoSplit": {
+    "description": "Dashboard report: dashboardReportNoSplit"
+  },
+  "dashboardReportFilters": "Filters",
+  "@dashboardReportFilters": {
+    "description": "Dashboard report: dashboardReportFilters"
+  },
+  "dashboardReportAddFilter": "Add filter",
+  "@dashboardReportAddFilter": {
+    "description": "Dashboard report: dashboardReportAddFilter"
+  },
+  "dashboardReportNoFilters": "No filters: the whole shop is included.",
+  "@dashboardReportNoFilters": {
+    "description": "Dashboard report: dashboardReportNoFilters"
+  },
+  "dashboardReportSalesHint": "Store receipts and online orders, for the dashboard period. Amounts include VAT.",
+  "@dashboardReportSalesHint": {
+    "description": "Dashboard report: dashboardReportSalesHint"
+  },
+  "dashboardReportClosingsHint": "Till closings, for the dashboard period.",
+  "@dashboardReportClosingsHint": {
+    "description": "Dashboard report: dashboardReportClosingsHint"
+  },
+  "dashboardReportSearchHint": "Type at least two letters to search",
+  "@dashboardReportSearchHint": {
+    "description": "Dashboard report: dashboardReportSearchHint"
+  },
+  "dashboardReportAreaSales": "Sales",
+  "@dashboardReportAreaSales": {
+    "description": "Dashboard report: dashboardReportAreaSales"
+  },
+  "dashboardReportAreaProducts": "Products and pieces",
+  "@dashboardReportAreaProducts": {
+    "description": "Dashboard report: dashboardReportAreaProducts"
+  },
+  "dashboardReportAreaCustomers": "Customers",
+  "@dashboardReportAreaCustomers": {
+    "description": "Dashboard report: dashboardReportAreaCustomers"
+  },
+  "dashboardReportAreaCash": "Till and closings",
+  "@dashboardReportAreaCash": {
+    "description": "Dashboard report: dashboardReportAreaCash"
+  },
+  "dashboardReportMeasureRevenue": "Revenue",
+  "@dashboardReportMeasureRevenue": {
+    "description": "Dashboard report: dashboardReportMeasureRevenue"
+  },
+  "dashboardReportMeasureNetRevenue": "Revenue excl. VAT",
+  "@dashboardReportMeasureNetRevenue": {
+    "description": "Dashboard report: dashboardReportMeasureNetRevenue"
+  },
+  "dashboardReportMeasureTax": "VAT",
+  "@dashboardReportMeasureTax": {
+    "description": "Dashboard report: dashboardReportMeasureTax"
+  },
+  "dashboardReportMeasureDocuments": "Receipts and orders",
+  "@dashboardReportMeasureDocuments": {
+    "description": "Dashboard report: dashboardReportMeasureDocuments"
+  },
+  "dashboardReportMeasureAverageTicket": "Average ticket",
+  "@dashboardReportMeasureAverageTicket": {
+    "description": "Dashboard report: dashboardReportMeasureAverageTicket"
+  },
+  "dashboardReportMeasureUnitsPerDocument": "Pieces per receipt",
+  "@dashboardReportMeasureUnitsPerDocument": {
+    "description": "Dashboard report: dashboardReportMeasureUnitsPerDocument"
+  },
+  "dashboardReportMeasureDiscount": "Discounts given",
+  "@dashboardReportMeasureDiscount": {
+    "description": "Dashboard report: dashboardReportMeasureDiscount"
+  },
+  "dashboardReportMeasureDiscountRate": "Average discount %",
+  "@dashboardReportMeasureDiscountRate": {
+    "description": "Dashboard report: dashboardReportMeasureDiscountRate"
+  },
+  "dashboardReportMeasureReturnsValue": "Returns value",
+  "@dashboardReportMeasureReturnsValue": {
+    "description": "Dashboard report: dashboardReportMeasureReturnsValue"
+  },
+  "dashboardReportMeasureReturnsRate": "Returns %",
+  "@dashboardReportMeasureReturnsRate": {
+    "description": "Dashboard report: dashboardReportMeasureReturnsRate"
+  },
+  "dashboardReportMeasureQuantity": "Net pieces sold",
+  "@dashboardReportMeasureQuantity": {
+    "description": "Dashboard report: dashboardReportMeasureQuantity"
+  },
+  "dashboardReportMeasureQuantitySold": "Pieces sold",
+  "@dashboardReportMeasureQuantitySold": {
+    "description": "Dashboard report: dashboardReportMeasureQuantitySold"
+  },
+  "dashboardReportMeasureQuantityReturned": "Pieces returned",
+  "@dashboardReportMeasureQuantityReturned": {
+    "description": "Dashboard report: dashboardReportMeasureQuantityReturned"
+  },
+  "dashboardReportMeasureAverageUnitPrice": "Average price per piece",
+  "@dashboardReportMeasureAverageUnitPrice": {
+    "description": "Dashboard report: dashboardReportMeasureAverageUnitPrice"
+  },
+  "dashboardReportMeasureDistinctProducts": "Different products sold",
+  "@dashboardReportMeasureDistinctProducts": {
+    "description": "Dashboard report: dashboardReportMeasureDistinctProducts"
+  },
+  "dashboardReportMeasureCustomers": "Customers who bought",
+  "@dashboardReportMeasureCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureCustomers"
+  },
+  "dashboardReportMeasureNewCustomers": "New customers",
+  "@dashboardReportMeasureNewCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureNewCustomers"
+  },
+  "dashboardReportMeasureReturningCustomers": "Returning customers",
+  "@dashboardReportMeasureReturningCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureReturningCustomers"
+  },
+  "dashboardReportMeasureRevenuePerCustomer": "Average spend per customer",
+  "@dashboardReportMeasureRevenuePerCustomer": {
+    "description": "Dashboard report: dashboardReportMeasureRevenuePerCustomer"
+  },
+  "dashboardReportMeasureDocumentsPerCustomer": "Purchases per customer",
+  "@dashboardReportMeasureDocumentsPerCustomer": {
+    "description": "Dashboard report: dashboardReportMeasureDocumentsPerCustomer"
+  },
+  "dashboardReportMeasureDaysSinceLastPurchase": "Days since last purchase",
+  "@dashboardReportMeasureDaysSinceLastPurchase": {
+    "description": "Dashboard report: dashboardReportMeasureDaysSinceLastPurchase"
+  },
+  "dashboardReportMeasureCollectedTotal": "Total collected",
+  "@dashboardReportMeasureCollectedTotal": {
+    "description": "Dashboard report: dashboardReportMeasureCollectedTotal"
+  },
+  "dashboardReportMeasureCashCollected": "Cash collected",
+  "@dashboardReportMeasureCashCollected": {
+    "description": "Dashboard report: dashboardReportMeasureCashCollected"
+  },
+  "dashboardReportMeasureCardCollected": "Card collected",
+  "@dashboardReportMeasureCardCollected": {
+    "description": "Dashboard report: dashboardReportMeasureCardCollected"
+  },
+  "dashboardReportMeasureOtherCollected": "Other methods collected",
+  "@dashboardReportMeasureOtherCollected": {
+    "description": "Dashboard report: dashboardReportMeasureOtherCollected"
+  },
+  "dashboardReportMeasureRefundsPaid": "Refunds paid",
+  "@dashboardReportMeasureRefundsPaid": {
+    "description": "Dashboard report: dashboardReportMeasureRefundsPaid"
+  },
+  "dashboardReportMeasureManualIn": "Manual cash in",
+  "@dashboardReportMeasureManualIn": {
+    "description": "Dashboard report: dashboardReportMeasureManualIn"
+  },
+  "dashboardReportMeasureManualOut": "Manual cash out",
+  "@dashboardReportMeasureManualOut": {
+    "description": "Dashboard report: dashboardReportMeasureManualOut"
+  },
+  "dashboardReportMeasureCashExpected": "Expected cash",
+  "@dashboardReportMeasureCashExpected": {
+    "description": "Dashboard report: dashboardReportMeasureCashExpected"
+  },
+  "dashboardReportMeasureCashCounted": "Counted cash",
+  "@dashboardReportMeasureCashCounted": {
+    "description": "Dashboard report: dashboardReportMeasureCashCounted"
+  },
+  "dashboardReportMeasureCashDifference": "Cash difference",
+  "@dashboardReportMeasureCashDifference": {
+    "description": "Dashboard report: dashboardReportMeasureCashDifference"
+  },
+  "dashboardReportMeasureCardDifference": "Card difference",
+  "@dashboardReportMeasureCardDifference": {
+    "description": "Dashboard report: dashboardReportMeasureCardDifference"
+  },
+  "dashboardReportMeasureClosings": "Closings",
+  "@dashboardReportMeasureClosings": {
+    "description": "Dashboard report: dashboardReportMeasureClosings"
+  },
+  "dashboardReportDimensionHour": "Hour",
+  "@dashboardReportDimensionHour": {
+    "description": "Dashboard report: dashboardReportDimensionHour"
+  },
+  "dashboardReportDimensionWeekday": "Day of the week",
+  "@dashboardReportDimensionWeekday": {
+    "description": "Dashboard report: dashboardReportDimensionWeekday"
+  },
+  "dashboardReportDimensionDay": "Day",
+  "@dashboardReportDimensionDay": {
+    "description": "Dashboard report: dashboardReportDimensionDay"
+  },
+  "dashboardReportDimensionWeek": "Week",
+  "@dashboardReportDimensionWeek": {
+    "description": "Dashboard report: dashboardReportDimensionWeek"
+  },
+  "dashboardReportDimensionMonth": "Month",
+  "@dashboardReportDimensionMonth": {
+    "description": "Dashboard report: dashboardReportDimensionMonth"
+  },
+  "dashboardReportDimensionQuarter": "Quarter",
+  "@dashboardReportDimensionQuarter": {
+    "description": "Dashboard report: dashboardReportDimensionQuarter"
+  },
+  "dashboardReportDimensionYear": "Year",
+  "@dashboardReportDimensionYear": {
+    "description": "Dashboard report: dashboardReportDimensionYear"
+  },
+  "dashboardReportDimensionProduct": "Product",
+  "@dashboardReportDimensionProduct": {
+    "description": "Dashboard report: dashboardReportDimensionProduct"
+  },
+  "dashboardReportDimensionVariation": "Variation",
+  "@dashboardReportDimensionVariation": {
+    "description": "Dashboard report: dashboardReportDimensionVariation"
+  },
+  "dashboardReportDimensionCategory": "Category",
+  "@dashboardReportDimensionCategory": {
+    "description": "Dashboard report: dashboardReportDimensionCategory"
+  },
+  "dashboardReportDimensionBrand": "Brand",
+  "@dashboardReportDimensionBrand": {
+    "description": "Dashboard report: dashboardReportDimensionBrand"
+  },
+  "dashboardReportDimensionCustomer": "Customer",
+  "@dashboardReportDimensionCustomer": {
+    "description": "Dashboard report: dashboardReportDimensionCustomer"
+  },
+  "dashboardReportDimensionChannel": "Channel",
+  "@dashboardReportDimensionChannel": {
+    "description": "Dashboard report: dashboardReportDimensionChannel"
+  },
+  "dashboardReportDimensionRegister": "Till",
+  "@dashboardReportDimensionRegister": {
+    "description": "Dashboard report: dashboardReportDimensionRegister"
+  },
+  "dashboardReportDimensionOperator": "Operator",
+  "@dashboardReportDimensionOperator": {
+    "description": "Dashboard report: dashboardReportDimensionOperator"
+  },
+  "dashboardReportDimensionPaymentMethod": "Payment method",
+  "@dashboardReportDimensionPaymentMethod": {
+    "description": "Dashboard report: dashboardReportDimensionPaymentMethod"
+  },
+  "dashboardReportPresetProductSales": "Pieces sold of a product",
+  "@dashboardReportPresetProductSales": {
+    "description": "Dashboard report: dashboardReportPresetProductSales"
+  },
+  "dashboardReportPresetBestCustomers": "Best customers",
+  "@dashboardReportPresetBestCustomers": {
+    "description": "Dashboard report: dashboardReportPresetBestCustomers"
+  },
+  "dashboardReportPresetAverageTicketPerCustomer": "Average ticket of each customer",
+  "@dashboardReportPresetAverageTicketPerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetAverageTicketPerCustomer"
+  },
+  "dashboardReportPresetAveragePricePerCustomer": "Average price paid by each customer",
+  "@dashboardReportPresetAveragePricePerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetAveragePricePerCustomer"
+  },
+  "dashboardReportPresetRevenuePerCustomer": "Average spend per customer",
+  "@dashboardReportPresetRevenuePerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetRevenuePerCustomer"
+  },
+  "dashboardReportPresetNewCustomers": "New customers",
+  "@dashboardReportPresetNewCustomers": {
+    "description": "Dashboard report: dashboardReportPresetNewCustomers"
+  },
+  "dashboardReportPresetDormantCustomers": "Customers not back for longest",
+  "@dashboardReportPresetDormantCustomers": {
+    "description": "Dashboard report: dashboardReportPresetDormantCustomers"
+  },
+  "dashboardReportPresetSalesByHour": "Sales by hour",
+  "@dashboardReportPresetSalesByHour": {
+    "description": "Dashboard report: dashboardReportPresetSalesByHour"
+  },
+  "dashboardReportPresetSalesByWeekday": "Sales by day of the week",
+  "@dashboardReportPresetSalesByWeekday": {
+    "description": "Dashboard report: dashboardReportPresetSalesByWeekday"
+  },
+  "dashboardReportPresetSalesByOperator": "Sales by operator",
+  "@dashboardReportPresetSalesByOperator": {
+    "description": "Dashboard report: dashboardReportPresetSalesByOperator"
+  },
+  "dashboardReportPresetSalesByPaymentMethod": "Sales by payment method",
+  "@dashboardReportPresetSalesByPaymentMethod": {
+    "description": "Dashboard report: dashboardReportPresetSalesByPaymentMethod"
+  },
+  "dashboardReportPresetSalesByChannel": "Store vs online",
+  "@dashboardReportPresetSalesByChannel": {
+    "description": "Dashboard report: dashboardReportPresetSalesByChannel"
+  },
+  "dashboardReportPresetCashDifferences": "Till differences by day",
+  "@dashboardReportPresetCashDifferences": {
+    "description": "Dashboard report: dashboardReportPresetCashDifferences"
+  },
+  "notificationsTitle": "Notifications",
+  "@notificationsTitle": {
+    "description": "Notification bell panel title"
+  },
+  "notificationsTooltip": "Notifications",
+  "@notificationsTooltip": {
+    "description": "Tooltip of the notification bell"
+  },
+  "notificationsMarkAllRead": "Mark all as read",
+  "@notificationsMarkAllRead": {
+    "description": "Notification panel button"
+  },
+  "notificationsEmpty": "No notifications",
+  "@notificationsEmpty": {
+    "description": "Notification panel empty state"
+  },
+  "notificationsUpdateTitle": "Update available",
+  "@notificationsUpdateTitle": {
+    "description": "Notification: new app version"
+  },
+  "notificationsUpdateMessage": "Version {version} of the app is available.",
+  "@notificationsUpdateMessage": {
+    "description": "Notification: new app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsOrdersToFulfilTitle": "Orders to fulfil",
+  "@notificationsOrdersToFulfilTitle": {
+    "description": "Notification: paid orders to prepare"
+  },
+  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 paid order waiting to be fulfilled.} other{{count} paid orders waiting to be fulfilled.}}",
+  "@notificationsOrdersToFulfilMessage": {
+    "description": "Notification: paid orders to prepare",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsOrdersUnpaidTitle": "Unpaid orders",
+  "@notificationsOrdersUnpaidTitle": {
+    "description": "Notification: orders pending payment or on hold"
+  },
+  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 order not paid yet: do not ship it until the payment is received.} other{{count} orders not paid yet: do not ship them until the payment is received.}}",
+  "@notificationsOrdersUnpaidMessage": {
+    "description": "Notification: orders pending payment or on hold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsLowStockTitle": "Low stock",
+  "@notificationsLowStockTitle": {
+    "description": "Notification: products under their low stock threshold"
+  },
+  "notificationsLowStockMessage": "{count, plural, =1{1 product is below its low stock threshold.} other{{count} products are below their low stock threshold.}}",
+  "@notificationsLowStockMessage": {
+    "description": "Notification: products under their low stock threshold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsFiscalRegisterTitle": "Fiscal register",
+  "@notificationsFiscalRegisterTitle": {
+    "description": "Notification: fiscal register unreachable"
+  },
+  "notificationsFiscalRegisterMessage": "The fiscal register of till {name} is not responding.",
+  "@notificationsFiscalRegisterMessage": {
+    "description": "Notification: fiscal register unreachable",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSettingsTitle": "Notifications",
+  "@notificationsSettingsTitle": {
+    "description": "Settings section for the notification bell"
+  },
+  "notificationsSettingsDescription": "Choose what the bell in the top bar reports. Low stock only covers products with their own low stock threshold in WooCommerce; the fiscal register only when a till name/number is set.",
+  "@notificationsSettingsDescription": {
+    "description": "Settings section for the notification bell"
+  },
+  "reportSeparatorQuestion": "What goes between colour and size?",
+  "@reportSeparatorQuestion": {
+    "description": "Label of the separator choice"
+  },
+  "reportSeparatorSpace": "space",
+  "@reportSeparatorSpace": {
+    "description": "Separator option: a blank space"
+  },
+  "reportSeparatorCustom": "Or type your own",
+  "@reportSeparatorCustom": {
+    "description": "Label of the custom separator field"
+  },
+  "reportSeparatorExample": "On the label: {example}",
+  "@reportSeparatorExample": {
+    "description": "Preview of colour and size with the chosen separator",
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateLabelShop": "My shop label",
+  "@reportTemplateLabelShop": {
+    "description": "Built-in template name: the label layout designed by the shop"
+  },
+  "productsPrintLabels": "Print labels",
+  "@productsPrintLabels": {
+    "description": "Product action that prints labels for the selected products"
+  },
+  "productsPrintLabelsSelect": "Select products to print their labels",
+  "@productsPrintLabelsSelect": {
+    "description": "Tooltip of the disabled print labels button"
+  },
+  "productsPrintLabelsError": "Labels not prepared: {error}",
+  "@productsPrintLabelsError": {
+    "description": "Error while preparing labels for the selected products",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTabPrint": "Print",
+  "@reportTabPrint": {
+    "description": "Tab that prints templates"
+  },
+  "reportTabTemplates": "Templates",
+  "@reportTabTemplates": {
+    "description": "Tab that manages templates"
+  },
+  "reportReload": "Reload",
+  "@reportReload": {
+    "description": "Reloads the print library from the server"
+  },
+  "reportLoadError": "Templates could not be loaded from the server. Check the connection and try again.",
+  "@reportLoadError": {
+    "description": "Shown when the print library cannot be loaded"
+  },
+  "reportPrintHelp": "Tap a template to see the preview and print.",
+  "@reportPrintHelp": {
+    "description": "Help of the Print tab"
+  },
+  "reportJobTemplateQuestion": "Choose the label template",
+  "@reportJobTemplateQuestion": {
+    "description": "Title of the Print tab when printing labels for products"
+  },
+  "reportJobSummary": "Labels for {products, plural, =1{1 item} other{{products} items}}: {labels, plural, =1{1 label} other{{labels} labels}}",
+  "@reportJobSummary": {
+    "description": "Summary of the labels requested from the products list",
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "labels": {
+        "type": "int"
+      }
+    }
+  },
+  "reportJobCancel": "Cancel",
+  "@reportJobCancel": {
+    "description": "Discards the labels requested from the products list"
+  },
+  "reportJobLabelsTitle": "Labels to print",
+  "@reportJobLabelsTitle": {
+    "description": "Section with the labels per product"
+  },
+  "reportJobQuantityHelp": "One label per piece in stock. Variants without pieces are not listed.",
+  "@reportJobQuantityHelp": {
+    "description": "Help of the labels per product"
+  },
+  "reportChangeTemplate": "Change template",
+  "@reportChangeTemplate": {
+    "description": "Back to the template list"
+  },
+  "reportPreviewRealNotice": "Product data: the print will look exactly like this.",
+  "@reportPreviewRealNotice": {
+    "description": "Notice above the preview of real product labels"
+  },
+  "reportNoTemplates": "There are no templates yet.",
+  "@reportNoTemplates": {
+    "description": "Shown when the library has no templates"
+  },
+  "reportNoCategory": "No category",
+  "@reportNoCategory": {
+    "description": "Group of templates without a category"
+  },
+  "reportEmptyCategory": "No templates in this category.",
+  "@reportEmptyCategory": {
+    "description": "Shown under an empty category"
+  },
+  "reportManagersOnly": "Only shop managers can create, change or delete templates, categories and paper formats.",
+  "@reportManagersOnly": {
+    "description": "Notice for staff without management rights"
+  },
+  "reportNewTemplate": "New template",
+  "@reportNewTemplate": {
+    "description": "Button that creates a template"
+  },
+  "reportNewCategory": "New category",
+  "@reportNewCategory": {
+    "description": "Button that creates a category"
+  },
+  "reportPaperFormats": "Paper formats",
+  "@reportPaperFormats": {
+    "description": "Button and title of the paper formats page"
+  },
+  "reportDuplicate": "Duplicate",
+  "@reportDuplicate": {
+    "description": "Template action"
+  },
+  "reportMoveToCategory": "Move to category",
+  "@reportMoveToCategory": {
+    "description": "Template action"
+  },
+  "reportCopyOf": "Copy of {name}",
+  "@reportCopyOf": {
+    "description": "Name of a duplicated template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateDeleted": "Template \"{name}\" deleted",
+  "@reportTemplateDeleted": {
+    "description": "Confirmation after deleting a template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSaveError": "Not saved on the server: {error}",
+  "@reportSaveError": {
+    "description": "Error when a change is refused by the server",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryActions": "Category options",
+  "@reportCategoryActions": {
+    "description": "Tooltip of the category menu"
+  },
+  "reportMoveUp": "Move up",
+  "@reportMoveUp": {
+    "description": "Category action"
+  },
+  "reportMoveDown": "Move down",
+  "@reportMoveDown": {
+    "description": "Category action"
+  },
+  "reportCategoryNameLabel": "Category name",
+  "@reportCategoryNameLabel": {
+    "description": "Label of the category name field"
+  },
+  "reportCategorySaved": "Category \"{name}\" saved",
+  "@reportCategorySaved": {
+    "description": "Confirmation after saving a category",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryDeleted": "Category \"{name}\" deleted",
+  "@reportCategoryDeleted": {
+    "description": "Confirmation after deleting a category",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeleteCategoryTitle": "Delete category",
+  "@reportDeleteCategoryTitle": {
+    "description": "Title of the delete category dialog"
+  },
+  "reportDeleteCategoryMessage": "Delete the category \"{name}\"? Its templates are kept and listed under \"No category\".",
+  "@reportDeleteCategoryMessage": {
+    "description": "Body of the delete category dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryLabel": "Category",
+  "@reportCategoryLabel": {
+    "description": "Label of the category choice"
+  },
+  "reportTemplateKindLabel": "Type",
+  "@reportTemplateKindLabel": {
+    "description": "Label of the template type choice"
+  },
+  "reportOpenDesigner": "Open the designer",
+  "@reportOpenDesigner": {
+    "description": "Creates the template and opens the designer"
+  },
+  "reportCategoryLabels": "Labels",
+  "@reportCategoryLabels": {
+    "description": "Default category"
+  },
+  "reportCategorySale": "Sales and discounts",
+  "@reportCategorySale": {
+    "description": "Default category"
+  },
+  "reportCategorySigns": "Shop signs",
+  "@reportCategorySigns": {
+    "description": "Default category"
+  },
+  "reportCategoryReports": "Reports",
+  "@reportCategoryReports": {
+    "description": "Default category"
+  },
+  "reportPaperFormatsHelp": "Sheets and rolls used by the templates. Every measure is in millimetres.",
+  "@reportPaperFormatsHelp": {
+    "description": "Help of the paper formats page"
+  },
+  "reportNewPaperFormat": "New paper format",
+  "@reportNewPaperFormat": {
+    "description": "Button and dialog title"
+  },
+  "reportEditPaperFormat": "Edit paper format",
+  "@reportEditPaperFormat": {
+    "description": "Dialog title"
+  },
+  "reportPaperFormatSaved": "Paper format \"{name}\" saved",
+  "@reportPaperFormatSaved": {
+    "description": "Confirmation after saving a paper format",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeletePaperFormatTitle": "Delete paper format",
+  "@reportDeletePaperFormatTitle": {
+    "description": "Title of the delete paper format dialog"
+  },
+  "reportDeletePaperFormatMessage": "Delete the paper format \"{name}\"?",
+  "@reportDeletePaperFormatMessage": {
+    "description": "Body of the delete paper format dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeletePaperFormatUsedMessage": "Delete the paper format \"{name}\"? {count, plural, =1{1 template uses it and will print} other{{count} templates use it and will print}} on another format of the same type until you choose one.",
+  "@reportDeletePaperFormatUsedMessage": {
+    "description": "Body of the delete dialog when templates use the format",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportPaperMissing": "No paper format for this type: add one in Paper formats.",
+  "@reportPaperMissing": {
+    "description": "Shown when a type has no paper format"
+  },
+  "reportPaperNameLabel": "Name",
+  "@reportPaperNameLabel": {
+    "description": "Label of the paper format name"
+  },
+  "reportPaperNameHelp": "Leave empty to show the measures.",
+  "@reportPaperNameHelp": {
+    "description": "Helper of the paper format name"
+  },
+  "reportPaperFeedSheet": "Sheet",
+  "@reportPaperFeedSheet": {
+    "description": "Paper feed option"
+  },
+  "reportPaperFeedRoll": "Roll",
+  "@reportPaperFeedRoll": {
+    "description": "Paper feed option"
+  },
+  "reportPaperLabelSizeTitle": "Label size (mm)",
+  "@reportPaperLabelSizeTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperCellSizeTitle": "Size of each label or sign (mm)",
+  "@reportPaperCellSizeTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperPageTitle": "Sheet size (mm)",
+  "@reportPaperPageTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperGridTitle": "Layout on the sheet",
+  "@reportPaperGridTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperWidth": "Width",
+  "@reportPaperWidth": {
+    "description": "Paper format field"
+  },
+  "reportPaperHeight": "Height",
+  "@reportPaperHeight": {
+    "description": "Paper format field"
+  },
+  "reportPaperColumns": "Columns",
+  "@reportPaperColumns": {
+    "description": "Paper format field"
+  },
+  "reportPaperRows": "Rows",
+  "@reportPaperRows": {
+    "description": "Paper format field"
+  },
+  "reportPaperMarginTop": "Top margin",
+  "@reportPaperMarginTop": {
+    "description": "Paper format field"
+  },
+  "reportPaperMarginLeft": "Left margin",
+  "@reportPaperMarginLeft": {
+    "description": "Paper format field"
+  },
+  "reportPaperGapX": "Gap between columns",
+  "@reportPaperGapX": {
+    "description": "Paper format field"
+  },
+  "reportPaperGapY": "Gap between rows",
+  "@reportPaperGapY": {
+    "description": "Paper format field"
+  },
+  "reportPaperErrorSize": "Enter the size of the sheet and of each label.",
+  "@reportPaperErrorSize": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperErrorGrid": "Columns must be 1 to 20 and rows 1 to 40.",
+  "@reportPaperErrorGrid": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperErrorOutside": "The labels do not fit on the sheet: check sizes, margins and gaps.",
+  "@reportPaperErrorOutside": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperSheetDescription": "Sheet {page} mm · {count} × {cell} mm",
+  "@reportPaperSheetDescription": {
+    "description": "Description of a sheet paper format",
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "reportJobLabelCount": "{count, plural, =1{1 label} other{{count} labels}}",
+  "@reportJobLabelCount": {
+    "description": "Labels printed for one product or variant",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportJobRemove": "Remove from the labels",
+  "@reportJobRemove": {
+    "description": "Tooltip of the button removing a product or variant from the labels"
+  },
+  "reportJobEmpty": "No labels left to print.",
+  "@reportJobEmpty": {
+    "description": "Shown when every line was removed"
+  },
+  "productsPrintLabelsNoStock": "The selected products have no pieces in stock: there are no labels to print.",
+  "@productsPrintLabelsNoStock": {
+    "description": "Warning when every selected variant has zero stock"
+  },
+  "reportSheetNumber": "Sheet {number}",
+  "@reportSheetNumber": {
+    "description": "Label of one sheet in the positions already used list",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "reportAddLabels": "Add label",
+  "@reportAddLabels": {
+    "description": "Opens the product picker to add products to the labels"
+  },
+  "reportAddLabelsHelp": "To print labels of real products, add them from the catalogue.",
+  "@reportAddLabelsHelp": {
+    "description": "Help above the add label button when printing example labels"
+  },
+  "reportAddLabelsAlreadyListed": "The chosen products are already in the labels.",
+  "@reportAddLabelsAlreadyListed": {
+    "description": "Shown when every chosen variant is already listed"
+  },
+  "productsVariantsSelected": "{count, plural, =1{1 variant selected} other{{count} variants selected}}",
+  "@productsVariantsSelected": {
+    "description": "Count of the ticked variants",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsClearSelection": "Clear selection",
+  "@productsVariantsClearSelection": {
+    "description": "Unticks every variant"
+  },
+  "productsVariantsBulkEdit": "Bulk edit",
+  "@productsVariantsBulkEdit": {
+    "description": "Changes the ticked variants together"
+  },
+  "productsVariantsBulkEditTitle": "{count, plural, =1{Edit 1 variant} other{Edit {count} variants}}",
+  "@productsVariantsBulkEditTitle": {
+    "description": "Title of the variants bulk edit dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsBulkEditHelp": "Fill only what you want to change: empty fields stay as they are.",
+  "@productsVariantsBulkEditHelp": {
+    "description": "Help of the variants bulk edit dialog"
+  },
+  "productsVariantsBulkPrice": "Price",
+  "@productsVariantsBulkPrice": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkSalePrice": "Sale price",
+  "@productsVariantsBulkSalePrice": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkQuantity": "Quantity",
+  "@productsVariantsBulkQuantity": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkApply": "Apply",
+  "@productsVariantsBulkApply": {
+    "description": "Applies the bulk edit"
+  },
+  "productsVariantsBulkInvalid": "Fill at least one field with a valid number (0 or more).",
+  "@productsVariantsBulkInvalid": {
+    "description": "Bulk edit validation error"
+  },
+  "productsVariantsUpdated": "Variants updated: {updated}{failed, plural, =0{} other{, not updated: {failed}}}",
+  "@productsVariantsUpdated": {
+    "description": "Result of the variants bulk edit",
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsDeleteTitle": "Delete variants",
+  "@productsVariantsDeleteTitle": {
+    "description": "Title of the delete variants dialog"
+  },
+  "productsVariantsDeleteMessage": "{count, plural, =1{Delete 1 variant} other{Delete {count} variants}} of \"{product}\" for good? {variants}. Their MGWS stock is brought to 0 with a movement; the product and its other variants stay.",
+  "@productsVariantsDeleteMessage": {
+    "description": "Body of the delete variants dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "product": {
+        "type": "String"
+      },
+      "variants": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantsDeleted": "Variants deleted: {deleted}{failed, plural, =0{} other{, not deleted: {failed}}}",
+  "@productsVariantsDeleted": {
+    "description": "Result of the variants deletion",
+    "placeholders": {
+      "deleted": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsDeleteStockReason": "Variant deleted from Products: {product}",
+  "@productsVariantsDeleteStockReason": {
+    "description": "Reason of the MGWS movement that brings a deleted variant to 0",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantsStockNotZeroed": "{count, plural, =1{1 variant was kept} other{{count} variants were kept}}: its MGWS stock could not be brought to 0.",
+  "@productsVariantsStockNotZeroed": {
+    "description": "Shown when variants were kept because MGWS did not zero their stock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

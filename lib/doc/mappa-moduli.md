@@ -16,8 +16,8 @@ La barra in alto mostra a destra il pulsante log e lo stato login: avatar e nome
 - `Clienti` - gestione clienti
 - `Fornitori` - lista in stile `Clienti` dei fornitori salvati nella tabella MGWS `mg_fornitori`; creazione tramite `Aggiungi fornitore` dedicato, senza creare utenti WordPress o customer WooCommerce
 - `Carte Fedelta` - punti, carta cliente, lookup e storico loyalty tramite MGWS v1
-- `Report` - etichette, QR e stampe
-- `Dashboard` - analisi WooCommerce con vendite, ordini, prodotti, stock, grafici, dettagli e generazione PDF/CSV dal periodo corrente
+- `Template e stampa` - stampa etichette prodotto, cartelli negozio e report A4 e gestisce modelli, categorie e formati carta salvati su MGWS (rotte `/print`); solo con MGWS
+- `Dashboard` - dashboard a widget personalizzabili (personali, condivise con tutti o solo admin) con filtri periodo e stati ordine, scelta del tipo di grafico, dettagli e generazione PDF/CSV
 - `Impostazioni` - backend, prodotti, tema, IA, RFID, shortcut
 - `Aggiornamenti` - aggiornamenti desktop Windows/Linux via Velopack e note release post-riavvio
 - `CalDAV` - calendario e contatti
@@ -40,7 +40,7 @@ La barra in alto mostra a destra il pulsante log e lo stato login: avatar e nome
 - `Movimenti` legge il ledger MGWS e lo raggruppa per operazione invece che per prodotto; non lo modifica, e le azioni che scrivono dal ledger sono l'annullamento (contromovimento, o spostamento al contrario su uno spostamento) e la riapertura in un pannello, che registra solo se l'operatore conferma
 - I pannelli di fornitori, riordino, ordini fornitore e ricezioni esistono nel codice ma il selettore dei moduli non li espone: restano fuori dal percorso operativo finche non vengono rimessi nel selettore
 - `Carte Fedelta` usa MGWS per conto loyalty, carta, punti e storico; rimuovere una carta non rimuove conto o movimenti
-- I report generati dalla `Dashboard` esportano in PDF/CSV i dati caricati nel periodo corrente; il modulo `Report` resta dedicato a etichette, QR e stampe.
+- I report generati dalla `Dashboard` esportano in PDF/CSV i dati caricati nel periodo corrente; il modulo `Template e stampa` resta dedicato a etichette, cartelli e stampe.
 - I report gestionali MGWS restano distinti dal modulo inventario descritto qui
 - `Clienti` resta dedicato ai clienti WooCommerce; ruoli e capability WordPress non si gestiscono da li.
 - `Dipendenti` usa le anagrafiche MGWS come sorgente principale. Ruoli e capability sono disponibili solo per i dipendenti con `wp_user_id` collegato, cosi l'app non gestisce permessi per utenti WordPress generici non dipendenti.

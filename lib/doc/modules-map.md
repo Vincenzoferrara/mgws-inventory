@@ -15,8 +15,8 @@ The home screen uses a dockable layout on desktop and a simpler single-view flow
 - `Customers` - WooCommerce customer management
 - `Suppliers` - MGWS supplier records when exposed by the active flow
 - `Loyalty Cards` - MGWS points, card lookup, customer account and loyalty history
-- `Reports` - labels, QR codes and printing flows
-- `Dashboard` - WooCommerce analytics, charts and PDF/CSV exports for the active period
+- `Templates and print` - prints product labels, shop signs and A4 reports and manages templates, categories and paper formats stored on MGWS (`/print` routes); MGWS-only
+- `Dashboard` - customizable widget dashboards (personal, shared with everyone or admins only) with period and order status filters, chart types and PDF/CSV exports
 - `Settings` - backend, products, theme, AI, RFID, shortcuts and module settings
 - `Updates` - desktop updates through Velopack and post-restart release notes
 - `CalDAV` - calendars and contacts
@@ -40,4 +40,4 @@ The home screen uses a dockable layout on desktop and a simpler single-view flow
 - `Loyalty Cards` uses MGWS for accounts, cards, points and history
 - `Customers` remains a WooCommerce customer module; WordPress roles and capabilities are not managed there
 - `Employees` uses MGWS employee records as the operational identity source
-- `Orders`, `Coupons`, `Reports`, `Dashboard`, `Settings`, `Updates` and `CalDAV` read from WooCommerce or local storage and stay open when MGWS is down
+- `Orders`, `Coupons`, `Dashboard`, `Settings`, `Updates` and `CalDAV` read from WooCommerce or local storage and stay open when MGWS is down

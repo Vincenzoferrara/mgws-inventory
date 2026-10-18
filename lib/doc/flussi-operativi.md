@@ -135,15 +135,15 @@ Anche `Ricezione/Convalida` non e oggi raggiungibile dal selettore dei moduli. I
 4. Consulta lo storico punti dalla rotta history, ordinato dal movimento piu recente
 5. Se rimuovi una carta, MGWS cancella solo il numero carta: conto cliente e storico movimenti restano disponibili
 
-## Analisi dashboard e generazione report
+## Personalizzazione dashboard e generazione report
 
-1. Apri `Dashboard`
-2. Scegli il periodo dal menu rapido: oggi, settimana, mese o anno
-3. Consulta vendite, ordini, prodotti, stock, clienti, grafici e accessi ai report dettagliati disponibili
-4. Usa il pannello `Analisi dashboard` per vedere quali dati sono gia analizzabili nel periodo corrente
-5. Premi `Genera report`
-6. Scegli `Dashboard CSV`, `Dashboard PDF`, `Vendite CSV` o `Vendite PDF`
-7. L'app genera e condivide il file usando i dati caricati nella dashboard e lo stesso periodo selezionato
+1. Apri `Dashboard` e scegli la dashboard dal nome in alto
+2. Imposta i filtri: periodo, confronto col periodo precedente, stati ordine
+3. Premi `Personalizza dashboard`, aggiungi o modifica i widget scegliendo dato e tipo di grafico, trascinali nella posizione voluta e regola larghezza e altezza
+4. Da `Nome e visibilita` scegli `Solo io`, `Tutti` o `Solo admin` (la condivisione e riservata ai gestori del negozio)
+5. Premi `Salva`: layout, visibilita e filtri vengono salvati in MGWS
+6. Per un report, apri `Altre opzioni` > `Esporta report` e scegli `Dashboard CSV`, `Dashboard PDF`, `Vendite CSV` o `Vendite PDF`
+7. L'app genera e condivide il file usando i dati caricati e il periodo filtrato
 
 ## Gestione dettaglio prodotto
 
@@ -154,8 +154,24 @@ Anche `Ricezione/Convalida` non e oggi raggiungibile dal selettore dei moduli. I
 5. Usa i filtri varianti per restringere taglia, colore o altri attributi e, se serve, mostra solo varianti disponibili
 6. Usa il menu azioni del dettaglio per modificare, eliminare o creare un prodotto
 
-## Etichette e report
+## Template e stampa
 
-1. Apri `Report`
-2. Seleziona il contenuto da stampare
-3. Esporta o invia in stampa
+1. Apri `Template e stampa` (serve MGWS).
+2. Nella tab `Stampa` tocca un modello nel suo gruppo.
+3. Imposta copie, posizioni gia usate e formato carta guardando l'anteprima.
+4. Premi `Stampa` o `Salva PDF`.
+
+## Stampa etichette dai prodotti
+
+1. In `Prodotti` seleziona i prodotti.
+2. Premi `Stampa etichette` nella barra o nel menu del tasto destro.
+3. Nella tab `Stampa` scegli il modello di etichetta.
+4. Controlla le etichette di ogni variante (una per pezzo in magazzino), togli con `Elimina` le righe da non stampare e aggiungi altri prodotti con `Aggiungi etichetta`.
+5. Premi `Stampa`.
+
+## Nuovo modello
+
+1. Nella tab `Template` premi `Nuovo modello` (solo responsabili).
+2. Scegli nome, tipo, categoria e formato carta.
+3. Disegna nel designer trascinando i campi sull'etichetta.
+4. Premi `Usa queste modifiche`: il modello e salvato su MGWS.

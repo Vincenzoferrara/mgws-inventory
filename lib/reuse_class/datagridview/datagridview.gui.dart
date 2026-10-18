@@ -13,6 +13,10 @@ class DataGridView<T> extends StatefulWidget {
   final Set<String> selectedRowIds;
   final ValueChanged<T>? onRowSelected;
   final ValueChanged<T>? onRowDoubleTap;
+
+  /// Tocco singolo completato (non scatta su pressione prolungata né su
+  /// scroll). Serve dove non c'è un pannello laterale, cioè su telefono.
+  final ValueChanged<T>? onRowTap;
   final Future<void> Function(TapDownDetails details, T value)?
   onRowSecondaryTap;
   final List<DataGridViewContextAction<T>> contextActions;
@@ -44,6 +48,7 @@ class DataGridView<T> extends StatefulWidget {
     this.selectedRowIds = const <String>{},
     this.onRowSelected,
     this.onRowDoubleTap,
+    this.onRowTap,
     this.onRowSecondaryTap,
     this.contextActions = const [],
     this.onRowChecked,
@@ -197,6 +202,10 @@ class _DataGridViewState<T> extends State<DataGridView<T>> {
 
   bool get _canSecondaryTap =>
       widget.onRowSecondaryTap != null || widget.contextActions.isNotEmpty;
+
+  /// Ultimo punto toccato su una cella: la pressione prolungata non porta
+  /// la posizione, e il menu va aperto dove si trova il dito.
+  Offset _lastTapPosition = Offset.zero;
 
   @override
   void didChangeDependencies() {
@@ -504,6 +513,22 @@ class _DataGridViewState<T> extends State<DataGridView<T>> {
     builtRows[index] = _buildRow(index);
   }
 
+  void _openContextMenu(int index, T value, TapDownDetails details) {
+    if (widget.contextActions.isNotEmpty) {
+      // Selezione della riga prima del menu (comportamento standard).
+      _selectIndex(index);
+      if (!mounted) return;
+      showDataGridViewContextMenu(
+        context: context,
+        actions: widget.contextActions,
+        value: value,
+        globalPosition: details.globalPosition,
+      );
+    } else {
+      widget.onRowSecondaryTap?.call(details, value);
+    }
+  }
+
   DataRow2 _buildRow(int index) {
     final row = _rows[index];
     final checked = widget.selectedRowIds.contains(row.id);
@@ -511,7 +536,13 @@ class _DataGridViewState<T> extends State<DataGridView<T>> {
         .map(
           (column) => DataCell(
             _cell(row, column),
-            onTapDown: (_) => _selectIndex(index),
+            onTapDown: (details) {
+              _lastTapPosition = details.globalPosition;
+              _selectIndex(index);
+            },
+            onTap: widget.onRowTap == null
+                ? null
+                : () => widget.onRowTap!(row.value),
           ),
         )
         .toList();
@@ -524,21 +555,16 @@ class _DataGridViewState<T> extends State<DataGridView<T>> {
       onDoubleTap: () => widget.onRowDoubleTap?.call(row.value),
       onSecondaryTapDown: !_canSecondaryTap
           ? null
-          : (details) {
-              if (widget.contextActions.isNotEmpty) {
-                // Selezione della riga prima del menu (comportamento standard).
-                _selectIndex(index);
-                if (!mounted) return;
-                showDataGridViewContextMenu(
-                  context: context,
-                  actions: widget.contextActions,
-                  value: row.value,
-                  globalPosition: details.globalPosition,
-                );
-              } else {
-                widget.onRowSecondaryTap?.call(details, row.value);
-              }
-            },
+          : (details) => _openContextMenu(index, row.value, details),
+      // Su touch non esiste il tasto destro: la pressione prolungata apre
+      // lo stesso menu, altrimenti le azioni di riga sarebbero irraggiungibili.
+      onLongPress: !_canSecondaryTap
+          ? null
+          : () => _openContextMenu(
+              index,
+              row.value,
+              TapDownDetails(globalPosition: _lastTapPosition),
+            ),
       cells: cells,
     );
   }

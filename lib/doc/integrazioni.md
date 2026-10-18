@@ -57,6 +57,8 @@
 - Loyalty: stato servizio, scheda cliente, lookup carta, lookup email, creazione o modifica carta, cancellazione carta, aggiunta punti, sottrazione punti, storico e statistiche
 - Cancellare una carta loyalty rimuove il numero carta dal conto MGWS, mantiene conto cliente e storico movimenti, e risponde `404` se la carta manca
 - Lo storico loyalty e append-only, paginato e ordinato dal movimento piu recente
+- Report: `POST /wp-json/mgws/v1/reports/query` risponde a una domanda fatta di misura, suddivisione facoltativa e filtri, aggregando in SQL gli scontrini MGWS (righe IVA inclusa, sconto di testata ripartito sulle righe, annullati esclusi, resi negativi) e le righe degli ordini online dalle tabelle analytics WooCommerce, escludendo gli ordini creati dalla cassa. Le fasce orarie seguono il fuso del negozio, ora legale compresa. `GET /wp-json/mgws/v1/reports/catalog` elenca misure, suddivisioni, filtri e valori noti (casse, operatori, metodi di pagamento). Entrambe richiedono `mgws_reports_read`, `manage_woocommerce` o `manage_options`; le risposte restano in cache 120 secondi.
+- Dashboard: `GET /wp-json/mgws/v1/dashboards`, `PUT` e `DELETE /wp-json/mgws/v1/dashboards/{id}` salvano le dashboard personali e quelle condivise con tutti o solo con i gestori.
 
 ## MGWS v1 compatibilita
 

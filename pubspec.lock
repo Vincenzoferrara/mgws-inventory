@@ -257,6 +257,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  cupertino_ui:
+    dependency: transitive
+    description:
+      name: cupertino_ui
+      sha256: ea0b8170b40a86262b2fc21ac0625303f52df209dbf6fccc2b98b27eff44f6ce
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   dart_jsonwebtoken:
     dependency: "direct main"
     description:
@@ -353,6 +361,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0-rc.2"
+  dots_indicator:
+    dependency: transitive
+    description:
+      name: dots_indicator
+      sha256: c9ea60760704d5af651ec971b9a75e629a5e7574a1d61e905b9c6e6efbe666e1
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   dropdown_search:
     dependency: "direct main"
     description:
@@ -574,6 +590,54 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
+  flutter_keyboard_visibility:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility
+      sha256: dabc6c146897b2d07794b096e3e696212c08ac1500b4344ba84f0bd6878b9a51
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.1"
+  flutter_keyboard_visibility_linux:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_linux
+      sha256: "478ccab140efbf8e0725063da5522a6c512a6ed33b9687161855a1eb6a668abe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  flutter_keyboard_visibility_macos:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_macos
+      sha256: "7bee81be3c5aa06950b11e68cc947b4b567079456ab66a261c3fee01a5194fc0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  flutter_keyboard_visibility_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_platform_interface
+      sha256: c16de89f36e655562baed76d8e05a9f19c884707e569b3ae6c121e0f41adfabe
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
+  flutter_keyboard_visibility_web:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_web
+      sha256: "2200cc44d1d743b83176bd078a341780bd054a0217ec35a08679387c0989fb35"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
+  flutter_keyboard_visibility_windows:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility_windows
+      sha256: fde7b3fd757bcd31474e6575d0e12ccb3d244841e97645b6d78df7bf86a9e341
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -821,6 +885,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.3"
+  introduction_screen:
+    dependency: "direct main"
+    description:
+      name: introduction_screen
+      sha256: "2c0c56e2cdbed8add65513382238f815950221e3b88ccb5adf38a0fb8506e9ff"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.1"
   io:
     dependency: transitive
     description:
@@ -949,6 +1021,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  material_ui:
+    dependency: transitive
+    description:
+      name: material_ui
+      sha256: "98ab9eda579ecae623e4b376c603035c5def78ce706f735f30bd632af5814695"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
   meta:
     dependency: transitive
     description:
@@ -1356,6 +1436,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  showcaseview:
+    dependency: "direct main"
+    description:
+      name: showcaseview
+      sha256: dad6e9c86dc870a29f29ff38f09278555790780464afc52e7aaf14e5ec490bd5
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.0"
   sky_engine:
     dependency: transitive
     description: flutter

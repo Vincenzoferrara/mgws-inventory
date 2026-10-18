@@ -21,7 +21,7 @@ version: 1.0.26+26
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
-  flutter: '>=3.41.2'
+  flutter: '>=3.44.0'
 
 
 # Dependencies specify other packages that your package needs in order to work.
@@ -41,6 +41,8 @@ dependencies:
 
   docking: ^1.16.2 # layout desktop dockabile con resize e tab
   multi_split_view: ^3.6.2 # split view leggera per pannelli ridimensionabili
+  introduction_screen: ^5.0.1 # Flusso di benvenuto e onboarding iniziale
+  showcaseview: ^5.1.0          # Tour guidati contestuali sulle schermate
 
   http: ^1.1.0               # Richieste HTTP
   flutter_secure_storage: ^11.2.0  # Storage sicuro
@@ -145,6 +147,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Font Noto (SIL OFL, vedi assets/fonts/OFL.txt) ridotti all'alfabeto latino:
+  # usati dai PDF di etichette, cartelli e report, perche' i font PDF standard
+  # non contengono il simbolo dell'euro.
+  assets:
+    - assets/fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

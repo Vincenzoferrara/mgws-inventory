@@ -46,6 +46,13 @@ Supported authentication paths include JWT, WooCommerce API credentials and Word
 
 `GET/PATCH /wp-json/mgws/v1/me/settings` synchronizes non-secret app preferences for the authenticated WordPress user. Passwords, tokens, secrets and sensitive keys are excluded.
 
+## Reports and dashboards
+
+- `POST /wp-json/mgws/v1/reports/query` answers a question made of a measure, an optional split and filters. MGWS aggregates POS receipts (VAT included, document discount spread over the lines, cancelled receipts excluded, returns negative) and online order lines from the WooCommerce analytics tables, excluding the orders created by the POS. Time buckets follow the shop timezone, DST included.
+- `GET /wp-json/mgws/v1/reports/catalog` lists measures, splits, filters and known values (tills, operators, payment methods).
+- Both routes need `mgws_reports_read`, `manage_woocommerce` or `manage_options`; answers are cached for 120 seconds.
+- `GET /wp-json/mgws/v1/dashboards`, `PUT` and `DELETE /wp-json/mgws/v1/dashboards/{id}` store personal dashboards and dashboards shared with everyone or with managers only.
+
 ## Employee credentials
 
 The app can list and revoke employee Application Passwords and WooCommerce keys through MGWS routes. It does not generate those credentials. Credential routes require administrator-level MGWS capability and a 403 must be treated as an authorization limit for that section, not as a full employee-page failure.

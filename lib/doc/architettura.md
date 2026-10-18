@@ -48,6 +48,7 @@
 - `login/jwt_api/query_mgws/` contiene i client MGWS usati dall'app
 - `WooConnect` e' l'unico owner dei connettori di autenticazione e l'unica fonte di `siteUrl` e del Dio autenticato: i client MGWS non istanziano connettori propri, altrimenti le richieste viaggerebbero con credenziali diverse da quelle della sessione attiva e MGWS risulterebbe irraggiungibile
 - `QueryMgwsPos` copre il checkout POS v1 con idempotenza basata su `idempotency_key` o meta `_id_scontrino_locale`
+- `QueryMgwsPrint` legge e scrive la libreria di stampa (modelli, categorie, formati carta) condivisa dal sito; la sezione `Template e stampa` dichiara `requiresMgws` e non si apre senza MGWS, perche quei dati esistono solo sul server
 - `QueryMgwsInventory` copre letture stock, statistiche, soglie basse, sync Woo verso MGWS, reconcile stock, RFID scan resolve-only, carico rapido, fornitori, riordino, ordini fornitore, ricezioni, movimenti e conte fisiche
 - `QueryMgwsLoyalty` copre stato servizio, cliente, lookup, carta, punti, storico e statistiche
 - I permessi operativi WordPress/MGWS si gestiscono dall'anagrafica `Dipendenti`: l'app legge o modifica ruoli/capability solo per dipendenti MGWS collegati a un `wp_user_id`, evitando una gestione generica di capability su utenti WordPress non dipendenti

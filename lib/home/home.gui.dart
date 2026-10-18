@@ -10,23 +10,39 @@ import '../coupon/coupon_gestisci/coupon_gestisci_view.gui.dart';
 import '../dashboard/dashboard_customization.dart';
 import '../dipendenti/dipendenti.gui.dart';
 import '../inventory/inventory.gui.dart';
+import '../inventory/inventory_site_panel.gui.dart';
 import '../inventory/inventory_suppliers.gui.dart';
 import '../login/gui/login.gui.dart';
 import '../login/mgws/connection/mgws_auth.dart';
+import '../login/mgws/connection/mgws_connection.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 import '../log_viewer/log_viewer.gui.dart';
 import '../notification/notification_service.dart';
 import '../ordini/ordini_gestisci/ordini_gestisci.gui.dart';
 import '../prodotti/prodotti_crea/prodotti_crea.gui.dart';
 import '../prodotti/prodotti_gestisci/prodotti_gestisci.gui.dart';
+import '../report/print_job.dart';
 import '../report/report.gui.dart';
 import '../settings/settings.gui.dart';
 import '../theme/theme.dart';
+import '../notification/notification_bell.gui.dart';
+import '../notification/notification_center.dart';
 import '../updater/updater.gui.dart';
 import '../updater/updater_service.dart';
 import 'home.code.dart';
+import 'home_section_requests.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.startGuidedLogin = false});
+
+  /// Requests the guided login once, right after the home is rendered.
+  ///
+  /// Set by the welcome flow, which has just explained the guides and sends the
+  /// user straight into the first one. It is a request and not a mode: the home
+  /// consumes it a single time and then forgets it, so a rebuild, a rotation or
+  /// a layout change cannot open the login twice. Default `false` keeps every
+  /// existing call site opening the home untouched.
+  final bool startGuidedLogin;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -51,14 +67,66 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _desktopTabsListener = () => setState(() {});
     _homeLogic.desktopLayout.addListener(_desktopTabsListener);
+    homeSectionRequest.addListener(_openRequestedSection);
     _initializeAuth();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showReleaseNotesAfterUpdate();
+    NotificationCenter.instance.start();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _showReleaseNotesAfterUpdate();
+      await _notifyAvailableUpdate();
     });
   }
 
   Future<void> _initializeAuth() async {
     await _homeLogic.checkAuthentication();
+    // Gli ordini e le scorte si possono leggere solo dopo il login.
+    if (_homeLogic.isConnected) NotificationCenter.instance.refresh();
+    if (_homeLogic.isConnected) await _verificaSede();
+  }
+
+  bool _verificaSedeInCorso = false;
+
+  /// Dopo il login, con MGWS collegato, controlla che l'utente abbia una sede
+  /// in uso. Se manca apre lo stesso pannello di Inventario: chi puo' crea o
+  /// sceglie la sede, gli altri leggono a chi chiederla. La finestra si
+  /// chiude da sola appena la sede c'e', e si puo' chiudere comunque: senza
+  /// sede resta bloccato solo l'inventario, non il resto dell'app.
+  Future<void> _verificaSede() async {
+    if (_verificaSedeInCorso) return;
+    _verificaSedeInCorso = true;
+    try {
+      if (!await MgwsConnection.instance.ensureConnected()) return;
+      final MgwsSiteStatus stato;
+      try {
+        stato = await QueryMgwsSite().getMySite();
+      } on MgwsSiteException {
+        return;
+      }
+      if (stato.hasSite || !mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.sedeInUso),
+          content: SizedBox(
+            width: 480,
+            child: SingleChildScrollView(
+              child: InventorySitePanel(
+                onStatusChanged: (stato) {
+                  if (stato != null) Navigator.of(dialogContext).pop();
+                },
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(context.l10n.commonClose),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      _verificaSedeInCorso = false;
+    }
   }
 
   @override
@@ -70,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _allineaTitoliAllaLingua();
     if (!_isInitialized) {
       _homeLogic.setHomePage(
-          title: context.l10n.homeTitoloHome,
-          page: _buildHomeTabContent(),
-        );
+        title: context.l10n.homeTitoloHome,
+        page: _buildHomeTabContent(),
+      );
       _isInitialized = true;
     }
   }
@@ -105,6 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _homeLogic.desktopLayout.removeListener(_desktopTabsListener);
+    homeSectionRequest.removeListener(_openRequestedSection);
+    NotificationCenter.instance.stop();
     super.dispose();
   }
 
@@ -204,14 +274,14 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: () => const CartaFedeltaPage(),
       ),
       _HomeSection(
-        id: 'report',
+        id: printSectionId,
         title: context.l10n.homeTitoloReport,
         subtitle: context.l10n.homeSottotitoloReport,
-        icon: Icons.insert_chart,
+        icon: Icons.print_outlined,
         iconColor: accents.report,
         openMode: HomeTabOpenMode.singleton,
-        requiresAuth: false,
-        builder: () => const EtichettePage(),
+        requiresMgws: true,
+        builder: () => const PrintCenterPage(),
       ),
       _HomeSection(
         id: 'dashboard',
@@ -294,6 +364,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Apre la sezione chiesta da un'altra sezione tramite [requestHomeSection].
+  void _openRequestedSection() {
+    final sectionId = homeSectionRequest.value;
+    if (sectionId == null || !mounted) return;
+    homeSectionRequest.value = null;
+    _openSectionById(sectionId);
+  }
+
+  /// Apre una sezione dal suo id, es. da una notifica della campanella.
+  void _openSectionById(String sectionId) {
+    final section = _sections
+        .where((section) => section.id == sectionId)
+        .firstOrNull;
+    if (section != null) _openSection(section);
+  }
+
   void _showLoginModal() {
     if (_isSmallScreen(context)) {
       Navigator.of(context).push(
@@ -365,6 +451,11 @@ class _HomeScreenState extends State<HomeScreen> {
         messaggio = l10n.mgwsNonRaggiungibile;
       case MgwsUnavailableReason.serviceDisabled:
         messaggio = l10n.mgwsServizioSpento;
+      case MgwsUnavailableReason.pluginOutdated:
+        messaggio = l10n.mgwsPluginDaAggiornare(
+          MgwsConnection.instance.pluginVersion ?? '?',
+          MgwsAuth.minPluginVersion,
+        );
       case MgwsUnavailableReason.unknown:
         messaggio = l10n.mgwsNonDisponibileMessaggio;
     }
@@ -433,6 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'home',
                   context.l10n.homeLoginSuccesso,
                 );
+                _verificaSede();
               },
             ),
           ),
@@ -629,15 +721,14 @@ class _HomeScreenState extends State<HomeScreen> {
         label: Text(context.l10n.homeTitoloLogin),
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: context.shapes.full,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: context.shapes.full),
         ),
       );
     }
 
     final avatarUrl = _homeLogic.avatarUrl;
-    final displayName = _homeLogic.displayName ?? context.l10n.homeNomeUtentePredefinito;
+    final displayName =
+        _homeLogic.displayName ?? context.l10n.homeNomeUtentePredefinito;
     return PopupMenuButton<String>(
       offset: const Offset(0, 45),
       tooltip: context.l10n.homeTooltipAccount,
@@ -778,7 +869,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final showMobileBack = isSmallScreen && !_homeLogic.isShowingMobileHome;
     final appBarTitle = showMobileBack
         ? (_homeLogic.mobileEntry?.displayTitle ??
-            context.l10n.homeTitoloMobileBack)
+              context.l10n.homeTitoloMobileBack)
         : context.l10n.homeTitoloDesktop;
 
     return Scaffold(
@@ -798,6 +889,10 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : null,
         actions: [
+          NotificationBell(
+            compact: isSmallScreen,
+            onOpenSection: _openSectionById,
+          ),
           _buildLogButton(),
           _buildAuthAction(),
           const SizedBox(width: 8),
@@ -889,14 +984,44 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       tabsArea: TabsAreaThemeData(
         color: theme.colorScheme.surface,
-        buttonsAreaDecoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-        ),
+        buttonsAreaDecoration: BoxDecoration(color: theme.colorScheme.surface),
       ),
       contentArea: ContentAreaThemeData(
         decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
       ),
     )..materialDesignIcons();
+  }
+
+  /// Avvisa una sola volta per release che esiste una versione nuova.
+  ///
+  /// Su desktop l'azione apre la sezione Aggiornamenti, dove Velopack
+  /// installa; su Android resta un avviso, perche l'aggiornamento arriva da
+  /// F-Droid, Obtainium o dallo store.
+  Future<void> _notifyAvailableUpdate() async {
+    final version = await UpdaterService().pendingUpdateNotice();
+    if (!mounted || version == null) return;
+
+    final l10n = context.l10n;
+    final notifyOnly = UpdaterService.isNotifyOnlyPlatform;
+    final updaterSection = _sections
+        .where((section) => section.id == 'aggiornamenti')
+        .firstOrNull;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          notifyOnly
+              ? l10n.updaterUpdateAvailableNotifyOnlyMessage(version)
+              : l10n.homeAggiornamentoDisponibile(version),
+        ),
+        duration: Duration(seconds: notifyOnly ? 8 : 10),
+        action: notifyOnly || updaterSection == null
+            ? null
+            : SnackBarAction(
+                label: l10n.homeApriAggiornamenti,
+                onPressed: () => _openSection(updaterSection),
+              ),
+      ),
+    );
   }
 
   Future<void> _showReleaseNotesAfterUpdate() async {

@@ -35,11 +35,44 @@ La schermata `Visualizza Log` mostra i messaggi diagnostici temporanei dell'app.
 - `Ordini` - gestione ordini
 - `Clienti` - anagrafiche clienti
 - `Carte Fedelta` - punti e fidelizzazione
-- `Report` - etichette e stampe
+- `Template e stampa` - stampa di etichette prodotto, cartelli negozio e report, e gestione di modelli, categorie e formati carta salvati su MGWS
 - `Dashboard` - analisi vendite, prodotti, ordini, stock e generazione report PDF/CSV
 - `Impostazioni` - preferenze dell'app, inclusa la sede in uso nella tab `Generale`
-- `Aggiornamenti` - controllo e installazione aggiornamenti desktop
+- `Aggiornamenti` - controllo e installazione aggiornamenti desktop; su Android solo avviso di nuova versione
 - `Dipendenti` - anagrafiche del personale, collegamento all'utente WordPress e gestione dei permessi MGWS quando il collegamento e presente
+
+## Template e stampa
+
+La sezione `Template e stampa` si apre solo con MGWS funzionante: modelli, categorie e formati carta sono salvati sul server e condivisi da tutti i dispositivi del negozio, niente resta sul dispositivo. Il pulsante `Ricarica` rilegge tutto dal server.
+
+La prima volta che un responsabile apre la sezione su un sito, l'app carica sul server i modelli, le categorie (`Etichette`, `Saldi e sconti`, `Cartelli`, `Report`) e i formati carta predefiniti. Succede una sola volta: da quel momento sono elementi normali, modificabili ed eliminabili, e non vengono ricaricati.
+
+### Tab Stampa
+
+Tutti i modelli sono in un'unica schermata, raggruppati per categoria: ogni gruppo ha il titolo e una riga di separazione; i modelli senza categoria chiudono l'elenco. Toccando un modello si aprono l'anteprima (identica al foglio stampato) e le opzioni. L'anteprima resta sempre visibile: a destra su schermi larghi, fissa in alto su smartphone mentre le opzioni scorrono sotto; si aggiorna a ogni modifica. Sui fogli con piu etichette parte dal `Foglio intero`, con tutti i fogli, le etichette vere e i posti saltati in grigio; `Una` ingrandisce una sola etichetta.
+
+- `Quante` (etichette e cartelli): numero di copie e `Foglio intero` per riempire un foglio adesivo.
+- `Posti gia usati su ogni foglio` (solo fogli con piu etichette, non rotoli): per ogni foglio da stampare (`Foglio 1`, `Foglio 2`, ...) si indica quante etichette mancano all'inizio; la stampa su quel foglio parte subito dopo e le etichette proseguono sul foglio successivo. Il numero di fogli si ricalcola e nell'anteprima del foglio intero i posti saltati sono grigi.
+- `Formato carta`: vale solo per questa stampa e non cambia il modello. Se la cella del formato ha misure diverse dal disegno, il disegno viene adattato alla cella.
+- `Stampa` apre la finestra di stampa del sistema con il formato pagina del modello; `Salva PDF` salva o condivide il file.
+- La freccia accanto al nome torna all'elenco (`Cambia modello`).
+
+Da `Prodotti`, il pulsante `Stampa etichette` nella barra (o la voce del menu con il tasto destro) apre questa tab sui prodotti selezionati: compaiono solo i modelli di tipo etichetta, e ogni variante (o prodotto semplice) ha una riga con le sue etichette: sempre una per pezzo in magazzino, numero che non si cambia. Le varianti senza pezzi non vengono elencate; se nessun prodotto selezionato ha pezzi, l'app avvisa e non apre la stampa. Il pulsante `Elimina` di ogni riga la toglie dalle etichette da stampare. `Aggiungi etichetta` apre lo stesso selettore prodotti di Cassa e Inventario MGWS: i prodotti e le varianti scelti si aggiungono con la stessa regola (un'etichetta per pezzo, senza varianti a zero pezzi e senza doppioni). Lo stesso pulsante compare stampando un modello di etichetta senza prodotti: aggiungendo prodotti si passa dalle etichette di esempio a quelle vere. Le etichette usano i dati veri: nome, colore e taglia della variante, prezzo, prezzo precedente e sconto quando la variante e scontata, codice e barcode della variante. `Annulla` nel riquadro in alto torna alla stampa normale.
+
+### Tab Template
+
+Mostra gli stessi gruppi della tab Stampa, piu le categorie vuote. Solo i responsabili (`manage_options` o `manage_woocommerce`) possono cambiare qualcosa; gli altri vedono l'elenco con un avviso.
+
+- `Nuovo modello`: nome, tipo (`Etichette prodotto`, `Cartelli negozio`, `Report da stampare`), categoria e formato carta, poi si apre il designer su una tela vuota della misura di una cella.
+- Toccando un modello, o con `Modifica modello` dal suo menu, si apre il designer. Il menu ha anche `Rinomina`, `Duplica`, `Sposta in categoria` ed `Elimina`.
+- `Nuova categoria`; il menu di ogni categoria permette `Rinomina`, `Sposta su`, `Sposta giu` ed `Elimina`. Eliminando una categoria i suoi modelli restano e finiscono in `Senza categoria`.
+- `Formati carta` apre l'elenco dei formati divisi per tipo: si aggiungono, modificano ed eliminano tutti, predefiniti compresi. Ogni formato ha nome (se vuoto si mostrano le misure), tipo, `Foglio` o `Rotolo`, misura di ogni etichetta, e per i fogli misura del foglio, colonne, righe, margini e spazi; l'app rifiuta un formato le cui etichette non stanno nel foglio. Eliminando un formato usato da qualche modello, l'app avvisa: quei modelli stampano su un altro formato dello stesso tipo finche non se ne sceglie uno.
+
+### Designer
+
+Il designer a trascinamento ha i righelli in millimetri: a sinistra gli elementi (testo, campo dati, codice a barre, QR, forme, tabella) e i campi dei dati da trascinare sull'etichetta, a destra le proprieta dell'elemento selezionato. La barra sopra la tela sceglie il `Formato carta` (la tela prende la misura di una cella, gli elementi restano dove sono) e, per etichette e cartelli, cosa stampare tra colore e taglia nel campo `coloreTaglia`: `-` (predefinito), `/`, `·`, `|`, `,`, `spazio` oppure un testo scritto a mano. `Usa queste modifiche` (o `Salva` nel designer) salva il modello sul server; chiudendo con modifiche non applicate l'app chiede conferma. Una linea e alta quanto il suo spessore (proprieta `Spessore (mm)`, nuova linea 0,3 mm): ha solo le maniglie alle due estremita e si allunga solo in orizzontale. In stampa e in anteprima ogni testo sta sempre nel suo riquadro: la dimensione del font impostata e la massima, e un testo troppo lungo si rimpicciolisce (su una riga in larghezza; con piu righe ammesse va a capo e si rimpicciolisce in altezza). Lo stesso vale per le celle delle tabelle dei report. Il designer mostra il testo alla dimensione impostata.
+
+I campi trascinabili delle etichette e dei cartelli sono quelli del prodotto (`nome`, `sku`, `global_unique_id`, `marca`, ...) piu `taglia`, `colore`, `coloreTaglia` (colore, separatore, taglia: `Blu navy - M`), `prezzoTesto`, `prezzoPrecedenteTesto` e `scontoTesto`. L'anteprima dei modelli e il designer usano un prodotto di esempio; i report usano ancora numeri di esempio e riportano la scritta `Dati di esempio`.
 
 ## Clienti e Dipendenti
 
@@ -68,7 +101,8 @@ La schermata `Prodotti` e una postazione operativa per consultare e gestire il c
 - La barra di paginazione resta su una riga sola e centra il gruppo dei controlli nella sezione: prima pagina, pagina precedente, selettore `Righe`, indicatore di pagina, pagina successiva, ultima pagina. L'indicatore e su due livelli, con `Pag.` sopra e `pagina/totale` sotto (`1/12`); in caricamento infinito diventa `Caricati` sopra e le righe caricate sotto, e le quattro frecce scompaiono perche' non hanno una pagina da raggiungere. La voce `Infinito` del selettore righe e' mostrata come `∞`. Da 600px in su la barra aggiunge le pillole `Tot:` e `Sel:` nello stesso gruppo centrato; sotto quella larghezza le omette per lasciare spazio ai controlli, che hanno sempre la loro dimensione piena.
 - Su desktop la schermata e divisa in elenco prodotti a sinistra e dettaglio a destra, separati da una linea verticale trascinabile senza spazio vuoto tra griglia e pannello dettaglio. La larghezza scelta resta salvata sulla macchina in uso; su schermi piccoli il dettaglio si apre in una pagina dedicata.
 - Le checkbox selezionano piu prodotti per le azioni di massa senza cambiare il dettaglio aperto; il click o tap sulla riga prodotto aggiorna invece il dettaglio.
-- Il click destro su una riga apre il menu azioni con `Modifica`, `Elimina` e `Crea`; il menu e gestito dalla `DataGridView` condivisa delle tabelle del progetto.
+- Il click destro su una riga apre il menu azioni con `Modifica`, `Stampa etichette`, `Elimina` e `Crea`; il menu e gestito dalla `DataGridView` condivisa delle tabelle del progetto. `Stampa etichette`, anche dal pulsante con la stampante nella barra filtri, apre `Template e stampa` sui prodotti selezionati con tutte le loro varianti.
+- Ogni variante nella lista del dettaglio ha una casella: spuntandone una o piu compare la barra `N varianti selezionate` con `Deseleziona`, `Stampa etichette` (solo le varianti spuntate, un'etichetta per pezzo), `Modifica in massa` (prezzo, prezzo scontato e quantita delle varianti spuntate; i campi lasciati vuoti restano come sono) ed `Elimina` (dopo una conferma porta a 0 lo stock MGWS delle varianti spuntate su ogni sede, con un unico movimento di rettifica `Variante eliminata da Prodotti`, poi le elimina definitivamente da WooCommerce; il prodotto e le altre varianti restano. Se MGWS non risponde o rifiuta l'azzeramento la variante non viene eliminata e il messaggio lo dice). Selezionare il prodotto dalla griglia equivale a prendere tutte le sue varianti.
 - Il pannello dettaglio mostra immagine, galleria, dati prodotto, modifica rapida, filtri varianti e lista varianti; il visualizzatore e le miniature mantengono le proporzioni originali della foto. La galleria ha una barra orizzontale per raggiungere tutte le foto; il pulsante `Apri` mostra la foto selezionata a piena dimensione e permette di passare alla precedente o successiva con le frecce laterali. Su schermi stretti il visualizzatore immagini si apre a schermo intero con area sicura e controlli compatti. Il contenitore dei filtri varianti usa lo stesso sfondo neutro delle altre schede, mentre la lista varianti e compatta e separa le righe con sfondi e bordi leggeri per evitare riquadri annidati troppo marcati. Nome, barcode, attributi, prezzo e quantita delle varianti nel dettaglio sono selezionabili per copia e incolla. Quando selezioni un prodotto variabile l'app carica tutte le pagine WooCommerce delle varianti e l'eventuale foto dedicata resta visibile direttamente nella riga della variante. Le varianti scontate mostrano il prezzo scontato in evidenza e il prezzo normale barrato.
 - `Modifica rapida` consente di aggiornare categorie, tag, stato e, per singolo prodotto, prezzo e quantita delle varianti; in selezione multipla sono disponibili categorie, tag, stato ed eliminazione secondo le impostazioni. Prima di applicare una modifica o un'eliminazione, un riepilogo mostra gli elementi e le modifiche coinvolte. Gli stati selezionabili sono `Pubblico`, `Privato`, `Bozza` e `In revisione`.
 - Le shortcut configurate in `Impostazioni > Shortcut` sono operative nella griglia e nel dettaglio: modifica rapida, salvataggio, selezione visibile, eliminazione e annullamento/uscita.
@@ -97,15 +131,22 @@ La schermata `Inventario MGWS` e la postazione operativa per lo stock gestionale
 
 ## Dashboard
 
-La `Dashboard` e la postazione rapida per controllare e analizzare i dati WooCommerce del negozio. Mostra il periodo attivo, vendite, ordini, prodotti, stock, clienti quando disponibili, andamento vendite e accessi ai dettagli gia presenti come top prodotti, performance e analisi ordini.
+La `Dashboard` e una griglia di widget che ogni utente compone come vuole. Ogni widget mostra un dato del negozio nel modo scelto.
 
-- Il menu periodo permette di cambiare l'intervallo attivo tra oggi, settimana, mese e anno; la dashboard ricarica i dati per quel periodo.
-- Il pannello `Analisi dashboard` riepiloga il filtro attivo e distingue i dati gia analizzabili dai dati che richiedono aggregazioni future.
-- Il pannello `Analisi dashboard` adatta disposizione, riepiloghi e pulsante report a layout smartphone, tablet e desktop.
-- `Genera report` crea un file PDF o CSV usando il periodo e i dati attualmente caricati nella dashboard.
-- Le scelte di export disponibili sono `Dashboard CSV`, `Dashboard PDF`, `Vendite CSV` e `Vendite PDF`.
-- I report `Vendite` usano lo stesso periodo della dashboard e includono riepilogo vendite, top prodotti e tendenze disponibili.
-- I filtri avanzati per vendite per brand, varianti e attributi non sono ancora controlli attivi nella dashboard: compaiono come capacita mancanti finche non esiste l'aggregazione dati corrispondente.
+- Al primo avvio la dashboard contiene un widget per ogni dato disponibile: l'utente toglie quelli che non gli servono con `Rimuovi widget`. `Ripristina standard` riporta tutti i widget.
+- `Report personalizzato (MGWS)` in `Modifica widget` permette di fare qualsiasi domanda sulle vendite: si sceglie `Cosa misurare` (incasso, pezzi venduti, scontrino medio, prezzo medio al pezzo, spesa media per cliente, clienti nuovi, giorni dall'ultimo acquisto, differenze di cassa e altro), `Suddividi per` (ora, giorno della settimana, giorno, settimana, mese, trimestre, anno, prodotto, variante, categoria, marchio, cliente, canale negozio/online, cassa, operatore, metodo di pagamento) e i `Filtri` (prodotti, clienti, categorie, marchi, canale, casse, operatori, metodi di pagamento, cercati per nome). Il periodo e quello della dashboard.
+- Le `Domande pronte` compilano tutto in un tocco: pezzi venduti di un prodotto, migliori clienti, scontrino medio e prezzo medio pagato da ogni cliente, spesa media per cliente, clienti nuovi, clienti che non tornano da piu tempo, vendite per ora, per giorno della settimana, per operatore, per metodo di pagamento, negozio e online, differenze di cassa per giorno.
+- I report contano scontrini del negozio e ordini online insieme, importi IVA inclusa, resi in negativo e scontrini annullati esclusi. Servono MGWS e il permesso `mgws_reports_read` (gia dato ad amministratori e gestori del negozio, assegnabile ai dipendenti dalla scheda permessi).
+
+- Il nome in alto apre l'elenco delle dashboard disponibili: le proprie (`Solo io`), quelle condivise con `Tutti` e, per i gestori del negozio, quelle `Solo admin`. Da li si crea anche una `Nuova dashboard`.
+- La barra filtri vale per tutti i widget: periodo (oggi, settimana, mese, anno, ultimi 7/30/90 giorni o intervallo personalizzato da calendario), `Confronta col periodo precedente` e stati ordine. `Azzera filtri` torna al mese corrente.
+- `Personalizza dashboard` (icona griglia) apre la modalita modifica: `Aggiungi widget`, trascinamento dalla maniglia per spostare i widget (o `Sposta prima`/`Sposta dopo` dal menu del widget), larghezza (da 1/4 a piena) e altezza (compatta, media, grande), `Modifica widget`, `Rimuovi widget`, `Ripristina standard`. Le modifiche valgono solo dopo `Salva`; `Annulla` le scarta.
+- I filtri attivi al momento del `Salva` diventano i filtri predefiniti della dashboard.
+- In `Modifica widget` si sceglie il dato (numeri, andamenti nel tempo, classifiche e ripartizioni), il tipo di visualizzazione (numero, indicatore, colonne, barre, linea, area, torta, ciambella, tabella), il titolo, la dimensione e, per le classifiche, quanti elementi mostrare, l'ordine e un filtro testuale sugli elementi. Per `Prodotti in esaurimento` si imposta la soglia. L'anteprima mostra il risultato con i dati attuali.
+- Dati disponibili: vendite, ordini, scontrino medio, ordini da evadere, prodotti pubblicati ed esauriti, clienti registrati e con ordini, andamento di vendite/ordini/scontrino medio, prodotti piu venduti per incasso o pezzi, vendite per categoria, prodotti per categoria, ordini per stato, stato magazzino, clienti con e senza ordini, prodotti in esaurimento.
+- `Nome e visibilita` decide chi vede la dashboard: `Solo io`, `Tutti` o `Solo admin`. Solo i gestori del negozio (amministratori WordPress o gestori WooCommerce) possono condividere, modificare o eliminare una dashboard condivisa; gli altri utenti la vedono in sola lettura e possono usare `Duplica dashboard` per farne una versione personale.
+- Senza MGWS raggiungibile le dashboard personali restano salvate solo sul dispositivo e la condivisione non e disponibile.
+- Il menu `Altre opzioni` contiene anche `Esporta report` (`Dashboard CSV`, `Dashboard PDF`, `Vendite CSV`, `Vendite PDF` sul periodo filtrato) e i report dettagliati: top prodotti, performance temporale e analisi ordini.
 
 ## Impostazioni
 
@@ -121,4 +162,6 @@ Le impostazioni sono raggruppate per responsabilita in tab dedicate.
 - Se una pagina richiede accesso, fai login prima
 - Per cassa, inventario e loyalty, il backend passa da MGWS
 - Su Windows e Linux, usa `Aggiornamenti` per verificare nuove versioni desktop; quando installi un update l'app si chiude, affida l'installazione al processo Velopack e si riavvia automaticamente
-- Dopo un aggiornamento desktop, l'app mostra una volta le note della release installata
+- All'avvio l'app controlla in background se esiste una versione nuova e lo segnala una sola volta per release; su desktop l'avviso apre `Aggiornamenti`
+- Su Android l'app non scarica ne installa aggiornamenti: avvisa soltanto che e' uscita una nuova versione, e l'aggiornamento lo eseguono F-Droid, Obtainium o lo store da cui e' stata installata
+- Dopo un aggiornamento, l'app mostra una volta le note della release installata (non alla prima installazione)

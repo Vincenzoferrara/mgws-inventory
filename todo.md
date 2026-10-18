@@ -9,6 +9,35 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
 
 ## Verifiche aperte repository Flutter
 
+- [ ] Verificare il motore report MGWS su un WordPress reale
+  - tipo: verifica/manuale
+  - priorita: high
+  - obiettivo: confrontare `POST /mgws/v1/reports/query` con i totali di WooCommerce e delle chiusure cassa su dati veri
+  - perche: il motore e' stato provato su MariaDB con tabelle minime e dati inventati, non su un sito con le tabelle analytics popolate da WooCommerce; i rimborsi online sono letti come righe con `parent_id` e quantita negative, da confermare sulla versione WooCommerce in uso
+  - rischio: con WooCommerce Analytics disattivato o non ancora sincronizzato gli ordini online mancano (`online_included: false` o righe in ritardo)
+  - verifica minima: incasso del mese da report uguale a scontrini MGWS + ordini online di WooCommerce; un utente senza `mgws_reports_read` riceve 403
+
+- [ ] Fasi successive della reportistica completa
+  - tipo: app/report
+  - priorita: medium
+  - obiettivo: ordini online (evasione, spedizioni, paesi), magazzino e acquisti nel motore report, tabella a piu colonne, heatmap ora per giorno, matrice taglia per colore, margini dal costo medio dei ricevimenti (`_purchase_cost`), dashboard pronte per area, schede prodotto e cliente con dettaglio al clic, obiettivi di vendita
+  - perche: la fase 1 copre vendite, prodotti, clienti e cassa; il piano approvato prevede queste fasi
+  - verifica minima: ogni fase aggiunge misure al catalogo MGWS e le rende sceglibili nell'editor
+
+- [ ] Verificare le dashboard personalizzabili su un sito MGWS reale
+  - tipo: verifica/manuale
+  - priorita: high
+  - obiettivo: controllare le rotte `GET/PUT/DELETE /mgws/v1/dashboards` con un amministratore e con un utente non gestore
+  - perche: pagina, griglia, trascinamento e grafici sono stati verificati solo con dati finti; il plugin non e stato provato su WordPress, e `mgws_contract_test.php` non copre ancora le nuove rotte
+  - verifica minima: l'admin crea una dashboard `Tutti` e una `Solo admin`; l'utente normale vede solo la prima, in sola lettura, riceve 403 se prova a salvarla e puo duplicarla come personale
+
+- [ ] Valutare filtri dashboard per categoria/brand lato dati
+  - tipo: decisione/prodotto
+  - priorita: low
+  - obiettivo: decidere se aggregare vendite per categoria, brand o variante con filtro globale
+  - perche: oggi i filtri globali sono periodo, confronto e stati ordine; per widget c'e solo filtro testuale e limite, perche i report WooCommerce non filtrano per categoria senza scaricare tutti gli ordini
+  - verifica minima: scelta documentata in `lib/doc/guida-sviluppatori.md`
+
 - [ ] Verificare il comportamento delle card MGWS-only su installazione senza tabelle MGWS
   - tipo: verifica/manuale
   - priorita: high
@@ -41,6 +70,35 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - note: il test F-Droid `test/fdroid/barcode_scanner_fdroid_test.dart` e' stato committato insieme al passaggio a `flutter_zxing`; resta da verificare tutta la suite dopo il push saltato
   - note 2026-10-02: misurata 89 test verdi e 18 rossi, falliti soprattutto in `test/prodotti/filters_bar_layout_test.dart`; i fallimenti non dipendono dal guard del primo frame introdotto in `lib/main.dart`, perche quel file di test non importa `main.dart` ne `reuse_class/gui/viewport_guard.dart`
   - verifica minima: `flutter test` termina con esito positivo oppure i test live/e2e instabili vengono separati dal gate ordinario con una scelta documentata
+
+- [ ] Collegare i dati reali ai report di stampa
+  - tipo: app/plugin/report
+  - priorita: high
+  - obiettivo: riempire i modelli di tipo report (chiusura cassa, vendite, magazzino, movimenti) con dati MGWS reali invece dei numeri di esempio
+  - perche: le etichette da Prodotti usano gia i dati veri, i report invece mostrano `Dati di esempio`
+  - nota: le chiavi (`incassoTotale`, `pagamenti`, `giacenze`, `movimenti`, ...) sono salvate nei modelli: i dati reali devono produrre le stesse chiavi
+  - verifica minima: un report stampato mostra dati MGWS e non la scritta `Dati di esempio`
+
+- [ ] Verificare nell'app la sezione Template e stampa con un utente reale
+  - tipo: verifica/manuale
+  - priorita: high
+  - obiettivo: con un responsabile, aprire la sezione su un sito nuovo (carica i predefiniti una volta), creare/modificare/eliminare modelli, categorie e formati, e stampare etichette da Prodotti su variabili con colore e taglia
+  - perche: le rotte `/print` sono state provate dentro WordPress e il codice dell'app compila, ma il flusso completo nell'app non e stato provato con un login reale
+  - verifica minima: dopo il riavvio dell'app su un altro dispositivo si vedono gli stessi modelli; un dipendente senza permessi vede l'avviso e non puo modificare
+
+- [ ] Verificare la stampa reale di etichette e cartelli su stampanti fisiche
+  - tipo: verifica/manuale
+  - priorita: medium
+  - obiettivo: controllare allineamento su fogli A4 adesivi (3x8, 3x7, 4x10, 5x13) e su rotoli termici, con la finestra di stampa del sistema su Linux, Windows e Android
+  - perche: verificato solo l'anteprima PDF; driver e dialoghi di stampa possono applicare margini o "adatta alla pagina" che spostano le etichette
+  - verifica minima: una stampa di prova su foglio adesivo cade dentro i bordi di ogni etichetta
+
+- [ ] Report di stampa su piu pagine
+  - tipo: app/report
+  - priorita: low
+  - obiettivo: far continuare le tabelle dei report su pagine successive quando le righe non entrano nell'area disegnata
+  - perche: il renderer disegna una pagina per modello e taglia le righe in eccesso della tabella
+  - verifica minima: un report movimenti con 200 righe stampa tutte le righe
 
 ## Priorita reale MGWS da portare anche nell'app Flutter
 

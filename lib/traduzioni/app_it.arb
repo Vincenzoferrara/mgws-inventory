@@ -370,11 +370,11 @@
   "@homeSottotitoloCarteFedelta": {
     "description": "Sottotitolo della sezione Carte fedelta"
   },
-  "homeTitoloReport": "Report",
+  "homeTitoloReport": "Template e stampa",
   "@homeTitoloReport": {
     "description": "Titolo della sezione Report"
   },
-  "homeSottotitoloReport": "Visualizza report",
+  "homeSottotitoloReport": "Etichette, cartelli e report",
   "@homeSottotitoloReport": {
     "description": "Sottotitolo della sezione Report"
   },
@@ -446,7 +446,7 @@
   "@updaterCanaliGestiti": {
     "description": "Titolo della sezione che elenca i canali di aggiornamento"
   },
-  "updaterCanaliDescrizione": "Velopack gestisce Windows e Linux AppImage. Android, iOS, apt e AUR sono gestiti da canali separati.",
+  "updaterCanaliDescrizione": "Velopack installa gli aggiornamenti su Windows e Linux AppImage. Su Android l'app avvisa soltanto: l'aggiornamento lo fanno F-Droid, Obtainium o lo store. iOS, apt e AUR sono gestiti dai rispettivi canali.",
   "@updaterCanaliDescrizione": {
     "description": "Spiegazione delle piattaforme supportate dall'aggiornatore"
   },
@@ -1077,38 +1077,9 @@
   "@logRicaricaLog": {
     "description": "Etichetta del pulsante che ricarica il log"
   },
-  "reportEtichette": "Etichette",
-  "@reportEtichette": {
-    "description": "Titolo della schermata etichette"
-  },
-  "reportSvuotaCoda": "Svuota coda",
-  "@reportSvuotaCoda": {
-    "description": "Tooltip e titolo dell'azione che svuota la coda delle etichette"
-  },
-  "reportBarcodeInterno": "Barcode interno: {barcode}",
-  "@reportBarcodeInterno": {
-    "description": "Etichetta del barcode interno di un'etichetta",
-    "placeholders": {
-      "barcode": {
-        "type": "String"
-      }
-    }
-  },
-  "reportConfermaSvuotaTitolo": "Svuota coda",
-  "@reportConfermaSvuotaTitolo": {
-    "description": "Titolo del dialogo che conferma lo svuotamento della coda"
-  },
-  "reportConfermaSvuotaTesto": "Sei sicuro di voler rimuovere tutte le etichette dalla coda?",
-  "@reportConfermaSvuotaTesto": {
-    "description": "Domanda mostrata prima di svuotare la coda delle etichette"
-  },
   "reportSvuota": "Svuota",
   "@reportSvuota": {
     "description": "Etichetta del pulsante che conferma lo svuotamento della coda"
-  },
-  "reportEsportaPdf": "Esporta PDF",
-  "@reportEsportaPdf": {
-    "description": "Etichetta del pulsante che esporta le etichette in PDF"
   },
   "sharedPaginaPrima": "Prima pagina",
   "@sharedPaginaPrima": {
@@ -3319,11 +3290,11 @@
   "@inventoryEtichettaProdotto": {
     "description": "Localized string inventoryEtichettaProdotto"
   },
-  "inventoryEtichettaProductId": "Product ID",
+  "inventoryEtichettaProductId": "ID prodotto",
   "@inventoryEtichettaProductId": {
     "description": "Localized string inventoryEtichettaProductId"
   },
-  "inventoryEtichettaReason": "Reason",
+  "inventoryEtichettaReason": "Motivo",
   "@inventoryEtichettaReason": {
     "description": "Localized string inventoryEtichettaReason"
   },
@@ -3346,7 +3317,7 @@
   "@inventoryEtichettaSedeObbligatoria": {
     "description": "Localized string inventoryEtichettaSedeObbligatoria"
   },
-  "inventoryEtichettaSource": "Source",
+  "inventoryEtichettaSource": "Origine",
   "@inventoryEtichettaSource": {
     "description": "Localized string inventoryEtichettaSource"
   },
@@ -3370,7 +3341,7 @@
   "@inventoryEtichettaVariante": {
     "description": "Localized string inventoryEtichettaVariante"
   },
-  "inventoryEtichettaVariationId": "Variation ID",
+  "inventoryEtichettaVariationId": "ID variante",
   "@inventoryEtichettaVariationId": {
     "description": "Localized string inventoryEtichettaVariationId"
   },
@@ -3468,7 +3439,7 @@
       "message": {}
     }
   },
-  "inventoryMovimentiSottotitolo": "Una riga per operazione, con i prodotti che ha toccato. Doppio click per aprirla.",
+  "inventoryMovimentiSottotitolo": "Una riga per operazione, con i prodotti che ha toccato. Si apre con un doppio clic, o con un tocco su telefono.",
   "@inventoryMovimentiSottotitolo": {
     "description": "Localized string inventoryMovimentiSottotitolo"
   },
@@ -3700,6 +3671,10 @@
   "inventoryTitoloCaricoRapido": "Carico rapido",
   "@inventoryTitoloCaricoRapido": {
     "description": "Localized string inventoryTitoloCaricoRapido"
+  },
+  "inventoryTitoloRiepilogoCarico": "Riepilogo carico",
+  "@inventoryTitoloRiepilogoCarico": {
+    "description": "Titolo del riepilogo di Aggiungi in modalità Semplice"
   },
   "inventoryTitoloInseritiControConvalida": "Inseriti contro convalida",
   "@inventoryTitoloInseritiControConvalida": {
@@ -6024,6 +5999,32 @@
   "@updaterInstallFailedMessage": {
     "description": "Localized string updaterInstallFailedMessage"
   },
+  "updaterReadyNotifyOnlyMessage": "Pronto per controllare nuove versioni. Su Android l'aggiornamento arriva da F-Droid, Obtainium o dallo store.",
+  "@updaterReadyNotifyOnlyMessage": {
+    "description": "Messaggio iniziale della schermata aggiornamenti su Android, dove l'app avvisa soltanto"
+  },
+  "updaterUpdateAvailableNotifyOnlyMessage": "Disponibile la versione {version}. Aggiornala da F-Droid, Obtainium o dallo store da cui hai installato l'app.",
+  "@updaterUpdateAvailableNotifyOnlyMessage": {
+    "description": "Avviso di nuova versione su Android: l'installazione spetta allo store",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAggiornamentoDisponibile": "Disponibile la versione {version} dell'app.",
+  "@homeAggiornamentoDisponibile": {
+    "description": "Avviso all'avvio di un aggiornamento desktop disponibile",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApriAggiornamenti": "Aggiorna",
+  "@homeApriAggiornamenti": {
+    "description": "Azione dell'avviso che apre la sezione Aggiornamenti"
+  },
   "mgwsNonDisponibileTitolo": "Backend MGWS non disponibile",
   "@mgwsNonDisponibileTitolo": {
     "description": "Titolo dell'avviso mostrato quando una sezione richiede MGWS e il backend non e' disponibile"
@@ -6040,6 +6041,18 @@
   "@mgwsServizioSpento": {
     "description": "Messaggio dell'avviso MGWS quando il servizio e' disabilitato"
   },
+  "mgwsPluginDaAggiornare": "Il plugin MGWS installato sul sito (versione {installata}) e' troppo vecchio per questa app, che richiede almeno la versione {minima}. Aggiorna il plugin da WordPress.",
+  "@mgwsPluginDaAggiornare": {
+    "description": "Messaggio dell'avviso MGWS quando il plugin e' piu' vecchio della versione richiesta",
+    "placeholders": {
+      "installata": {
+        "type": "String"
+      },
+      "minima": {
+        "type": "String"
+      }
+    }
+  },
   "mgwsHoCapito": "Ho capito",
   "@mgwsHoCapito": {
     "description": "Pulsante di chiusura dell'avviso MGWS"
@@ -6055,5 +6068,2466 @@
   "cassaAltri": "Altri",
   "@cassaAltri": {
     "description": "Etichetta per il campo metodo pagamento altri"
+  },
+  "welcomeSkip": "Salta",
+  "@welcomeSkip": {
+    "description": "Etichetta dell'azione di benvenuto che chiude l'onboarding senza leggerlo"
+  },
+  "welcomeBack": "Indietro",
+  "@welcomeBack": {
+    "description": "Etichetta dell'azione di benvenuto che torna alla pagina precedente"
+  },
+  "welcomeNext": "Avanti",
+  "@welcomeNext": {
+    "description": "Etichetta dell'azione di benvenuto che va alla pagina successiva"
+  },
+  "welcomeStart": "Inizia",
+  "@welcomeStart": {
+    "description": "Etichetta dell'azione di benvenuto che chiude l'onboarding e apre l'app"
+  },
+  "welcomeSkipSemantic": "Salta le pagine di benvenuto e apri l'app",
+  "@welcomeSkipSemantic": {
+    "description": "Etichetta per gli screen reader dell'azione salta del benvenuto"
+  },
+  "welcomeBackSemantic": "Torna alla pagina di benvenuto precedente",
+  "@welcomeBackSemantic": {
+    "description": "Etichetta per gli screen reader dell'azione indietro del benvenuto"
+  },
+  "welcomeNextSemantic": "Vai alla pagina di benvenuto successiva",
+  "@welcomeNextSemantic": {
+    "description": "Etichetta per gli screen reader dell'azione avanti del benvenuto"
+  },
+  "welcomeStartSemantic": "Concludi il benvenuto e apri l'app",
+  "@welcomeStartSemantic": {
+    "description": "Etichetta per gli screen reader dell'azione inizia del benvenuto"
+  },
+  "welcomeProgressSemantic": "Pagina {current} di {total}",
+  "@welcomeProgressSemantic": {
+    "description": "Etichetta per gli screen reader dei punti di avanzamento del benvenuto",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "4"
+      }
+    }
+  },
+  "welcomePurposeTitle": "Benvenuto nel tuo negozio",
+  "@welcomePurposeTitle": {
+    "description": "Titolo della prima pagina di benvenuto, che spiega a cosa serve l'app"
+  },
+  "welcomePurposeBody": "Una sola app gestisce il negozio di abbigliamento: catalogo, magazzino, cassa, ordini e clienti, con il tuo sito WordPress come unico backend.",
+  "@welcomePurposeBody": {
+    "description": "Testo della prima pagina di benvenuto, che spiega a cosa serve l'app"
+  },
+  "welcomePurposePointCatalogue": "Prodotti con varianti, taglie e colori, sempre allineati al negozio online.",
+  "@welcomePurposePointCatalogue": {
+    "description": "Primo punto della prima pagina di benvenuto, sul catalogo prodotti"
+  },
+  "welcomePurposePointStock": "Magazzino, movimenti, ordini di acquisto e fornitori in un unico posto.",
+  "@welcomePurposePointStock": {
+    "description": "Secondo punto della prima pagina di benvenuto, su magazzino e acquisti"
+  },
+  "welcomePurposePointTill": "Cassa, ordini, clienti e carte fedeltà pronti per il lavoro di ogni giorno.",
+  "@welcomePurposePointTill": {
+    "description": "Terzo punto della prima pagina di benvenuto, sul lavoro quotidiano del negozio"
+  },
+  "welcomeGuidesTitle": "Guide interattive",
+  "@welcomeGuidesTitle": {
+    "description": "Titolo della pagina di benvenuto che spiega le guide contestuali"
+  },
+  "welcomeGuidesBody": "D'ora in poi l'app può offrirti una breve guida sulle schermate che usi di più. Decidi tu se seguirla.",
+  "@welcomeGuidesBody": {
+    "description": "Testo della pagina di benvenuto che spiega le guide contestuali"
+  },
+  "welcomeGuidesPointRealControls": "Una guida indica i controlli reali della schermata, un passo alla volta, e non mostra mai dati simulati.",
+  "@welcomeGuidesPointRealControls": {
+    "description": "Primo punto della pagina di benvenuto sulle guide, su come si comporta una guida"
+  },
+  "welcomeGuidesPointSafeActions": "Le azioni sicure si possono eseguire dalla guida; tutto ciò che avrebbe conseguenze reali sul negozio viene solo spiegato.",
+  "@welcomeGuidesPointSafeActions": {
+    "description": "Secondo punto della pagina di benvenuto sulle guide, su quali azioni una guida può eseguire"
+  },
+  "welcomeGuidesPointReplay": "Concludere o saltare una guida impedisce che si riavvii da sola: puoi riaprirla dal pulsante Aiuto quando vuoi.",
+  "@welcomeGuidesPointReplay": {
+    "description": "Terzo punto della pagina di benvenuto sulle guide, su conclusione, salto e riapertura"
+  },
+  "welcomeGuidesPointLocalState": "Quali guide hai già visto viene salvato solo su questo dispositivo e non viene mai inviato al sito.",
+  "@welcomeGuidesPointLocalState": {
+    "description": "Quarto punto della pagina di benvenuto sulle guide, sul stato delle guide salvato solo in locale"
+  },
+  "welcomeLanguageTitle": "Lingua",
+  "@welcomeLanguageTitle": {
+    "description": "Titolo della pagina di benvenuto che sceglie la lingua dell'interfaccia"
+  },
+  "welcomeLanguageBody": "Scegli la lingua dell'interfaccia. Il cambio viene applicato subito e puoi modificarlo in qualsiasi momento in Impostazioni.",
+  "@welcomeLanguageBody": {
+    "description": "Testo della pagina di benvenuto che sceglie la lingua dell'interfaccia"
+  },
+  "welcomeLanguageSystem": "Lingua del sistema",
+  "@welcomeLanguageSystem": {
+    "description": "Opzione lingua che segue l'impostazione del sistema operativo"
+  },
+  "welcomeLanguageSystemDescription": "Segui la lingua di questo dispositivo. Al momento si risolve in {language}.",
+  "@welcomeLanguageSystemDescription": {
+    "description": "Descrizione dell'opzione lingua del sistema, con la lingua a cui si risolve",
+    "placeholders": {
+      "language": {
+        "type": "String",
+        "example": "English"
+      }
+    }
+  },
+  "welcomeSelected": "Selezionata",
+  "@welcomeSelected": {
+    "description": "Badge mostrato sull'opzione di benvenuto attualmente attiva"
+  },
+  "welcomeOptionalNote": "Facoltativo: continua senza scegliere nulla e le impostazioni che hai già vengono mantenute.",
+  "@welcomeOptionalNote": {
+    "description": "Nota che ricorda che le preferenze del benvenuto non sono obbligatorie"
+  },
+  "welcomeAppearanceTitle": "Aspetto",
+  "@welcomeAppearanceTitle": {
+    "description": "Titolo della pagina di benvenuto che sceglie il colore primario e la modalità tema"
+  },
+  "welcomeAppearanceBody": "Fai sembrare l'app come preferisci. Ogni scelta qui è facoltativa: continua senza cambiare nulla e le impostazioni attuali vengono mantenute.",
+  "@welcomeAppearanceBody": {
+    "description": "Testo della pagina di benvenuto che sceglie il colore primario e la modalità tema"
+  },
+  "welcomeAppearancePrimaryColor": "Colore primario",
+  "@welcomeAppearancePrimaryColor": {
+    "description": "Etichetta del selettore del colore primario nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearancePickColor": "Scegli colore",
+  "@welcomeAppearancePickColor": {
+    "description": "Titolo del dialogo di scelta colore aperto dalla pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceResetColor": "Ripristina il colore predefinito",
+  "@welcomeAppearanceResetColor": {
+    "description": "Azione che riporta il colore primario a quello predefinito"
+  },
+  "welcomeAppearanceThemeMode": "Modalità tema",
+  "@welcomeAppearanceThemeMode": {
+    "description": "Etichetta del selettore della modalità tema nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceModeLight": "Chiaro",
+  "@welcomeAppearanceModeLight": {
+    "description": "Opzione modalità tema chiaro nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceModeLightDescription": "Usa sempre il tema chiaro",
+  "@welcomeAppearanceModeLightDescription": {
+    "description": "Descrizione dell'opzione modalità tema chiaro"
+  },
+  "welcomeAppearanceModeDark": "Scuro",
+  "@welcomeAppearanceModeDark": {
+    "description": "Opzione modalità tema scuro nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceModeDarkDescription": "Usa sempre il tema scuro",
+  "@welcomeAppearanceModeDarkDescription": {
+    "description": "Descrizione dell'opzione modalità tema scuro"
+  },
+  "welcomeAppearanceModeSystem": "Sistema",
+  "@welcomeAppearanceModeSystem": {
+    "description": "Opzione modalità tema sistema nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceModeSystemDescription": "Segue il tema chiaro o scuro del dispositivo",
+  "@welcomeAppearanceModeSystemDescription": {
+    "description": "Descrizione dell'opzione modalità tema sistema"
+  },
+  "welcomeAppearanceBackground": "Sfondi decorativi",
+  "@welcomeAppearanceBackground": {
+    "description": "Etichetta del selettore degli sfondi decorativi nella pagina aspetto del benvenuto"
+  },
+  "welcomeAppearanceBackgroundFollowsTheme": "Segui il tema chiaro/scuro",
+  "@welcomeAppearanceBackgroundFollowsTheme": {
+    "description": "Etichetta dell'interruttore sugli sfondi decorativi che seguono il tema chiaro/scuro"
+  },
+  "welcomeAppearanceBackgroundFollowsThemeDescription": "Attivo: gli sfondi seguono il tema chiaro o scuro. Disattivo: gli sfondi usano il colore selezionato.",
+  "@welcomeAppearanceBackgroundFollowsThemeDescription": {
+    "description": "Descrizione dell'interruttore sugli sfondi decorativi che seguono il tema chiaro/scuro"
+  },
+  "welcomeHelpButton": "Guida",
+  "@welcomeHelpButton": {
+    "description": "Etichetta del pulsante che riapre il tour guidato della schermata corrente"
+  },
+  "welcomeHelpButtonSemantic": "Mostra la guida di questa schermata",
+  "@welcomeHelpButtonSemantic": {
+    "description": "Etichetta per il lettore di schermo del pulsante che riapre il tour guidato della schermata corrente"
+  },
+  "welcomeStepOf": "Passo {current} di {total}",
+  "@welcomeStepOf": {
+    "description": "Avanzamento visibile di un passo del tour guidato, mostrato nella bolla della guida",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "example": "2"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "welcomeTourSkipSemantic": "Salta questa guida",
+  "@welcomeTourSkipSemantic": {
+    "description": "Etichetta per il lettore di schermo dell'azione che salta il tour guidato della schermata corrente"
+  },
+  "welcomeTourBackSemantic": "Torna al passo precedente di questa guida",
+  "@welcomeTourBackSemantic": {
+    "description": "Etichetta per il lettore di schermo dell'azione che torna al passo precedente di un tour guidato"
+  },
+  "welcomeTourNextSemantic": "Vai al passo successivo di questa guida",
+  "@welcomeTourNextSemantic": {
+    "description": "Etichetta per il lettore di schermo dell'azione che avanza al passo successivo di un tour guidato"
+  },
+  "welcomeTourFinish": "Fine",
+  "@welcomeTourFinish": {
+    "description": "Etichetta dell'azione che chiude un tour guidato dall'ultimo passo"
+  },
+  "welcomeTourFinishSemantic": "Concludi questa guida",
+  "@welcomeTourFinishSemantic": {
+    "description": "Etichetta per il lettore di schermo dell'azione che chiude un tour guidato dall'ultimo passo"
+  },
+  "sedeCaricamento": "Lettura della sede in uso…",
+  "@sedeCaricamento": {
+    "description": "Sede in uso: sedeCaricamento"
+  },
+  "sedeRiprova": "Riprova",
+  "@sedeRiprova": {
+    "description": "Sede in uso: sedeRiprova"
+  },
+  "sedeNessunaTitolo": "Nessuna sede nel negozio",
+  "@sedeNessunaTitolo": {
+    "description": "Sede in uso: sedeNessunaTitolo"
+  },
+  "sedeNessunaTesto": "L'inventario si usa solo dentro una sede, il negozio fisico. Chiedi a un amministratore di crearla.",
+  "@sedeNessunaTesto": {
+    "description": "Sede in uso: sedeNessunaTesto"
+  },
+  "sedeCreaPrimaTitolo": "Crea la prima sede",
+  "@sedeCreaPrimaTitolo": {
+    "description": "Sede in uso: sedeCreaPrimaTitolo"
+  },
+  "sedeCreaPrimaTesto": "Ogni movimento di magazzino appartiene a una sede, il negozio fisico. Finché è l'unica, vale per tutti gli utenti.",
+  "@sedeCreaPrimaTesto": {
+    "description": "Sede in uso: sedeCreaPrimaTesto"
+  },
+  "sedeNome": "Nome della sede",
+  "@sedeNome": {
+    "description": "Sede in uso: sedeNome"
+  },
+  "sedeCrea": "Crea sede",
+  "@sedeCrea": {
+    "description": "Sede in uso: sedeCrea"
+  },
+  "sedeNuova": "Nuova sede…",
+  "@sedeNuova": {
+    "description": "Sede in uso: sedeNuova"
+  },
+  "sedeSceltaTitolo": "Scegli la sede in uso",
+  "@sedeSceltaTitolo": {
+    "description": "Sede in uso: sedeSceltaTitolo"
+  },
+  "sedeSceltaTesto": "Il negozio ha più sedi: scegli quella in cui lavori. Potrai cambiarla in seguito.",
+  "@sedeSceltaTesto": {
+    "description": "Sede in uso: sedeSceltaTesto"
+  },
+  "sedeNonAssegnataTitolo": "Nessuna sede assegnata",
+  "@sedeNonAssegnataTitolo": {
+    "description": "Sede in uso: sedeNonAssegnataTitolo"
+  },
+  "sedeNonAssegnataTesto": "Il negozio ha più sedi e al tuo utente non ne è stata assegnata una. Chiedi a chi gestisce i dipendenti di assegnartela.",
+  "@sedeNonAssegnataTesto": {
+    "description": "Sede in uso: sedeNonAssegnataTesto"
+  },
+  "sedeInUso": "Sede in uso",
+  "@sedeInUso": {
+    "description": "Sede in uso: sedeInUso"
+  },
+  "sedeBloccata": "Solo chi gestisce i dipendenti può cambiarla.",
+  "@sedeBloccata": {
+    "description": "Sede in uso: sedeBloccata"
+  },
+  "sedeModificabile": "Vale per tutti i movimenti che registri.",
+  "@sedeModificabile": {
+    "description": "Sede in uso: sedeModificabile"
+  },
+  "sedeMagazzini": "Magazzini della sede",
+  "@sedeMagazzini": {
+    "description": "Sede in uso: sedeMagazzini"
+  },
+  "sedeNessunMagazzino": "Nessun magazzino registrato per questa sede: valgono gli elenchi manuali qui sotto.",
+  "@sedeNessunMagazzino": {
+    "description": "Sede in uso: sedeNessunMagazzino"
+  },
+  "sedeDipendente": "Sede",
+  "@sedeDipendente": {
+    "description": "Sede in uso: sedeDipendente"
+  },
+  "sedeDipendenteObbligatoria": "Obbligatoria: il negozio ha più sedi.",
+  "@sedeDipendenteObbligatoria": {
+    "description": "Sede in uso: sedeDipendenteObbligatoria"
+  },
+  "sedeDipendenteSenzaUtente": "Collega un utente WordPress per assegnare una sede.",
+  "@sedeDipendenteSenzaUtente": {
+    "description": "Sede in uso: sedeDipendenteSenzaUtente"
+  },
+  "dashboardConfrontoCon": "Confronto con {periodo}",
+  "@dashboardConfrontoCon": {
+    "description": "Dashboard: dashboardConfrontoCon",
+    "placeholders": {
+      "periodo": {}
+    }
+  },
+  "dashboardAggiornatoAlle": "Aggiornato alle {ora}",
+  "@dashboardAggiornatoAlle": {
+    "description": "Dashboard: dashboardAggiornatoAlle",
+    "placeholders": {
+      "ora": {}
+    }
+  },
+  "dashboardKpiVendite": "Vendite lorde",
+  "@dashboardKpiVendite": {
+    "description": "Dashboard: dashboardKpiVendite"
+  },
+  "dashboardKpiOrdini": "Ordini",
+  "@dashboardKpiOrdini": {
+    "description": "Dashboard: dashboardKpiOrdini"
+  },
+  "dashboardKpiScontrinoMedio": "Scontrino medio",
+  "@dashboardKpiScontrinoMedio": {
+    "description": "Dashboard: dashboardKpiScontrinoMedio"
+  },
+  "dashboardKpiDaEvadere": "Da evadere ora",
+  "@dashboardKpiDaEvadere": {
+    "description": "Dashboard: dashboardKpiDaEvadere"
+  },
+  "dashboardKpiDaEvadereNota": "In lavorazione o in sospeso, di qualsiasi data",
+  "@dashboardKpiDaEvadereNota": {
+    "description": "Dashboard: dashboardKpiDaEvadereNota"
+  },
+  "dashboardNessunConfronto": "Nessuna vendita da confrontare",
+  "@dashboardNessunConfronto": {
+    "description": "Dashboard: dashboardNessunConfronto"
+  },
+  "dashboardVenditePerGiorno": "Vendite per giorno",
+  "@dashboardVenditePerGiorno": {
+    "description": "Dashboard: dashboardVenditePerGiorno"
+  },
+  "dashboardVenditePerMese": "Vendite per mese",
+  "@dashboardVenditePerMese": {
+    "description": "Dashboard: dashboardVenditePerMese"
+  },
+  "dashboardAndamentoSoloOggi": "Scegli un periodo più lungo per vedere l'andamento",
+  "@dashboardAndamentoSoloOggi": {
+    "description": "Dashboard: dashboardAndamentoSoloOggi"
+  },
+  "dashboardNessunaVendita": "Nessuna vendita in questo periodo",
+  "@dashboardNessunaVendita": {
+    "description": "Dashboard: dashboardNessunaVendita"
+  },
+  "dashboardOrdiniDelPeriodo": "Ordini del periodo",
+  "@dashboardOrdiniDelPeriodo": {
+    "description": "Dashboard: dashboardOrdiniDelPeriodo"
+  },
+  "dashboardOrdiniDelPeriodoNota": "Creati nel periodo selezionato, per stato attuale",
+  "@dashboardOrdiniDelPeriodoNota": {
+    "description": "Dashboard: dashboardOrdiniDelPeriodoNota"
+  },
+  "dashboardInAttesaPagamento": "{n} in attesa di pagamento",
+  "@dashboardInAttesaPagamento": {
+    "description": "Dashboard: dashboardInAttesaPagamento",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardMagazzino": "Magazzino",
+  "@dashboardMagazzino": {
+    "description": "Dashboard: dashboardMagazzino"
+  },
+  "dashboardDisponibili": "Disponibili",
+  "@dashboardDisponibili": {
+    "description": "Dashboard: dashboardDisponibili"
+  },
+  "dashboardEsauriti": "Esauriti",
+  "@dashboardEsauriti": {
+    "description": "Dashboard: dashboardEsauriti"
+  },
+  "dashboardProdottiPubblicati": "{n} prodotti pubblicati",
+  "@dashboardProdottiPubblicati": {
+    "description": "Dashboard: dashboardProdottiPubblicati",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardScorteBasse": "In esaurimento (≤ {soglia} pz)",
+  "@dashboardScorteBasse": {
+    "description": "Dashboard: dashboardScorteBasse",
+    "placeholders": {
+      "soglia": {}
+    }
+  },
+  "dashboardScorteBasseNota": "Solo prodotti con stock gestito sul prodotto, non sulle varianti",
+  "@dashboardScorteBasseNota": {
+    "description": "Dashboard: dashboardScorteBasseNota"
+  },
+  "dashboardNessunaScortaBassa": "Nessun prodotto in esaurimento",
+  "@dashboardNessunaScortaBassa": {
+    "description": "Dashboard: dashboardNessunaScortaBassa"
+  },
+  "dashboardPezzi": "{n} pz",
+  "@dashboardPezzi": {
+    "description": "Dashboard: dashboardPezzi",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardClientiRegistrati": "Clienti registrati",
+  "@dashboardClientiRegistrati": {
+    "description": "Dashboard: dashboardClientiRegistrati"
+  },
+  "dashboardClientiPaganti": "{n} hanno acquistato almeno una volta",
+  "@dashboardClientiPaganti": {
+    "description": "Dashboard: dashboardClientiPaganti",
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "dashboardTopProdottiNota": "Per incasso nel periodo",
+  "@dashboardTopProdottiNota": {
+    "description": "Dashboard: dashboardTopProdottiNota"
+  },
+  "dashboardMostraTabella": "Mostra come tabella",
+  "@dashboardMostraTabella": {
+    "description": "Dashboard: dashboardMostraTabella"
+  },
+  "dashboardMostraGrafico": "Mostra come grafico",
+  "@dashboardMostraGrafico": {
+    "description": "Dashboard: dashboardMostraGrafico"
+  },
+  "dashboardColonnaData": "Data",
+  "@dashboardColonnaData": {
+    "description": "Dashboard: dashboardColonnaData"
+  },
+  "dashboardSezioni": "Mostra sezioni",
+  "@dashboardSezioni": {
+    "description": "Dashboard: dashboardSezioni"
+  },
+  "dashboardReportDettagliati": "Report dettagliati",
+  "@dashboardReportDettagliati": {
+    "description": "Dashboard: dashboardReportDettagliati"
+  },
+  "dashboardImpossibileCaricare": "Impossibile caricare la dashboard",
+  "@dashboardImpossibileCaricare": {
+    "description": "Dashboard: dashboardImpossibileCaricare"
+  },
+  "dashboardReportGenerato": "Report generato: {percorso}",
+  "@dashboardReportGenerato": {
+    "description": "Dashboard: dashboardReportGenerato",
+    "placeholders": {
+      "percorso": {}
+    }
+  },
+  "dashboardExportFallito": "Export non riuscito: {errore}",
+  "@dashboardExportFallito": {
+    "description": "Dashboard: dashboardExportFallito",
+    "placeholders": {
+      "errore": {}
+    }
+  },
+  "reportPrintCenterTitle": "Template e stampa",
+  "@reportPrintCenterTitle": {
+    "description": "Title of the labels, signs and reports screen"
+  },
+  "reportKindLabelsTitle": "Etichette prodotto",
+  "@reportKindLabelsTitle": {
+    "description": "Card title: product price tags"
+  },
+  "reportKindSignsTitle": "Cartelli negozio",
+  "@reportKindSignsTitle": {
+    "description": "Card title: shop and window signs"
+  },
+  "reportKindReportsTitle": "Report da stampare",
+  "@reportKindReportsTitle": {
+    "description": "Card title: A4 reports"
+  },
+  "reportTemplateQuestion": "Scegli un modello",
+  "@reportTemplateQuestion": {
+    "description": "Title of wizard step 2"
+  },
+  "reportTemplateActions": "Opzioni modello",
+  "@reportTemplateActions": {
+    "description": "Tooltip of the template menu"
+  },
+  "reportRename": "Rinomina",
+  "@reportRename": {
+    "description": "Menu action that renames a template"
+  },
+  "reportDeleteTemplateTitle": "Elimina modello",
+  "@reportDeleteTemplateTitle": {
+    "description": "Title of the delete template dialog"
+  },
+  "reportDeleteTemplateMessage": "Eliminare il modello \"{name}\"? I modelli pronti non vengono toccati.",
+  "@reportDeleteTemplateMessage": {
+    "description": "Body of the delete template dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateNameLabel": "Nome del modello",
+  "@reportTemplateNameLabel": {
+    "description": "Label of the template name field"
+  },
+  "reportTemplateSaved": "Modello \"{name}\" salvato",
+  "@reportTemplateSaved": {
+    "description": "Confirmation after saving a template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSavePdf": "Salva PDF",
+  "@reportSavePdf": {
+    "description": "Button saving or sharing the PDF"
+  },
+  "reportPrintError": "Stampa non riuscita: {error}",
+  "@reportPrintError": {
+    "description": "Error shown when printing or saving fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPreviewTitle": "Anteprima",
+  "@reportPreviewTitle": {
+    "description": "Title of the preview panel"
+  },
+  "reportPreviewOneLabel": "Una",
+  "@reportPreviewOneLabel": {
+    "description": "Preview switch: show a single label enlarged"
+  },
+  "reportPreviewWholeSheet": "Foglio intero",
+  "@reportPreviewWholeSheet": {
+    "description": "Preview switch: show the whole sheet"
+  },
+  "reportPreviewSampleNotice": "Dati di esempio: la stampa sarà esattamente cosi.",
+  "@reportPreviewSampleNotice": {
+    "description": "Notice under the preview title"
+  },
+  "reportPreviewSheetNotice": "Le linee tratteggiate e i riquadri grigi mostrano i bordi delle etichette e le posizioni già usate: non vengono stampati.",
+  "@reportPreviewSheetNotice": {
+    "description": "Notice under the preview title when the whole sheet is shown"
+  },
+  "reportPreviewError": "Anteprima non disponibile: {error}",
+  "@reportPreviewError": {
+    "description": "Error shown in the preview panel",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportReportSampleExplanation": "Per ora questo report mostra numeri di esempio, cosi puoi scegliere come deve apparire. I dati del negozio verranno inseriti quando il report sarà collegato a MGWS.",
+  "@reportReportSampleExplanation": {
+    "description": "Info box in the report editor"
+  },
+  "reportSectionQuantity": "Quante",
+  "@reportSectionQuantity": {
+    "description": "Editor section: number of copies"
+  },
+  "reportSectionPaper": "Formato carta",
+  "@reportSectionPaper": {
+    "description": "Editor section: paper format"
+  },
+  "reportCopiesQuestion": "Quante copie stampare?",
+  "@reportCopiesQuestion": {
+    "description": "Label of the copies stepper"
+  },
+  "reportFullSheet": "Foglio intero ({count})",
+  "@reportFullSheet": {
+    "description": "Chip filling a whole sheet of labels",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportSkipQuestion": "Posti già usati su ogni foglio",
+  "@reportSkipQuestion": {
+    "description": "Label of the skipped positions stepper"
+  },
+  "reportSkipHelp": "Per ogni foglio indica quante etichette mancano all'inizio: la stampa su quel foglio parte subito dopo. I rotoli partono sempre dalla prima etichetta.",
+  "@reportSkipHelp": {
+    "description": "Help of the skipped positions stepper"
+  },
+  "reportSheetsNeeded": "{count, plural, =1{1 foglio da stampare} other{{count} fogli da stampare}}",
+  "@reportSheetsNeeded": {
+    "description": "Number of sheets the print needs",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportDecrease": "Diminuisci",
+  "@reportDecrease": {
+    "description": "Tooltip of the minus button"
+  },
+  "reportIncrease": "Aumenta",
+  "@reportIncrease": {
+    "description": "Tooltip of the plus button"
+  },
+  "reportPaperGroupSheets": "Fogli A4 adesivi (stampante normale)",
+  "@reportPaperGroupSheets": {
+    "description": "Paper group title"
+  },
+  "reportPaperGroupRolls": "Rotolo (stampante per etichette)",
+  "@reportPaperGroupRolls": {
+    "description": "Paper group title"
+  },
+  "reportPaperLabelSheet": "Foglio A4 · {count} etichette {size} mm",
+  "@reportPaperLabelSheet": {
+    "description": "Paper format: adhesive A4 sheet",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPaperRoll": "Rotolo · etichetta {size} mm",
+  "@reportPaperRoll": {
+    "description": "Paper format: thermal roll",
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPaperSignA4Portrait": "A4 verticale · 1 per foglio",
+  "@reportPaperSignA4Portrait": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA4Landscape": "A4 orizzontale · 1 per foglio",
+  "@reportPaperSignA4Landscape": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA5": "A5 · 2 per foglio A4",
+  "@reportPaperSignA5": {
+    "description": "Paper format"
+  },
+  "reportPaperSignA6": "A6 · 4 per foglio A4",
+  "@reportPaperSignA6": {
+    "description": "Paper format"
+  },
+  "reportPaperReportPortrait": "A4 verticale",
+  "@reportPaperReportPortrait": {
+    "description": "Paper format"
+  },
+  "reportPaperReportLandscape": "A4 orizzontale",
+  "@reportPaperReportLandscape": {
+    "description": "Paper format"
+  },
+  "reportTemplateLabelClassic": "Classica",
+  "@reportTemplateLabelClassic": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBigPrice": "Prezzo grande",
+  "@reportTemplateLabelBigPrice": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelSale": "Saldi",
+  "@reportTemplateLabelSale": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelMinimal": "Essenziale",
+  "@reportTemplateLabelMinimal": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBoutique": "Boutique",
+  "@reportTemplateLabelBoutique": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateLabelBarcode": "Codice a barre",
+  "@reportTemplateLabelBarcode": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignSale": "Cartello saldi",
+  "@reportTemplateSignSale": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignNewArrivals": "Nuovi arrivi",
+  "@reportTemplateSignNewArrivals": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignShelfPrice": "Prezzo a scaffale",
+  "@reportTemplateSignShelfPrice": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSignPromo": "Offerta speciale",
+  "@reportTemplateSignPromo": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateDailyClosing": "Chiusura cassa giornaliera",
+  "@reportTemplateDailyClosing": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateSales": "Vendite del periodo",
+  "@reportTemplateSales": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateInventory": "Situazione magazzino",
+  "@reportTemplateInventory": {
+    "description": "Built-in template name"
+  },
+  "reportTemplateStockMovements": "Movimenti di magazzino",
+  "@reportTemplateStockMovements": {
+    "description": "Built-in template name"
+  },
+  "reportDefaultShopName": "Il tuo negozio",
+  "@reportDefaultShopName": {
+    "description": "Default shop name printed by templates"
+  },
+  "reportDefaultSaleTitle": "Saldi",
+  "@reportDefaultSaleTitle": {
+    "description": "Default title of sale templates"
+  },
+  "reportDefaultSaleSubtitle": "su tutta la collezione",
+  "@reportDefaultSaleSubtitle": {
+    "description": "Default subtitle of the sale sign"
+  },
+  "reportDefaultSaleFooter": "Fino a esaurimento scorte",
+  "@reportDefaultSaleFooter": {
+    "description": "Default footer of the sale sign"
+  },
+  "reportDefaultNewArrivalsTitle": "Nuovi arrivi",
+  "@reportDefaultNewArrivalsTitle": {
+    "description": "Default title of the new arrivals sign"
+  },
+  "reportDefaultNewArrivalsSubtitle": "Scopri la nuova collezione",
+  "@reportDefaultNewArrivalsSubtitle": {
+    "description": "Default subtitle of the new arrivals sign"
+  },
+  "reportDefaultNewArrivalsFooter": "Chiedi al personale",
+  "@reportDefaultNewArrivalsFooter": {
+    "description": "Default footer of the new arrivals sign"
+  },
+  "reportDefaultShelfTitle": "Prezzo speciale",
+  "@reportDefaultShelfTitle": {
+    "description": "Default title of the shelf price sign"
+  },
+  "reportDefaultShelfSubtitle": "Taglie S - XL",
+  "@reportDefaultShelfSubtitle": {
+    "description": "Default subtitle of the shelf price sign"
+  },
+  "reportDefaultShelfFooter": "Prezzo valido fino a esaurimento scorte",
+  "@reportDefaultShelfFooter": {
+    "description": "Default footer of the shelf price sign"
+  },
+  "reportDefaultPromoTitle": "3x2",
+  "@reportDefaultPromoTitle": {
+    "description": "Default title of the offer sign"
+  },
+  "reportDefaultPromoSubtitle": "Prendi 3, paghi 2",
+  "@reportDefaultPromoSubtitle": {
+    "description": "Default subtitle of the offer sign"
+  },
+  "reportDefaultPromoFooter": "Il capo meno caro è in omaggio",
+  "@reportDefaultPromoFooter": {
+    "description": "Default footer of the offer sign"
+  },
+  "reportSampleDataNotice": "Dati di esempio",
+  "@reportSampleDataNotice": {
+    "description": "Report footer: the figures are examples"
+  },
+  "reportNotesTitle": "Note",
+  "@reportNotesTitle": {
+    "description": "Title of the notes box in reports"
+  },
+  "reportSignatureOperator": "Firma operatore",
+  "@reportSignatureOperator": {
+    "description": "Signature line label"
+  },
+  "reportSignatureManager": "Firma responsabile",
+  "@reportSignatureManager": {
+    "description": "Signature line label"
+  },
+  "reportSignatureCountedBy": "Conteggio eseguito da",
+  "@reportSignatureCountedBy": {
+    "description": "Signature line label"
+  },
+  "reportFigureTakings": "Incasso totale",
+  "@reportFigureTakings": {
+    "description": "Report summary figure"
+  },
+  "reportFigureReceipts": "Scontrini",
+  "@reportFigureReceipts": {
+    "description": "Report summary figure"
+  },
+  "reportFigureAverageReceipt": "Scontrino medio",
+  "@reportFigureAverageReceipt": {
+    "description": "Report summary figure"
+  },
+  "reportFigureCashDifference": "Differenza cassa",
+  "@reportFigureCashDifference": {
+    "description": "Report summary figure"
+  },
+  "reportFigureRevenue": "Fatturato",
+  "@reportFigureRevenue": {
+    "description": "Report summary figure"
+  },
+  "reportFigureItemsSold": "Pezzi venduti",
+  "@reportFigureItemsSold": {
+    "description": "Report summary figure"
+  },
+  "reportFigureReturns": "Resi",
+  "@reportFigureReturns": {
+    "description": "Report summary figure"
+  },
+  "reportFigureArticles": "Articoli",
+  "@reportFigureArticles": {
+    "description": "Report summary figure"
+  },
+  "reportFigurePieces": "Pezzi in magazzino",
+  "@reportFigurePieces": {
+    "description": "Report summary figure"
+  },
+  "reportFigureStockValue": "Valore magazzino",
+  "@reportFigureStockValue": {
+    "description": "Report summary figure"
+  },
+  "reportFigureLowStock": "Sotto scorta",
+  "@reportFigureLowStock": {
+    "description": "Report summary figure"
+  },
+  "reportFigureLoads": "Pezzi caricati",
+  "@reportFigureLoads": {
+    "description": "Report summary figure"
+  },
+  "reportFigureUnloads": "Pezzi scaricati",
+  "@reportFigureUnloads": {
+    "description": "Report summary figure"
+  },
+  "reportFigureAdjustments": "Rettifiche",
+  "@reportFigureAdjustments": {
+    "description": "Report summary figure"
+  },
+  "reportTablePaymentMethods": "Incassi per metodo di pagamento",
+  "@reportTablePaymentMethods": {
+    "description": "Report table title"
+  },
+  "reportTableCashCount": "Conteggio contanti",
+  "@reportTableCashCount": {
+    "description": "Report table title"
+  },
+  "reportTableTopProducts": "Prodotti più venduti",
+  "@reportTableTopProducts": {
+    "description": "Report table title"
+  },
+  "reportTableStock": "Giacenze per variante",
+  "@reportTableStock": {
+    "description": "Report table title"
+  },
+  "reportTableMovements": "Movimenti",
+  "@reportTableMovements": {
+    "description": "Report table title"
+  },
+  "reportColumnPaymentMethod": "Metodo di pagamento",
+  "@reportColumnPaymentMethod": {
+    "description": "Report column header"
+  },
+  "reportColumnAmount": "Importo",
+  "@reportColumnAmount": {
+    "description": "Report column header"
+  },
+  "reportColumnItem": "Voce",
+  "@reportColumnItem": {
+    "description": "Report column header"
+  },
+  "reportColumnProduct": "Prodotto",
+  "@reportColumnProduct": {
+    "description": "Report column header"
+  },
+  "reportColumnQuantity": "Qta",
+  "@reportColumnQuantity": {
+    "description": "Report column header"
+  },
+  "reportColumnRevenue": "Incasso",
+  "@reportColumnRevenue": {
+    "description": "Report column header"
+  },
+  "reportColumnVariant": "Variante",
+  "@reportColumnVariant": {
+    "description": "Report column header"
+  },
+  "reportColumnCode": "Codice",
+  "@reportColumnCode": {
+    "description": "Report column header"
+  },
+  "reportColumnValue": "Valore",
+  "@reportColumnValue": {
+    "description": "Report column header"
+  },
+  "reportColumnDate": "Data",
+  "@reportColumnDate": {
+    "description": "Report column header"
+  },
+  "reportColumnMovementType": "Tipo",
+  "@reportColumnMovementType": {
+    "description": "Report column header"
+  },
+  "reportSampleProduct1": "Maglia cotone basic",
+  "@reportSampleProduct1": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct2": "Jeans slim fit",
+  "@reportSampleProduct2": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct3": "Felpa con cappuccio",
+  "@reportSampleProduct3": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct4": "Sneakers bianche",
+  "@reportSampleProduct4": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct5": "Camicia in lino",
+  "@reportSampleProduct5": {
+    "description": "Example product name"
+  },
+  "reportSampleProduct6": "Stivaletti in pelle",
+  "@reportSampleProduct6": {
+    "description": "Example product name"
+  },
+  "reportSampleColorNavy": "Blu navy",
+  "@reportSampleColorNavy": {
+    "description": "Example colour"
+  },
+  "reportSampleColorBlack": "Nero",
+  "@reportSampleColorBlack": {
+    "description": "Example colour"
+  },
+  "reportSampleColorGrey": "Grigio",
+  "@reportSampleColorGrey": {
+    "description": "Example colour"
+  },
+  "reportSampleColorWhite": "Bianco",
+  "@reportSampleColorWhite": {
+    "description": "Example colour"
+  },
+  "reportSampleColorBeige": "Beige",
+  "@reportSampleColorBeige": {
+    "description": "Example colour"
+  },
+  "reportSamplePaymentCash": "Contanti",
+  "@reportSamplePaymentCash": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentCard": "Carta",
+  "@reportSamplePaymentCard": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentVoucher": "Buoni regalo",
+  "@reportSamplePaymentVoucher": {
+    "description": "Example payment method"
+  },
+  "reportSamplePaymentReturns": "Rimborsi resi",
+  "@reportSamplePaymentReturns": {
+    "description": "Example payment line"
+  },
+  "reportSampleOpeningFloat": "Fondo cassa iniziale",
+  "@reportSampleOpeningFloat": {
+    "description": "Example cash count line"
+  },
+  "reportSampleExpectedCash": "Contanti attesi",
+  "@reportSampleExpectedCash": {
+    "description": "Example cash count line"
+  },
+  "reportSampleCountedCash": "Contanti contati",
+  "@reportSampleCountedCash": {
+    "description": "Example cash count line"
+  },
+  "reportSampleDifference": "Differenza",
+  "@reportSampleDifference": {
+    "description": "Example cash count line"
+  },
+  "reportSampleMovementLoad": "Carico",
+  "@reportSampleMovementLoad": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementSale": "Vendita",
+  "@reportSampleMovementSale": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementAdjustment": "Rettifica",
+  "@reportSampleMovementAdjustment": {
+    "description": "Example movement type"
+  },
+  "reportSampleMovementTransfer": "Trasferimento",
+  "@reportSampleMovementTransfer": {
+    "description": "Example movement type"
+  },
+  "reportEditDesign": "Modifica modello",
+  "@reportEditDesign": {
+    "description": "Button opening the drag-and-drop designer"
+  },
+  "reportDesignerTitle": "Modifica: {name}",
+  "@reportDesignerTitle": {
+    "description": "Title of the designer screen",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportApplyDesign": "Usa queste modifiche",
+  "@reportApplyDesign": {
+    "description": "Button closing the designer and applying the layout"
+  },
+  "reportDiscardDesignTitle": "Annullare le modifiche?",
+  "@reportDiscardDesignTitle": {
+    "description": "Title of the dialog shown when closing the designer with changes"
+  },
+  "reportDiscardDesignMessage": "Le modifiche fatte nel designer andranno perse.",
+  "@reportDiscardDesignMessage": {
+    "description": "Body of the discard changes dialog"
+  },
+  "reportKeepEditing": "Continua a modificare",
+  "@reportKeepEditing": {
+    "description": "Button that keeps the designer open"
+  },
+  "reportDiscardDesign": "Annulla modifiche",
+  "@reportDiscardDesign": {
+    "description": "Button that closes the designer without applying"
+  },
+  "reportPrefixPrintedOn": "Stampato il",
+  "@reportPrefixPrintedOn": {
+    "description": "Text before the print date in reports"
+  },
+  "reportPrefixBusinessDay": "Giornata",
+  "@reportPrefixBusinessDay": {
+    "description": "Text before the business day in reports"
+  },
+  "reportPrefixPeriod": "Periodo:",
+  "@reportPrefixPeriod": {
+    "description": "Text before the period in reports"
+  },
+  "reportPrefixStockOn": "Giacenze al",
+  "@reportPrefixStockOn": {
+    "description": "Text before the stock date in reports"
+  },
+  "reportPrefixFrom": "Dal",
+  "@reportPrefixFrom": {
+    "description": "Text before the start date in reports"
+  },
+  "reportPrefixTo": "al",
+  "@reportPrefixTo": {
+    "description": "Text before the end date in reports"
+  },
+  "reportSampleBrand": "Marca di esempio",
+  "@reportSampleBrand": {
+    "description": "Example brand name"
+  },
+  "reportSampleRegister": "Cassa 1",
+  "@reportSampleRegister": {
+    "description": "Example till name"
+  },
+  "dashboardWidgetCustomersWithOrders": "Con ordini",
+  "@dashboardWidgetCustomersWithOrders": {
+    "description": "Dashboard: dashboardWidgetCustomersWithOrders"
+  },
+  "dashboardWidgetCustomersWithoutOrders": "Senza ordini",
+  "@dashboardWidgetCustomersWithoutOrders": {
+    "description": "Dashboard: dashboardWidgetCustomersWithoutOrders"
+  },
+  "dashboardWidgetMetricProductsPublished": "Prodotti pubblicati",
+  "@dashboardWidgetMetricProductsPublished": {
+    "description": "Dashboard: dashboardWidgetMetricProductsPublished"
+  },
+  "dashboardWidgetMetricProductsOutOfStock": "Prodotti esauriti",
+  "@dashboardWidgetMetricProductsOutOfStock": {
+    "description": "Dashboard: dashboardWidgetMetricProductsOutOfStock"
+  },
+  "dashboardWidgetMetricCustomersPaying": "Clienti con ordini",
+  "@dashboardWidgetMetricCustomersPaying": {
+    "description": "Dashboard: dashboardWidgetMetricCustomersPaying"
+  },
+  "dashboardWidgetMetricOrdersTrend": "Andamento ordini",
+  "@dashboardWidgetMetricOrdersTrend": {
+    "description": "Dashboard: dashboardWidgetMetricOrdersTrend"
+  },
+  "dashboardWidgetMetricAverageTicketTrend": "Andamento scontrino medio",
+  "@dashboardWidgetMetricAverageTicketTrend": {
+    "description": "Dashboard: dashboardWidgetMetricAverageTicketTrend"
+  },
+  "dashboardWidgetMetricTopProductsQuantity": "Prodotti più venduti (pezzi)",
+  "@dashboardWidgetMetricTopProductsQuantity": {
+    "description": "Dashboard: dashboardWidgetMetricTopProductsQuantity"
+  },
+  "dashboardWidgetMetricSalesByCategory": "Vendite per categoria",
+  "@dashboardWidgetMetricSalesByCategory": {
+    "description": "Dashboard: dashboardWidgetMetricSalesByCategory"
+  },
+  "dashboardWidgetMetricProductsByCategory": "Prodotti per categoria",
+  "@dashboardWidgetMetricProductsByCategory": {
+    "description": "Dashboard: dashboardWidgetMetricProductsByCategory"
+  },
+  "dashboardWidgetMetricCustomersActivity": "Clienti con e senza ordini",
+  "@dashboardWidgetMetricCustomersActivity": {
+    "description": "Dashboard: dashboardWidgetMetricCustomersActivity"
+  },
+  "dashboardWidgetMetricLowStockProducts": "Prodotti in esaurimento",
+  "@dashboardWidgetMetricLowStockProducts": {
+    "description": "Dashboard: dashboardWidgetMetricLowStockProducts"
+  },
+  "dashboardWidgetChartNumber": "Numero",
+  "@dashboardWidgetChartNumber": {
+    "description": "Dashboard: dashboardWidgetChartNumber"
+  },
+  "dashboardWidgetChartGauge": "Indicatore",
+  "@dashboardWidgetChartGauge": {
+    "description": "Dashboard: dashboardWidgetChartGauge"
+  },
+  "dashboardWidgetChartBar": "Colonne",
+  "@dashboardWidgetChartBar": {
+    "description": "Dashboard: dashboardWidgetChartBar"
+  },
+  "dashboardWidgetChartHorizontalBar": "Barre",
+  "@dashboardWidgetChartHorizontalBar": {
+    "description": "Dashboard: dashboardWidgetChartHorizontalBar"
+  },
+  "dashboardWidgetChartLine": "Linea",
+  "@dashboardWidgetChartLine": {
+    "description": "Dashboard: dashboardWidgetChartLine"
+  },
+  "dashboardWidgetChartArea": "Area",
+  "@dashboardWidgetChartArea": {
+    "description": "Dashboard: dashboardWidgetChartArea"
+  },
+  "dashboardWidgetChartPie": "Torta",
+  "@dashboardWidgetChartPie": {
+    "description": "Dashboard: dashboardWidgetChartPie"
+  },
+  "dashboardWidgetChartDonut": "Ciambella",
+  "@dashboardWidgetChartDonut": {
+    "description": "Dashboard: dashboardWidgetChartDonut"
+  },
+  "dashboardWidgetChartTable": "Tabella",
+  "@dashboardWidgetChartTable": {
+    "description": "Dashboard: dashboardWidgetChartTable"
+  },
+  "dashboardWidgetFilteredBy": "Filtro: \"{text}\"",
+  "@dashboardWidgetFilteredBy": {
+    "description": "Dashboard: dashboardWidgetFilteredBy",
+    "placeholders": {
+      "text": {}
+    }
+  },
+  "dashboardWidgetNotPeriodBound": "Situazione attuale, non legata al periodo",
+  "@dashboardWidgetNotPeriodBound": {
+    "description": "Dashboard: dashboardWidgetNotPeriodBound"
+  },
+  "dashboardWidgetDataUnavailable": "Dati non disponibili",
+  "@dashboardWidgetDataUnavailable": {
+    "description": "Dashboard: dashboardWidgetDataUnavailable"
+  },
+  "dashboardWidgetShareOfTotal": "{percent} di {total}",
+  "@dashboardWidgetShareOfTotal": {
+    "description": "Dashboard: dashboardWidgetShareOfTotal",
+    "placeholders": {
+      "percent": {},
+      "total": {}
+    }
+  },
+  "dashboardWidgetVersus": "vs {value}",
+  "@dashboardWidgetVersus": {
+    "description": "Dashboard: dashboardWidgetVersus",
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "dashboardWidgetOther": "Altro",
+  "@dashboardWidgetOther": {
+    "description": "Dashboard: dashboardWidgetOther"
+  },
+  "dashboardLayoutSaved": "Dashboard salvata",
+  "@dashboardLayoutSaved": {
+    "description": "Dashboard: dashboardLayoutSaved"
+  },
+  "dashboardLayoutSaveFailed": "Impossibile salvare la dashboard: {error}",
+  "@dashboardLayoutSaveFailed": {
+    "description": "Dashboard: dashboardLayoutSaveFailed",
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "dashboardLayoutResetTitle": "Ripristinare il layout standard?",
+  "@dashboardLayoutResetTitle": {
+    "description": "Dashboard: dashboardLayoutResetTitle"
+  },
+  "dashboardLayoutResetMessage": "I widget di questa dashboard vengono sostituiti con la panoramica standard. Niente viene salvato finché non premi Salva.",
+  "@dashboardLayoutResetMessage": {
+    "description": "Dashboard: dashboardLayoutResetMessage"
+  },
+  "dashboardLayoutReset": "Ripristina standard",
+  "@dashboardLayoutReset": {
+    "description": "Dashboard: dashboardLayoutReset"
+  },
+  "dashboardLayoutNew": "Nuova dashboard",
+  "@dashboardLayoutNew": {
+    "description": "Dashboard: dashboardLayoutNew"
+  },
+  "dashboardLayoutDuplicate": "Duplica dashboard",
+  "@dashboardLayoutDuplicate": {
+    "description": "Dashboard: dashboardLayoutDuplicate"
+  },
+  "dashboardLayoutCopyName": "{name} (copia)",
+  "@dashboardLayoutCopyName": {
+    "description": "Dashboard: dashboardLayoutCopyName",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardLayoutSettings": "Nome e visibilità",
+  "@dashboardLayoutSettings": {
+    "description": "Dashboard: dashboardLayoutSettings"
+  },
+  "dashboardLayoutDeleteTitle": "Eliminare la dashboard?",
+  "@dashboardLayoutDeleteTitle": {
+    "description": "Dashboard: dashboardLayoutDeleteTitle"
+  },
+  "dashboardLayoutDeleteMessage": "\"{name}\" verrà eliminata per tutti quelli che la vedono.",
+  "@dashboardLayoutDeleteMessage": {
+    "description": "Dashboard: dashboardLayoutDeleteMessage",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardLayoutChoose": "Scegli dashboard",
+  "@dashboardLayoutChoose": {
+    "description": "Dashboard: dashboardLayoutChoose"
+  },
+  "dashboardLayoutReadOnly": "Dashboard condivisa: solo i gestori del negozio possono modificarla. Duplicala per farne una tua versione.",
+  "@dashboardLayoutReadOnly": {
+    "description": "Dashboard: dashboardLayoutReadOnly"
+  },
+  "dashboardLayoutMore": "Altre opzioni",
+  "@dashboardLayoutMore": {
+    "description": "Dashboard: dashboardLayoutMore"
+  },
+  "dashboardLayoutDelete": "Elimina dashboard",
+  "@dashboardLayoutDelete": {
+    "description": "Dashboard: dashboardLayoutDelete"
+  },
+  "dashboardLayoutEdit": "Personalizza dashboard",
+  "@dashboardLayoutEdit": {
+    "description": "Dashboard: dashboardLayoutEdit"
+  },
+  "dashboardLayoutEditingHint": "Trascina i widget dalla maniglia per spostarli",
+  "@dashboardLayoutEditingHint": {
+    "description": "Dashboard: dashboardLayoutEditingHint"
+  },
+  "dashboardLayoutEmpty": "Questa dashboard non ha widget",
+  "@dashboardLayoutEmpty": {
+    "description": "Dashboard: dashboardLayoutEmpty"
+  },
+  "dashboardLayoutEmptyHint": "Aggiungi dei widget e scegli cosa mostra ognuno e come.",
+  "@dashboardLayoutEmptyHint": {
+    "description": "Dashboard: dashboardLayoutEmptyHint"
+  },
+  "dashboardWidgetAdd": "Aggiungi widget",
+  "@dashboardWidgetAdd": {
+    "description": "Dashboard: dashboardWidgetAdd"
+  },
+  "dashboardVisibilityTitle": "Chi può vederla",
+  "@dashboardVisibilityTitle": {
+    "description": "Dashboard: dashboardVisibilityTitle"
+  },
+  "dashboardVisibilityPersonal": "Solo io",
+  "@dashboardVisibilityPersonal": {
+    "description": "Dashboard: dashboardVisibilityPersonal"
+  },
+  "dashboardVisibilityEveryone": "Tutti",
+  "@dashboardVisibilityEveryone": {
+    "description": "Dashboard: dashboardVisibilityEveryone"
+  },
+  "dashboardVisibilityAdmins": "Solo admin",
+  "@dashboardVisibilityAdmins": {
+    "description": "Dashboard: dashboardVisibilityAdmins"
+  },
+  "dashboardVisibilityPersonalHelp": "Dashboard personale, visibile solo a te",
+  "@dashboardVisibilityPersonalHelp": {
+    "description": "Dashboard: dashboardVisibilityPersonalHelp"
+  },
+  "dashboardVisibilityEveryoneHelp": "La vedono tutti gli utenti del negozio; solo i gestori possono modificarla",
+  "@dashboardVisibilityEveryoneHelp": {
+    "description": "Dashboard: dashboardVisibilityEveryoneHelp"
+  },
+  "dashboardVisibilityAdminsHelp": "La vedono e la modificano solo i gestori del negozio",
+  "@dashboardVisibilityAdminsHelp": {
+    "description": "Dashboard: dashboardVisibilityAdminsHelp"
+  },
+  "dashboardVisibilityLocalOnly": "MGWS non è raggiungibile: la dashboard viene salvata solo su questo dispositivo e non può essere condivisa.",
+  "@dashboardVisibilityLocalOnly": {
+    "description": "Dashboard: dashboardVisibilityLocalOnly"
+  },
+  "dashboardVisibilityManagersOnly": "Solo i gestori del negozio possono condividere le dashboard.",
+  "@dashboardVisibilityManagersOnly": {
+    "description": "Dashboard: dashboardVisibilityManagersOnly"
+  },
+  "dashboardFilterPeriod": "Periodo",
+  "@dashboardFilterPeriod": {
+    "description": "Dashboard: dashboardFilterPeriod"
+  },
+  "dashboardFilterCompare": "Confronta col periodo precedente",
+  "@dashboardFilterCompare": {
+    "description": "Dashboard: dashboardFilterCompare"
+  },
+  "dashboardFilterOrderStatus": "Stati ordine",
+  "@dashboardFilterOrderStatus": {
+    "description": "Dashboard: dashboardFilterOrderStatus"
+  },
+  "dashboardFilterAllStatuses": "Tutti gli stati ordine",
+  "@dashboardFilterAllStatuses": {
+    "description": "Dashboard: dashboardFilterAllStatuses"
+  },
+  "dashboardFilterStatusesCount": "{count} stati ordine",
+  "@dashboardFilterStatusesCount": {
+    "description": "Dashboard: dashboardFilterStatusesCount",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "dashboardFilterReset": "Azzera filtri",
+  "@dashboardFilterReset": {
+    "description": "Dashboard: dashboardFilterReset"
+  },
+  "dashboardFilterLast7Days": "Ultimi 7 giorni",
+  "@dashboardFilterLast7Days": {
+    "description": "Dashboard: dashboardFilterLast7Days"
+  },
+  "dashboardFilterLast30Days": "Ultimi 30 giorni",
+  "@dashboardFilterLast30Days": {
+    "description": "Dashboard: dashboardFilterLast30Days"
+  },
+  "dashboardFilterLast90Days": "Ultimi 90 giorni",
+  "@dashboardFilterLast90Days": {
+    "description": "Dashboard: dashboardFilterLast90Days"
+  },
+  "dashboardFilterCustomRange": "Intervallo personalizzato…",
+  "@dashboardFilterCustomRange": {
+    "description": "Dashboard: dashboardFilterCustomRange"
+  },
+  "dashboardWidgetDragHint": "Trascina per spostare",
+  "@dashboardWidgetDragHint": {
+    "description": "Dashboard: dashboardWidgetDragHint"
+  },
+  "dashboardWidgetOptions": "Opzioni widget",
+  "@dashboardWidgetOptions": {
+    "description": "Dashboard: dashboardWidgetOptions"
+  },
+  "dashboardWidgetEdit": "Modifica widget",
+  "@dashboardWidgetEdit": {
+    "description": "Dashboard: dashboardWidgetEdit"
+  },
+  "dashboardWidgetMoveBefore": "Sposta prima",
+  "@dashboardWidgetMoveBefore": {
+    "description": "Dashboard: dashboardWidgetMoveBefore"
+  },
+  "dashboardWidgetMoveAfter": "Sposta dopo",
+  "@dashboardWidgetMoveAfter": {
+    "description": "Dashboard: dashboardWidgetMoveAfter"
+  },
+  "dashboardWidgetRemove": "Rimuovi widget",
+  "@dashboardWidgetRemove": {
+    "description": "Dashboard: dashboardWidgetRemove"
+  },
+  "dashboardWidgetDropAtEnd": "Rilascia qui per spostare in fondo",
+  "@dashboardWidgetDropAtEnd": {
+    "description": "Dashboard: dashboardWidgetDropAtEnd"
+  },
+  "dashboardWidgetWidthQuarter": "Larghezza 1/4",
+  "@dashboardWidgetWidthQuarter": {
+    "description": "Dashboard: dashboardWidgetWidthQuarter"
+  },
+  "dashboardWidgetWidthThird": "Larghezza 1/3",
+  "@dashboardWidgetWidthThird": {
+    "description": "Dashboard: dashboardWidgetWidthThird"
+  },
+  "dashboardWidgetWidthHalf": "Larghezza 1/2",
+  "@dashboardWidgetWidthHalf": {
+    "description": "Dashboard: dashboardWidgetWidthHalf"
+  },
+  "dashboardWidgetWidthTwoThirds": "Larghezza 2/3",
+  "@dashboardWidgetWidthTwoThirds": {
+    "description": "Dashboard: dashboardWidgetWidthTwoThirds"
+  },
+  "dashboardWidgetWidthThreeQuarters": "Larghezza 3/4",
+  "@dashboardWidgetWidthThreeQuarters": {
+    "description": "Dashboard: dashboardWidgetWidthThreeQuarters"
+  },
+  "dashboardWidgetWidthFull": "Larghezza piena",
+  "@dashboardWidgetWidthFull": {
+    "description": "Dashboard: dashboardWidgetWidthFull"
+  },
+  "dashboardWidgetHeightCompact": "Altezza compatta",
+  "@dashboardWidgetHeightCompact": {
+    "description": "Dashboard: dashboardWidgetHeightCompact"
+  },
+  "dashboardWidgetHeightMedium": "Altezza media",
+  "@dashboardWidgetHeightMedium": {
+    "description": "Dashboard: dashboardWidgetHeightMedium"
+  },
+  "dashboardWidgetHeightTall": "Altezza grande",
+  "@dashboardWidgetHeightTall": {
+    "description": "Dashboard: dashboardWidgetHeightTall"
+  },
+  "dashboardWidgetSortNatural": "Ordine predefinito",
+  "@dashboardWidgetSortNatural": {
+    "description": "Dashboard: dashboardWidgetSortNatural"
+  },
+  "dashboardWidgetSortValueDesc": "Dal più alto",
+  "@dashboardWidgetSortValueDesc": {
+    "description": "Dashboard: dashboardWidgetSortValueDesc"
+  },
+  "dashboardWidgetSortValueAsc": "Dal più basso",
+  "@dashboardWidgetSortValueAsc": {
+    "description": "Dashboard: dashboardWidgetSortValueAsc"
+  },
+  "dashboardWidgetSortLabel": "Alfabetico",
+  "@dashboardWidgetSortLabel": {
+    "description": "Dashboard: dashboardWidgetSortLabel"
+  },
+  "dashboardWidgetGroupNumbers": "Numeri",
+  "@dashboardWidgetGroupNumbers": {
+    "description": "Dashboard: dashboardWidgetGroupNumbers"
+  },
+  "dashboardWidgetGroupTrends": "Andamenti nel tempo",
+  "@dashboardWidgetGroupTrends": {
+    "description": "Dashboard: dashboardWidgetGroupTrends"
+  },
+  "dashboardWidgetGroupRankings": "Classifiche e ripartizioni",
+  "@dashboardWidgetGroupRankings": {
+    "description": "Dashboard: dashboardWidgetGroupRankings"
+  },
+  "dashboardWidgetData": "Dati da mostrare",
+  "@dashboardWidgetData": {
+    "description": "Dashboard: dashboardWidgetData"
+  },
+  "dashboardWidgetChartType": "Visualizza come",
+  "@dashboardWidgetChartType": {
+    "description": "Dashboard: dashboardWidgetChartType"
+  },
+  "dashboardWidgetTitle": "Titolo (facoltativo)",
+  "@dashboardWidgetTitle": {
+    "description": "Dashboard: dashboardWidgetTitle"
+  },
+  "dashboardWidgetWidth": "Larghezza",
+  "@dashboardWidgetWidth": {
+    "description": "Dashboard: dashboardWidgetWidth"
+  },
+  "dashboardWidgetHeight": "Altezza",
+  "@dashboardWidgetHeight": {
+    "description": "Dashboard: dashboardWidgetHeight"
+  },
+  "dashboardWidgetItemLimit": "Elementi mostrati",
+  "@dashboardWidgetItemLimit": {
+    "description": "Dashboard: dashboardWidgetItemLimit"
+  },
+  "dashboardWidgetSort": "Ordine",
+  "@dashboardWidgetSort": {
+    "description": "Dashboard: dashboardWidgetSort"
+  },
+  "dashboardWidgetItemFilter": "Mostra solo elementi che contengono",
+  "@dashboardWidgetItemFilter": {
+    "description": "Dashboard: dashboardWidgetItemFilter"
+  },
+  "dashboardWidgetItemFilterHelp": "Lascia vuoto per mostrare tutto",
+  "@dashboardWidgetItemFilterHelp": {
+    "description": "Dashboard: dashboardWidgetItemFilterHelp"
+  },
+  "dashboardWidgetStockThreshold": "Soglia scorte basse (pezzi)",
+  "@dashboardWidgetStockThreshold": {
+    "description": "Dashboard: dashboardWidgetStockThreshold"
+  },
+  "dashboardWidgetUsesStatusFilter": "Segue il filtro stati ordine della dashboard.",
+  "@dashboardWidgetUsesStatusFilter": {
+    "description": "Dashboard: dashboardWidgetUsesStatusFilter"
+  },
+  "dashboardWidgetPreview": "Anteprima",
+  "@dashboardWidgetPreview": {
+    "description": "Dashboard: dashboardWidgetPreview"
+  },
+  "dashboardReportCustom": "Report personalizzato (MGWS)",
+  "@dashboardReportCustom": {
+    "description": "Dashboard report: dashboardReportCustom"
+  },
+  "dashboardReportTitleBy": "{measure} per {dimension}",
+  "@dashboardReportTitleBy": {
+    "description": "Dashboard report: dashboardReportTitleBy",
+    "placeholders": {
+      "measure": {},
+      "dimension": {}
+    }
+  },
+  "dashboardReportDaysValue": "{days} giorni",
+  "@dashboardReportDaysValue": {
+    "description": "Dashboard report: dashboardReportDaysValue",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "dashboardReportNeedsMgws": "Serve MGWS con il motore report",
+  "@dashboardReportNeedsMgws": {
+    "description": "Dashboard report: dashboardReportNeedsMgws"
+  },
+  "dashboardReportForbidden": "Non hai il permesso di vedere i report",
+  "@dashboardReportForbidden": {
+    "description": "Dashboard report: dashboardReportForbidden"
+  },
+  "dashboardReportAnonymous": "Cliente anonimo",
+  "@dashboardReportAnonymous": {
+    "description": "Dashboard report: dashboardReportAnonymous"
+  },
+  "dashboardReportChannelStore": "Negozio",
+  "@dashboardReportChannelStore": {
+    "description": "Dashboard report: dashboardReportChannelStore"
+  },
+  "dashboardReportChannelOnline": "Online",
+  "@dashboardReportChannelOnline": {
+    "description": "Dashboard report: dashboardReportChannelOnline"
+  },
+  "dashboardReportPresets": "Domande pronte",
+  "@dashboardReportPresets": {
+    "description": "Dashboard report: dashboardReportPresets"
+  },
+  "dashboardReportMeasure": "Cosa misurare",
+  "@dashboardReportMeasure": {
+    "description": "Dashboard report: dashboardReportMeasure"
+  },
+  "dashboardReportSplitBy": "Suddividi per",
+  "@dashboardReportSplitBy": {
+    "description": "Dashboard report: dashboardReportSplitBy"
+  },
+  "dashboardReportNoSplit": "Totale (nessuna suddivisione)",
+  "@dashboardReportNoSplit": {
+    "description": "Dashboard report: dashboardReportNoSplit"
+  },
+  "dashboardReportFilters": "Filtri",
+  "@dashboardReportFilters": {
+    "description": "Dashboard report: dashboardReportFilters"
+  },
+  "dashboardReportAddFilter": "Aggiungi filtro",
+  "@dashboardReportAddFilter": {
+    "description": "Dashboard report: dashboardReportAddFilter"
+  },
+  "dashboardReportNoFilters": "Nessun filtro: è incluso tutto il negozio.",
+  "@dashboardReportNoFilters": {
+    "description": "Dashboard report: dashboardReportNoFilters"
+  },
+  "dashboardReportSalesHint": "Scontrini del negozio e ordini online, nel periodo della dashboard. Importi IVA inclusa.",
+  "@dashboardReportSalesHint": {
+    "description": "Dashboard report: dashboardReportSalesHint"
+  },
+  "dashboardReportClosingsHint": "Chiusure di cassa, nel periodo della dashboard.",
+  "@dashboardReportClosingsHint": {
+    "description": "Dashboard report: dashboardReportClosingsHint"
+  },
+  "dashboardReportSearchHint": "Scrivi almeno due lettere per cercare",
+  "@dashboardReportSearchHint": {
+    "description": "Dashboard report: dashboardReportSearchHint"
+  },
+  "dashboardReportAreaSales": "Vendite",
+  "@dashboardReportAreaSales": {
+    "description": "Dashboard report: dashboardReportAreaSales"
+  },
+  "dashboardReportAreaProducts": "Prodotti e pezzi",
+  "@dashboardReportAreaProducts": {
+    "description": "Dashboard report: dashboardReportAreaProducts"
+  },
+  "dashboardReportAreaCustomers": "Clienti",
+  "@dashboardReportAreaCustomers": {
+    "description": "Dashboard report: dashboardReportAreaCustomers"
+  },
+  "dashboardReportAreaCash": "Cassa e chiusure",
+  "@dashboardReportAreaCash": {
+    "description": "Dashboard report: dashboardReportAreaCash"
+  },
+  "dashboardReportMeasureRevenue": "Incasso",
+  "@dashboardReportMeasureRevenue": {
+    "description": "Dashboard report: dashboardReportMeasureRevenue"
+  },
+  "dashboardReportMeasureNetRevenue": "Incasso senza IVA",
+  "@dashboardReportMeasureNetRevenue": {
+    "description": "Dashboard report: dashboardReportMeasureNetRevenue"
+  },
+  "dashboardReportMeasureTax": "IVA",
+  "@dashboardReportMeasureTax": {
+    "description": "Dashboard report: dashboardReportMeasureTax"
+  },
+  "dashboardReportMeasureDocuments": "Scontrini e ordini",
+  "@dashboardReportMeasureDocuments": {
+    "description": "Dashboard report: dashboardReportMeasureDocuments"
+  },
+  "dashboardReportMeasureAverageTicket": "Scontrino medio",
+  "@dashboardReportMeasureAverageTicket": {
+    "description": "Dashboard report: dashboardReportMeasureAverageTicket"
+  },
+  "dashboardReportMeasureUnitsPerDocument": "Pezzi per scontrino",
+  "@dashboardReportMeasureUnitsPerDocument": {
+    "description": "Dashboard report: dashboardReportMeasureUnitsPerDocument"
+  },
+  "dashboardReportMeasureDiscount": "Sconti concessi",
+  "@dashboardReportMeasureDiscount": {
+    "description": "Dashboard report: dashboardReportMeasureDiscount"
+  },
+  "dashboardReportMeasureDiscountRate": "Sconto medio %",
+  "@dashboardReportMeasureDiscountRate": {
+    "description": "Dashboard report: dashboardReportMeasureDiscountRate"
+  },
+  "dashboardReportMeasureReturnsValue": "Valore resi",
+  "@dashboardReportMeasureReturnsValue": {
+    "description": "Dashboard report: dashboardReportMeasureReturnsValue"
+  },
+  "dashboardReportMeasureReturnsRate": "Resi %",
+  "@dashboardReportMeasureReturnsRate": {
+    "description": "Dashboard report: dashboardReportMeasureReturnsRate"
+  },
+  "dashboardReportMeasureQuantity": "Pezzi venduti netti",
+  "@dashboardReportMeasureQuantity": {
+    "description": "Dashboard report: dashboardReportMeasureQuantity"
+  },
+  "dashboardReportMeasureQuantitySold": "Pezzi venduti",
+  "@dashboardReportMeasureQuantitySold": {
+    "description": "Dashboard report: dashboardReportMeasureQuantitySold"
+  },
+  "dashboardReportMeasureQuantityReturned": "Pezzi resi",
+  "@dashboardReportMeasureQuantityReturned": {
+    "description": "Dashboard report: dashboardReportMeasureQuantityReturned"
+  },
+  "dashboardReportMeasureAverageUnitPrice": "Prezzo medio al pezzo",
+  "@dashboardReportMeasureAverageUnitPrice": {
+    "description": "Dashboard report: dashboardReportMeasureAverageUnitPrice"
+  },
+  "dashboardReportMeasureDistinctProducts": "Prodotti diversi venduti",
+  "@dashboardReportMeasureDistinctProducts": {
+    "description": "Dashboard report: dashboardReportMeasureDistinctProducts"
+  },
+  "dashboardReportMeasureCustomers": "Clienti che hanno comprato",
+  "@dashboardReportMeasureCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureCustomers"
+  },
+  "dashboardReportMeasureNewCustomers": "Clienti nuovi",
+  "@dashboardReportMeasureNewCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureNewCustomers"
+  },
+  "dashboardReportMeasureReturningCustomers": "Clienti di ritorno",
+  "@dashboardReportMeasureReturningCustomers": {
+    "description": "Dashboard report: dashboardReportMeasureReturningCustomers"
+  },
+  "dashboardReportMeasureRevenuePerCustomer": "Spesa media per cliente",
+  "@dashboardReportMeasureRevenuePerCustomer": {
+    "description": "Dashboard report: dashboardReportMeasureRevenuePerCustomer"
+  },
+  "dashboardReportMeasureDocumentsPerCustomer": "Acquisti per cliente",
+  "@dashboardReportMeasureDocumentsPerCustomer": {
+    "description": "Dashboard report: dashboardReportMeasureDocumentsPerCustomer"
+  },
+  "dashboardReportMeasureDaysSinceLastPurchase": "Giorni dall'ultimo acquisto",
+  "@dashboardReportMeasureDaysSinceLastPurchase": {
+    "description": "Dashboard report: dashboardReportMeasureDaysSinceLastPurchase"
+  },
+  "dashboardReportMeasureCollectedTotal": "Incassato totale",
+  "@dashboardReportMeasureCollectedTotal": {
+    "description": "Dashboard report: dashboardReportMeasureCollectedTotal"
+  },
+  "dashboardReportMeasureCashCollected": "Incassato in contanti",
+  "@dashboardReportMeasureCashCollected": {
+    "description": "Dashboard report: dashboardReportMeasureCashCollected"
+  },
+  "dashboardReportMeasureCardCollected": "Incassato con carta",
+  "@dashboardReportMeasureCardCollected": {
+    "description": "Dashboard report: dashboardReportMeasureCardCollected"
+  },
+  "dashboardReportMeasureOtherCollected": "Incassato con altri metodi",
+  "@dashboardReportMeasureOtherCollected": {
+    "description": "Dashboard report: dashboardReportMeasureOtherCollected"
+  },
+  "dashboardReportMeasureRefundsPaid": "Rimborsi pagati",
+  "@dashboardReportMeasureRefundsPaid": {
+    "description": "Dashboard report: dashboardReportMeasureRefundsPaid"
+  },
+  "dashboardReportMeasureManualIn": "Entrate manuali",
+  "@dashboardReportMeasureManualIn": {
+    "description": "Dashboard report: dashboardReportMeasureManualIn"
+  },
+  "dashboardReportMeasureManualOut": "Uscite manuali",
+  "@dashboardReportMeasureManualOut": {
+    "description": "Dashboard report: dashboardReportMeasureManualOut"
+  },
+  "dashboardReportMeasureCashExpected": "Contanti attesi",
+  "@dashboardReportMeasureCashExpected": {
+    "description": "Dashboard report: dashboardReportMeasureCashExpected"
+  },
+  "dashboardReportMeasureCashCounted": "Contanti contati",
+  "@dashboardReportMeasureCashCounted": {
+    "description": "Dashboard report: dashboardReportMeasureCashCounted"
+  },
+  "dashboardReportMeasureCashDifference": "Differenza contanti",
+  "@dashboardReportMeasureCashDifference": {
+    "description": "Dashboard report: dashboardReportMeasureCashDifference"
+  },
+  "dashboardReportMeasureCardDifference": "Differenza carte",
+  "@dashboardReportMeasureCardDifference": {
+    "description": "Dashboard report: dashboardReportMeasureCardDifference"
+  },
+  "dashboardReportMeasureClosings": "Chiusure",
+  "@dashboardReportMeasureClosings": {
+    "description": "Dashboard report: dashboardReportMeasureClosings"
+  },
+  "dashboardReportDimensionHour": "Ora",
+  "@dashboardReportDimensionHour": {
+    "description": "Dashboard report: dashboardReportDimensionHour"
+  },
+  "dashboardReportDimensionWeekday": "Giorno della settimana",
+  "@dashboardReportDimensionWeekday": {
+    "description": "Dashboard report: dashboardReportDimensionWeekday"
+  },
+  "dashboardReportDimensionDay": "Giorno",
+  "@dashboardReportDimensionDay": {
+    "description": "Dashboard report: dashboardReportDimensionDay"
+  },
+  "dashboardReportDimensionWeek": "Settimana",
+  "@dashboardReportDimensionWeek": {
+    "description": "Dashboard report: dashboardReportDimensionWeek"
+  },
+  "dashboardReportDimensionMonth": "Mese",
+  "@dashboardReportDimensionMonth": {
+    "description": "Dashboard report: dashboardReportDimensionMonth"
+  },
+  "dashboardReportDimensionQuarter": "Trimestre",
+  "@dashboardReportDimensionQuarter": {
+    "description": "Dashboard report: dashboardReportDimensionQuarter"
+  },
+  "dashboardReportDimensionYear": "Anno",
+  "@dashboardReportDimensionYear": {
+    "description": "Dashboard report: dashboardReportDimensionYear"
+  },
+  "dashboardReportDimensionProduct": "Prodotto",
+  "@dashboardReportDimensionProduct": {
+    "description": "Dashboard report: dashboardReportDimensionProduct"
+  },
+  "dashboardReportDimensionVariation": "Variante",
+  "@dashboardReportDimensionVariation": {
+    "description": "Dashboard report: dashboardReportDimensionVariation"
+  },
+  "dashboardReportDimensionCategory": "Categoria",
+  "@dashboardReportDimensionCategory": {
+    "description": "Dashboard report: dashboardReportDimensionCategory"
+  },
+  "dashboardReportDimensionBrand": "Marchio",
+  "@dashboardReportDimensionBrand": {
+    "description": "Dashboard report: dashboardReportDimensionBrand"
+  },
+  "dashboardReportDimensionCustomer": "Cliente",
+  "@dashboardReportDimensionCustomer": {
+    "description": "Dashboard report: dashboardReportDimensionCustomer"
+  },
+  "dashboardReportDimensionChannel": "Canale",
+  "@dashboardReportDimensionChannel": {
+    "description": "Dashboard report: dashboardReportDimensionChannel"
+  },
+  "dashboardReportDimensionRegister": "Cassa",
+  "@dashboardReportDimensionRegister": {
+    "description": "Dashboard report: dashboardReportDimensionRegister"
+  },
+  "dashboardReportDimensionOperator": "Operatore",
+  "@dashboardReportDimensionOperator": {
+    "description": "Dashboard report: dashboardReportDimensionOperator"
+  },
+  "dashboardReportDimensionPaymentMethod": "Metodo di pagamento",
+  "@dashboardReportDimensionPaymentMethod": {
+    "description": "Dashboard report: dashboardReportDimensionPaymentMethod"
+  },
+  "dashboardReportPresetProductSales": "Pezzi venduti di un prodotto",
+  "@dashboardReportPresetProductSales": {
+    "description": "Dashboard report: dashboardReportPresetProductSales"
+  },
+  "dashboardReportPresetBestCustomers": "Migliori clienti",
+  "@dashboardReportPresetBestCustomers": {
+    "description": "Dashboard report: dashboardReportPresetBestCustomers"
+  },
+  "dashboardReportPresetAverageTicketPerCustomer": "Scontrino medio di ogni cliente",
+  "@dashboardReportPresetAverageTicketPerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetAverageTicketPerCustomer"
+  },
+  "dashboardReportPresetAveragePricePerCustomer": "Prezzo medio pagato da ogni cliente",
+  "@dashboardReportPresetAveragePricePerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetAveragePricePerCustomer"
+  },
+  "dashboardReportPresetRevenuePerCustomer": "Spesa media per cliente",
+  "@dashboardReportPresetRevenuePerCustomer": {
+    "description": "Dashboard report: dashboardReportPresetRevenuePerCustomer"
+  },
+  "dashboardReportPresetNewCustomers": "Clienti nuovi",
+  "@dashboardReportPresetNewCustomers": {
+    "description": "Dashboard report: dashboardReportPresetNewCustomers"
+  },
+  "dashboardReportPresetDormantCustomers": "Clienti che non tornano da più tempo",
+  "@dashboardReportPresetDormantCustomers": {
+    "description": "Dashboard report: dashboardReportPresetDormantCustomers"
+  },
+  "dashboardReportPresetSalesByHour": "Vendite per ora",
+  "@dashboardReportPresetSalesByHour": {
+    "description": "Dashboard report: dashboardReportPresetSalesByHour"
+  },
+  "dashboardReportPresetSalesByWeekday": "Vendite per giorno della settimana",
+  "@dashboardReportPresetSalesByWeekday": {
+    "description": "Dashboard report: dashboardReportPresetSalesByWeekday"
+  },
+  "dashboardReportPresetSalesByOperator": "Vendite per operatore",
+  "@dashboardReportPresetSalesByOperator": {
+    "description": "Dashboard report: dashboardReportPresetSalesByOperator"
+  },
+  "dashboardReportPresetSalesByPaymentMethod": "Vendite per metodo di pagamento",
+  "@dashboardReportPresetSalesByPaymentMethod": {
+    "description": "Dashboard report: dashboardReportPresetSalesByPaymentMethod"
+  },
+  "dashboardReportPresetSalesByChannel": "Negozio e online",
+  "@dashboardReportPresetSalesByChannel": {
+    "description": "Dashboard report: dashboardReportPresetSalesByChannel"
+  },
+  "dashboardReportPresetCashDifferences": "Differenze di cassa per giorno",
+  "@dashboardReportPresetCashDifferences": {
+    "description": "Dashboard report: dashboardReportPresetCashDifferences"
+  },
+  "notificationsTitle": "Notifiche",
+  "@notificationsTitle": {
+    "description": "Notification bell panel title"
+  },
+  "notificationsTooltip": "Notifiche",
+  "@notificationsTooltip": {
+    "description": "Tooltip of the notification bell"
+  },
+  "notificationsMarkAllRead": "Segna tutte come lette",
+  "@notificationsMarkAllRead": {
+    "description": "Notification panel button"
+  },
+  "notificationsEmpty": "Nessuna notifica",
+  "@notificationsEmpty": {
+    "description": "Notification panel empty state"
+  },
+  "notificationsUpdateTitle": "Aggiornamento disponibile",
+  "@notificationsUpdateTitle": {
+    "description": "Notification: new app version"
+  },
+  "notificationsUpdateMessage": "È disponibile la versione {version} dell'app.",
+  "@notificationsUpdateMessage": {
+    "description": "Notification: new app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsOrdersToFulfilTitle": "Ordini da evadere",
+  "@notificationsOrdersToFulfilTitle": {
+    "description": "Notification: paid orders to prepare"
+  },
+  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 ordine pagato da evadere.} other{{count} ordini pagati da evadere.}}",
+  "@notificationsOrdersToFulfilMessage": {
+    "description": "Notification: paid orders to prepare",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsOrdersUnpaidTitle": "Ordini non pagati",
+  "@notificationsOrdersUnpaidTitle": {
+    "description": "Notification: orders pending payment or on hold"
+  },
+  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 ordine non ancora pagato: non spedirlo finché il pagamento non risulta incassato.} other{{count} ordini non ancora pagati: non spedirli finché il pagamento non risulta incassato.}}",
+  "@notificationsOrdersUnpaidMessage": {
+    "description": "Notification: orders pending payment or on hold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsLowStockTitle": "Scorte basse",
+  "@notificationsLowStockTitle": {
+    "description": "Notification: products under their low stock threshold"
+  },
+  "notificationsLowStockMessage": "{count, plural, =1{1 prodotto è sotto la sua soglia di scorta minima.} other{{count} prodotti sono sotto la loro soglia di scorta minima.}}",
+  "@notificationsLowStockMessage": {
+    "description": "Notification: products under their low stock threshold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsFiscalRegisterTitle": "Registratore di cassa",
+  "@notificationsFiscalRegisterTitle": {
+    "description": "Notification: fiscal register unreachable"
+  },
+  "notificationsFiscalRegisterMessage": "Il registratore della cassa {name} non risponde.",
+  "@notificationsFiscalRegisterMessage": {
+    "description": "Notification: fiscal register unreachable",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsSettingsTitle": "Notifiche",
+  "@notificationsSettingsTitle": {
+    "description": "Settings section for the notification bell"
+  },
+  "notificationsSettingsDescription": "Scegli cosa segnala la campanella in alto. Le scorte basse riguardano solo i prodotti con una soglia propria in WooCommerce; il registratore solo se è impostato il nome/numero cassa.",
+  "@notificationsSettingsDescription": {
+    "description": "Settings section for the notification bell"
+  },
+  "reportSeparatorQuestion": "Cosa mettere tra colore e taglia?",
+  "@reportSeparatorQuestion": {
+    "description": "Label of the separator choice"
+  },
+  "reportSeparatorSpace": "spazio",
+  "@reportSeparatorSpace": {
+    "description": "Separator option: a blank space"
+  },
+  "reportSeparatorCustom": "Oppure scrivine uno tuo",
+  "@reportSeparatorCustom": {
+    "description": "Label of the custom separator field"
+  },
+  "reportSeparatorExample": "Sull'etichetta: {example}",
+  "@reportSeparatorExample": {
+    "description": "Preview of colour and size with the chosen separator",
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateLabelShop": "Etichetta mio modello",
+  "@reportTemplateLabelShop": {
+    "description": "Built-in template name: the label layout designed by the shop"
+  },
+  "productsPrintLabels": "Stampa etichette",
+  "@productsPrintLabels": {
+    "description": "Product action that prints labels for the selected products"
+  },
+  "productsPrintLabelsSelect": "Seleziona i prodotti di cui stampare le etichette",
+  "@productsPrintLabelsSelect": {
+    "description": "Tooltip of the disabled print labels button"
+  },
+  "productsPrintLabelsError": "Etichette non preparate: {error}",
+  "@productsPrintLabelsError": {
+    "description": "Error while preparing labels for the selected products",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTabPrint": "Stampa",
+  "@reportTabPrint": {
+    "description": "Tab that prints templates"
+  },
+  "reportTabTemplates": "Template",
+  "@reportTabTemplates": {
+    "description": "Tab that manages templates"
+  },
+  "reportReload": "Ricarica",
+  "@reportReload": {
+    "description": "Reloads the print library from the server"
+  },
+  "reportLoadError": "Non è stato possibile caricare i modelli dal server. Controlla la connessione e riprova.",
+  "@reportLoadError": {
+    "description": "Shown when the print library cannot be loaded"
+  },
+  "reportPrintHelp": "Tocca un modello per vedere l'anteprima e stampare.",
+  "@reportPrintHelp": {
+    "description": "Help of the Print tab"
+  },
+  "reportJobTemplateQuestion": "Scegli il modello di etichetta",
+  "@reportJobTemplateQuestion": {
+    "description": "Title of the Print tab when printing labels for products"
+  },
+  "reportJobSummary": "Etichette per {products, plural, =1{1 articolo} other{{products} articoli}}: {labels, plural, =1{1 etichetta} other{{labels} etichette}}",
+  "@reportJobSummary": {
+    "description": "Summary of the labels requested from the products list",
+    "placeholders": {
+      "products": {
+        "type": "int"
+      },
+      "labels": {
+        "type": "int"
+      }
+    }
+  },
+  "reportJobCancel": "Annulla",
+  "@reportJobCancel": {
+    "description": "Discards the labels requested from the products list"
+  },
+  "reportJobLabelsTitle": "Etichette da stampare",
+  "@reportJobLabelsTitle": {
+    "description": "Section with the labels per product"
+  },
+  "reportJobQuantityHelp": "Un'etichetta per ogni pezzo in magazzino. Le varianti senza pezzi non sono elencate.",
+  "@reportJobQuantityHelp": {
+    "description": "Help of the labels per product"
+  },
+  "reportChangeTemplate": "Cambia modello",
+  "@reportChangeTemplate": {
+    "description": "Back to the template list"
+  },
+  "reportPreviewRealNotice": "Dati dei prodotti: la stampa sarà esattamente così.",
+  "@reportPreviewRealNotice": {
+    "description": "Notice above the preview of real product labels"
+  },
+  "reportNoTemplates": "Non ci sono ancora modelli.",
+  "@reportNoTemplates": {
+    "description": "Shown when the library has no templates"
+  },
+  "reportNoCategory": "Senza categoria",
+  "@reportNoCategory": {
+    "description": "Group of templates without a category"
+  },
+  "reportEmptyCategory": "Nessun modello in questa categoria.",
+  "@reportEmptyCategory": {
+    "description": "Shown under an empty category"
+  },
+  "reportManagersOnly": "Solo i responsabili possono creare, modificare o eliminare modelli, categorie e formati carta.",
+  "@reportManagersOnly": {
+    "description": "Notice for staff without management rights"
+  },
+  "reportNewTemplate": "Nuovo modello",
+  "@reportNewTemplate": {
+    "description": "Button that creates a template"
+  },
+  "reportNewCategory": "Nuova categoria",
+  "@reportNewCategory": {
+    "description": "Button that creates a category"
+  },
+  "reportPaperFormats": "Formati carta",
+  "@reportPaperFormats": {
+    "description": "Button and title of the paper formats page"
+  },
+  "reportDuplicate": "Duplica",
+  "@reportDuplicate": {
+    "description": "Template action"
+  },
+  "reportMoveToCategory": "Sposta in categoria",
+  "@reportMoveToCategory": {
+    "description": "Template action"
+  },
+  "reportCopyOf": "Copia di {name}",
+  "@reportCopyOf": {
+    "description": "Name of a duplicated template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTemplateDeleted": "Modello \"{name}\" eliminato",
+  "@reportTemplateDeleted": {
+    "description": "Confirmation after deleting a template",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSaveError": "Non salvato sul server: {error}",
+  "@reportSaveError": {
+    "description": "Error when a change is refused by the server",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryActions": "Opzioni categoria",
+  "@reportCategoryActions": {
+    "description": "Tooltip of the category menu"
+  },
+  "reportMoveUp": "Sposta su",
+  "@reportMoveUp": {
+    "description": "Category action"
+  },
+  "reportMoveDown": "Sposta giù",
+  "@reportMoveDown": {
+    "description": "Category action"
+  },
+  "reportCategoryNameLabel": "Nome della categoria",
+  "@reportCategoryNameLabel": {
+    "description": "Label of the category name field"
+  },
+  "reportCategorySaved": "Categoria \"{name}\" salvata",
+  "@reportCategorySaved": {
+    "description": "Confirmation after saving a category",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryDeleted": "Categoria \"{name}\" eliminata",
+  "@reportCategoryDeleted": {
+    "description": "Confirmation after deleting a category",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeleteCategoryTitle": "Elimina categoria",
+  "@reportDeleteCategoryTitle": {
+    "description": "Title of the delete category dialog"
+  },
+  "reportDeleteCategoryMessage": "Eliminare la categoria \"{name}\"? I suoi modelli restano e finiscono in \"Senza categoria\".",
+  "@reportDeleteCategoryMessage": {
+    "description": "Body of the delete category dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCategoryLabel": "Categoria",
+  "@reportCategoryLabel": {
+    "description": "Label of the category choice"
+  },
+  "reportTemplateKindLabel": "Tipo",
+  "@reportTemplateKindLabel": {
+    "description": "Label of the template type choice"
+  },
+  "reportOpenDesigner": "Apri il designer",
+  "@reportOpenDesigner": {
+    "description": "Creates the template and opens the designer"
+  },
+  "reportCategoryLabels": "Etichette",
+  "@reportCategoryLabels": {
+    "description": "Default category"
+  },
+  "reportCategorySale": "Saldi e sconti",
+  "@reportCategorySale": {
+    "description": "Default category"
+  },
+  "reportCategorySigns": "Cartelli",
+  "@reportCategorySigns": {
+    "description": "Default category"
+  },
+  "reportCategoryReports": "Report",
+  "@reportCategoryReports": {
+    "description": "Default category"
+  },
+  "reportPaperFormatsHelp": "Fogli e rotoli usati dai modelli. Tutte le misure sono in millimetri.",
+  "@reportPaperFormatsHelp": {
+    "description": "Help of the paper formats page"
+  },
+  "reportNewPaperFormat": "Nuovo formato carta",
+  "@reportNewPaperFormat": {
+    "description": "Button and dialog title"
+  },
+  "reportEditPaperFormat": "Modifica formato carta",
+  "@reportEditPaperFormat": {
+    "description": "Dialog title"
+  },
+  "reportPaperFormatSaved": "Formato carta \"{name}\" salvato",
+  "@reportPaperFormatSaved": {
+    "description": "Confirmation after saving a paper format",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeletePaperFormatTitle": "Elimina formato carta",
+  "@reportDeletePaperFormatTitle": {
+    "description": "Title of the delete paper format dialog"
+  },
+  "reportDeletePaperFormatMessage": "Eliminare il formato carta \"{name}\"?",
+  "@reportDeletePaperFormatMessage": {
+    "description": "Body of the delete paper format dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeletePaperFormatUsedMessage": "Eliminare il formato carta \"{name}\"? {count, plural, =1{1 modello lo usa e stamperà} other{{count} modelli lo usano e stamperanno}} su un altro formato dello stesso tipo finché non ne scegli uno.",
+  "@reportDeletePaperFormatUsedMessage": {
+    "description": "Body of the delete dialog when templates use the format",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportPaperMissing": "Nessun formato carta per questo tipo: aggiungine uno in Formati carta.",
+  "@reportPaperMissing": {
+    "description": "Shown when a type has no paper format"
+  },
+  "reportPaperNameLabel": "Nome",
+  "@reportPaperNameLabel": {
+    "description": "Label of the paper format name"
+  },
+  "reportPaperNameHelp": "Lascia vuoto per mostrare le misure.",
+  "@reportPaperNameHelp": {
+    "description": "Helper of the paper format name"
+  },
+  "reportPaperFeedSheet": "Foglio",
+  "@reportPaperFeedSheet": {
+    "description": "Paper feed option"
+  },
+  "reportPaperFeedRoll": "Rotolo",
+  "@reportPaperFeedRoll": {
+    "description": "Paper feed option"
+  },
+  "reportPaperLabelSizeTitle": "Misura etichetta (mm)",
+  "@reportPaperLabelSizeTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperCellSizeTitle": "Misura di ogni etichetta o cartello (mm)",
+  "@reportPaperCellSizeTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperPageTitle": "Misura del foglio (mm)",
+  "@reportPaperPageTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperGridTitle": "Disposizione sul foglio",
+  "@reportPaperGridTitle": {
+    "description": "Section title in the paper format dialog"
+  },
+  "reportPaperWidth": "Larghezza",
+  "@reportPaperWidth": {
+    "description": "Paper format field"
+  },
+  "reportPaperHeight": "Altezza",
+  "@reportPaperHeight": {
+    "description": "Paper format field"
+  },
+  "reportPaperColumns": "Colonne",
+  "@reportPaperColumns": {
+    "description": "Paper format field"
+  },
+  "reportPaperRows": "Righe",
+  "@reportPaperRows": {
+    "description": "Paper format field"
+  },
+  "reportPaperMarginTop": "Margine sopra",
+  "@reportPaperMarginTop": {
+    "description": "Paper format field"
+  },
+  "reportPaperMarginLeft": "Margine sinistro",
+  "@reportPaperMarginLeft": {
+    "description": "Paper format field"
+  },
+  "reportPaperGapX": "Spazio tra colonne",
+  "@reportPaperGapX": {
+    "description": "Paper format field"
+  },
+  "reportPaperGapY": "Spazio tra righe",
+  "@reportPaperGapY": {
+    "description": "Paper format field"
+  },
+  "reportPaperErrorSize": "Inserisci la misura del foglio e di ogni etichetta.",
+  "@reportPaperErrorSize": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperErrorGrid": "Le colonne devono essere da 1 a 20 e le righe da 1 a 40.",
+  "@reportPaperErrorGrid": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperErrorOutside": "Le etichette non stanno nel foglio: controlla misure, margini e spazi.",
+  "@reportPaperErrorOutside": {
+    "description": "Paper format validation error"
+  },
+  "reportPaperSheetDescription": "Foglio {page} mm · {count} × {cell} mm",
+  "@reportPaperSheetDescription": {
+    "description": "Description of a sheet paper format",
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "cell": {
+        "type": "String"
+      }
+    }
+  },
+  "reportJobLabelCount": "{count, plural, =1{1 etichetta} other{{count} etichette}}",
+  "@reportJobLabelCount": {
+    "description": "Labels printed for one product or variant",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportJobRemove": "Togli dalle etichette",
+  "@reportJobRemove": {
+    "description": "Tooltip of the button removing a product or variant from the labels"
+  },
+  "reportJobEmpty": "Non ci sono più etichette da stampare.",
+  "@reportJobEmpty": {
+    "description": "Shown when every line was removed"
+  },
+  "productsPrintLabelsNoStock": "I prodotti selezionati non hanno pezzi in magazzino: non ci sono etichette da stampare.",
+  "@productsPrintLabelsNoStock": {
+    "description": "Warning when every selected variant has zero stock"
+  },
+  "reportSheetNumber": "Foglio {number}",
+  "@reportSheetNumber": {
+    "description": "Label of one sheet in the positions already used list",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "reportAddLabels": "Aggiungi etichetta",
+  "@reportAddLabels": {
+    "description": "Opens the product picker to add products to the labels"
+  },
+  "reportAddLabelsHelp": "Per stampare le etichette di prodotti veri, aggiungili dal catalogo.",
+  "@reportAddLabelsHelp": {
+    "description": "Help above the add label button when printing example labels"
+  },
+  "reportAddLabelsAlreadyListed": "I prodotti scelti sono già tra le etichette.",
+  "@reportAddLabelsAlreadyListed": {
+    "description": "Shown when every chosen variant is already listed"
+  },
+  "productsVariantsSelected": "{count, plural, =1{1 variante selezionata} other{{count} varianti selezionate}}",
+  "@productsVariantsSelected": {
+    "description": "Count of the ticked variants",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsClearSelection": "Deseleziona",
+  "@productsVariantsClearSelection": {
+    "description": "Unticks every variant"
+  },
+  "productsVariantsBulkEdit": "Modifica in massa",
+  "@productsVariantsBulkEdit": {
+    "description": "Changes the ticked variants together"
+  },
+  "productsVariantsBulkEditTitle": "{count, plural, =1{Modifica 1 variante} other{Modifica {count} varianti}}",
+  "@productsVariantsBulkEditTitle": {
+    "description": "Title of the variants bulk edit dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsBulkEditHelp": "Compila solo quello che vuoi cambiare: i campi vuoti restano come sono.",
+  "@productsVariantsBulkEditHelp": {
+    "description": "Help of the variants bulk edit dialog"
+  },
+  "productsVariantsBulkPrice": "Prezzo",
+  "@productsVariantsBulkPrice": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkSalePrice": "Prezzo scontato",
+  "@productsVariantsBulkSalePrice": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkQuantity": "Quantità",
+  "@productsVariantsBulkQuantity": {
+    "description": "Bulk edit field"
+  },
+  "productsVariantsBulkApply": "Applica",
+  "@productsVariantsBulkApply": {
+    "description": "Applies the bulk edit"
+  },
+  "productsVariantsBulkInvalid": "Compila almeno un campo con un numero valido (0 o più).",
+  "@productsVariantsBulkInvalid": {
+    "description": "Bulk edit validation error"
+  },
+  "productsVariantsUpdated": "Varianti aggiornate: {updated}{failed, plural, =0{} other{, non aggiornate: {failed}}}",
+  "@productsVariantsUpdated": {
+    "description": "Result of the variants bulk edit",
+    "placeholders": {
+      "updated": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsDeleteTitle": "Elimina varianti",
+  "@productsVariantsDeleteTitle": {
+    "description": "Title of the delete variants dialog"
+  },
+  "productsVariantsDeleteMessage": "{count, plural, =1{Eliminare definitivamente 1 variante} other{Eliminare definitivamente {count} varianti}} di \"{product}\"? {variants}. Lo stock MGWS viene portato a 0 con un movimento; il prodotto e le altre varianti restano.",
+  "@productsVariantsDeleteMessage": {
+    "description": "Body of the delete variants dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "product": {
+        "type": "String"
+      },
+      "variants": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantsDeleted": "Varianti eliminate: {deleted}{failed, plural, =0{} other{, non eliminate: {failed}}}",
+  "@productsVariantsDeleted": {
+    "description": "Result of the variants deletion",
+    "placeholders": {
+      "deleted": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsDeleteStockReason": "Variante eliminata da Prodotti: {product}",
+  "@productsVariantsDeleteStockReason": {
+    "description": "Reason of the MGWS movement that brings a deleted variant to 0",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantsStockNotZeroed": "{count, plural, =1{1 variante non è stata eliminata} other{{count} varianti non sono state eliminate}}: non è stato possibile azzerarne lo stock MGWS.",
+  "@productsVariantsStockNotZeroed": {
+    "description": "Shown when variants were kept because MGWS did not zero their stock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

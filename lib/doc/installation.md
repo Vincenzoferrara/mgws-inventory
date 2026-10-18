@@ -23,8 +23,8 @@ For normal usage you need:
 
 For local development you need:
 
-- Flutter `>=3.41.2`
-- Dart `>=3.11.0 <4.0.0`
+- Flutter `>=3.44.0`
+- Dart `>=3.12.0 <4.0.0`
 - Android SDK for Android builds
 - a reachable WordPress/WooCommerce/MGWS backend
 

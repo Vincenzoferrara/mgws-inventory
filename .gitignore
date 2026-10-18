@@ -89,3 +89,8 @@ lib/traduzioni/generato/
 
 # Elenco delle chiavi non tradotte, generato dalla stessa configurazione.
 lib/traduzioni/non_tradotte.json
+
+# Configurazione shell locale e copie di backup
+.zshrc
+*.bak
+*.backup

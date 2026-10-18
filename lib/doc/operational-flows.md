@@ -84,3 +84,25 @@
 3. Install the update.
 4. Let the app close and restart through Velopack.
 5. Read the release notes shown after restart.
+
+## Templates and print
+
+1. Open `Templates and print` (MGWS required).
+2. In the `Print` tab tap a template in its group.
+3. Set copies, positions already used and paper format while looking at the preview.
+4. Press `Print` or `Save PDF`.
+
+## Print labels from products
+
+1. In `Products` select the products.
+2. Press `Print labels` in the toolbar or in the right-click menu.
+3. In the `Print` tab choose the label template.
+4. Check the labels of each variant (one per piece in stock), remove with `Delete` the lines not to print and add more products with `Add label`.
+5. Press `Print`.
+
+## New template
+
+1. In the `Template` tab press `New template` (shop managers only).
+2. Choose name, type, category and paper format.
+3. Draw in the designer by dragging the fields onto the label.
+4. Press `Use these changes`: the template is saved on MGWS.

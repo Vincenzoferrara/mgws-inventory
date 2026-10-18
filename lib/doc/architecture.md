@@ -60,6 +60,7 @@
 - The checkout asks the driver to issue the receipt. In simulation the driver issues nothing and returns no number, so the POS keeps its own receipt sequence. `Scontrino.numeroProgressivoDispositivo` holds the number when a device issues one.
 - A failing driver never blocks the till: the sale is recorded and the failure is logged, because losing the receipt is worse than an unissued document.
 - Pairing the till with a register is not an app feature. It is a one-off registration the merchant performs in the "Fatture e Corrispettivi" portal, and the app only exposes the POS identifier it needs for that.
+- `QueryMgwsPrint` reads and writes the print library (templates, categories, paper formats) shared by the site.
 - `QueryMgwsInventory` handles stock reads, stock writes, movement ledger, suppliers, reordering, purchase orders, receptions and counts.
 - `QueryMgwsLoyalty` handles loyalty service status, customer lookup, cards, points and history.
 - Employee roles/capabilities are managed only for MGWS employees linked to a WordPress user.
@@ -76,7 +77,7 @@ The login chain verifies MGWS at its end, following the same path for every cred
 2. When the session succeeds, `MgwsConnection.verify()` reads the MGWS service status routes. When the session fails, MGWS is not contacted and the login stops.
 3. A failed MGWS verification does not fail the login: WooCommerce sections stay usable and the modules that need MGWS report the backend as unavailable.
 
-A section that needs MGWS declares `requiresMgws` and is not opened without a working backend. `Cashier` and `Suppliers` are MGWS-only: cashier shifts and checkout are confirmed by the MGWS server, and the supplier registry exists only in MGWS routes.
+A section that needs MGWS declares `requiresMgws` and is not opened without a working backend. `Cashier`, `Suppliers` and `Templates and print` are MGWS-only: cashier shifts and checkout are confirmed by the MGWS server, the supplier registry exists only in MGWS routes, and print templates, categories and paper formats are stored only by MGWS.
 
 ## Privacy and de-Googled design
 

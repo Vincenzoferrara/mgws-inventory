@@ -38,3 +38,5 @@ per sbloccare le complete funzionalita, bisogno installare il plguin, questo plg
 
 - GitHub: <https://github.com/Vincenzoferrara/mg-warehouse-stock>
 - Su wordpress.org
+## Licenza
+mgws_inventory è software libero, distribuito sotto la licenza GNU General Public License v3.0 (GPL-3.0). Il testo completo è nel file [LICENSE](LICENSE).
