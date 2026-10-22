@@ -1,3 +1,5 @@
+import '../../l10n/localized_text.dart';
+
 class UrlValidator {
   /// Controlla se un host è un IP locale o riservato.
   static bool isLocalOrReservedIp(String host) {
@@ -21,26 +23,30 @@ class UrlValidator {
   }
 
   /// Valida un URL completo.
-  static String? validateUrl(String? value, {bool allowLocalhost = false}) {
+  /// Restituisce `null` se l'URL e valido, altrimenti il motivo tradotto.
+  static LocalizedText? validateUrl(
+    String? value, {
+    bool allowLocalhost = false,
+  }) {
     if (value == null || value.isEmpty) {
-      return 'Inserisci l\'URL del tuo sito';
+      return (l10n) => l10n.loginEnterSiteUrl;
     }
 
     final uri = Uri.tryParse(value);
     if (uri == null || !uri.isAbsolute) {
       return allowLocalhost
-          ? 'URL non valido (es. http://localhost)'
-          : 'URL non valido (es. https://...)';
+          ? (l10n) => l10n.loginInvalidUrlLocal
+          : (l10n) => l10n.loginInvalidUrl;
     }
 
     bool isLocal = isLocalOrReservedIp(uri.host);
 
     if (isLocal && !allowLocalhost) {
-      return 'Per indirizzi locali, abilita la modalità sviluppo.';
+      return (l10n) => l10n.loginLocalNeedsDevMode;
     }
 
     if (!isLocal && uri.scheme != 'https') {
-      return 'Le connessioni a siti esterni devono usare HTTPS.';
+      return (l10n) => l10n.loginExternalNeedsHttps;
     }
 
     return null; // L'URL è valido

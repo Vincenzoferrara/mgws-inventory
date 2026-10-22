@@ -59,9 +59,7 @@ class WooQueryCategoria {
         );
       }
 
-      throw Exception(
-        'Tipo di dati non supportato: ${wooCategoryData.runtimeType}',
-      );
+      throw Exception('Unsupported data type: ${wooCategoryData.runtimeType}');
     } catch (e) {
       log.e('🔍 ERRORE CONVERSIONE CATEGORIA: $e');
       log.e('🔍 TIPO DATI: ${wooCategoryData.runtimeType}');
@@ -70,16 +68,16 @@ class WooQueryCategoria {
       if (wooCategoryData is WooProductCategory) {
         return CategoriaProdotto(
           id: wooCategoryData.id ?? 0,
-          nome: wooCategoryData.name ?? 'Categoria Sconosciuta',
-          slug: wooCategoryData.slug ?? 'categoria-sconosciuta',
+          nome: wooCategoryData.name ?? 'Unknown category',
+          slug: wooCategoryData.slug ?? 'unknown-category',
           count: wooCategoryData.count ?? 0,
           visibile: true,
         );
       } else if (wooCategoryData is Map<String, dynamic>) {
         return CategoriaProdotto(
           id: wooCategoryData['id'] ?? 0,
-          nome: wooCategoryData['name'] ?? 'Categoria Sconosciuta',
-          slug: wooCategoryData['slug'] ?? 'categoria-sconosciuta',
+          nome: wooCategoryData['name'] ?? 'Unknown category',
+          slug: wooCategoryData['slug'] ?? 'unknown-category',
           count: wooCategoryData['count'] ?? 0,
           visibile: true,
         );
@@ -88,8 +86,8 @@ class WooQueryCategoria {
       // Ultimo fallback
       return CategoriaProdotto(
         id: 0,
-        nome: 'Categoria Errore',
-        slug: 'categoria-errore',
+        nome: 'Category error',
+        slug: 'category-error',
         count: 0,
         visibile: true,
       );

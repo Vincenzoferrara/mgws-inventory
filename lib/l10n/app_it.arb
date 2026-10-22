@@ -12653,5 +12653,569 @@
   "customersRegistered": "Registrato",
   "@customersRegistered": {
     "description": "Localized string customersRegistered"
+  },
+  "apiErrorTimeout": "Errore di rete: il server non ha risposto in tempo.",
+  "@apiErrorTimeout": {
+    "description": "Localized string apiErrorTimeout"
+  },
+  "apiErrorUnauthorized": "Sessione non valida o scaduta. Effettua nuovamente il login.",
+  "@apiErrorUnauthorized": {
+    "description": "Localized string apiErrorUnauthorized"
+  },
+  "apiErrorForbidden": "Permessi insufficienti per eseguire questa operazione.",
+  "@apiErrorForbidden": {
+    "description": "Localized string apiErrorForbidden"
+  },
+  "apiErrorServer": "Si è verificato un errore interno del server. Riprova più tardi.",
+  "@apiErrorServer": {
+    "description": "Localized string apiErrorServer"
+  },
+  "apiErrorInvalidResponse": "La risposta del server non è in un formato leggibile (JSON).",
+  "@apiErrorInvalidResponse": {
+    "description": "Localized string apiErrorInvalidResponse"
+  },
+  "apiErrorUnhandled": "Errore API non gestito.",
+  "@apiErrorUnhandled": {
+    "description": "Localized string apiErrorUnhandled"
+  },
+  "apiErrorProductNotFound": "Il prodotto richiesto non esiste.",
+  "@apiErrorProductNotFound": {
+    "description": "Localized string apiErrorProductNotFound"
+  },
+  "apiErrorBarcodeExists": "Un barcode interno deve essere unico.",
+  "@apiErrorBarcodeExists": {
+    "description": "Localized string apiErrorBarcodeExists"
+  },
+  "apiErrorCategoryNotFound": "La categoria richiesta non esiste.",
+  "@apiErrorCategoryNotFound": {
+    "description": "Localized string apiErrorCategoryNotFound"
+  },
+  "apiErrorTagNotFound": "Il tag richiesto non esiste.",
+  "@apiErrorTagNotFound": {
+    "description": "Localized string apiErrorTagNotFound"
+  },
+  "apiErrorTagNameExists": "Un tag con questo nome esiste già.",
+  "@apiErrorTagNameExists": {
+    "description": "Localized string apiErrorTagNameExists"
+  },
+  "apiErrorTagSlugExists": "Un tag con questo slug esiste già.",
+  "@apiErrorTagSlugExists": {
+    "description": "Localized string apiErrorTagSlugExists"
+  },
+  "apiErrorAttributeNotFound": "L'attributo richiesto non esiste.",
+  "@apiErrorAttributeNotFound": {
+    "description": "Localized string apiErrorAttributeNotFound"
+  },
+  "apiErrorAttributeSlugExists": "Un attributo con questo slug esiste già.",
+  "@apiErrorAttributeSlugExists": {
+    "description": "Localized string apiErrorAttributeSlugExists"
+  },
+  "apiErrorAttributeTermNotFound": "Il termine dell'attributo richiesto non esiste.",
+  "@apiErrorAttributeTermNotFound": {
+    "description": "Localized string apiErrorAttributeTermNotFound"
+  },
+  "apiErrorVariationNotFound": "La variante richiesta non esiste.",
+  "@apiErrorVariationNotFound": {
+    "description": "Localized string apiErrorVariationNotFound"
+  },
+  "apiErrorVariationAttributesRequired": "Gli attributi sono obbligatori per le varianti.",
+  "@apiErrorVariationAttributesRequired": {
+    "description": "Localized string apiErrorVariationAttributesRequired"
+  },
+  "apiErrorVariationBarcodeExists": "Una variante con questo barcode interno esiste già.",
+  "@apiErrorVariationBarcodeExists": {
+    "description": "Localized string apiErrorVariationBarcodeExists"
+  },
+  "apiErrorMediaNotFound": "Il media richiesto non esiste.",
+  "@apiErrorMediaNotFound": {
+    "description": "Localized string apiErrorMediaNotFound"
+  },
+  "apiErrorMediaTooLarge": "Il file è troppo grande per essere caricato.",
+  "@apiErrorMediaTooLarge": {
+    "description": "Localized string apiErrorMediaTooLarge"
+  },
+  "apiErrorOrderNotFound": "L'ordine richiesto non esiste.",
+  "@apiErrorOrderNotFound": {
+    "description": "Localized string apiErrorOrderNotFound"
+  },
+  "apiErrorInvalidOrderStatus": "Lo stato dell'ordine specificato non è valido.",
+  "@apiErrorInvalidOrderStatus": {
+    "description": "Localized string apiErrorInvalidOrderStatus"
+  },
+  "apiErrorOrderAlreadyPaid": "L'ordine è già stato pagato.",
+  "@apiErrorOrderAlreadyPaid": {
+    "description": "Localized string apiErrorOrderAlreadyPaid"
+  },
+  "apiErrorOrderCannotBeModified": "L'ordine non può essere modificato nel suo stato attuale.",
+  "@apiErrorOrderCannotBeModified": {
+    "description": "Localized string apiErrorOrderCannotBeModified"
+  },
+  "apiErrorCouponNotFound": "Il coupon richiesto non esiste.",
+  "@apiErrorCouponNotFound": {
+    "description": "Localized string apiErrorCouponNotFound"
+  },
+  "apiErrorCouponCodeExists": "Il codice coupon esiste già.",
+  "@apiErrorCouponCodeExists": {
+    "description": "Localized string apiErrorCouponCodeExists"
+  },
+  "apiErrorCouponExpired": "Il coupon è scaduto.",
+  "@apiErrorCouponExpired": {
+    "description": "Localized string apiErrorCouponExpired"
+  },
+  "apiErrorCouponUsageLimit": "Il coupon ha raggiunto il limite di utilizzi.",
+  "@apiErrorCouponUsageLimit": {
+    "description": "Localized string apiErrorCouponUsageLimit"
+  },
+  "apiErrorTaxClassNotFound": "La classe di tasse richiesta non esiste.",
+  "@apiErrorTaxClassNotFound": {
+    "description": "Localized string apiErrorTaxClassNotFound"
+  },
+  "apiErrorTaxRateNotFound": "L'aliquota fiscale richiesta non esiste.",
+  "@apiErrorTaxRateNotFound": {
+    "description": "Localized string apiErrorTaxRateNotFound"
+  },
+  "apiErrorInvalidTaxLocation": "La zona fiscale specificata non è valida.",
+  "@apiErrorInvalidTaxLocation": {
+    "description": "Localized string apiErrorInvalidTaxLocation"
+  },
+  "apiErrorCustomerNotFound": "Il cliente richiesto non esiste.",
+  "@apiErrorCustomerNotFound": {
+    "description": "Localized string apiErrorCustomerNotFound"
+  },
+  "apiErrorInvalidEmail": "L'indirizzo email non è valido.",
+  "@apiErrorInvalidEmail": {
+    "description": "Localized string apiErrorInvalidEmail"
+  },
+  "apiErrorEmailExists": "L'indirizzo email è già in uso.",
+  "@apiErrorEmailExists": {
+    "description": "Localized string apiErrorEmailExists"
+  },
+  "apiErrorInvalidUsername": "Il nome utente non è valido.",
+  "@apiErrorInvalidUsername": {
+    "description": "Localized string apiErrorInvalidUsername"
+  },
+  "apiErrorUsernameExists": "Il nome utente è già in uso.",
+  "@apiErrorUsernameExists": {
+    "description": "Localized string apiErrorUsernameExists"
+  },
+  "apiErrorShippingZoneNotFound": "La zona di spedizione richiesta non esiste.",
+  "@apiErrorShippingZoneNotFound": {
+    "description": "Localized string apiErrorShippingZoneNotFound"
+  },
+  "apiErrorShippingMethodNotFound": "Il metodo di spedizione richiesto non esiste.",
+  "@apiErrorShippingMethodNotFound": {
+    "description": "Localized string apiErrorShippingMethodNotFound"
+  },
+  "apiErrorShippingClassNotFound": "La classe di spedizione richiesta non esiste.",
+  "@apiErrorShippingClassNotFound": {
+    "description": "Localized string apiErrorShippingClassNotFound"
+  },
+  "apiErrorInvalidShippingLocation": "La zona di spedizione specificata non è valida.",
+  "@apiErrorInvalidShippingLocation": {
+    "description": "Localized string apiErrorInvalidShippingLocation"
+  },
+  "apiErrorBatchLimit": "È stato superato il limite massimo per le operazioni batch.",
+  "@apiErrorBatchLimit": {
+    "description": "Localized string apiErrorBatchLimit"
+  },
+  "apiErrorConnection": "Errore di rete: {details}",
+  "@apiErrorConnection": {
+    "description": "Localized string apiErrorConnection",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "apiErrorNetwork": "Errore di rete: rete non raggiungibile.",
+  "@apiErrorNetwork": {
+    "description": "Localized string apiErrorNetwork"
+  },
+  "apiErrorRequestCancelled": "Errore di rete: richiesta annullata.",
+  "@apiErrorRequestCancelled": {
+    "description": "Localized string apiErrorRequestCancelled"
+  },
+  "apiErrorResourceNotFound": "La risorsa \"{resource}\" non è stata trovata sul server.",
+  "@apiErrorResourceNotFound": {
+    "description": "Localized string apiErrorResourceNotFound",
+    "placeholders": {
+      "resource": {
+        "type": "String"
+      }
+    }
+  },
+  "apiErrorUpload": "Errore durante l'upload: {details}",
+  "@apiErrorUpload": {
+    "description": "Localized string apiErrorUpload",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "apiErrorUnsupportedFileType": "Tipo di file non supportato: {mimeType}",
+  "@apiErrorUnsupportedFileType": {
+    "description": "Localized string apiErrorUnsupportedFileType",
+    "placeholders": {
+      "mimeType": {
+        "type": "String"
+      }
+    }
+  },
+  "apiErrorInvalidBatchData": "I dati per l'operazione batch non sono validi.",
+  "@apiErrorInvalidBatchData": {
+    "description": "Localized string apiErrorInvalidBatchData"
+  },
+  "apiErrorInvalidBatchDataDetail": "I dati per l'operazione batch non sono validi: {details}",
+  "@apiErrorInvalidBatchDataDetail": {
+    "description": "Localized string apiErrorInvalidBatchDataDetail",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "apiErrorBatchFailed": "L'operazione batch è fallita.",
+  "@apiErrorBatchFailed": {
+    "description": "Localized string apiErrorBatchFailed"
+  },
+  "apiErrorBatchFailedDetail": "L'operazione batch è fallita: {details}",
+  "@apiErrorBatchFailedDetail": {
+    "description": "Localized string apiErrorBatchFailedDetail",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "msgMgwsUnavailable": "Backend MGWS non disponibile",
+  "@msgMgwsUnavailable": {
+    "description": "Localized string msgMgwsUnavailable"
+  },
+  "msgMgwsUnreachable": "Servizio MGWS non raggiungibile",
+  "@msgMgwsUnreachable": {
+    "description": "Localized string msgMgwsUnreachable"
+  },
+  "msgMgwsServerUnreachable": "Server MGWS non raggiungibile.",
+  "@msgMgwsServerUnreachable": {
+    "description": "Localized string msgMgwsServerUnreachable"
+  },
+  "msgNoSiteConnected": "Nessun sito connesso",
+  "@msgNoSiteConnected": {
+    "description": "Localized string msgNoSiteConnected"
+  },
+  "msgReceiptListMalformed": "Elenco scontrini non strutturato",
+  "@msgReceiptListMalformed": {
+    "description": "Localized string msgReceiptListMalformed"
+  },
+  "msgDocumentUpdateMalformed": "Aggiornamento documento non strutturato",
+  "@msgDocumentUpdateMalformed": {
+    "description": "Localized string msgDocumentUpdateMalformed"
+  },
+  "msgClosingListMalformed": "Elenco chiusure non strutturato",
+  "@msgClosingListMalformed": {
+    "description": "Localized string msgClosingListMalformed"
+  },
+  "msgClosingMalformed": "Chiusura non strutturata",
+  "@msgClosingMalformed": {
+    "description": "Localized string msgClosingMalformed"
+  },
+  "msgClosingAdjustmentMalformed": "Rettifica chiusura non strutturata",
+  "@msgClosingAdjustmentMalformed": {
+    "description": "Localized string msgClosingAdjustmentMalformed"
+  },
+  "msgReceiptDetailMalformed": "Dettaglio scontrino non strutturato",
+  "@msgReceiptDetailMalformed": {
+    "description": "Localized string msgReceiptDetailMalformed"
+  },
+  "msgInvalidServerResponse": "Risposta del server non valida.",
+  "@msgInvalidServerResponse": {
+    "description": "Localized string msgInvalidServerResponse"
+  },
+  "msgStockSyncDone": "Sync stock completato",
+  "@msgStockSyncDone": {
+    "description": "Localized string msgStockSyncDone"
+  },
+  "msgStockSyncFailed": "Sync stock non riuscito",
+  "@msgStockSyncFailed": {
+    "description": "Localized string msgStockSyncFailed"
+  },
+  "msgReconcileDone": "Riconciliazione completata",
+  "@msgReconcileDone": {
+    "description": "Localized string msgReconcileDone"
+  },
+  "msgReconcileFailed": "Riconciliazione non riuscita",
+  "@msgReconcileFailed": {
+    "description": "Localized string msgReconcileFailed"
+  },
+  "msgMoveDone": "Spostamento completato",
+  "@msgMoveDone": {
+    "description": "Localized string msgMoveDone"
+  },
+  "msgMoveFailed": "Spostamento non riuscito",
+  "@msgMoveFailed": {
+    "description": "Localized string msgMoveFailed"
+  },
+  "msgRfidResolved": "RFID risolto senza aggiornare stock",
+  "@msgRfidResolved": {
+    "description": "Localized string msgRfidResolved"
+  },
+  "msgRfidNotResolved": "RFID non risolto",
+  "@msgRfidNotResolved": {
+    "description": "Localized string msgRfidNotResolved"
+  },
+  "msgMgwsOperationDone": "Operazione MGWS completata",
+  "@msgMgwsOperationDone": {
+    "description": "Localized string msgMgwsOperationDone"
+  },
+  "msgMgwsInvalidResponse": "Risposta MGWS non valida",
+  "@msgMgwsInvalidResponse": {
+    "description": "Localized string msgMgwsInvalidResponse"
+  },
+  "msgMgwsListLoaded": "Elenco MGWS caricato",
+  "@msgMgwsListLoaded": {
+    "description": "Localized string msgMgwsListLoaded"
+  },
+  "msgEmployeePermissionsReadFailed": "Impossibile leggere i permessi del dipendente",
+  "@msgEmployeePermissionsReadFailed": {
+    "description": "Localized string msgEmployeePermissionsReadFailed"
+  },
+  "msgNothingToSave": "Nessuna modifica da salvare",
+  "@msgNothingToSave": {
+    "description": "Localized string msgNothingToSave"
+  },
+  "msgEmployeePermissionsUpdateFailed": "Impossibile aggiornare i permessi del dipendente",
+  "@msgEmployeePermissionsUpdateFailed": {
+    "description": "Localized string msgEmployeePermissionsUpdateFailed"
+  },
+  "msgEmployeeAppPasswordsLoadFailed": "Impossibile caricare le Application Password del dipendente",
+  "@msgEmployeeAppPasswordsLoadFailed": {
+    "description": "Localized string msgEmployeeAppPasswordsLoadFailed"
+  },
+  "msgAppPasswordRevokeFailed": "Impossibile revocare la Application Password",
+  "@msgAppPasswordRevokeFailed": {
+    "description": "Localized string msgAppPasswordRevokeFailed"
+  },
+  "msgEmployeeWooKeysLoadFailed": "Impossibile caricare le chiavi WooCommerce del dipendente",
+  "@msgEmployeeWooKeysLoadFailed": {
+    "description": "Localized string msgEmployeeWooKeysLoadFailed"
+  },
+  "msgWooKeyRevokeFailed": "Impossibile revocare la chiave WooCommerce",
+  "@msgWooKeyRevokeFailed": {
+    "description": "Localized string msgWooKeyRevokeFailed"
+  },
+  "msgCouponInvalid": "Coupon non valido",
+  "@msgCouponInvalid": {
+    "description": "Localized string msgCouponInvalid"
+  },
+  "msgCouponNotFound": "Coupon non trovato",
+  "@msgCouponNotFound": {
+    "description": "Localized string msgCouponNotFound"
+  },
+  "msgNoBatchOperation": "Nessuna operazione batch specificata",
+  "@msgNoBatchOperation": {
+    "description": "Localized string msgNoBatchOperation"
+  },
+  "msgVariantNeedsAttribute": "La variante deve avere almeno un attributo",
+  "@msgVariantNeedsAttribute": {
+    "description": "Localized string msgVariantNeedsAttribute"
+  },
+  "loginEnterSiteUrl": "Inserisci l'URL del tuo sito",
+  "@loginEnterSiteUrl": {
+    "description": "Localized string loginEnterSiteUrl"
+  },
+  "loginInvalidUrlLocal": "URL non valido (es. http://localhost)",
+  "@loginInvalidUrlLocal": {
+    "description": "Localized string loginInvalidUrlLocal"
+  },
+  "loginInvalidUrl": "URL non valido (es. https://...)",
+  "@loginInvalidUrl": {
+    "description": "Localized string loginInvalidUrl"
+  },
+  "loginLocalNeedsDevMode": "Per indirizzi locali, abilita la modalità sviluppo.",
+  "@loginLocalNeedsDevMode": {
+    "description": "Localized string loginLocalNeedsDevMode"
+  },
+  "loginExternalNeedsHttps": "Le connessioni a siti esterni devono usare HTTPS.",
+  "@loginExternalNeedsHttps": {
+    "description": "Localized string loginExternalNeedsHttps"
+  },
+  "loginEnterPassword": "Inserisci password",
+  "@loginEnterPassword": {
+    "description": "Localized string loginEnterPassword"
+  },
+  "loginJwtPluginMissing": "Plugin JWT non installato o endpoint non attivo.",
+  "@loginJwtPluginMissing": {
+    "description": "Localized string loginJwtPluginMissing"
+  },
+  "loginInvalidCredentialsOrPermissions": "Credenziali non valide o permessi insufficienti.",
+  "@loginInvalidCredentialsOrPermissions": {
+    "description": "Localized string loginInvalidCredentialsOrPermissions"
+  },
+  "loginNoJwtEndpoint": "Nessun endpoint JWT funzionante trovato.",
+  "@loginNoJwtEndpoint": {
+    "description": "Localized string loginNoJwtEndpoint"
+  },
+  "loginWordpressHttpsRequired": "HTTPS obbligatorio per l'autenticazione WordPress",
+  "@loginWordpressHttpsRequired": {
+    "description": "Localized string loginWordpressHttpsRequired"
+  },
+  "loginNeedsApplicationPassword": "Sul web serve un'Application Password (WordPress > Utenti > Profilo > Password applicazione), non la password di accesso.",
+  "@loginNeedsApplicationPassword": {
+    "description": "Localized string loginNeedsApplicationPassword"
+  },
+  "loginInvalidCredentialsOrServer": "Credenziali non valide o errore del server.",
+  "@loginInvalidCredentialsOrServer": {
+    "description": "Localized string loginInvalidCredentialsOrServer"
+  },
+  "loginAppPasswordsDisabled": "Application Passwords non abilitati sul sito. Abilitarli da WordPress > Profilo > Application Passwords.",
+  "@loginAppPasswordsDisabled": {
+    "description": "Localized string loginAppPasswordsDisabled"
+  },
+  "loginRestNonceMissing": "Nonce REST API non trovato nella pagina wp-admin. Verificare che l'utente sia autenticato.",
+  "@loginRestNonceMissing": {
+    "description": "Localized string loginRestNonceMissing"
+  },
+  "loginAppPasswordCreateFailed": "Impossibile creare Application Password: {details}",
+  "@loginAppPasswordCreateFailed": {
+    "description": "Localized string loginAppPasswordCreateFailed",
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "loginAppPasswordExists": "Application Password già esistente. Rivolgersi al profilo WordPress per recuperarla o revocarla.",
+  "@loginAppPasswordExists": {
+    "description": "Localized string loginAppPasswordExists"
+  },
+  "loginAppPasswordUnavailable": "Impossibile creare o recuperare Application Password",
+  "@loginAppPasswordUnavailable": {
+    "description": "Localized string loginAppPasswordUnavailable"
+  },
+  "msgMgwsPluginTooOld": "Il plugin MGWS sul sito è troppo vecchio: aggiornalo alla versione 2.4.0 o successiva per usare le sedi.",
+  "@msgMgwsPluginTooOld": {
+    "description": "Localized string msgMgwsPluginTooOld"
+  },
+  "productsBarcodeExistsInShop": "Barcode interno già esistente in WooCommerce: {barcode} (prodotto ID {productId})",
+  "@productsBarcodeExistsInShop": {
+    "description": "Localized string productsBarcodeExistsInShop",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      },
+      "productId": {
+        "type": "String"
+      }
+    }
+  },
+  "productsCodeExistsInShop": "Codice prodotto già esistente in WooCommerce: {code} (prodotto ID {productId})",
+  "@productsCodeExistsInShop": {
+    "description": "Localized string productsCodeExistsInShop",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "productId": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaFileNotFound": "File non trovato: {path}",
+  "@mediaFileNotFound": {
+    "description": "Localized string mediaFileNotFound",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaAccessDenied": "Accesso negato: l'utente non ha permessi per visualizzare i media. Verifica che l'utente WordPress abbia la capacità \"upload_files\".",
+  "@mediaAccessDenied": {
+    "description": "Localized string mediaAccessDenied"
+  },
+  "productsVariantAttributeEmpty": "Attributo variante non valido: nome e valore vuoti (barcode interno: {barcode})",
+  "@productsVariantAttributeEmpty": {
+    "description": "Localized string productsVariantAttributeEmpty",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAttributeNoName": "Attributo variante non valido: valore presente senza nome attributo (barcode interno: {barcode})",
+  "@productsVariantAttributeNoName": {
+    "description": "Localized string productsVariantAttributeNoName",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAttributeNoValue": "Attributo variante non valido: nome attributo presente senza valore (barcode interno: {barcode}, attributo: {attribute})",
+  "@productsVariantAttributeNoValue": {
+    "description": "Localized string productsVariantAttributeNoValue",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      },
+      "attribute": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAttributeInvalid": "Attributo variante non valido dopo normalizzazione (barcode interno: {barcode})",
+  "@productsVariantAttributeInvalid": {
+    "description": "Localized string productsVariantAttributeInvalid",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "productsAttributeCreateFailed": "Impossibile creare/trovare attributo: {attribute}",
+  "@productsAttributeCreateFailed": {
+    "description": "Localized string productsAttributeCreateFailed",
+    "placeholders": {
+      "attribute": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantValueInvalid": "Valore attributo non valido dopo normalizzazione (barcode interno: {barcode}, attributo: {attribute})",
+  "@productsVariantValueInvalid": {
+    "description": "Localized string productsVariantValueInvalid",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      },
+      "attribute": {
+        "type": "String"
+      }
+    }
+  },
+  "productsNoVariantCreated": "Nessuna variante creata per prodotto {productId} (tentate: {count}).",
+  "@productsNoVariantCreated": {
+    "description": "Localized string productsNoVariantCreated",
+    "placeholders": {
+      "productId": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smartcardLoginOk": "Login riuscito!",
+  "@smartcardLoginOk": {
+    "description": "Localized string smartcardLoginOk"
+  },
+  "smartcardNoData": "Nessun dato trovato sulla smartcard",
+  "@smartcardNoData": {
+    "description": "Localized string smartcardNoData"
+  },
+  "smartcardSaveFailed": "Errore durante il salvataggio",
+  "@smartcardSaveFailed": {
+    "description": "Localized string smartcardSaveFailed"
   }
 }

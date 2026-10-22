@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../connection/mgws_connection.dart';
 import 'query_mgws_base.dart';
 
@@ -36,7 +37,7 @@ class QueryMgwsEmployees {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'ok': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
     final response = await _base.post(
@@ -56,7 +57,7 @@ class QueryMgwsEmployees {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'ok': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
     final response = await _base.patch(
@@ -73,7 +74,7 @@ class QueryMgwsEmployees {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'ok': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
     final response = await _base.delete('/wp-json/mgws/v1/employees/$id');

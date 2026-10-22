@@ -26,7 +26,7 @@ class WooQueryMarchi {
       );
     }
 
-    throw Exception('Tipo brand non supportato: ${brandData.runtimeType}');
+    throw Exception('Unsupported brand type: ${brandData.runtimeType}');
   }
 
   String _generateSlug(String name) {

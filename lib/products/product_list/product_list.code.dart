@@ -1,5 +1,6 @@
 // product_list.code.dart
 
+import '../../l10n/error_text.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -1528,7 +1529,8 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: (l10n) => l10n.productsCategoryUpdateError('$e'),
+        message: (l10n) =>
+            l10n.productsCategoryUpdateError(localizedErrorText(l10n, e)),
       );
     }
   }
@@ -1611,7 +1613,8 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 1,
-        message: (l10n) => l10n.productsCategoryUpdateError('$e'),
+        message: (l10n) =>
+            l10n.productsCategoryUpdateError(localizedErrorText(l10n, e)),
       );
     }
   }
@@ -1795,7 +1798,8 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: (l10n) => l10n.productsTagUpdateError('$e'),
+        message: (l10n) =>
+            l10n.productsTagUpdateError(localizedErrorText(l10n, e)),
       );
     }
   }
@@ -1866,7 +1870,8 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: (l10n) => l10n.productsStatusUpdateError('$e'),
+        message: (l10n) =>
+            l10n.productsStatusUpdateError(localizedErrorText(l10n, e)),
       );
     }
   }

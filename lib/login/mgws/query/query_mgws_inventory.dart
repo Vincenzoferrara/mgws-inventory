@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../../../log_viewer/app_logger.dart';
 import '../connection/mgws_auth.dart';
 import '../connection/mgws_connection.dart';
@@ -137,8 +138,8 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     if (!await _availability.ensureConnected()) {
       return const MgwsStockSyncResult(
         success: false,
-        message: 'Backend MGWS non disponibile',
-        errors: ['Backend MGWS non disponibile'],
+        message: AppMessages.mgwsUnavailable,
+        errors: [AppMessages.mgwsUnavailable],
       );
     }
     final response = await _base.post(
@@ -167,8 +168,8 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     if (!await _availability.ensureConnected()) {
       return const MgwsReconcileResult(
         success: false,
-        message: 'Backend MGWS non disponibile',
-        errors: ['Backend MGWS non disponibile'],
+        message: AppMessages.mgwsUnavailable,
+        errors: [AppMessages.mgwsUnavailable],
       );
     }
     // `site_id` non e' facoltativo: dichiara su quale sede il totale viene
@@ -199,8 +200,8 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     if (!await _availability.ensureConnected()) {
       return const MgwsRfidScanResult(
         success: false,
-        message: 'Backend MGWS non disponibile',
-        errors: ['Backend MGWS non disponibile'],
+        message: AppMessages.mgwsUnavailable,
+        errors: [AppMessages.mgwsUnavailable],
         resolved: [],
         unresolved: [],
         stockUpdates: 0,
@@ -239,8 +240,8 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     if (!await _availability.ensureConnected()) {
       return const MgwsMoveResult(
         success: false,
-        message: 'Backend MGWS non disponibile',
-        errors: ['Backend MGWS non disponibile'],
+        message: AppMessages.mgwsUnavailable,
+        errors: [AppMessages.mgwsUnavailable],
       );
     }
     // `from_site_id` e `to_site_id` viaggiano per compatibilita' con il
@@ -627,7 +628,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       return MgwsRestockResult.failure(
         const MgwsRestockError(
           code: 'mgws_transport_error',
-          message: 'Servizio MGWS non raggiungibile',
+          message: AppMessages.mgwsUnreachable,
         ),
       );
     }
@@ -650,7 +651,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       return MgwsRestockResult.failure(
         const MgwsRestockError(
           code: 'mgws_transport_error',
-          message: 'Servizio MGWS non raggiungibile',
+          message: AppMessages.mgwsUnreachable,
         ),
       );
     }
@@ -665,7 +666,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     return MgwsRestockResult.failure(
       const MgwsRestockError(
         code: 'mgws_unavailable',
-        message: 'Backend MGWS non disponibile',
+        message: AppMessages.mgwsUnavailable,
       ),
     );
   }

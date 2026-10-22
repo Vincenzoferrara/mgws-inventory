@@ -99,7 +99,7 @@ class WooQueryReport {
         venditeGiornaliere: venditeGiornaliere,
       );
     } catch (e) {
-      throw Exception('Errore nel caricamento report vendite: $e');
+      throw Exception('Sales report load failed: $e');
     }
   }
 
@@ -177,7 +177,7 @@ class WooQueryReport {
         prodottiPerTag: {},
       );
     } catch (e) {
-      throw Exception('Errore nel caricamento statistiche prodotti: $e');
+      throw Exception('Product statistics load failed: $e');
     }
   }
 
@@ -274,7 +274,7 @@ class WooQueryReport {
         };
       }).toList();
     } catch (e) {
-      throw Exception('Errore nel caricamento top prodotti: $e');
+      throw Exception('Top products load failed: $e');
     }
   }
 
@@ -299,7 +299,7 @@ class WooQueryReport {
 
       return statusCounts;
     } catch (e) {
-      throw Exception('Errore nel caricamento ordini per stato: $e');
+      throw Exception('Orders by status load failed: $e');
     }
   }
 
@@ -352,7 +352,7 @@ class WooQueryReport {
         'avg_lifetime_value': '0', // Non disponibile in questo endpoint
       };
     } catch (e) {
-      throw Exception('Errore nel caricamento statistiche clienti: $e');
+      throw Exception('Customer statistics load failed: $e');
     }
   }
 
@@ -377,7 +377,7 @@ class WooQueryReport {
 
       return ratingCounts;
     } catch (e) {
-      throw Exception('Errore nel caricamento statistiche recensioni: $e');
+      throw Exception('Review statistics load failed: $e');
     }
   }
 
@@ -402,7 +402,7 @@ class WooQueryReport {
         };
       }).toList();
     } catch (e) {
-      throw Exception('Errore nel caricamento report coupon: $e');
+      throw Exception('Coupon report load failed: $e');
     }
   }
 
@@ -450,7 +450,7 @@ class WooQueryReport {
         },
       };
     } catch (e) {
-      throw Exception('Errore nel caricamento dashboard summary: $e');
+      throw Exception('Dashboard summary load failed: $e');
     }
   }
 
@@ -524,7 +524,7 @@ class WooQueryReport {
 
       return trends;
     } catch (e) {
-      throw Exception('Errore nel caricamento trend vendite: $e');
+      throw Exception('Sales trend load failed: $e');
     }
   }
 
@@ -565,7 +565,7 @@ class WooQueryReport {
 
       return result;
     } catch (e) {
-      throw Exception('Errore nel caricamento prodotti per categoria: $e');
+      throw Exception('Products by category load failed: $e');
     }
   }
 
@@ -623,7 +623,7 @@ class WooQueryReport {
 
       return lowStockProducts;
     } catch (e) {
-      throw Exception('Errore nel caricamento prodotti stock basso: $e');
+      throw Exception('Low stock products load failed: $e');
     }
   }
 
@@ -681,7 +681,7 @@ class WooQueryReport {
 
       return totalValue;
     } catch (e) {
-      throw Exception('Errore nel calcolo valore inventario: $e');
+      throw Exception('Inventory value calculation failed: $e');
     }
   }
 
@@ -711,7 +711,7 @@ class WooQueryReport {
         'low_stock_threshold': lowStockThreshold,
       };
     } catch (e) {
-      throw Exception('Errore nel caricamento statistiche stock: $e');
+      throw Exception('Stock statistics load failed: $e');
     }
   }
 

@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../../../log_viewer/app_logger.dart';
 import '../connection/mgws_connection.dart';
 import 'query_mgws_base.dart';
@@ -37,7 +38,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -68,7 +69,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Elenco scontrini non strutturato',
+      'message': AppMessages.receiptListMalformed,
     };
   }
 
@@ -86,7 +87,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -106,7 +107,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Aggiornamento documento non strutturato',
+      'message': AppMessages.documentUpdateMalformed,
     };
   }
 
@@ -120,7 +121,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -143,7 +144,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Elenco chiusure non strutturato',
+      'message': AppMessages.closingListMalformed,
     };
   }
 
@@ -155,7 +156,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -172,7 +173,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Chiusura non strutturata',
+      'message': AppMessages.closingMalformed,
     };
   }
 
@@ -185,7 +186,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -205,7 +206,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Rettifica chiusura non strutturata',
+      'message': AppMessages.closingAdjustmentMalformed,
     };
   }
 
@@ -213,7 +214,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -229,7 +230,7 @@ class QueryMgwsPos {
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
-      'message': 'Dettaglio scontrino non strutturato',
+      'message': AppMessages.receiptDetailMalformed,
     };
   }
 
@@ -237,7 +238,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -261,7 +262,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -288,7 +289,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -318,7 +319,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 
@@ -351,7 +352,7 @@ class QueryMgwsPos {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'success': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
 

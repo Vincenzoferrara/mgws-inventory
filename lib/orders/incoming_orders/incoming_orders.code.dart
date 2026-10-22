@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import '../../l10n/localized_text.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
@@ -65,7 +66,8 @@ class OrdiniInArrivoController {
       log.i('Caricati ${_ordini.length} ordini in arrivo');
     } catch (e) {
       log.e('Errore nel caricamento degli ordini in arrivo: $e');
-      _errorMessage = (l10n) => l10n.ordersIncomingLoadError('$e');
+      _errorMessage = (l10n) =>
+          l10n.ordersIncomingLoadError(localizedErrorText(l10n, e));
       _ordini = [];
     } finally {
       _isLoading = false;

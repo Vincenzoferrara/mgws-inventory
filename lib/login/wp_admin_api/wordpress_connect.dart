@@ -195,7 +195,10 @@ class WordPressConnect implements AuthConnector {
         siteUri.scheme == 'http' &&
         UrlValidator.isLocalOrReservedIp(siteUri.host);
     if (!isHttps && !isLocalHttp) {
-      throw Exception('HTTPS obbligatorio per l\'autenticazione WordPress');
+      throw LocalizedException(
+        'HTTPS is required for WordPress authentication',
+        (l10n) => l10n.loginWordpressHttpsRequired,
+      );
     }
     if (isLocalHttp) {
       log.w(
@@ -245,7 +248,7 @@ class WordPressConnect implements AuthConnector {
 
       log.i('WordPress: login completato con successo');
     } on SocketException {
-      throw ConnectionException('di rete');
+      throw ConnectionException.network();
     } on TimeoutException {
       throw ConnectionTimeoutException();
     } catch (e) {
@@ -299,11 +302,12 @@ class WordPressConnect implements AuthConnector {
     } on DioException catch (e) {
       if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
         throw InvalidCredentialsException(
-          'Sul web serve un\'Application Password (WordPress > Utenti > '
-          'Profilo > Password applicazione), non la password di accesso.',
+          'An Application Password is required on the web, not the login '
+          'password.',
+          localized: (l10n) => l10n.loginNeedsApplicationPassword,
         );
       }
-      throw ConnectionException('di rete');
+      throw ConnectionException.network();
     }
 
     final session = WordPressSession(
@@ -373,7 +377,8 @@ class WordPressConnect implements AuthConnector {
       if (loggedInCookie.isEmpty) {
         log.e('WordPress: login fallito, cookie non trovato');
         throw InvalidCredentialsException(
-          'Credenziali non valide o errore del server.',
+          'Invalid credentials or server error.',
+          localized: (l10n) => l10n.loginInvalidCredentialsOrServer,
         );
       }
 
@@ -409,9 +414,9 @@ class WordPressConnect implements AuthConnector {
         .join();
 
     if (!discoveryBody.contains('application-passwords')) {
-      throw Exception(
-        'Application Passwords non abilitati sul sito. '
-        'Abilitarli da WordPress > Profilo > Application Passwords.',
+      throw LocalizedException(
+        'Application Passwords are not enabled on the site.',
+        (l10n) => l10n.loginAppPasswordsDisabled,
       );
     }
 
@@ -437,9 +442,9 @@ class WordPressConnect implements AuthConnector {
     ).firstMatch(adminBody);
 
     if (nonceMatch == null) {
-      throw Exception(
-        'Nonce REST API non trovato nella pagina wp-admin. '
-        'Verificare che l\'utente sia autenticato.',
+      throw LocalizedException(
+        'REST API nonce not found in the wp-admin page.',
+        (l10n) => l10n.loginRestNonceMissing,
       );
     }
 
@@ -498,8 +503,10 @@ class WordPressConnect implements AuthConnector {
           cookies,
         );
       } else {
-        throw Exception(
-          'Impossibile creare Application Password: ${json['message'] ?? 'errore sconosciuto'}',
+        final details = '${json['message'] ?? 'unknown error'}';
+        throw LocalizedException(
+          'Could not create the Application Password: $details',
+          (l10n) => l10n.loginAppPasswordCreateFailed(details),
         );
       }
     } finally {
@@ -538,14 +545,17 @@ class WordPressConnect implements AuthConnector {
         log.d('WordPress: Application Password esistente trovata');
         // Le API REST non restituiscono la password in chiaro
         // L'utente deve riviverla o usarne una esistente
-        throw Exception(
-          'Application Password già esistente. '
-          'Rivolgersi al profilo WordPress per recuperarla o revocarla.',
+        throw LocalizedException(
+          'Application Password already exists.',
+          (l10n) => l10n.loginAppPasswordExists,
         );
       }
     }
 
-    throw Exception('Impossibile creare o recuperare Application Password');
+    throw LocalizedException(
+      'Could not create or retrieve the Application Password',
+      (l10n) => l10n.loginAppPasswordUnavailable,
+    );
   }
 
   /// Ottiene un ID univoco per questo dispositivo

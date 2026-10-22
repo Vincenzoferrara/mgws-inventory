@@ -1,3 +1,5 @@
+import '../error_list.dart';
+import '../../../l10n/known_messages.dart';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -418,7 +420,7 @@ class WooQueryVarianti {
       final rawVariations = response.data;
       if (rawVariations is! List) {
         throw StateError(
-          'Risposta variazioni non valida: attesa lista, ricevuto ${rawVariations.runtimeType}',
+          'Invalid variations response: expected a list, got ${rawVariations.runtimeType}',
         );
       }
 
@@ -433,7 +435,7 @@ class WooQueryVarianti {
       for (final rawVariation in rawVariations) {
         if (rawVariation is! Map) {
           throw StateError(
-            'Elemento variazione non valido: ${rawVariation.runtimeType}',
+            'Invalid variation item: ${rawVariation.runtimeType}',
           );
         }
         final rawMap = Map<String, dynamic>.from(rawVariation);
@@ -503,7 +505,7 @@ class WooQueryVarianti {
     String attributeCaseMode,
   ) async {
     if (variante.attributi.isEmpty) {
-      throw Exception('La variante deve avere almeno un attributo');
+      throw Exception(AppMessages.variantNeedsAttribute);
     }
 
     log.e('🔍 Verifica attributi per variante ${variante.barcodeInterno}...');
@@ -518,20 +520,27 @@ class WooQueryVarianti {
       final termName = rawTermName.trim();
 
       if (attributeName.isEmpty && termName.isEmpty) {
-        throw Exception(
-          'Attributo variante non valido: nome e valore vuoti (SKU: ${variante.barcodeInterno})',
+        throw LocalizedException(
+          'Invalid variant attribute: empty name and value (${variante.barcodeInterno})',
+          (l10n) => l10n.productsVariantAttributeEmpty(variante.barcodeInterno),
         );
       }
 
       if (attributeName.isEmpty && termName.isNotEmpty) {
-        throw Exception(
-          'Attributo variante non valido: valore presente senza nome attributo (SKU: ${variante.barcodeInterno})',
+        throw LocalizedException(
+          'Invalid variant attribute: value without name (${variante.barcodeInterno})',
+          (l10n) =>
+              l10n.productsVariantAttributeNoName(variante.barcodeInterno),
         );
       }
 
       if (attributeName.isNotEmpty && termName.isEmpty) {
-        throw Exception(
-          'Attributo variante non valido: nome attributo presente senza valore (SKU: ${variante.barcodeInterno}, attributo: $attributeName)',
+        throw LocalizedException(
+          'Invalid variant attribute: name without value (${variante.barcodeInterno}, $attributeName)',
+          (l10n) => l10n.productsVariantAttributeNoValue(
+            variante.barcodeInterno,
+            attributeName,
+          ),
         );
       }
 
@@ -550,8 +559,10 @@ class WooQueryVarianti {
               attributeCaseMode,
             );
         if (normalizedAttributeName.isEmpty) {
-          throw Exception(
-            'Attributo variante non valido dopo normalizzazione (SKU: ${variante.barcodeInterno})',
+          throw LocalizedException(
+            'Invalid variant attribute after normalisation (${variante.barcodeInterno})',
+            (l10n) =>
+                l10n.productsVariantAttributeInvalid(variante.barcodeInterno),
           );
         }
         log.d(
@@ -565,7 +576,10 @@ class WooQueryVarianti {
       }
 
       if (attributo.id == null) {
-        throw Exception('Impossibile creare/trovare attributo: $attributeName');
+        throw LocalizedException(
+          'Could not create or find the attribute: $attributeName',
+          (l10n) => l10n.productsAttributeCreateFailed(attributeName),
+        );
       }
 
       // STEP 2: Verifica/crea il termine dell'attributo
@@ -581,8 +595,12 @@ class WooQueryVarianti {
               attributeCaseMode,
             );
         if (normalizedTermName.isEmpty) {
-          throw Exception(
-            'Valore attributo non valido dopo normalizzazione (SKU: ${variante.barcodeInterno}, attributo: $attributeName)',
+          throw LocalizedException(
+            'Invalid attribute value after normalisation (${variante.barcodeInterno}, $attributeName)',
+            (l10n) => l10n.productsVariantValueInvalid(
+              variante.barcodeInterno,
+              attributeName,
+            ),
           );
         }
         log.d(
@@ -703,8 +721,10 @@ class WooQueryVarianti {
       }
 
       if (varianti.isNotEmpty && variantiCreate.isEmpty) {
-        throw Exception(
-          'Nessuna variante creata per prodotto $productId (tentate: ${varianti.length}).',
+        throw LocalizedException(
+          'No variant created for product $productId (attempted: ${varianti.length}).',
+          (l10n) =>
+              l10n.productsNoVariantCreated('$productId', varianti.length),
         );
       }
 

@@ -4,6 +4,8 @@
 // L'autenticazione è gestita centralmente da WooConnect
 // Converte i dati WooCommerce in modelli globali multi-piattaforma
 
+import '../error_list.dart';
+import '../../../l10n/known_messages.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import 'package:dio/dio.dart';
 import '../woo_connect.dart';
@@ -1219,8 +1221,13 @@ class WooQueryProdotti {
           barcodeNormalizzato,
         );
         if (existingProduct != null) {
-          throw Exception(
-            'Barcode interno già esistente in WooCommerce: $barcodeNormalizzato (prodotto ID ${existingProduct.id})',
+          final productId = '${existingProduct.id}';
+          throw LocalizedException(
+            'Internal barcode already used: $barcodeNormalizzato (product $productId)',
+            (l10n) => l10n.productsBarcodeExistsInShop(
+              barcodeNormalizzato,
+              productId,
+            ),
           );
         }
       }
@@ -1231,8 +1238,13 @@ class WooQueryProdotti {
           codiceProdottoNormalizzato,
         );
         if (existingProduct != null) {
-          throw Exception(
-            'Codice prodotto già esistente in WooCommerce: $codiceProdottoNormalizzato (prodotto ID ${existingProduct.id})',
+          final productId = '${existingProduct.id}';
+          throw LocalizedException(
+            'Product code already used: $codiceProdottoNormalizzato (product $productId)',
+            (l10n) => l10n.productsCodeExistsInShop(
+              codiceProdottoNormalizzato,
+              productId,
+            ),
           );
         }
       }
@@ -1495,7 +1507,7 @@ class WooQueryProdotti {
       if (delete != null && delete.isNotEmpty) batchData['delete'] = delete;
 
       if (batchData.isEmpty) {
-        throw Exception('Nessuna operazione batch specificata');
+        throw Exception(AppMessages.noBatchOperation);
       }
 
       log.d('🔵 BATCH UPDATE - ${batchData.length} operations');

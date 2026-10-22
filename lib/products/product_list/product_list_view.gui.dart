@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -673,7 +674,9 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       NotificationService.instance.messageBar(
         'errore',
         'prodotti_gestisci',
-        context.l10n.productsQuickSaveError('$e'),
+        context.l10n.productsQuickSaveError(
+          localizedErrorText(context.l10n, e),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

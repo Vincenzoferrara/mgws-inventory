@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import '../../l10n/localized_text.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
@@ -44,7 +45,8 @@ class OrdiniGestioneController {
       log.i('Caricati ${_ordini.length} ordini');
     } catch (e) {
       log.e('Errore nel caricamento degli ordini: $e');
-      _errorMessage = (l10n) => l10n.ordersLoadError('$e');
+      _errorMessage = (l10n) =>
+          l10n.ordersLoadError(localizedErrorText(l10n, e));
       _ordini = [];
     } finally {
       _isLoading = false;

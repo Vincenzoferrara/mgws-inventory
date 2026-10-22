@@ -333,7 +333,7 @@ class WooQueryAttributi {
         await getAttributeById(attributeId);
       } catch (e) {
         throw Exception(
-          'Attributo con ID $attributeId non trovato. Impossibile creare il termine.',
+          'Attribute $attributeId not found: cannot create the term.',
         );
       }
 

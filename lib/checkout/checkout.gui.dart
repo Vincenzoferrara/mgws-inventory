@@ -1,3 +1,4 @@
+import '../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'class_receipt.dart';
@@ -2024,7 +2025,9 @@ class _LatoDestroWidget extends StatelessWidget {
                   NotificationService.instance.messageBar(
                     'errore',
                     'cassa',
-                    context.l10n.cassaErrorDetail('$e'),
+                    context.l10n.cassaErrorDetail(
+                      localizedErrorText(context.l10n, e),
+                    ),
                   );
                 }
               }

@@ -1,3 +1,5 @@
+import '../../../l10n/known_messages.dart';
+
 abstract class MgwsInventoryGateway {
   Future<bool> isInventoryServiceAvailable();
 
@@ -91,7 +93,7 @@ class MgwsStockSyncResult {
     final success = MgwsInventoryParser.parseSuccess(data, statusCode);
     final message = MgwsInventoryParser.parseMessage(
       data,
-      success ? 'Sync stock completato' : 'Sync stock non riuscito',
+      success ? AppMessages.stockSyncDone : AppMessages.stockSyncFailed,
     );
     return MgwsStockSyncResult(
       success: success,
@@ -139,7 +141,7 @@ class MgwsReconcileResult {
     final success = MgwsInventoryParser.parseSuccess(data, statusCode);
     final message = MgwsInventoryParser.parseMessage(
       data,
-      success ? 'Riconciliazione completata' : 'Riconciliazione non riuscita',
+      success ? AppMessages.reconcileDone : AppMessages.reconcileFailed,
     );
     return MgwsReconcileResult(
       success: success,
@@ -203,7 +205,7 @@ class MgwsMoveResult {
     final success = MgwsInventoryParser.parseSuccess(data, statusCode);
     final message = MgwsInventoryParser.parseMessage(
       data,
-      success ? 'Spostamento completato' : 'Spostamento non riuscito',
+      success ? AppMessages.moveDone : AppMessages.moveFailed,
     );
     return MgwsMoveResult(
       success: success,
@@ -284,7 +286,7 @@ class MgwsRfidScanResult {
     final success = MgwsInventoryParser.parseSuccess(data, statusCode);
     final message = MgwsInventoryParser.parseMessage(
       data,
-      success ? 'RFID risolto senza aggiornare stock' : 'RFID non risolto',
+      success ? AppMessages.rfidResolved : AppMessages.rfidNotResolved,
     );
     return MgwsRfidScanResult(
       success: success,
@@ -527,7 +529,7 @@ class MgwsRestockResult<T> {
 
   factory MgwsRestockResult.success(
     T data, {
-    String message = 'Operazione MGWS completata',
+    String message = AppMessages.mgwsOperationDone,
   }) {
     return MgwsRestockResult._(success: true, message: message, data: data);
   }
@@ -580,7 +582,7 @@ class MgwsRestockParser {
   static MgwsRestockError error(
     Object? raw,
     int? statusCode, {
-    String fallback = 'Risposta MGWS non valida',
+    String fallback = AppMessages.mgwsInvalidResponse,
   }) {
     final data = payload(raw);
     final message =
@@ -617,7 +619,7 @@ class MgwsRestockParser {
     Object? raw,
     int? statusCode,
     T? Function(Map<String, Object?> value) parse, {
-    String successMessage = 'Operazione MGWS completata',
+    String successMessage = AppMessages.mgwsOperationDone,
   }) {
     final data = payload(raw);
     final parsed = parse(data);
@@ -637,7 +639,7 @@ class MgwsRestockParser {
     Object? raw,
     int? statusCode,
     T? Function(Map<String, Object?> value) parse, {
-    String successMessage = 'Elenco MGWS caricato',
+    String successMessage = AppMessages.mgwsListLoaded,
   }) {
     final response = map(raw);
     if ((statusCode != null && (statusCode < 200 || statusCode >= 300)) ||

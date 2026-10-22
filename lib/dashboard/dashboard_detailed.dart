@@ -5,6 +5,7 @@
 // - Analisi Performance Temporale
 // - Report Ordini Dettagliato
 
+import '../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'dashboard.code.dart';
 import 'dashboard_charts.dart';
@@ -60,7 +61,8 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
       log.e('❌ Errore caricamento report top prodotti', e);
       if (mounted) {
         setState(() {
-          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
+          _errorMessage = (l10n) =>
+              l10n.dashboardErrorDetail(localizedErrorText(l10n, e));
           _isLoading = false;
         });
       }
@@ -369,7 +371,8 @@ class _PerformanceTimelineReportPageState
       log.e('❌ Errore caricamento report performance', e);
       if (mounted) {
         setState(() {
-          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
+          _errorMessage = (l10n) =>
+              l10n.dashboardErrorDetail(localizedErrorText(l10n, e));
           _isLoading = false;
         });
       }
@@ -700,7 +703,8 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
       log.e('❌ Errore caricamento report ordini', e);
       if (mounted) {
         setState(() {
-          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
+          _errorMessage = (l10n) =>
+              l10n.dashboardErrorDetail(localizedErrorText(l10n, e));
           _isLoading = false;
         });
       }

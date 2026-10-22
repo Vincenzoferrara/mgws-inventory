@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../theme/theme.dart';
@@ -76,7 +77,9 @@ class _CalDavLoginTabState extends State<CalDavLoginTab> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = context.l10n.caldavErroreSalvataggio('$e');
+        _errorMessage = context.l10n.caldavErroreSalvataggio(
+          localizedErrorText(context.l10n, e),
+        );
         _isLoading = false;
       });
     }
@@ -106,7 +109,9 @@ class _CalDavLoginTabState extends State<CalDavLoginTab> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = context.l10n.caldavErroreCancellamento('$e');
+        _errorMessage = context.l10n.caldavErroreCancellamento(
+          localizedErrorText(context.l10n, e),
+        );
         _isLoading = false;
       });
     }

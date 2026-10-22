@@ -1,3 +1,4 @@
+import '../l10n/error_text.dart';
 import '../l10n/localized_text.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
@@ -59,7 +60,8 @@ class ClientiGestioneController {
       log.i('Caricati ${_clienti.length} clienti');
     } catch (e) {
       log.e('Errore nel caricamento dei clienti: $e');
-      _errorMessage = (l10n) => l10n.customersLoadError('$e');
+      _errorMessage = (l10n) =>
+          l10n.customersLoadError(localizedErrorText(l10n, e));
       _clienti = [];
     } finally {
       _isLoading = false;

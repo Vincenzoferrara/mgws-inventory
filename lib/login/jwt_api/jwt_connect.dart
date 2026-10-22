@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'secure_storage_service.dart';
 import 'error_list.dart';
+import '../../l10n/localized_text.dart';
 import '../../log_viewer/app_logger.dart';
 import '../auth_connector.dart';
 
@@ -282,6 +283,7 @@ class JwtConnect implements AuthConnector {
     final endpointsToTry = await _getEndpointsToTry(customEndpoint);
     log.d('Endpoints to try: ${endpointsToTry.join(", ")}');
     String? lastKnownError;
+    LocalizedText? lastKnownLocalized;
 
     // 2. Prova ogni endpoint in sequenza.
     for (final endpoint in endpointsToTry) {
@@ -289,7 +291,8 @@ class JwtConnect implements AuthConnector {
         log.d('Trying endpoint: $endpoint');
         final endpointExists = await _jwtEndpointExists(siteUrl, endpoint);
         if (!endpointExists) {
-          lastKnownError = 'Plugin JWT non installato o endpoint non attivo.';
+          lastKnownError = 'JWT plugin not installed or endpoint not active.';
+          lastKnownLocalized = (l10n) => l10n.loginJwtPluginMissing;
           log.w('Endpoint JWT non disponibile: $endpoint');
           continue;
         }
@@ -324,9 +327,13 @@ class JwtConnect implements AuthConnector {
         // Se l'errore è credenziali/permessi, interrompi subito.
         else if (response.statusCode == 403) {
           final body = jsonDecode(response.body);
-          lastKnownError =
-              body['message'] ??
-              'Credenziali non valide o permessi insufficienti.';
+          lastKnownError = body['message'];
+          lastKnownLocalized = null;
+          if (lastKnownError == null) {
+            lastKnownError = 'Invalid credentials or insufficient permissions.';
+            lastKnownLocalized = (l10n) =>
+                l10n.loginInvalidCredentialsOrPermissions;
+          }
           log.e('Error 403: $lastKnownError');
           break;
         } else {
@@ -334,7 +341,7 @@ class JwtConnect implements AuthConnector {
         }
       } on SocketException catch (e) {
         log.e('Network error for $endpoint', e);
-        throw ConnectionException('di rete');
+        throw ConnectionException.network();
       } on TimeoutException catch (e) {
         log.e('Timeout for $endpoint', e);
         throw ConnectionTimeoutException();
@@ -343,13 +350,17 @@ class JwtConnect implements AuthConnector {
         // Ignora gli errori 404 (NotFound) e continua con il prossimo endpoint.
         if (e is! NotFoundException) {
           lastKnownError = e.toString();
+          lastKnownLocalized = null;
         }
       }
     }
     // 3. Se nessun endpoint ha funzionato, lancia un errore.
     log.e('All endpoints failed. Last error: $lastKnownError');
     throw InvalidCredentialsException(
-      lastKnownError ?? 'Nessun endpoint JWT funzionante trovato.',
+      lastKnownError ?? 'No working JWT endpoint found.',
+      localized: lastKnownError == null
+          ? (l10n) => l10n.loginNoJwtEndpoint
+          : lastKnownLocalized,
     );
   }
 
@@ -440,13 +451,13 @@ class JwtConnect implements AuthConnector {
               .timeout(const Duration(seconds: 20));
           break;
         default:
-          throw Exception('Metodo HTTP non supportato');
+          throw Exception('Unsupported HTTP method');
       }
       // Delega la gestione degli errori di risposta a un gestore centralizzato.
       if (response.statusCode >= 400) ErrorHandler.throwFromResponse(response);
       return response;
     } on SocketException {
-      throw ConnectionException('di rete');
+      throw ConnectionException.network();
     } on TimeoutException {
       throw ConnectionTimeoutException();
     }

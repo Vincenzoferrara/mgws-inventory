@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
 
@@ -43,7 +44,7 @@ class WooQueryCoupon {
     final coupons = await woo.getCoupons(code: code, perPage: 1);
 
     if (coupons.items.isEmpty) {
-      throw Exception('WooCoupon non trovato');
+      throw Exception(AppMessages.couponNotFound);
     }
 
     return coupons.items.first;
@@ -218,7 +219,7 @@ class WooQueryCoupon {
         'amount': coupon.amount,
       };
     } catch (e) {
-      throw Exception('Errore nella validazione coupon: $e');
+      throw Exception('Coupon validation failed: $e');
     }
   }
 

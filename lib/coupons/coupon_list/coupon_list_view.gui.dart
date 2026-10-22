@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import '../../notification/notification_service.dart';
 import '../class_coupon.dart';
@@ -124,7 +125,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
         NotificationService.instance.messageBar(
           'errore',
           'coupon_gestisci',
-          context.l10n.couponsErrorDetail('$e'),
+          context.l10n.couponsErrorDetail(localizedErrorText(context.l10n, e)),
         );
       }
     }
@@ -473,7 +474,9 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
               NotificationService.instance.messageBar(
                 'errore',
                 'coupon_gestisci',
-                context.l10n.couponsErrorDetail('$e'),
+                context.l10n.couponsErrorDetail(
+                  localizedErrorText(context.l10n, e),
+                ),
               );
             }
           },
@@ -995,7 +998,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
       NotificationService.instance.messageBar(
         'errore',
         'coupon_gestisci',
-        context.l10n.couponsErrorDetail('$e'),
+        context.l10n.couponsErrorDetail(localizedErrorText(context.l10n, e)),
       );
     } finally {
       if (mounted) {

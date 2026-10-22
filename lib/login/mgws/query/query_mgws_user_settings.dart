@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../connection/mgws_connection.dart';
 import 'query_mgws_base.dart';
 
@@ -10,7 +11,7 @@ class QueryMgwsUserSettings {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'ok': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
         'settings': <String, dynamic>{},
       };
     }
@@ -30,7 +31,7 @@ class QueryMgwsUserSettings {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
         'ok': false,
-        'message': 'Backend MGWS non disponibile',
+        'message': AppMessages.mgwsUnavailable,
       };
     }
     final response = await _base.patch(

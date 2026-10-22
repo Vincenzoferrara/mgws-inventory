@@ -4,6 +4,7 @@
 /// L'autenticazione è gestita centralmente da WooConnect
 /// CONVERTE tra OrdiniGlobal (app) e WooOrder (WooCommerce)
 
+import '../../../l10n/known_messages.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
 import '../../../orders/class_orders.dart';
@@ -640,7 +641,7 @@ class WooQueryOrdini {
       if (delete != null && delete.isNotEmpty) batchData['delete'] = delete;
 
       if (batchData.isEmpty) {
-        throw Exception('Nessuna operazione batch specificata');
+        throw Exception(AppMessages.noBatchOperation);
       }
 
       final response = await _woo.dio.post('/orders/batch', data: batchData);

@@ -34,7 +34,10 @@ class WooQueryMedia {
     try {
       final file = File(filePath);
       if (!file.existsSync()) {
-        throw Exception('File non trovato: $filePath');
+        throw LocalizedException(
+          'File not found: $filePath',
+          (l10n) => l10n.mediaFileNotFound(filePath),
+        );
       }
 
       // Determina content type dal file
@@ -77,7 +80,7 @@ class WooQueryMedia {
             : null,
       );
     } catch (e) {
-      throw Exception('Errore nell\'upload media: $e');
+      throw Exception('Media upload failed: $e');
     }
   }
 
@@ -115,7 +118,7 @@ class WooQueryMedia {
             : null,
       );
     } catch (e) {
-      throw Exception('Errore nell\'upload da URL: $e');
+      throw Exception('Upload from URL failed: $e');
     }
   }
 
@@ -143,7 +146,7 @@ class WooQueryMedia {
             : null,
       );
     } catch (e) {
-      throw Exception('Errore nel caricamento media $id: $e');
+      throw Exception('Media $id load failed: $e');
     }
   }
 
@@ -197,18 +200,19 @@ class WooQueryMedia {
           'Errore 403: accesso negato ai media. Risposta: ${e.response?.data}',
           e,
         );
-        throw Exception(
-          'Accesso negato: l\'utente non ha permessi per visualizzare i media. Verifica che l\'utente WordPress abbia la capacità "upload_files".',
+        throw LocalizedException(
+          'Access denied: the user may not view media (upload_files).',
+          (l10n) => l10n.mediaAccessDenied,
         );
       }
       if (e.response?.statusCode == 401) {
         throw UnauthorizedException();
       }
       log.e('Errore caricamento media', e);
-      throw Exception('Errore nel caricamento lista media: ${e.message}');
+      throw Exception('Media list load failed: ${e.message}');
     } catch (e) {
       log.e('Errore generico caricamento media', e);
-      throw Exception('Errore nel caricamento lista media: $e');
+      throw Exception('Media list load failed: $e');
     }
   }
 
@@ -246,7 +250,7 @@ class WooQueryMedia {
             : null,
       );
     } catch (e) {
-      throw Exception('Errore nell\'aggiornamento media $id: $e');
+      throw Exception('Media $id update failed: $e');
     }
   }
 
@@ -258,7 +262,7 @@ class WooQueryMedia {
         queryParameters: {'force': force},
       );
     } catch (e) {
-      throw Exception('Errore nell\'eliminazione media $id: $e');
+      throw Exception('Media $id deletion failed: $e');
     }
   }
 

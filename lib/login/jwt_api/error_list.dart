@@ -11,12 +11,24 @@ import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
+import 'package:mgws_inventory/l10n/extensions.dart';
+import 'package:mgws_inventory/l10n/known_messages.dart';
+import 'package:mgws_inventory/l10n/localized_text.dart';
+
 /// Classe base per tutte le eccezioni personalizzate dell'applicazione.
 abstract class AppException implements Exception {
+  /// Testo inglese per i log; la GUI usa [localizedMessage].
   final String message;
   final int? statusCode;
 
-  AppException(this.message, {this.statusCode});
+  /// Testo tradotto; `null` quando il messaggio arriva dal server.
+  final LocalizedText? localized;
+
+  AppException(this.message, {this.statusCode, this.localized});
+
+  /// Messaggio da mostrare all'operatore nella lingua attiva.
+  String localizedMessage(AppLocalizations l10n) =>
+      localized?.call(l10n) ?? knownMessageText(l10n, message);
 
   @override
   String toString() => message;
@@ -27,21 +39,55 @@ abstract class AppException implements Exception {
 // =========================================================================
 
 class ConnectionException extends AppException {
-  ConnectionException(String details) : super('Errore di rete: $details');
+  ConnectionException(String details)
+    : super(
+        'Network error: $details',
+        localized: (l10n) => l10n.apiErrorConnection(details),
+      );
+
+  /// Rete non raggiungibile.
+  ConnectionException.network()
+    : super(
+        'Network error: network unreachable',
+        localized: (l10n) => l10n.apiErrorNetwork,
+      );
+
+  /// Per le sottoclassi con un messaggio proprio.
+  ConnectionException.withMessage(String message, LocalizedText localized)
+    : super(message, localized: localized);
+
+  /// Richiesta annullata prima della risposta.
+  ConnectionException.cancelled()
+    : super(
+        'Network error: request cancelled',
+        localized: (l10n) => l10n.apiErrorRequestCancelled,
+      );
 }
 
 class ConnectionTimeoutException extends ConnectionException {
-  ConnectionTimeoutException() : super('il server non ha risposto in tempo.');
+  ConnectionTimeoutException()
+    : super.withMessage(
+        'Network error: the server did not answer in time.',
+        (l10n) => l10n.apiErrorTimeout,
+      );
+}
+
+/// Errore con un testo inglese per i log e uno tradotto per la GUI.
+class LocalizedException extends AppException {
+  LocalizedException(String message, LocalizedText localized)
+    : super(message, localized: localized);
 }
 
 class InvalidCredentialsException extends AppException {
-  InvalidCredentialsException(String message) : super(message, statusCode: 403);
+  InvalidCredentialsException(String message, {LocalizedText? localized})
+    : super(message, statusCode: 403, localized: localized);
 }
 
 class UnauthorizedException extends AppException {
   UnauthorizedException()
     : super(
-        'Sessione non valida o scaduta. Effettua nuovamente il login.',
+        'Invalid or expired session. Please log in again.',
+        localized: (l10n) => l10n.apiErrorUnauthorized,
         statusCode: 401,
       );
 }
@@ -49,7 +95,8 @@ class UnauthorizedException extends AppException {
 class ForbiddenException extends AppException {
   ForbiddenException()
     : super(
-        'Permessi insufficienti per eseguire questa operazione.',
+        'You do not have permission to perform this operation.',
+        localized: (l10n) => l10n.apiErrorForbidden,
         statusCode: 403,
       );
 }
@@ -57,7 +104,8 @@ class ForbiddenException extends AppException {
 class NotFoundException extends AppException {
   NotFoundException(String resource)
     : super(
-        'La risorsa "$resource" non è stata trovata sul server.',
+        'The resource "$resource" was not found on the server.',
+        localized: (l10n) => l10n.apiErrorResourceNotFound(resource),
         statusCode: 404,
       );
 }
@@ -65,20 +113,28 @@ class NotFoundException extends AppException {
 class ServerException extends AppException {
   ServerException()
     : super(
-        'Si è verificato un errore interno del server. Riprova più tardi.',
+        'An internal server error occurred. Try again later.',
+        localized: (l10n) => l10n.apiErrorServer,
         statusCode: 500,
       );
 }
 
 class InvalidResponseFormatException extends AppException {
   InvalidResponseFormatException()
-    : super('La risposta del server non è in un formato leggibile (JSON).');
+    : super(
+        'The server response is not in a readable format (JSON).',
+        localized: (l10n) => l10n.apiErrorInvalidResponse,
+      );
 }
 
 /// Classe concreta per errori generici non gestiti
 class UnhandledApiException extends AppException {
   UnhandledApiException({required int statusCode})
-    : super('Errore API non gestito.', statusCode: statusCode);
+    : super(
+        'Unhandled API error.',
+        localized: (l10n) => l10n.apiErrorUnhandled,
+        statusCode: statusCode,
+      );
 }
 
 // =========================================================================
@@ -91,9 +147,10 @@ abstract class WooCommerceException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore WooCommerce: $message (Codice: $code)';
+  String toString() => 'WooCommerce error: $message (code: $code)';
 }
 
 // === ERRORI PRODOTTI ===
@@ -101,7 +158,8 @@ class ProductNotFoundException extends WooCommerceException {
   ProductNotFoundException()
     : super(
         code: 'product_invalid_id',
-        message: 'Il prodotto richiesto non esiste.',
+        message: 'The requested product does not exist.',
+        localized: (l10n) => l10n.apiErrorProductNotFound,
         statusCode: 404,
       );
 }
@@ -110,7 +168,8 @@ class BarcodeInternoAlreadyExistsException extends WooCommerceException {
   BarcodeInternoAlreadyExistsException()
     : super(
         code: 'product_sku_already_exists',
-        message: 'Un barcode interno deve essere unico.',
+        message: 'An internal barcode must be unique.',
+        localized: (l10n) => l10n.apiErrorBarcodeExists,
         statusCode: 400,
       );
 }
@@ -130,16 +189,18 @@ abstract class CategoryException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Categoria: $message (Codice: $code)';
+  String toString() => 'Category error: $message (code: $code)';
 }
 
 class CategoryNotFoundException extends CategoryException {
   CategoryNotFoundException()
     : super(
         code: 'category_invalid_id',
-        message: 'La categoria richiesta non esiste.',
+        message: 'The requested category does not exist.',
+        localized: (l10n) => l10n.apiErrorCategoryNotFound,
         statusCode: 404,
       );
 }
@@ -155,17 +216,22 @@ class GenericCategoryException extends CategoryException {
 // === ERRORI TAG ===
 abstract class TagException extends AppException {
   final String code;
-  TagException({required this.code, required String message, int? statusCode})
-    : super(message, statusCode: statusCode);
+  TagException({
+    required this.code,
+    required String message,
+    int? statusCode,
+    super.localized,
+  }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Tag: $message (Codice: $code)';
+  String toString() => 'Tag error: $message (code: $code)';
 }
 
 class TagNotFoundException extends TagException {
   TagNotFoundException()
     : super(
         code: 'tag_invalid_id',
-        message: 'Il tag richiesto non esiste.',
+        message: 'The requested tag does not exist.',
+        localized: (l10n) => l10n.apiErrorTagNotFound,
         statusCode: 404,
       );
 }
@@ -174,7 +240,8 @@ class TagNameAlreadyExistsException extends TagException {
   TagNameAlreadyExistsException()
     : super(
         code: 'tag_name_exists',
-        message: 'Un tag con questo nome esiste già.',
+        message: 'A tag with this name already exists.',
+        localized: (l10n) => l10n.apiErrorTagNameExists,
         statusCode: 400,
       );
 }
@@ -183,7 +250,8 @@ class TagSlugAlreadyExistsException extends TagException {
   TagSlugAlreadyExistsException()
     : super(
         code: 'tag_slug_exists',
-        message: 'Un tag con questo slug esiste già.',
+        message: 'A tag with this slug already exists.',
+        localized: (l10n) => l10n.apiErrorTagSlugExists,
         statusCode: 400,
       );
 }
@@ -203,16 +271,18 @@ abstract class AttributeException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Attributo: $message (Codice: $code)';
+  String toString() => 'Attribute error: $message (code: $code)';
 }
 
 class AttributeNotFoundException extends AttributeException {
   AttributeNotFoundException()
     : super(
         code: 'attribute_invalid_id',
-        message: 'L\'attributo richiesto non esiste.',
+        message: 'The requested attribute does not exist.',
+        localized: (l10n) => l10n.apiErrorAttributeNotFound,
         statusCode: 404,
       );
 }
@@ -221,7 +291,8 @@ class AttributeSlugAlreadyExistsException extends AttributeException {
   AttributeSlugAlreadyExistsException()
     : super(
         code: 'attribute_slug_exists',
-        message: 'Un attributo con questo slug esiste già.',
+        message: 'An attribute with this slug already exists.',
+        localized: (l10n) => l10n.apiErrorAttributeSlugExists,
         statusCode: 400,
       );
 }
@@ -230,7 +301,8 @@ class AttributeTermNotFoundException extends AttributeException {
   AttributeTermNotFoundException()
     : super(
         code: 'attribute_term_invalid_id',
-        message: 'Il termine dell\'attributo richiesto non esiste.',
+        message: 'The requested attribute term does not exist.',
+        localized: (l10n) => l10n.apiErrorAttributeTermNotFound,
         statusCode: 404,
       );
 }
@@ -250,16 +322,18 @@ abstract class VariationException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Variante: $message (Codice: $code)';
+  String toString() => 'Variant error: $message (code: $code)';
 }
 
 class VariationNotFoundException extends VariationException {
   VariationNotFoundException()
     : super(
         code: 'variation_invalid_id',
-        message: 'La variante richiesta non esiste.',
+        message: 'The requested variant does not exist.',
+        localized: (l10n) => l10n.apiErrorVariationNotFound,
         statusCode: 404,
       );
 }
@@ -268,7 +342,8 @@ class VariationAttributesRequiredException extends VariationException {
   VariationAttributesRequiredException()
     : super(
         code: 'variation_attributes_required',
-        message: 'Gli attributi sono obbligatori per le varianti.',
+        message: 'Attributes are required for variants.',
+        localized: (l10n) => l10n.apiErrorVariationAttributesRequired,
         statusCode: 400,
       );
 }
@@ -277,7 +352,8 @@ class VariationBarcodeInternoAlreadyExistsException extends VariationException {
   VariationBarcodeInternoAlreadyExistsException()
     : super(
         code: 'variation_sku_exists',
-        message: 'Una variante con questo barcode interno esiste già.',
+        message: 'A variant with this internal barcode already exists.',
+        localized: (l10n) => l10n.apiErrorVariationBarcodeExists,
         statusCode: 400,
       );
 }
@@ -293,17 +369,22 @@ class GenericVariationException extends VariationException {
 // === ERRORI MEDIA ===
 abstract class MediaException extends AppException {
   final String code;
-  MediaException({required this.code, required String message, int? statusCode})
-    : super(message, statusCode: statusCode);
+  MediaException({
+    required this.code,
+    required String message,
+    int? statusCode,
+    super.localized,
+  }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Media: $message (Codice: $code)';
+  String toString() => 'Media error: $message (code: $code)';
 }
 
 class MediaNotFoundException extends MediaException {
   MediaNotFoundException()
     : super(
         code: 'media_invalid_id',
-        message: 'Il media richiesto non esiste.',
+        message: 'The requested media does not exist.',
+        localized: (l10n) => l10n.apiErrorMediaNotFound,
         statusCode: 404,
       );
 }
@@ -312,7 +393,8 @@ class MediaUploadException extends MediaException {
   MediaUploadException(String details)
     : super(
         code: 'media_upload_failed',
-        message: 'Errore durante l\'upload: $details',
+        message: 'Upload error: $details',
+        localized: (l10n) => l10n.apiErrorUpload(details),
         statusCode: 400,
       );
 }
@@ -321,7 +403,8 @@ class InvalidMediaTypeException extends MediaException {
   InvalidMediaTypeException(String mimeType)
     : super(
         code: 'invalid_media_type',
-        message: 'Tipo di file non supportato: $mimeType',
+        message: 'Unsupported file type: $mimeType',
+        localized: (l10n) => l10n.apiErrorUnsupportedFileType(mimeType),
         statusCode: 400,
       );
 }
@@ -330,7 +413,8 @@ class MediaFileTooLargeException extends MediaException {
   MediaFileTooLargeException()
     : super(
         code: 'media_file_too_large',
-        message: 'Il file è troppo grande per essere caricato.',
+        message: 'The file is too large to upload.',
+        localized: (l10n) => l10n.apiErrorMediaTooLarge,
         statusCode: 413,
       );
 }
@@ -346,17 +430,22 @@ class GenericMediaException extends MediaException {
 // === ERRORI ORDINI ===
 abstract class OrderException extends AppException {
   final String code;
-  OrderException({required this.code, required String message, int? statusCode})
-    : super(message, statusCode: statusCode);
+  OrderException({
+    required this.code,
+    required String message,
+    int? statusCode,
+    super.localized,
+  }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Ordine: $message (Codice: $code)';
+  String toString() => 'Order error: $message (code: $code)';
 }
 
 class OrderNotFoundException extends OrderException {
   OrderNotFoundException()
     : super(
         code: 'order_invalid_id',
-        message: 'L\'ordine richiesto non esiste.',
+        message: 'The requested order does not exist.',
+        localized: (l10n) => l10n.apiErrorOrderNotFound,
         statusCode: 404,
       );
 }
@@ -365,7 +454,8 @@ class InvalidOrderStatusException extends OrderException {
   InvalidOrderStatusException()
     : super(
         code: 'invalid_order_status',
-        message: 'Lo stato dell\'ordine specificato non è valido.',
+        message: 'The specified order status is not valid.',
+        localized: (l10n) => l10n.apiErrorInvalidOrderStatus,
         statusCode: 400,
       );
 }
@@ -374,7 +464,8 @@ class OrderAlreadyPaidException extends OrderException {
   OrderAlreadyPaidException()
     : super(
         code: 'order_already_paid',
-        message: 'L\'ordine è già stato pagato.',
+        message: 'The order has already been paid.',
+        localized: (l10n) => l10n.apiErrorOrderAlreadyPaid,
         statusCode: 400,
       );
 }
@@ -383,7 +474,8 @@ class OrderCannotBeModifiedException extends OrderException {
   OrderCannotBeModifiedException()
     : super(
         code: 'order_cannot_be_modified',
-        message: 'L\'ordine non può essere modificato nel suo stato attuale.',
+        message: 'The order cannot be changed in its current status.',
+        localized: (l10n) => l10n.apiErrorOrderCannotBeModified,
         statusCode: 400,
       );
 }
@@ -406,9 +498,10 @@ abstract class ReportException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Report: $message (Codice: $code)';
+  String toString() => 'Report error: $message (code: $code)';
 }
 
 class GenericReportException extends ReportException {
@@ -429,16 +522,18 @@ abstract class CouponException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Coupon: $message (Codice: $code)';
+  String toString() => 'Coupon error: $message (code: $code)';
 }
 
 class CouponNotFoundException extends CouponException {
   CouponNotFoundException()
     : super(
         code: 'coupon_invalid_code',
-        message: 'Il coupon richiesto non esiste.',
+        message: 'The requested coupon does not exist.',
+        localized: (l10n) => l10n.apiErrorCouponNotFound,
         statusCode: 404,
       );
 }
@@ -447,7 +542,8 @@ class CouponCodeAlreadyExistsException extends CouponException {
   CouponCodeAlreadyExistsException()
     : super(
         code: 'coupon_code_exists',
-        message: 'Il codice coupon esiste già.',
+        message: 'The coupon code already exists.',
+        localized: (l10n) => l10n.apiErrorCouponCodeExists,
         statusCode: 400,
       );
 }
@@ -456,7 +552,8 @@ class CouponExpiredException extends CouponException {
   CouponExpiredException()
     : super(
         code: 'coupon_expired',
-        message: 'Il coupon è scaduto.',
+        message: 'The coupon has expired.',
+        localized: (l10n) => l10n.apiErrorCouponExpired,
         statusCode: 400,
       );
 }
@@ -465,7 +562,8 @@ class CouponUsageLimitException extends CouponException {
   CouponUsageLimitException()
     : super(
         code: 'coupon_usage_limit',
-        message: 'Il coupon ha raggiunto il limite di utilizzi.',
+        message: 'The coupon has reached its usage limit.',
+        localized: (l10n) => l10n.apiErrorCouponUsageLimit,
         statusCode: 400,
       );
 }
@@ -484,17 +582,22 @@ class GenericCouponException extends CouponException {
 
 abstract class TaxException extends AppException {
   final String code;
-  TaxException({required this.code, required String message, int? statusCode})
-    : super(message, statusCode: statusCode);
+  TaxException({
+    required this.code,
+    required String message,
+    int? statusCode,
+    super.localized,
+  }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Tasse: $message (Codice: $code)';
+  String toString() => 'Tax error: $message (code: $code)';
 }
 
 class TaxClassNotFoundException extends TaxException {
   TaxClassNotFoundException()
     : super(
         code: 'tax_class_invalid',
-        message: 'La classe di tasse richiesta non esiste.',
+        message: 'The requested tax class does not exist.',
+        localized: (l10n) => l10n.apiErrorTaxClassNotFound,
         statusCode: 404,
       );
 }
@@ -503,7 +606,8 @@ class TaxRateNotFoundException extends TaxException {
   TaxRateNotFoundException()
     : super(
         code: 'tax_rate_invalid',
-        message: 'L\'aliquota fiscale richiesta non esiste.',
+        message: 'The requested tax rate does not exist.',
+        localized: (l10n) => l10n.apiErrorTaxRateNotFound,
         statusCode: 404,
       );
 }
@@ -512,7 +616,8 @@ class InvalidTaxLocationException extends TaxException {
   InvalidTaxLocationException()
     : super(
         code: 'invalid_tax_location',
-        message: 'La zona fiscale specificata non è valida.',
+        message: 'The specified tax location is not valid.',
+        localized: (l10n) => l10n.apiErrorInvalidTaxLocation,
         statusCode: 400,
       );
 }
@@ -535,16 +640,18 @@ abstract class CustomerException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Cliente: $message (Codice: $code)';
+  String toString() => 'Customer error: $message (code: $code)';
 }
 
 class CustomerNotFoundException extends CustomerException {
   CustomerNotFoundException()
     : super(
         code: 'customer_invalid_id',
-        message: 'Il cliente richiesto non esiste.',
+        message: 'The requested customer does not exist.',
+        localized: (l10n) => l10n.apiErrorCustomerNotFound,
         statusCode: 404,
       );
 }
@@ -553,7 +660,8 @@ class InvalidCustomerEmailException extends CustomerException {
   InvalidCustomerEmailException()
     : super(
         code: 'invalid_email',
-        message: 'L\'indirizzo email non è valido.',
+        message: 'The email address is not valid.',
+        localized: (l10n) => l10n.apiErrorInvalidEmail,
         statusCode: 400,
       );
 }
@@ -562,7 +670,8 @@ class CustomerEmailAlreadyExistsException extends CustomerException {
   CustomerEmailAlreadyExistsException()
     : super(
         code: 'email_exists',
-        message: 'L\'indirizzo email è già in uso.',
+        message: 'The email address is already in use.',
+        localized: (l10n) => l10n.apiErrorEmailExists,
         statusCode: 400,
       );
 }
@@ -571,7 +680,8 @@ class InvalidCustomerUsernameException extends CustomerException {
   InvalidCustomerUsernameException()
     : super(
         code: 'invalid_username',
-        message: 'Il nome utente non è valido.',
+        message: 'The username is not valid.',
+        localized: (l10n) => l10n.apiErrorInvalidUsername,
         statusCode: 400,
       );
 }
@@ -580,7 +690,8 @@ class CustomerUsernameAlreadyExistsException extends CustomerException {
   CustomerUsernameAlreadyExistsException()
     : super(
         code: 'username_exists',
-        message: 'Il nome utente è già in uso.',
+        message: 'The username is already in use.',
+        localized: (l10n) => l10n.apiErrorUsernameExists,
         statusCode: 400,
       );
 }
@@ -603,16 +714,18 @@ abstract class ShippingException extends AppException {
     required this.code,
     required String message,
     int? statusCode,
+    super.localized,
   }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Spedizione: $message (Codice: $code)';
+  String toString() => 'Shipping error: $message (code: $code)';
 }
 
 class ShippingZoneNotFoundException extends ShippingException {
   ShippingZoneNotFoundException()
     : super(
         code: 'shipping_zone_invalid',
-        message: 'La zona di spedizione richiesta non esiste.',
+        message: 'The requested shipping zone does not exist.',
+        localized: (l10n) => l10n.apiErrorShippingZoneNotFound,
         statusCode: 404,
       );
 }
@@ -621,7 +734,8 @@ class ShippingMethodNotFoundException extends ShippingException {
   ShippingMethodNotFoundException()
     : super(
         code: 'shipping_method_invalid',
-        message: 'Il metodo di spedizione richiesto non esiste.',
+        message: 'The requested shipping method does not exist.',
+        localized: (l10n) => l10n.apiErrorShippingMethodNotFound,
         statusCode: 404,
       );
 }
@@ -630,7 +744,8 @@ class ShippingClassNotFoundException extends ShippingException {
   ShippingClassNotFoundException()
     : super(
         code: 'shipping_class_invalid',
-        message: 'La classe di spedizione richiesta non esiste.',
+        message: 'The requested shipping class does not exist.',
+        localized: (l10n) => l10n.apiErrorShippingClassNotFound,
         statusCode: 404,
       );
 }
@@ -639,7 +754,8 @@ class InvalidShippingLocationException extends ShippingException {
   InvalidShippingLocationException()
     : super(
         code: 'invalid_shipping_location',
-        message: 'La zona di spedizione specificata non è valida.',
+        message: 'The specified shipping location is not valid.',
+        localized: (l10n) => l10n.apiErrorInvalidShippingLocation,
         statusCode: 400,
       );
 }
@@ -658,10 +774,14 @@ class GenericShippingException extends ShippingException {
 
 abstract class BatchException extends AppException {
   final String code;
-  BatchException({required this.code, required String message, int? statusCode})
-    : super(message, statusCode: statusCode);
+  BatchException({
+    required this.code,
+    required String message,
+    int? statusCode,
+    super.localized,
+  }) : super(message, statusCode: statusCode);
   @override
-  String toString() => 'Errore Operazione Batch: $message (Codice: $code)';
+  String toString() => 'Batch operation error: $message (code: $code)';
 }
 
 class InvalidBatchDataException extends BatchException {
@@ -669,8 +789,11 @@ class InvalidBatchDataException extends BatchException {
     : super(
         code: 'invalid_batch_data',
         message: details != null
-            ? 'I dati per l\'operazione batch non sono validi: $details'
-            : 'I dati per l\'operazione batch non sono validi.',
+            ? 'Invalid batch operation data: $details'
+            : 'Invalid batch operation data.',
+        localized: (l10n) => details != null
+            ? l10n.apiErrorInvalidBatchDataDetail(details)
+            : l10n.apiErrorInvalidBatchData,
         statusCode: 400,
       );
 }
@@ -679,7 +802,8 @@ class BatchLimitExceededException extends BatchException {
   BatchLimitExceededException()
     : super(
         code: 'batch_limit_exceeded',
-        message: 'È stato superato il limite massimo per le operazioni batch.',
+        message: 'The maximum limit for batch operations was exceeded.',
+        localized: (l10n) => l10n.apiErrorBatchLimit,
         statusCode: 400,
       );
 }
@@ -689,8 +813,11 @@ class BatchOperationFailedException extends BatchException {
     : super(
         code: 'batch_operation_failed',
         message: details != null
-            ? 'L\'operazione batch è fallita: $details'
-            : 'L\'operazione batch è fallita.',
+            ? 'Batch operation failed: $details'
+            : 'Batch operation failed.',
+        localized: (l10n) => details != null
+            ? l10n.apiErrorBatchFailedDetail(details)
+            : l10n.apiErrorBatchFailed,
         statusCode: 500,
       );
 }
@@ -718,7 +845,7 @@ class ErrorHandler {
       case 403:
         throw ForbiddenException();
       case 404:
-        throw NotFoundException(response.request?.url.path ?? 'risorsa');
+        throw NotFoundException(response.request?.url.path ?? 'resource');
       case 500:
       case 502:
       case 503:
@@ -731,8 +858,7 @@ class ErrorHandler {
       try {
         final jsonBody = jsonDecode(response.body);
         final String code = jsonBody['code'] ?? '';
-        final String message =
-            jsonBody['message'] ?? 'Errore nei dati inviati.';
+        final String message = jsonBody['message'] ?? 'Invalid data sent.';
 
         // Mappa errori specifici alle eccezioni tipizzate
         switch (code) {
@@ -903,8 +1029,7 @@ class ErrorHandler {
               ? response.data
               : jsonDecode(response.data.toString());
           final String code = jsonBody['code'] ?? '';
-          final String message =
-              jsonBody['message'] ?? 'Errore nei dati inviati.';
+          final String message = jsonBody['message'] ?? 'Invalid data sent.';
 
           // Mappa errori specifici alle eccezioni tipizzate
           switch (code) {
@@ -1053,11 +1178,11 @@ class ErrorHandler {
         case DioExceptionType.receiveTimeout:
           throw ConnectionTimeoutException();
         case DioExceptionType.connectionError:
-          throw ConnectionException('di rete');
+          throw ConnectionException.network();
         case DioExceptionType.cancel:
-          throw ConnectionException('richiesta annullata');
+          throw ConnectionException.cancelled();
         default:
-          throw ConnectionException(e.message ?? 'errore sconosciuto');
+          throw ConnectionException(e.message ?? 'unknown error');
       }
     }
   }

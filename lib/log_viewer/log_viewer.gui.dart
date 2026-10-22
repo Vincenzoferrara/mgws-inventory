@@ -1,3 +1,4 @@
+import '../l10n/error_text.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -278,7 +279,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       NotificationService.instance.messageBar(
         'errore',
         'log_viewer',
-        l10n.logShareError(error.toString()),
+        l10n.logShareError(localizedErrorText(l10n, error)),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

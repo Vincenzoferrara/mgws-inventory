@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../woo_connect.dart';
 import '../../mgws/connection/mgws_connection.dart';
 
@@ -36,11 +37,7 @@ class QueryUserWordPress {
     final response = await _authorizedGet(
       '/wp-json/mgws/v1/users/$userId/permissions',
     );
-    return _readMap(
-      response,
-      200,
-      'Impossibile leggere i permessi del dipendente',
-    );
+    return _readMap(response, 200, AppMessages.employeePermissionsReadFailed);
   }
 
   /// Aggiorna ruoli e/o capability dell'utente WordPress collegato.
@@ -55,18 +52,14 @@ class QueryUserWordPress {
     };
 
     if (payload.isEmpty) {
-      throw Exception('Nessuna modifica da salvare');
+      throw Exception(AppMessages.nothingToSave);
     }
 
     final response = await _authorizedPatch(
       '/wp-json/mgws/v1/users/$userId/permissions',
       payload,
     );
-    return _readMap(
-      response,
-      200,
-      'Impossibile aggiornare i permessi del dipendente',
-    );
+    return _readMap(response, 200, AppMessages.employeePermissionsUpdateFailed);
   }
 
   /// Elenco delle Application Password attive dell'utente collegato.
@@ -74,11 +67,7 @@ class QueryUserWordPress {
     final response = await _authorizedGet(
       '/wp-json/mgws/v1/users/$userId/app-passwords',
     );
-    return _readMap(
-      response,
-      200,
-      'Impossibile caricare le Application Password del dipendente',
-    );
+    return _readMap(response, 200, AppMessages.employeeAppPasswordsLoadFailed);
   }
 
   /// Revoca una Application Password dell'utente collegato.
@@ -89,7 +78,7 @@ class QueryUserWordPress {
     final response = await _authorizedDelete(
       '/wp-json/mgws/v1/users/$userId/app-passwords/$uuid',
     );
-    _readMap(response, 200, 'Impossibile revocare la Application Password');
+    _readMap(response, 200, AppMessages.appPasswordRevokeFailed);
   }
 
   /// Elenco delle WooCommerce API key attive dell'utente collegato.
@@ -97,11 +86,7 @@ class QueryUserWordPress {
     final response = await _authorizedGet(
       '/wp-json/mgws/v1/users/$userId/woo-keys',
     );
-    return _readMap(
-      response,
-      200,
-      'Impossibile caricare le chiavi WooCommerce del dipendente',
-    );
+    return _readMap(response, 200, AppMessages.employeeWooKeysLoadFailed);
   }
 
   /// Revoca una WooCommerce API key dell'utente collegato.
@@ -112,7 +97,7 @@ class QueryUserWordPress {
     final response = await _authorizedDelete(
       '/wp-json/mgws/v1/users/$userId/woo-keys/$keyId',
     );
-    _readMap(response, 200, 'Impossibile revocare la chiave WooCommerce');
+    _readMap(response, 200, AppMessages.wooKeyRevokeFailed);
   }
 
   Map<String, dynamic> _readMap(
@@ -161,7 +146,7 @@ class QueryUserWordPress {
   Future<String> _ensureBaseUrl() async {
     final baseUrl = WooConnect().siteUrl ?? '';
     if (baseUrl.isEmpty) {
-      throw Exception('Nessun sito connesso');
+      throw Exception(AppMessages.noSiteConnected);
     }
     return baseUrl;
   }
@@ -175,7 +160,7 @@ class QueryUserWordPress {
   /// login o un'azione esplicita dell'utente lo segnalano.
   Future<void> _ensureMgwsAvailable() async {
     if (!await MgwsConnection.instance.ensureConnected()) {
-      throw StateError('Backend MGWS non disponibile');
+      throw StateError(AppMessages.mgwsUnavailable);
     }
   }
 }

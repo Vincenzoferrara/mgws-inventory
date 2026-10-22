@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                       return UrlValidator.validateUrl(
                         correctedUrl,
                         allowLocalhost: _allowLocalhost,
-                      );
+                      )?.call(context.l10n);
                     },
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
@@ -385,7 +385,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       obscureText: _obscurePassword,
                       validator: (v) => (v == null || v.isEmpty)
-                          ? 'Inserisci password'
+                          ? context.l10n.loginEnterPassword
                           : null,
                     ),
                   ],
@@ -576,7 +576,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on AppException catch (e) {
       setState(() {
-        _errorMessage = e.message;
+        _errorMessage = e.localizedMessage(l10n);
         _isLoading = false;
       });
       if (_authType == AuthType.jwt || _authType == AuthType.wordpress) {

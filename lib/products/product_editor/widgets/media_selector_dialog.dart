@@ -1,3 +1,4 @@
+import '../../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
@@ -97,7 +98,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
       log.e('Errore caricamento immagini', e);
       if (mounted) {
         setState(() {
-          _error = (l10n) => l10n.mediaLoadError('$e');
+          _error = (l10n) => l10n.mediaLoadError(localizedErrorText(l10n, e));
           _isLoading = false;
         });
       }
@@ -163,7 +164,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
       log.e('Errore ricerca immagini', e);
       if (mounted) {
         setState(() {
-          _error = (l10n) => l10n.mediaSearchError('$e');
+          _error = (l10n) => l10n.mediaSearchError(localizedErrorText(l10n, e));
           _isLoading = false;
         });
       }
@@ -190,7 +191,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'errore',
           'media_selector_dialog',
-          context.l10n.mediaFilePickError('$e'),
+          context.l10n.mediaFilePickError(localizedErrorText(context.l10n, e)),
         );
       }
     }
@@ -256,7 +257,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'errore',
           'media_selector_dialog',
-          context.l10n.mediaLoadError('$e'),
+          context.l10n.mediaLoadError(localizedErrorText(context.l10n, e)),
         );
       }
     } finally {

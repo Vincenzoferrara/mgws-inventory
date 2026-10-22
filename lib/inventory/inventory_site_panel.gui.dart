@@ -10,6 +10,7 @@
 //  - sede presente: chi gestisce i dipendenti puo' cambiarla, gli altri la
 //    vedono bloccata.
 
+import '../l10n/known_messages.dart';
 import 'package:flutter/material.dart';
 
 import '../login/mgws/query/query_mgws_site.dart';
@@ -96,7 +97,7 @@ class _InventorySitePanelState extends State<InventorySitePanel> {
       widget.onStatusChanged(status.hasSite ? status : null);
     } on MgwsSiteException catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.message);
+      setState(() => _error = knownMessageText(context.l10n, e.message));
       if (_status == null) widget.onStatusChanged(null);
     } finally {
       if (mounted) {

@@ -1,3 +1,4 @@
+import '../l10n/error_text.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../login/mgws/connection/mgws_connection.dart';
 import 'inventory_restock_feedback.code.dart';
@@ -100,7 +101,8 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryStockLoadError('$e'),
+          message: (l10n) =>
+              l10n.inventoryStockLoadError(localizedErrorText(l10n, e)),
         ),
       );
     } finally {
@@ -141,7 +143,8 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventorySyncError('$e'),
+          message: (l10n) =>
+              l10n.inventorySyncError(localizedErrorText(l10n, e)),
         ),
       );
     } finally {
@@ -199,7 +202,8 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryReconcileError('$e'),
+          message: (l10n) =>
+              l10n.inventoryReconcileError(localizedErrorText(l10n, e)),
         ),
       );
     } finally {
@@ -275,7 +279,8 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryMoveError('$e'),
+          message: (l10n) =>
+              l10n.inventoryMoveError(localizedErrorText(l10n, e)),
         ),
       );
     } finally {
@@ -312,7 +317,8 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryRfidError('$e'),
+          message: (l10n) =>
+              l10n.inventoryRfidError(localizedErrorText(l10n, e)),
         ),
       );
     } finally {

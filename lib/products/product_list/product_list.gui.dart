@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -702,7 +703,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       NotificationService.instance.messageBar(
         'errore',
         'prodotti',
-        context.l10n.productsPrintLabelsError(error.toString()),
+        context.l10n.productsPrintLabelsError(
+          localizedErrorText(context.l10n, error),
+        ),
       );
     }
   }

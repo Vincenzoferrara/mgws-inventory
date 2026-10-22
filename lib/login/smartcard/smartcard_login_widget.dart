@@ -1,3 +1,4 @@
+import '../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'smartcard_service.dart';
 import '../../l10n/extensions.dart';
@@ -59,7 +60,7 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
         );
 
         setState(() {
-          _statusMessage = '✅ Login riuscito!';
+          _statusMessage = '✅ ${context.l10n.smartcardLoginOk}';
         });
 
         if (widget.onLoginSuccess != null) {
@@ -67,14 +68,14 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
         }
       } else {
         setState(() {
-          _statusMessage = '❌ Nessun dato trovato sulla smartcard';
+          _statusMessage = '❌ ${context.l10n.smartcardNoData}';
         });
       }
     } catch (e) {
       log.e('Error reading smartcard', e);
       setState(() {
         _statusMessage =
-            '❌ ${context.l10n.smartcardErroreLettura(e.toString())}';
+            '❌ ${context.l10n.smartcardErroreLettura(localizedErrorText(context.l10n, e))}';
       });
     } finally {
       setState(() {
@@ -367,14 +368,15 @@ class _SaveToSmartcardDialogState extends State<SaveToSmartcardDialog> {
         }
       } else if (mounted) {
         setState(() {
-          _statusMessage = '❌ Errore durante il salvataggio';
+          _statusMessage = '❌ ${context.l10n.smartcardSaveFailed}';
         });
       }
     } catch (e) {
       log.e('Error writing to smartcard', e);
       if (mounted) {
         setState(() {
-          _statusMessage = '❌ Errore: ${e.toString()}';
+          _statusMessage =
+              '❌ ${context.l10n.smartcardErroreLettura(localizedErrorText(context.l10n, e))}';
         });
       }
     } finally {

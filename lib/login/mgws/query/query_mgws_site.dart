@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import 'package:dio/dio.dart';
 
 import 'query_mgws_base.dart';
@@ -14,7 +15,7 @@ class MgwsSite {
     final id = int.tryParse('${value['id']}') ?? 0;
     if (id <= 0) return null;
     final name = '${value['name'] ?? ''}'.trim();
-    return MgwsSite(id: id, name: name.isEmpty ? 'Sede $id' : name);
+    return MgwsSite(id: id, name: name.isEmpty ? '#$id' : name);
   }
 }
 
@@ -95,7 +96,7 @@ class QueryMgwsSite {
       );
       final site = MgwsSite.fromMap(response.data);
       if (site == null) {
-        throw const MgwsSiteException('Risposta del server non valida.');
+        throw const MgwsSiteException(AppMessages.invalidServerResponse);
       }
       return site;
     } on DioException catch (e) {
@@ -108,7 +109,7 @@ class QueryMgwsSite {
       final Response<dynamic> response = await call();
       final data = response.data;
       if (data is! Map<String, dynamic>) {
-        throw const MgwsSiteException('Risposta del server non valida.');
+        throw const MgwsSiteException(AppMessages.invalidServerResponse);
       }
       return MgwsSiteStatus.fromMap(data);
     } on DioException catch (e) {
@@ -119,11 +120,10 @@ class QueryMgwsSite {
   static String _message(DioException e) {
     if (e.response?.statusCode == 404 &&
         '${e.requestOptions.path}'.endsWith('/me/site')) {
-      return 'Il plugin MGWS sul sito e\' troppo vecchio: aggiornalo alla '
-          'versione 2.4.0 o successiva per usare le sedi.';
+      return AppMessages.mgwsPluginTooOld;
     }
     final data = e.response?.data;
     if (data is Map && data['message'] is String) return data['message'];
-    return 'Server MGWS non raggiungibile.';
+    return AppMessages.mgwsServerUnreachable;
   }
 }

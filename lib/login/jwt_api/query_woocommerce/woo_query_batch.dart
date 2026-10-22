@@ -24,7 +24,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update prodotti: $e');
+      throw Exception('Batch update of products failed: $e');
     }
   }
 
@@ -39,7 +39,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update ordini: $e');
+      throw Exception('Batch update of orders failed: $e');
     }
   }
 
@@ -54,7 +54,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update clienti: $e');
+      throw Exception('Batch update of customers failed: $e');
     }
   }
 
@@ -69,7 +69,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update coupon: $e');
+      throw Exception('Batch update of coupons failed: $e');
     }
   }
 
@@ -84,7 +84,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update categorie: $e');
+      throw Exception('Batch update of categories failed: $e');
     }
   }
 
@@ -99,7 +99,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update tag: $e');
+      throw Exception('Batch update of tags failed: $e');
     }
   }
 
@@ -115,7 +115,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update varianti: $e');
+      throw Exception('Batch update of variants failed: $e');
     }
   }
 
@@ -130,7 +130,7 @@ class WooQueryBatch {
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
-      throw Exception('Errore nel batch update attributi: $e');
+      throw Exception('Batch update of attributes failed: $e');
     }
   }
 

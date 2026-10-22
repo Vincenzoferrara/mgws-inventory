@@ -1,4 +1,5 @@
 import '../l10n/extensions.dart';
+import '../l10n/known_messages.dart';
 import 'checkout_failure.dart';
 
 /// Testo tradotto di un [CassaFailure], da leggere in `build` o subito prima
@@ -85,7 +86,10 @@ extension CassaFailureText on CassaFailure {
       case CassaFailureCode.couponNoEligibleItems:
         return l10n.cassaCouponNoEligibleItems;
       case CassaFailureCode.server:
-        return messaggio ?? l10n.cassaErrorShiftOperationFailed;
+        final testo = messaggio;
+        return testo == null
+            ? l10n.cassaErrorShiftOperationFailed
+            : knownMessageText(l10n, testo);
     }
   }
 

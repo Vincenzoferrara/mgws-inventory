@@ -1,3 +1,4 @@
+import '../../../l10n/known_messages.dart';
 import '../../jwt_api/woo_connect.dart';
 
 /// Query base autenticata per le rotte MGWS.
@@ -13,7 +14,7 @@ class QueryMgwsBase {
   Future<String> ensureBaseUrl() async {
     final baseUrl = _woo.siteUrl ?? '';
     if (baseUrl.isEmpty) {
-      throw Exception('Nessun sito connesso');
+      throw Exception(AppMessages.noSiteConnected);
     }
     return baseUrl;
   }
