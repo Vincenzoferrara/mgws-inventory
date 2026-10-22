@@ -1,3 +1,4 @@
+import '../l10n/localized_text.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../log_viewer/app_logger.dart';
@@ -19,7 +20,7 @@ class ClientiGestioneController {
   List<WooCustomer> _clienti = [];
   WooCustomer? _clienteSelezionato;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   // Filtri
   String _searchQuery = '';
@@ -31,7 +32,7 @@ class ClientiGestioneController {
   List<WooCustomer> get clienti => _clientiFiltrati;
   WooCustomer? get clienteSelezionato => _clienteSelezionato;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  LocalizedText? get errorMessage => _errorMessage;
   bool get hasClienteSelezionato => _clienteSelezionato != null;
   String get searchQuery => _searchQuery;
 
@@ -58,7 +59,7 @@ class ClientiGestioneController {
       log.i('Caricati ${_clienti.length} clienti');
     } catch (e) {
       log.e('Errore nel caricamento dei clienti: $e');
-      _errorMessage = 'Errore nel caricamento dei clienti: $e';
+      _errorMessage = (l10n) => l10n.customersLoadError('$e');
       _clienti = [];
     } finally {
       _isLoading = false;

@@ -107,7 +107,7 @@ class ClientiGestisciPageState extends State<ClientiGestisciPage>
           ),
           SizedBox(height: context.spacing.l),
           Text(
-            'Seleziona un cliente',
+            context.l10n.customersSelect,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
@@ -133,7 +133,10 @@ class ClientiGestisciPageState extends State<ClientiGestisciPage>
               color: context.colors.errorColorStatus,
             ),
             SizedBox(height: context.spacing.l),
-            Text(_controller.errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _controller.errorMessage!(context.l10n),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: context.spacing.l),
             ElevatedButton.icon(
               onPressed: _caricaClienti,
@@ -157,7 +160,7 @@ class ClientiGestisciPageState extends State<ClientiGestisciPage>
             ),
             SizedBox(height: context.spacing.l),
             Text(
-              'Nessun cliente trovato',
+              context.l10n.customersNoneFound,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -348,7 +351,7 @@ class _ClienteListItem extends StatelessWidget {
                   ),
                   SizedBox(width: context.spacing.xs),
                   Text(
-                    'Registrato: $dataRegistrazione',
+                    context.l10n.customersRegisteredOn(dataRegistrazione),
                     style: theme.textTheme.bodySmall,
                   ),
                   const Spacer(),
@@ -363,7 +366,7 @@ class _ClienteListItem extends StatelessWidget {
                         borderRadius: context.shapes.m,
                       ),
                       child: Text(
-                        'Cliente pagante',
+                        context.l10n.customersPaying,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: customColors.successColor,
                           fontWeight: FontWeight.bold,
@@ -428,115 +431,158 @@ class _ClienteDettagli extends StatelessWidget {
           Divider(height: context.spacing.xxl),
 
           // Informazioni personali
-          _buildSezione(context, 'Informazioni Personali', Icons.person, [
-            _buildInfoRow(context, 'Username', cliente.username ?? 'N/D'),
-            _buildInfoRow(context, 'Nome', cliente.firstName ?? 'N/D'),
-            _buildInfoRow(context, 'Cognome', cliente.lastName ?? 'N/D'),
-            _buildInfoRow(context, 'Email', cliente.email ?? 'N/D'),
-            _buildInfoRow(context, 'Ruolo', cliente.role?.value ?? 'N/D'),
-            _buildInfoRow(
-              context,
-              'Cliente pagante',
-              cliente.isPayingCustomer == true ? 'Sì' : 'No',
-            ),
-            _buildInfoRow(
-              context,
-              'Registrato',
-              cliente.dateCreated != null
-                  ? dateFormat.format(cliente.dateCreated!)
-                  : 'N/D',
-            ),
-          ]),
+          _buildSezione(
+            context,
+            context.l10n.customersPersonalInfo,
+            Icons.person,
+            [
+              _buildInfoRow(context, 'Username', cliente.username ?? 'N/D'),
+              _buildInfoRow(
+                context,
+                context.l10n.commonName,
+                cliente.firstName ?? 'N/D',
+              ),
+              _buildInfoRow(
+                context,
+                context.l10n.customersLastName,
+                cliente.lastName ?? 'N/D',
+              ),
+              _buildInfoRow(context, 'Email', cliente.email ?? 'N/D'),
+              _buildInfoRow(
+                context,
+                context.l10n.customersRole,
+                cliente.role?.value ?? 'N/D',
+              ),
+              _buildInfoRow(
+                context,
+                context.l10n.customersPaying,
+                cliente.isPayingCustomer == true ? 'Sì' : 'No',
+              ),
+              _buildInfoRow(
+                context,
+                context.l10n.customersRegistered,
+                cliente.dateCreated != null
+                    ? dateFormat.format(cliente.dateCreated!)
+                    : 'N/D',
+              ),
+            ],
+          ),
           SizedBox(height: context.spacing.l),
 
           // Indirizzo di fatturazione
           if (cliente.billing != null)
-            _buildSezione(context, 'Indirizzo Fatturazione', Icons.receipt, [
-              _buildInfoRow(
-                context,
-                'Nome',
-                '${cliente.billing?.firstName ?? ''} ${cliente.billing?.lastName ?? ''}'
-                    .trim(),
-              ),
-              _buildInfoRow(
-                context,
-                'Azienda',
-                cliente.billing?.company ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Indirizzo',
-                cliente.billing?.address1 ?? 'N/D',
-              ),
-              if (cliente.billing?.address2?.isNotEmpty ?? false)
+            _buildSezione(
+              context,
+              context.l10n.ordersBillingAddress,
+              Icons.receipt,
+              [
                 _buildInfoRow(
                   context,
-                  'Indirizzo 2',
-                  cliente.billing?.address2 ?? '',
+                  context.l10n.commonName,
+                  '${cliente.billing?.firstName ?? ''} ${cliente.billing?.lastName ?? ''}'
+                      .trim(),
                 ),
-              _buildInfoRow(context, 'Città', cliente.billing?.city ?? 'N/D'),
-              _buildInfoRow(context, 'CAP', cliente.billing?.postcode ?? 'N/D'),
-              _buildInfoRow(
-                context,
-                'Provincia',
-                cliente.billing?.state ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Paese',
-                cliente.billing?.country ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Telefono',
-                cliente.billing?.phone ?? 'N/D',
-              ),
-              _buildInfoRow(context, 'Email', cliente.billing?.email ?? 'N/D'),
-            ]),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersCompany,
+                  cliente.billing?.company ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersAddress,
+                  cliente.billing?.address1 ?? 'N/D',
+                ),
+                if (cliente.billing?.address2?.isNotEmpty ?? false)
+                  _buildInfoRow(
+                    context,
+                    context.l10n.customersAddress2,
+                    cliente.billing?.address2 ?? '',
+                  ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersCity,
+                  cliente.billing?.city ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersPostcode,
+                  cliente.billing?.postcode ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersProvince,
+                  cliente.billing?.state ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersCountry,
+                  cliente.billing?.country ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersPhone,
+                  cliente.billing?.phone ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  'Email',
+                  cliente.billing?.email ?? 'N/D',
+                ),
+              ],
+            ),
           SizedBox(height: context.spacing.l),
 
           // Indirizzo di spedizione
           if (cliente.shipping != null)
-            _buildSezione(context, 'Indirizzo Spedizione', Icons.local_shipping, [
-              _buildInfoRow(
-                context,
-                'Nome',
-                '${cliente.shipping?.firstName ?? ''} ${cliente.shipping?.lastName ?? ''}'
-                    .trim(),
-              ),
-              _buildInfoRow(
-                context,
-                'Azienda',
-                cliente.shipping?.company ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Indirizzo',
-                cliente.shipping?.address1 ?? 'N/D',
-              ),
-              if (cliente.shipping?.address2?.isNotEmpty ?? false)
+            _buildSezione(
+              context,
+              context.l10n.customersShippingAddress,
+              Icons.local_shipping,
+              [
                 _buildInfoRow(
                   context,
-                  'Indirizzo 2',
-                  cliente.shipping?.address2 ?? '',
+                  context.l10n.commonName,
+                  '${cliente.shipping?.firstName ?? ''} ${cliente.shipping?.lastName ?? ''}'
+                      .trim(),
                 ),
-              _buildInfoRow(context, 'Città', cliente.shipping?.city ?? 'N/D'),
-              _buildInfoRow(
-                context,
-                'CAP',
-                cliente.shipping?.postcode ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Provincia',
-                cliente.shipping?.state ?? 'N/D',
-              ),
-              _buildInfoRow(
-                context,
-                'Paese',
-                cliente.shipping?.country ?? 'N/D',
-              ),
-            ]),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersCompany,
+                  cliente.shipping?.company ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersAddress,
+                  cliente.shipping?.address1 ?? 'N/D',
+                ),
+                if (cliente.shipping?.address2?.isNotEmpty ?? false)
+                  _buildInfoRow(
+                    context,
+                    context.l10n.customersAddress2,
+                    cliente.shipping?.address2 ?? '',
+                  ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersCity,
+                  cliente.shipping?.city ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.ordersPostcode,
+                  cliente.shipping?.postcode ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersProvince,
+                  cliente.shipping?.state ?? 'N/D',
+                ),
+                _buildInfoRow(
+                  context,
+                  context.l10n.customersCountry,
+                  cliente.shipping?.country ?? 'N/D',
+                ),
+              ],
+            ),
         ],
       ),
     );

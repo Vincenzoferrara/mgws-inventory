@@ -12436,5 +12436,222 @@
   "dashboardOrdersOverTime": "Numero ordini nel tempo",
   "@dashboardOrdersOverTime": {
     "description": "Localized string dashboardOrdersOverTime"
+  },
+  "couponsDeleted": "Coupon eliminato con successo",
+  "@couponsDeleted": {
+    "description": "Localized string couponsDeleted"
+  },
+  "couponsManageTitle": "Gestione coupon",
+  "@couponsManageTitle": {
+    "description": "Localized string couponsManageTitle"
+  },
+  "couponsFilterType": "Tipo",
+  "@couponsFilterType": {
+    "description": "Localized string couponsFilterType"
+  },
+  "couponsFilterStatus": "Stato",
+  "@couponsFilterStatus": {
+    "description": "Localized string couponsFilterStatus"
+  },
+  "couponsStatDiscountShort": "Sconto tot.",
+  "@couponsStatDiscountShort": {
+    "description": "Localized string couponsStatDiscountShort"
+  },
+  "couponsCreateFirst": "Crea il tuo primo coupon",
+  "@couponsCreateFirst": {
+    "description": "Localized string couponsCreateFirst"
+  },
+  "couponsActivate": "Attiva",
+  "@couponsActivate": {
+    "description": "Localized string couponsActivate"
+  },
+  "couponsDeactivate": "Disattiva",
+  "@couponsDeactivate": {
+    "description": "Localized string couponsDeactivate"
+  },
+  "couponsBadgeExpired": "SCADUTO",
+  "@couponsBadgeExpired": {
+    "description": "Localized string couponsBadgeExpired"
+  },
+  "couponsBadgeActive": "ATTIVO",
+  "@couponsBadgeActive": {
+    "description": "Localized string couponsBadgeActive"
+  },
+  "couponsBadgeDraft": "BOZZA",
+  "@couponsBadgeDraft": {
+    "description": "Localized string couponsBadgeDraft"
+  },
+  "couponsBadgeTrash": "CESTINO",
+  "@couponsBadgeTrash": {
+    "description": "Localized string couponsBadgeTrash"
+  },
+  "couponsCreated": "Coupon creato con successo",
+  "@couponsCreated": {
+    "description": "Localized string couponsCreated"
+  },
+  "couponsUpdated": "Coupon aggiornato con successo",
+  "@couponsUpdated": {
+    "description": "Localized string couponsUpdated"
+  },
+  "couponsEditTitle": "Modifica coupon",
+  "@couponsEditTitle": {
+    "description": "Localized string couponsEditTitle"
+  },
+  "couponsCodeExample": "SCONTO20",
+  "@couponsCodeExample": {
+    "description": "Localized string couponsCodeExample"
+  },
+  "couponsPercentRequired": "Percentuale sconto *",
+  "@couponsPercentRequired": {
+    "description": "Localized string couponsPercentRequired"
+  },
+  "couponsAmountRequired": "Importo sconto *",
+  "@couponsAmountRequired": {
+    "description": "Localized string couponsAmountRequired"
+  },
+  "couponsCreate": "Crea",
+  "@couponsCreate": {
+    "description": "Localized string couponsCreate"
+  },
+  "customersSelect": "Seleziona un cliente",
+  "@customersSelect": {
+    "description": "Localized string customersSelect"
+  },
+  "customersNoneFound": "Nessun cliente trovato",
+  "@customersNoneFound": {
+    "description": "Localized string customersNoneFound"
+  },
+  "customersPaying": "Cliente pagante",
+  "@customersPaying": {
+    "description": "Localized string customersPaying"
+  },
+  "customersPersonalInfo": "Informazioni personali",
+  "@customersPersonalInfo": {
+    "description": "Localized string customersPersonalInfo"
+  },
+  "customersLastName": "Cognome",
+  "@customersLastName": {
+    "description": "Localized string customersLastName"
+  },
+  "customersRole": "Ruolo",
+  "@customersRole": {
+    "description": "Localized string customersRole"
+  },
+  "customersCompany": "Azienda",
+  "@customersCompany": {
+    "description": "Localized string customersCompany"
+  },
+  "customersAddress2": "Indirizzo 2",
+  "@customersAddress2": {
+    "description": "Localized string customersAddress2"
+  },
+  "customersProvince": "Provincia",
+  "@customersProvince": {
+    "description": "Localized string customersProvince"
+  },
+  "customersCountry": "Paese",
+  "@customersCountry": {
+    "description": "Localized string customersCountry"
+  },
+  "customersShippingAddress": "Indirizzo di spedizione",
+  "@customersShippingAddress": {
+    "description": "Localized string customersShippingAddress"
+  },
+  "couponsReservedFor": "Riservato a: {email}",
+  "@couponsReservedFor": {
+    "description": "Localized string couponsReservedFor",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsErrorDetail": "Errore: {error}",
+  "@couponsErrorDetail": {
+    "description": "Localized string couponsErrorDetail",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsForCustomer": "Coupon per {email}",
+  "@couponsForCustomer": {
+    "description": "Localized string couponsForCustomer",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsExpiryValue": "Scadenza: {value}",
+  "@couponsExpiryValue": {
+    "description": "Localized string couponsExpiryValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsUsageValue": "Limite: {used}/{limit}",
+  "@couponsUsageValue": {
+    "description": "Localized string couponsUsageValue",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsMinimumValue": "Min: {amount}",
+  "@couponsMinimumValue": {
+    "description": "Localized string couponsMinimumValue",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsEmailValue": "Email: {email}",
+  "@couponsEmailValue": {
+    "description": "Localized string couponsEmailValue",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsDeleteConfirm": "Sei sicuro di voler eliminare il coupon \"{code}\"?",
+  "@couponsDeleteConfirm": {
+    "description": "Localized string couponsDeleteConfirm",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "customersLoadError": "Errore nel caricamento dei clienti: {error}",
+  "@customersLoadError": {
+    "description": "Localized string customersLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "customersRegisteredOn": "Registrato: {date}",
+  "@customersRegisteredOn": {
+    "description": "Localized string customersRegisteredOn",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "customersRegistered": "Registrato",
+  "@customersRegistered": {
+    "description": "Localized string customersRegistered"
   }
 }
