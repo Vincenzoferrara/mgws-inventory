@@ -15,6 +15,7 @@ import '../../login/jwt_api/woo_connect.dart';
 import '../../login/jwt_api/jwt_connect.dart';
 import '../../log_viewer/app_logger.dart';
 import '../../l10n/extensions.dart';
+import '../../l10n/localized_text.dart';
 import '../../inventory/inventory_movement_key.code.dart';
 import '../../inventory/inventory_adjustment.code.dart';
 import '../../login/mgws/connection/mgws_connection.dart';
@@ -132,7 +133,7 @@ class ProdottiGestioneController {
 
   final Map<String, String> _filtriVariantiAttivi = {};
   List<VarianteProductGlobal> _variantiFiltrate = [];
-  String? _lastLoadWarning;
+  LocalizedText? _lastLoadWarning;
   int _selectedProductLoadToken = 0;
 
   static const int _productsPerPage = 100;
@@ -259,9 +260,9 @@ class ProdottiGestioneController {
   bool get hasFiltriVariantiAttivi => _filtriVariantiAttivi.isNotEmpty;
   Map<String, String> get filtriVariantiAttivi =>
       Map.unmodifiable(_filtriVariantiAttivi);
-  String? get lastLoadWarning => _lastLoadWarning;
+  LocalizedText? get lastLoadWarning => _lastLoadWarning;
 
-  String? consumeLastLoadWarning() {
+  LocalizedText? consumeLastLoadWarning() {
     final w = _lastLoadWarning;
     _lastLoadWarning = null;
     return w;
@@ -531,9 +532,7 @@ class ProdottiGestioneController {
           '❌ [prefetchVarianti] Sessione scaduta e refresh fallito: '
           'prefetch ANNULLATO. Effettuare nuovamente il login.',
         );
-        _lastLoadWarning =
-            'Sessione WooCommerce scaduta: esegui il logout e il login '
-            'per ripristinare la sincronizzazione delle varianti.';
+        _lastLoadWarning = (l10n) => l10n.productsWooSessionExpired;
         log.w(
           '[perf-trace] prefetchVarianti ANNULLATO per sessione scaduta '
           'dur=${stopwatch.elapsedMilliseconds}ms',
@@ -1132,23 +1131,20 @@ class ProdottiGestioneController {
         _prodotti = List<ProdottoGlobal>.from(loaded);
         log.i('✅ Caricati ${_prodotti.length} prodotti da WooCommerce');
         if (partial) {
-          _lastLoadWarning =
-              'Caricamento prodotti parziale: alcuni elementi potrebbero mancare.';
+          _lastLoadWarning = (l10n) => l10n.productsLoadPartial;
         }
         _publishSharedCache();
       } else if (previousLocal.isNotEmpty) {
         _prodotti = previousLocal;
-        _lastLoadWarning =
-            'Server non raggiungibile: uso elenco prodotti locale già caricato.';
+        _lastLoadWarning = (l10n) => l10n.productsServerUnreachableUsingLocal;
         _publishSharedCache();
       } else {
         _prodotti = <ProdottoGlobal>[];
-        _lastLoadWarning =
-            'Server non raggiungibile: nessun prodotto disponibile.';
+        _lastLoadWarning = (l10n) => l10n.productsServerUnreachableNone;
       }
 
       if (_prodotti.isEmpty) {
-        _lastLoadWarning ??= 'Nessun prodotto trovato sul server.';
+        _lastLoadWarning ??= (l10n) => l10n.productsNoneOnServer;
       }
 
       _applicaFiltroEOrdinamento();
@@ -1158,12 +1154,11 @@ class ProdottiGestioneController {
       log.e('   Dettagli errore: ${e.toString()}');
       if (previousLocal.isNotEmpty) {
         _prodotti = previousLocal;
-        _lastLoadWarning =
-            'Errore durante il caricamento prodotti: uso cache precedente.';
+        _lastLoadWarning = (l10n) => l10n.productsLoadErrorUsingCache;
         _publishSharedCache();
       } else {
         _prodotti = <ProdottoGlobal>[];
-        _lastLoadWarning = 'Errore durante il caricamento prodotti.';
+        _lastLoadWarning = (l10n) => l10n.productsLoadError;
       }
       _applicaFiltroEOrdinamento();
     }
@@ -1207,8 +1202,7 @@ class ProdottiGestioneController {
     } catch (e) {
       log.e('❌ Errore caricamento prodotti paginato', e);
       if (_prodotti.isNotEmpty) {
-        _lastLoadWarning =
-            'Server non raggiungibile: uso elenco prodotti locale gia caricato.';
+        _lastLoadWarning = (l10n) => l10n.productsServerUnreachableUsingLocal;
         _applicaFiltroEOrdinamento();
         final total = _prodottiFiltrati.length;
         final totalPages = total == 0 ? 1 : (total / perPage).ceil();
@@ -1382,7 +1376,7 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessun prodotto selezionato.',
+        message: (l10n) => l10n.productsNoProductSelected,
       );
     }
 
@@ -1399,7 +1393,7 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Nessuna categoria valida selezionata.',
+        message: (l10n) => l10n.productsNoValidCategorySelected,
       );
     }
 
@@ -1427,7 +1421,7 @@ class ProdottiGestioneController {
         return BulkCategoryUpdateResult(
           successCount: 0,
           failedCount: _selectedProductIds.length,
-          message: 'Nessun prodotto aggiornabile trovato.',
+          message: (l10n) => l10n.productsNoUpdatableProduct,
         );
       }
 
@@ -1525,15 +1519,16 @@ class ProdottiGestioneController {
         successCount: successCount,
         failedCount: failedCount,
         message: failedCount == 0
-            ? 'Aggiornamento completato: $successCount prodotti aggiornati.'
-            : 'Aggiornamento parziale: $successCount successi, $failedCount falliti.',
+            ? (l10n) => l10n.productsBulkUpdateDone(successCount)
+            : (l10n) =>
+                  l10n.productsBulkUpdatePartial(successCount, failedCount),
       );
     } catch (e) {
       log.e('❌ Errore bulk update categorie', e);
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Errore durante aggiornamento categorie: $e',
+        message: (l10n) => l10n.productsCategoryUpdateError('$e'),
       );
     }
   }
@@ -1544,10 +1539,10 @@ class ProdottiGestioneController {
   }) async {
     final prodotto = _prodottoSelezionato;
     if (prodotto == null || prodotto.id == null || prodotto.id! <= 0) {
-      return const BulkCategoryUpdateResult(
+      return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 1,
-        message: 'Nessun prodotto selezionato valido.',
+        message: (l10n) => l10n.productsNoValidProductSelected,
       );
     }
 
@@ -1560,10 +1555,10 @@ class ProdottiGestioneController {
           ..sort();
 
     if (normalized.isEmpty) {
-      return const BulkCategoryUpdateResult(
+      return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 1,
-        message: 'Nessuna categoria selezionata.',
+        message: (l10n) => l10n.productsNoCategorySelected,
       );
     }
 
@@ -1616,7 +1611,7 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 1,
-        message: 'Errore aggiornamento categorie: $e',
+        message: (l10n) => l10n.productsCategoryUpdateError('$e'),
       );
     }
   }
@@ -1722,10 +1717,10 @@ class ProdottiGestioneController {
     bool replaceExisting = false,
   }) async {
     if (_selectedProductIds.isEmpty) {
-      return const BulkCategoryUpdateResult(
+      return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessun prodotto selezionato.',
+        message: (l10n) => l10n.productsNoProductSelected,
       );
     }
 
@@ -1737,7 +1732,7 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Nessun tag valido selezionato.',
+        message: (l10n) => l10n.productsNoValidTagSelected,
       );
     }
 
@@ -1793,14 +1788,14 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: updatedIds.length,
         failedCount: _selectedProductIds.length - updatedIds.length,
-        message: 'Tag aggiornati su ${updatedIds.length} prodotti.',
+        message: (l10n) => l10n.productsTagsUpdated(updatedIds.length),
       );
     } catch (e) {
       log.e('❌ Errore bulk tag update', e);
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Errore aggiornamento tag: $e',
+        message: (l10n) => l10n.productsTagUpdateError('$e'),
       );
     }
   }
@@ -1809,10 +1804,10 @@ class ProdottiGestioneController {
     required String status,
   }) async {
     if (_selectedProductIds.isEmpty) {
-      return const BulkCategoryUpdateResult(
+      return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessun prodotto selezionato.',
+        message: (l10n) => l10n.productsNoProductSelected,
       );
     }
 
@@ -1822,7 +1817,7 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Stato non valido: $status',
+        message: (l10n) => l10n.productsInvalidStatus(status),
       );
     }
 
@@ -1864,14 +1859,14 @@ class ProdottiGestioneController {
       return BulkCategoryUpdateResult(
         successCount: updatedIds.length,
         failedCount: _selectedProductIds.length - updatedIds.length,
-        message: 'Stato aggiornato su ${updatedIds.length} prodotti.',
+        message: (l10n) => l10n.productsStatusUpdated(updatedIds.length),
       );
     } catch (e) {
       log.e('❌ Errore bulk status update', e);
       return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: _selectedProductIds.length,
-        message: 'Errore aggiornamento stato: $e',
+        message: (l10n) => l10n.productsStatusUpdateError('$e'),
       );
     }
   }
@@ -1880,10 +1875,10 @@ class ProdottiGestioneController {
     required bool force,
   }) async {
     if (_selectedProductIds.isEmpty) {
-      return const BulkCategoryUpdateResult(
+      return BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessun prodotto selezionato.',
+        message: (l10n) => l10n.productsNoProductSelected,
       );
     }
 
@@ -1924,8 +1919,8 @@ class ProdottiGestioneController {
       successCount: success,
       failedCount: failed,
       message: force
-          ? 'Eliminazione definitiva: $success successi, $failed falliti.'
-          : 'Spostati nel cestino: $success successi, $failed falliti.',
+          ? (l10n) => l10n.productsPermanentDeleteResult(success, failed)
+          : (l10n) => l10n.productsTrashResult(success, failed),
     );
   }
 
@@ -2073,10 +2068,10 @@ class ProdottiGestioneController {
     required Map<int, QuickVariantEdit> edits,
   }) async {
     if (edits.isEmpty) {
-      return const QuickVariantSaveResult(
+      return QuickVariantSaveResult(
         updated: 0,
         failed: 0,
-        message: 'Nessuna modifica variante da salvare.',
+        message: (l10n) => l10n.productsNoVariantChangeToSave,
       );
     }
 
@@ -2143,8 +2138,8 @@ class ProdottiGestioneController {
       updated: updated,
       failed: failed,
       message: failed == 0
-          ? 'Varianti aggiornate: $updated.'
-          : 'Aggiornamento varianti parziale: $updated successi, $failed fallite.',
+          ? (l10n) => l10n.productsVariantsSaved(updated)
+          : (l10n) => l10n.productsVariantsPartial(updated, failed),
     );
   }
 }
@@ -2152,7 +2147,7 @@ class ProdottiGestioneController {
 class BulkCategoryUpdateResult {
   final int successCount;
   final int failedCount;
-  final String message;
+  final LocalizedText message;
 
   const BulkCategoryUpdateResult({
     required this.successCount,
@@ -2222,7 +2217,7 @@ class QuickVariantEdit {
 class QuickVariantSaveResult {
   final int updated;
   final int failed;
-  final String message;
+  final LocalizedText message;
 
   const QuickVariantSaveResult({
     required this.updated,

@@ -9,6 +9,7 @@ import '../../../login/jwt_api/query_woocommerce/woo_query_media.dart';
 import '../../class_media.dart';
 import '../../../reuse_class/image_url_resolver.dart';
 import '../../../l10n/extensions.dart';
+import '../../../l10n/localized_text.dart';
 
 /// Dialog per selezionare immagini dalla libreria media di WordPress
 class MediaSelectorDialog extends StatefulWidget {
@@ -35,7 +36,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
   List<MediaFile> _images = [];
   final Set<String> _selectedUrls = <String>{};
   bool _isLoading = false;
-  String? _error;
+  LocalizedText? _error;
   int _currentPage = 1;
   final int _perPage = 20;
   bool _hasMorePages = true;
@@ -96,7 +97,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
       log.e('Errore caricamento immagini', e);
       if (mounted) {
         setState(() {
-          _error = 'Errore nel caricamento: $e';
+          _error = (l10n) => l10n.mediaLoadError('$e');
           _isLoading = false;
         });
       }
@@ -162,7 +163,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
       log.e('Errore ricerca immagini', e);
       if (mounted) {
         setState(() {
-          _error = 'Errore nella ricerca: $e';
+          _error = (l10n) => l10n.mediaSearchError('$e');
           _isLoading = false;
         });
       }
@@ -179,7 +180,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
       }
 
       if (file.path == null) {
-        throw Exception('Percorso file non valido');
+        throw Exception(context.l10n.mediaInvalidFilePath);
       }
 
       await _uploadFile(file.path!, file.name);
@@ -189,7 +190,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'errore',
           'media_selector_dialog',
-          'Errore nella selezione del file: $e',
+          context.l10n.mediaFilePickError('$e'),
         );
       }
     }
@@ -211,7 +212,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'warning',
           'media_selector_dialog',
-          'Per favore trascina solo file immagine (jpg, png, gif, webp, svg)',
+          context.l10n.mediaOnlyImages,
         );
       }
       return;
@@ -243,7 +244,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'successo',
           'media_selector_dialog',
-          'Immagine "$fileName" caricata con successo!',
+          context.l10n.mediaUploaded(fileName),
         );
 
         // Ricarica la lista immagini per mostrare quella appena caricata
@@ -255,7 +256,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         NotificationService.instance.messageBar(
           'errore',
           'media_selector_dialog',
-          'Errore nel caricamento: $e',
+          context.l10n.mediaLoadError('$e'),
         );
       }
     } finally {
@@ -298,8 +299,8 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                       const SizedBox(width: 12),
                       Text(
                         widget.multiSelect
-                            ? 'Seleziona Immagini'
-                            : 'Seleziona Immagine',
+                            ? context.l10n.mediaSelectImages
+                            : context.l10n.mediaSelectImage,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -394,8 +395,8 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Caricamento in corso...',
+                                Text(
+                                  context.l10n.commonLoading,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 if (_uploadingFileName != null)
@@ -419,8 +420,11 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         widget.multiSelect
-                            ? '${_images.length} immagini trovate • ${_selectedUrls.length} selezionate'
-                            : '${_images.length} immagini trovate',
+                            ? context.l10n.mediaImagesFoundSelected(
+                                _images.length,
+                                _selectedUrls.length,
+                              )
+                            : context.l10n.mediaImagesFound(_images.length),
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     ),
@@ -455,7 +459,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                           ),
                         ],
                       ),
-                      child: const Column(
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
@@ -465,7 +469,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'Rilascia qui per caricare',
+                            context.l10n.mediaDropToUpload,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -491,7 +495,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text(_error!, textAlign: TextAlign.center),
+            Text(_error!(context.l10n), textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadImages,
@@ -523,7 +527,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
             Icon(Icons.image_not_supported, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'Nessuna immagine trovata',
+              context.l10n.mediaNoImageFound,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -683,7 +687,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    image.title ?? 'Immagine senza titolo',
+                    image.title ?? context.l10n.mediaUntitledImage,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -733,15 +737,19 @@ class ProductImageDimensionWarningBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message:
-          'Dimensioni $width × $height sopra soglia $thresholdWidth × $thresholdHeight px',
+      message: context.l10n.mediaOversizedDetail(
+        '$width',
+        '$height',
+        '$thresholdWidth',
+        '$thresholdHeight',
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.orange.shade50,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: Colors.orange.shade300),
         ),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -754,7 +762,7 @@ class ProductImageDimensionWarningBadge extends StatelessWidget {
               SizedBox(width: 4),
               Flexible(
                 child: Text(
-                  'Oltre soglia',
+                  context.l10n.mediaOverThreshold,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 10, color: Colors.orange),

@@ -159,7 +159,7 @@ class _InventoryQuickLoadPickerDialogState
               const LinearProgressIndicator(minHeight: 3),
             if (_controller.errorMessage case final warning?)
               MaterialBanner(
-                content: Text(warning),
+                content: Text(warning(context.l10n)),
                 leading: const Icon(Icons.warning_amber_rounded),
                 actions: [
                   TextButton(

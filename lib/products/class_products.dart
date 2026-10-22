@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/localized_text.dart';
+
 // ============================================================================
 // HELPER FUNCTIONS PER GESTIONE NULL
 // ============================================================================
@@ -514,7 +516,7 @@ class VarianteProductGlobal {
 
   /// Nome visualizzabile basato sugli attributi
   String get nomeVisualizzabile {
-    if (attributi.isEmpty) return nome.isEmpty ? 'Variante' : nome;
+    if (attributi.isEmpty) return nome.isEmpty ? '#$id' : nome;
     return attributi.map((a) => a.opzione).join(' - ');
   }
 
@@ -546,7 +548,7 @@ class VarianteProductGlobal {
 
   @override
   String toString() =>
-      '$nomeVisualizzabile (Barcode interno: $barcodeInterno, Prezzo: €${prezzoEffettivo.toStringAsFixed(2)})';
+      '$nomeVisualizzabile (internal barcode: $barcodeInterno, price: €${prezzoEffettivo.toStringAsFixed(2)})';
 }
 
 /// Classe per rappresentare una categoria di prodotti
@@ -788,39 +790,39 @@ abstract class ProdottoExportImport {
 
 /// Classe per la validazione dei prodotti
 class ValidatoreProdotti {
-  static List<String> valida(ProdottoGlobal prodotto) {
-    final errori = <String>[];
+  static List<LocalizedText> valida(ProdottoGlobal prodotto) {
+    final errori = <LocalizedText>[];
 
     // Validazioni base
     if ((prodotto.nome?.trim() ?? '').isEmpty) {
-      errori.add('Il nome del prodotto è obbligatorio');
+      errori.add((l10n) => l10n.productsValidationNameRequired);
     }
 
     if ((prodotto.barcodeInterno?.trim() ?? '').isEmpty) {
-      errori.add('Il barcode interno è obbligatorio');
+      errori.add((l10n) => l10n.productsValidationBarcodeRequired);
     }
 
     if ((prodotto.prezzoNormale ?? 0) <= 0) {
-      errori.add('Il prezzo normale deve essere maggiore di 0');
+      errori.add((l10n) => l10n.productsValidationRegularPrice);
     }
 
     if (prodotto.prezzoScontato != null &&
         prodotto.prezzoScontato! >= (prodotto.prezzoNormale ?? 0)) {
-      errori.add('Il prezzo scontato deve essere minore del prezzo normale');
+      errori.add((l10n) => l10n.productsValidationSalePrice);
     }
 
     if ((prodotto.descrizioneBreve?.trim() ?? '').isEmpty) {
-      errori.add('La descrizione breve è obbligatoria');
+      errori.add((l10n) => l10n.productsValidationShortDescription);
     }
 
     if ((prodotto.categoria?.isEmpty ?? true)) {
-      errori.add('La categoria è obbligatoria');
+      errori.add((l10n) => l10n.productsValidationCategory);
     }
 
     // Validazione URL immagine
     if ((prodotto.immagineUrl?.isNotEmpty ?? false) &&
         !_isValidUrl(prodotto.immagineUrl!)) {
-      errori.add('URL dell\'immagine principale non valido');
+      errori.add((l10n) => l10n.productsValidationMainImageUrl);
     }
 
     // Validazione varianti
@@ -831,19 +833,27 @@ class ValidatoreProdotti {
     return errori;
   }
 
-  static List<String> _validaVarianti(List<VarianteProductGlobal> varianti) {
-    final errori = <String>[];
+  static List<LocalizedText> _validaVarianti(
+    List<VarianteProductGlobal> varianti,
+  ) {
+    final errori = <LocalizedText>[];
     final barcodeInterniUsati = <String>{};
     final codiciProdottoUsati = <String>{};
 
     for (int i = 0; i < varianti.length; i++) {
       final variante = varianti[i];
-      final prefisso = 'Variante ${i + 1}: ';
+      final index = i + 1;
+      LocalizedText prefisso(LocalizedText message) =>
+          (l10n) => l10n.productsValidationVariantPrefix(index, message(l10n));
 
       if (variante.barcodeInterno.trim().isEmpty) {
-        errori.add('${prefisso}Barcode interno obbligatorio');
+        errori.add(
+          prefisso((l10n) => l10n.productsValidationVariantBarcodeRequired),
+        );
       } else if (barcodeInterniUsati.contains(variante.barcodeInterno)) {
-        errori.add('${prefisso}Barcode interno duplicato');
+        errori.add(
+          prefisso((l10n) => l10n.productsValidationVariantBarcodeDuplicate),
+        );
       } else {
         barcodeInterniUsati.add(variante.barcodeInterno);
       }
@@ -853,31 +863,35 @@ class ValidatoreProdotti {
       final codiceProdotto = variante.codiceProdotto.trim();
       if (codiceProdotto.isNotEmpty) {
         if (codiciProdottoUsati.contains(codiceProdotto)) {
-          errori.add('${prefisso}Codice prodotto duplicato');
+          errori.add(
+            prefisso((l10n) => l10n.productsValidationVariantSkuDuplicate),
+          );
         } else {
           codiciProdottoUsati.add(codiceProdotto);
         }
       }
 
       if (variante.prezzo <= 0) {
-        errori.add('${prefisso}Il prezzo deve essere maggiore di 0');
+        errori.add(prefisso((l10n) => l10n.productsValidationVariantPrice));
       }
 
       if (variante.quantita < 0) {
-        errori.add('${prefisso}La quantità non può essere negativa');
+        errori.add(prefisso((l10n) => l10n.productsValidationVariantQuantity));
       }
 
       if (variante.attributi.isEmpty) {
-        errori.add('${prefisso}Almeno un attributo è richiesto');
+        errori.add(prefisso((l10n) => l10n.productsValidationVariantAttribute));
       }
 
       // Validazione attributi
       for (final attributo in variante.attributi) {
         if (attributo.nome.trim().isEmpty) {
-          errori.add('${prefisso}Nome attributo obbligatorio');
+          errori.add(prefisso((l10n) => l10n.productsValidationAttributeName));
         }
         if (attributo.opzione.trim().isEmpty) {
-          errori.add('${prefisso}Opzione attributo obbligatoria');
+          errori.add(
+            prefisso((l10n) => l10n.productsValidationAttributeOption),
+          );
         }
       }
 
@@ -885,7 +899,7 @@ class ValidatoreProdotti {
       if (variante.immagineUrl != null &&
           variante.immagineUrl!.isNotEmpty &&
           !_isValidUrl(variante.immagineUrl!)) {
-        errori.add('${prefisso}URL dell\'immagine non valido');
+        errori.add(prefisso((l10n) => l10n.productsValidationVariantImageUrl));
       }
     }
 

@@ -51,7 +51,7 @@ class SelectedProductUnit {
     final nome = variant?.nome.trim().isNotEmpty == true
         ? variant!.nome.trim()
         : (product.nome ?? '').trim();
-    return nome.isEmpty ? 'Prodotto $productId' : nome;
+    return nome.isEmpty ? '#$productId' : nome;
   }
 
   /// Barcode interno: quello della variante se esiste, altrimenti quello del

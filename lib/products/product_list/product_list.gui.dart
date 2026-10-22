@@ -216,7 +216,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   // ── Busy overlay ─────────────────────────────────────────────────────────
   int _busyDepth = 0;
-  String _busyMessage = 'Caricamento in corso...';
+
+  /// `null` mostra il testo di caricamento generico.
+  String? _busyMessage;
   bool _productsLoading = false;
   bool _disposed = false;
 
@@ -368,13 +370,10 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   void _pushBusy(String message) => _setBusy(_busyDepth + 1, message);
   void _popBusy() {
     if (_busyDepth <= 0) return;
-    _setBusy(
-      _busyDepth - 1,
-      _busyDepth == 1 ? 'Caricamento in corso...' : _busyMessage,
-    );
+    _setBusy(_busyDepth - 1, _busyDepth == 1 ? null : _busyMessage);
   }
 
-  void _setBusy(int depth, String message) {
+  void _setBusy(int depth, String? message) {
     if (_disposed) return;
     _busyDepth = depth;
     _busyMessage = message;
@@ -426,7 +425,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   // ── Inizializzazione ─────────────────────────────────────────────
 
   Future<void> _initSettings() async {
-    await _runBusy('Inizializzazione...', () async {
+    await _runBusy(context.l10n.productsInitializing, () async {
       await _appSettings.init();
       await _machineUiPreferences.init();
       if (!_alive) return;
@@ -515,11 +514,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       }
       _syncSelectedProductDisplay();
       final warning = _controller.consumeLastLoadWarning();
-      if (mounted && warning != null && warning.isNotEmpty) {
+      if (mounted && warning != null) {
         NotificationService.instance.messageBar(
           'warning',
           'prodotti_gestisci',
-          warning,
+          warning(context.l10n),
         );
       }
       if (_alive) setState(() {});
@@ -719,8 +718,8 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     if (!confirmed || !mounted) return;
 
     final label = useBulk
-        ? 'Eliminazione ${toDelete.length} prodotti...'
-        : 'Eliminazione prodotto...';
+        ? context.l10n.productsDeletingMany(toDelete.length)
+        : context.l10n.productsDeletingOne;
 
     final (bulkResult, success) = await _runBusy(label, () async {
       if (useBulk) {
@@ -742,17 +741,18 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         ? 'warning'
         : 'errore';
 
+    final l10n = context.l10n;
     final message = success
         ? useBulk
-              ? bulkResult!.message
-              : 'Prodotto eliminato con successo.'
+              ? bulkResult!.message(l10n)
+              : l10n.productsDeletedOne
         : useBulk
-        ? (bulkResult?.message ?? 'Eliminazione parziale.')
-        : 'Eliminazione non riuscita.';
+        ? (bulkResult?.message(l10n) ?? l10n.productsDeletePartial)
+        : l10n.productsDeleteFailed;
 
     NotificationService.instance.messageBar(
-      'prodotti_gestisci',
       severity,
+      'prodotti_gestisci',
       message,
     );
     if (success || (bulkResult?.successCount ?? 0) > 0) {
@@ -863,13 +863,13 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   List<DataGridViewContextAction<ProdottoGlobal>> _buildContextActions() {
     final actions = <DataGridViewContextAction<ProdottoGlobal>>[
       DataGridViewContextAction<ProdottoGlobal>(
-        label: 'Nuovo',
+        label: context.l10n.commonNew,
         icon: Icons.add_circle_outline,
         onSelected: (product) =>
             _handleProductAction(_ProductContextAction.crea, product),
       ),
       DataGridViewContextAction<ProdottoGlobal>(
-        label: 'Modifica',
+        label: context.l10n.commonEdit,
         icon: Icons.edit_outlined,
         onSelected: (product) =>
             _handleProductAction(_ProductContextAction.modifica, product),
@@ -878,7 +878,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     if (_controller.selectedProductsCount > 1) {
       actions.add(
         DataGridViewContextAction<ProdottoGlobal>(
-          label: 'Modifica in massa',
+          label: context.l10n.productsBulkEdit,
           icon: Icons.edit_note_outlined,
           onSelected: (product) => _handleProductAction(
             _ProductContextAction.modificaInMassa,
@@ -897,7 +897,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     );
     actions.add(
       DataGridViewContextAction<ProdottoGlobal>(
-        label: 'Elimina',
+        label: context.l10n.commonDelete,
         icon: Icons.delete_outline,
         onSelected: (product) =>
             _handleProductAction(_ProductContextAction.elimina, product),
@@ -994,7 +994,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             child: LinearProgressIndicator(minHeight: 3),
           ),
         if (_isBusy)
-          Positioned.fill(child: _BusyOverlay(message: _busyMessage)),
+          Positioned.fill(
+            child: _BusyOverlay(
+              message: _busyMessage ?? context.l10n.commonLoading,
+            ),
+          ),
       ],
     );
   }
@@ -1156,7 +1160,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
                     },
               icon: const Icon(Icons.add_shopping_cart),
               label: Text(
-                selectedCount == 0 ? 'Aggiungi' : 'Aggiungi ($selectedCount)',
+                selectedCount == 0
+                    ? context.l10n.cassaAdd
+                    : context.l10n.productsAddCount(selectedCount),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor:
@@ -1304,13 +1310,13 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
           ),
           const SizedBox(height: 16),
           Text(
-            'Seleziona un prodotto',
+            context.l10n.productsSelectAProduct,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
           ),
           Text(
-            'per vedere i dettagli',
+            context.l10n.productsToSeeDetails,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
             ),
@@ -1414,7 +1420,7 @@ class _ProductsGridState extends State<_ProductsGrid> {
           ProductGridColumnId.preview.storageKey: Center(
             child: DataGridViewImagePreview(
               imageUrl: product.immagineUrl,
-              semanticLabel: 'Anteprima ${info.nome}',
+              semanticLabel: context.l10n.productsPreviewOf('${info.nome}'),
               size: 56,
               hoverPreviewSize: 300,
               muted: !info.inStock,
@@ -1632,7 +1638,7 @@ class _ProductsGridState extends State<_ProductsGrid> {
               children: [
                 Icon(Icons.checklist_rtl, size: 20, color: theme.primaryColor),
                 Text(
-                  '$selectedCount prodotti selezionati',
+                  context.l10n.productsSelectedCount(selectedCount),
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: theme.primaryColor,
                     fontWeight: FontWeight.w800,
@@ -1698,7 +1704,7 @@ class _BusyOverlay extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Operazione in corso',
+                      context.l10n.productsOperationRunning,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -1953,11 +1959,11 @@ class _FiltersBarState extends State<_FiltersBar> {
       ProdottoFilterEngine.orderedOperators();
 
   String _ordinamentoLabel(OrdinamentoProdotti o) => switch (o) {
-    OrdinamentoProdotti.nomeCrescente => 'Nome (A-Z)',
-    OrdinamentoProdotti.nomeDecrescente => 'Nome (Z-A)',
-    OrdinamentoProdotti.prezzoCrescente => 'Prezzo (Crescente)',
-    OrdinamentoProdotti.prezzoDecrescente => 'Prezzo (Decrescente)',
-    OrdinamentoProdotti.nessuno => 'Ordina per...',
+    OrdinamentoProdotti.nomeCrescente => context.l10n.productsSortNameAsc,
+    OrdinamentoProdotti.nomeDecrescente => context.l10n.productsSortNameDesc,
+    OrdinamentoProdotti.prezzoCrescente => context.l10n.productsSortPriceAsc,
+    OrdinamentoProdotti.prezzoDecrescente => context.l10n.productsSortPriceDesc,
+    OrdinamentoProdotti.nessuno => context.l10n.productsSortBy,
   };
 
   void _scheduleQuickSearch(String value) {
@@ -2015,7 +2021,7 @@ class _FiltersBarState extends State<_FiltersBar> {
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_gestisci',
-        'Operatore non disponibile per il campo selezionato.',
+        context.l10n.productsOperatorNotAvailable,
       );
       return;
     }
@@ -2094,7 +2100,7 @@ class _FiltersBarState extends State<_FiltersBar> {
                           ),
                           const SizedBox(width: _kControlGap),
                           Text(
-                            'Filtro',
+                            context.l10n.productsFilter,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleSmall?.copyWith(
@@ -2104,8 +2110,8 @@ class _FiltersBarState extends State<_FiltersBar> {
                           IconButton(
                             onPressed: toggleEspanso,
                             tooltip: espanso
-                                ? 'Riduci filtri'
-                                : 'Espandi filtri',
+                                ? context.l10n.productsCollapseFilters
+                                : context.l10n.productsExpandFilters,
                             visualDensity: VisualDensity.compact,
                             icon: Icon(
                               espanso ? Icons.expand_less : Icons.expand_more,
@@ -2145,13 +2151,15 @@ class _FiltersBarState extends State<_FiltersBar> {
                                     labelText:
                                         _campo ==
                                             CampoFiltroProdotto.ricercaRapida
-                                        ? 'Ricerca rapida'
-                                        : 'Valore filtro',
+                                        ? context.l10n.productsQuickSearch
+                                        : context.l10n.productsFilterValue,
                                     hintText:
                                         _campo ==
                                             CampoFiltroProdotto.ricercaRapida
-                                        ? 'Cerca su tutti i campi'
-                                        : 'Es: Nike, 1, disponibile',
+                                        ? context.l10n.productsSearchAllFields
+                                        : context
+                                              .l10n
+                                              .productsQuickSearchExample,
                                     prefixIcon: const Icon(Icons.search),
                                     suffixIcon: _valueCtrl.text.isNotEmpty
                                         ? IconButton(
@@ -2258,8 +2266,8 @@ class _FiltersBarState extends State<_FiltersBar> {
                                 icon: const Icon(Icons.add),
                                 label: Text(
                                   _campo == CampoFiltroProdotto.ricercaRapida
-                                      ? 'Applica ricerca'
-                                      : 'Aggiungi filtro',
+                                      ? context.l10n.productsApplySearch
+                                      : context.l10n.productsAddFilter,
                                 ),
                               ),
                               _CommandIconButton(

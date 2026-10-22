@@ -4,6 +4,31 @@ import '../../login/mgws/connection/mgws_connection.dart';
 import '../../login/mgws/query/query_mgws_inventory.dart';
 import '../../l10n/extensions.dart';
 
+/// Il prodotto da modificare non esiste piu sul server.
+class ProductNotFoundException implements Exception {
+  final int? productId;
+  final String? productCode;
+
+  const ProductNotFoundException({this.productId, this.productCode});
+
+  @override
+  String toString() =>
+      'Product not found on the server (id: ${productId ?? '-'}, '
+      'code: ${productCode ?? '-'})';
+}
+
+/// Creazione o aggiornamento del prodotto rifiutati dal server.
+class ProductSaveException implements Exception {
+  final bool isUpdate;
+  final Object cause;
+
+  const ProductSaveException({required this.isUpdate, required this.cause});
+
+  @override
+  String toString() =>
+      'Product ${isUpdate ? 'update' : 'creation'} failed: $cause';
+}
+
 class ProductMgwsStockInput {
   const ProductMgwsStockInput({
     required this.stockText,
@@ -110,8 +135,9 @@ class ProdottiCreaController {
       if (product != null) return product;
     }
 
-    throw Exception(
-      'Prodotto non trovato sul server. ID: ${normalizedId > 0 ? normalizedId : '-'}, codice prodotto: ${normalizedCode.isEmpty ? '-' : normalizedCode}',
+    throw ProductNotFoundException(
+      productId: normalizedId > 0 ? normalizedId : null,
+      productCode: normalizedCode.isEmpty ? null : normalizedCode,
     );
   }
 
@@ -176,7 +202,7 @@ class ProdottiCreaController {
       // Usa PlatformManager per creare il prodotto
       return await PlatformManager.prodotti.createProduct(prodotto);
     } catch (e) {
-      throw Exception('Errore durante la creazione del prodotto: $e');
+      throw ProductSaveException(isUpdate: false, cause: e);
     }
   }
 
@@ -186,7 +212,7 @@ class ProdottiCreaController {
       // Usa PlatformManager per aggiornare il prodotto
       return await PlatformManager.prodotti.updateProduct(prodotto);
     } catch (e) {
-      throw Exception('Errore durante l\'aggiornamento del prodotto: $e');
+      throw ProductSaveException(isUpdate: true, cause: e);
     }
   }
 

@@ -10505,5 +10505,1281 @@
   "inventoryReorderDraftNote": "Draft generated from an MGWS reorder suggestion",
   "@inventoryReorderDraftNote": {
     "description": "Localized string inventoryReorderDraftNote"
+  },
+  "productsNoProductSelected": "No product selected.",
+  "@productsNoProductSelected": {
+    "description": "Localized string productsNoProductSelected"
+  },
+  "productsNoValidCategorySelected": "No valid category selected.",
+  "@productsNoValidCategorySelected": {
+    "description": "Localized string productsNoValidCategorySelected"
+  },
+  "productsNoUpdatableProduct": "No updatable product found.",
+  "@productsNoUpdatableProduct": {
+    "description": "Localized string productsNoUpdatableProduct"
+  },
+  "productsBulkUpdateDone": "Update completed: {count} products updated.",
+  "@productsBulkUpdateDone": {
+    "description": "Localized string productsBulkUpdateDone",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsBulkUpdatePartial": "Partial update: {done} succeeded, {failed} failed.",
+  "@productsBulkUpdatePartial": {
+    "description": "Localized string productsBulkUpdatePartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsCategoryUpdateError": "Error updating categories: {error}",
+  "@productsCategoryUpdateError": {
+    "description": "Localized string productsCategoryUpdateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsNoValidProductSelected": "No valid product selected.",
+  "@productsNoValidProductSelected": {
+    "description": "Localized string productsNoValidProductSelected"
+  },
+  "productsNoCategorySelected": "No category selected.",
+  "@productsNoCategorySelected": {
+    "description": "Localized string productsNoCategorySelected"
+  },
+  "productsNoValidTagSelected": "No valid tag selected.",
+  "@productsNoValidTagSelected": {
+    "description": "Localized string productsNoValidTagSelected"
+  },
+  "productsTagsUpdated": "Tags updated on {count} products.",
+  "@productsTagsUpdated": {
+    "description": "Localized string productsTagsUpdated",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsTagUpdateError": "Error updating tags: {error}",
+  "@productsTagUpdateError": {
+    "description": "Localized string productsTagUpdateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsInvalidStatus": "Invalid status: {status}",
+  "@productsInvalidStatus": {
+    "description": "Localized string productsInvalidStatus",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "productsStatusUpdated": "Status updated on {count} products.",
+  "@productsStatusUpdated": {
+    "description": "Localized string productsStatusUpdated",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsStatusUpdateError": "Error updating status: {error}",
+  "@productsStatusUpdateError": {
+    "description": "Localized string productsStatusUpdateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsPermanentDeleteResult": "Permanent deletion: {done} succeeded, {failed} failed.",
+  "@productsPermanentDeleteResult": {
+    "description": "Localized string productsPermanentDeleteResult",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsTrashResult": "Moved to trash: {done} succeeded, {failed} failed.",
+  "@productsTrashResult": {
+    "description": "Localized string productsTrashResult",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsNoVariantChangeToSave": "No variant change to save.",
+  "@productsNoVariantChangeToSave": {
+    "description": "Localized string productsNoVariantChangeToSave"
+  },
+  "productsVariantsSaved": "Variants updated: {count}.",
+  "@productsVariantsSaved": {
+    "description": "Localized string productsVariantsSaved",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsPartial": "Partial variant update: {done} succeeded, {failed} failed.",
+  "@productsVariantsPartial": {
+    "description": "Localized string productsVariantsPartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "productsLoadPartial": "Partial product load: some items may be missing.",
+  "@productsLoadPartial": {
+    "description": "Localized string productsLoadPartial"
+  },
+  "productsServerUnreachableUsingLocal": "Server unreachable: using the product list already loaded.",
+  "@productsServerUnreachableUsingLocal": {
+    "description": "Localized string productsServerUnreachableUsingLocal"
+  },
+  "productsServerUnreachableNone": "Server unreachable: no products available.",
+  "@productsServerUnreachableNone": {
+    "description": "Localized string productsServerUnreachableNone"
+  },
+  "productsNoneOnServer": "No products found on the server.",
+  "@productsNoneOnServer": {
+    "description": "Localized string productsNoneOnServer"
+  },
+  "productsLoadErrorUsingCache": "Error loading products: using the previous cache.",
+  "@productsLoadErrorUsingCache": {
+    "description": "Localized string productsLoadErrorUsingCache"
+  },
+  "productsLoadError": "Error loading products.",
+  "@productsLoadError": {
+    "description": "Localized string productsLoadError"
+  },
+  "productsWooSessionExpired": "WooCommerce session expired: log out and log in again to restore variant sync.",
+  "@productsWooSessionExpired": {
+    "description": "Localized string productsWooSessionExpired"
+  },
+  "productsDeletingMany": "Deleting {count} products...",
+  "@productsDeletingMany": {
+    "description": "Localized string productsDeletingMany",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsDeletingOne": "Deleting product...",
+  "@productsDeletingOne": {
+    "description": "Localized string productsDeletingOne"
+  },
+  "productsDeletedOne": "Product deleted successfully.",
+  "@productsDeletedOne": {
+    "description": "Localized string productsDeletedOne"
+  },
+  "productsDeletePartial": "Partial deletion.",
+  "@productsDeletePartial": {
+    "description": "Localized string productsDeletePartial"
+  },
+  "productsDeleteFailed": "Deletion failed.",
+  "@productsDeleteFailed": {
+    "description": "Localized string productsDeleteFailed"
+  },
+  "productsNoSelectionForBulk": "No product selected for the bulk edit.",
+  "@productsNoSelectionForBulk": {
+    "description": "Localized string productsNoSelectionForBulk"
+  },
+  "productsNothingToSave": "No changes to save.",
+  "@productsNothingToSave": {
+    "description": "Localized string productsNothingToSave"
+  },
+  "productsRecapCategories": "Categories: {names}",
+  "@productsRecapCategories": {
+    "description": "Localized string productsRecapCategories",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapTags": "Tags: {names}",
+  "@productsRecapTags": {
+    "description": "Localized string productsRecapTags",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapStatus": "Status: {status}",
+  "@productsRecapStatus": {
+    "description": "Localized string productsRecapStatus",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapDelete": "Deletion of the {count} selected products",
+  "@productsRecapDelete": {
+    "description": "Localized string productsRecapDelete",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsRecapVariantPrices": "Variant prices or quantities",
+  "@productsRecapVariantPrices": {
+    "description": "Localized string productsRecapVariantPrices"
+  },
+  "productsNoCategoryChange": "No category change.",
+  "@productsNoCategoryChange": {
+    "description": "Localized string productsNoCategoryChange"
+  },
+  "productsNoTagChange": "No tag change.",
+  "@productsNoTagChange": {
+    "description": "Localized string productsNoTagChange"
+  },
+  "productsNoStatusChange": "No status change.",
+  "@productsNoStatusChange": {
+    "description": "Localized string productsNoStatusChange"
+  },
+  "productsNoDeletion": "No deletion.",
+  "@productsNoDeletion": {
+    "description": "Localized string productsNoDeletion"
+  },
+  "productsNoVariantChange": "No variant change.",
+  "@productsNoVariantChange": {
+    "description": "Localized string productsNoVariantChange"
+  },
+  "productsQuickSaveError": "Quick save error: {error}",
+  "@productsQuickSaveError": {
+    "description": "Localized string productsQuickSaveError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsValidationNameRequired": "The product name is required",
+  "@productsValidationNameRequired": {
+    "description": "Localized string productsValidationNameRequired"
+  },
+  "productsValidationBarcodeRequired": "The internal barcode is required",
+  "@productsValidationBarcodeRequired": {
+    "description": "Localized string productsValidationBarcodeRequired"
+  },
+  "productsValidationRegularPrice": "The regular price must be greater than 0",
+  "@productsValidationRegularPrice": {
+    "description": "Localized string productsValidationRegularPrice"
+  },
+  "productsValidationSalePrice": "The sale price must be lower than the regular price",
+  "@productsValidationSalePrice": {
+    "description": "Localized string productsValidationSalePrice"
+  },
+  "productsValidationShortDescription": "The short description is required",
+  "@productsValidationShortDescription": {
+    "description": "Localized string productsValidationShortDescription"
+  },
+  "productsValidationCategory": "The category is required",
+  "@productsValidationCategory": {
+    "description": "Localized string productsValidationCategory"
+  },
+  "productsValidationMainImageUrl": "Invalid main image URL",
+  "@productsValidationMainImageUrl": {
+    "description": "Localized string productsValidationMainImageUrl"
+  },
+  "productsValidationVariantPrefix": "Variant {index}: {message}",
+  "@productsValidationVariantPrefix": {
+    "description": "Localized string productsValidationVariantPrefix",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "productsValidationVariantBarcodeRequired": "Internal barcode required",
+  "@productsValidationVariantBarcodeRequired": {
+    "description": "Localized string productsValidationVariantBarcodeRequired"
+  },
+  "productsValidationVariantBarcodeDuplicate": "Duplicate internal barcode",
+  "@productsValidationVariantBarcodeDuplicate": {
+    "description": "Localized string productsValidationVariantBarcodeDuplicate"
+  },
+  "productsValidationVariantSkuDuplicate": "Duplicate product code",
+  "@productsValidationVariantSkuDuplicate": {
+    "description": "Localized string productsValidationVariantSkuDuplicate"
+  },
+  "productsValidationVariantPrice": "The price must be greater than 0",
+  "@productsValidationVariantPrice": {
+    "description": "Localized string productsValidationVariantPrice"
+  },
+  "productsValidationVariantQuantity": "The quantity cannot be negative",
+  "@productsValidationVariantQuantity": {
+    "description": "Localized string productsValidationVariantQuantity"
+  },
+  "productsValidationVariantAttribute": "At least one attribute is required",
+  "@productsValidationVariantAttribute": {
+    "description": "Localized string productsValidationVariantAttribute"
+  },
+  "productsValidationAttributeName": "Attribute name required",
+  "@productsValidationAttributeName": {
+    "description": "Localized string productsValidationAttributeName"
+  },
+  "productsValidationAttributeOption": "Attribute option required",
+  "@productsValidationAttributeOption": {
+    "description": "Localized string productsValidationAttributeOption"
+  },
+  "productsValidationVariantImageUrl": "Invalid image URL",
+  "@productsValidationVariantImageUrl": {
+    "description": "Localized string productsValidationVariantImageUrl"
+  },
+  "productsNotFoundOnServer": "Product not found on the server. ID: {id}, product code: {code}",
+  "@productsNotFoundOnServer": {
+    "description": "Localized string productsNotFoundOnServer",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "productsCreateFailed": "Error while creating the product: {error}",
+  "@productsCreateFailed": {
+    "description": "Localized string productsCreateFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsUpdateFailed": "Error while updating the product: {error}",
+  "@productsUpdateFailed": {
+    "description": "Localized string productsUpdateFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "productsNoValue": "No value",
+  "@productsNoValue": {
+    "description": "Localized string productsNoValue"
+  },
+  "productsAttributesTitle": "Product attributes",
+  "@productsAttributesTitle": {
+    "description": "Localized string productsAttributesTitle"
+  },
+  "productsAttributesHint": "Pick or type an attribute name and choose several values. The values field shows the selected ones separated by commas.",
+  "@productsAttributesHint": {
+    "description": "Localized string productsAttributesHint"
+  },
+  "productsNoAttributeConfigured": "No attribute configured",
+  "@productsNoAttributeConfigured": {
+    "description": "Localized string productsNoAttributeConfigured"
+  },
+  "productsVariantPhoto": "Variant photo",
+  "@productsVariantPhoto": {
+    "description": "Localized string productsVariantPhoto"
+  },
+  "productsVariantNoPhoto": "No photo linked to the variant.",
+  "@productsVariantNoPhoto": {
+    "description": "Localized string productsVariantNoPhoto"
+  },
+  "productsAttributes": "Attributes",
+  "@productsAttributes": {
+    "description": "Localized string productsAttributes"
+  },
+  "productsNoAttributeDefined": "No attribute defined",
+  "@productsNoAttributeDefined": {
+    "description": "Localized string productsNoAttributeDefined"
+  },
+  "productsImagesHint": "Only one cover. Images can also be selected by clicking the row.",
+  "@productsImagesHint": {
+    "description": "Localized string productsImagesHint"
+  },
+  "productsImagesSelected": "Selected",
+  "@productsImagesSelected": {
+    "description": "Localized string productsImagesSelected"
+  },
+  "productsNoImageSelected": "No image selected",
+  "@productsNoImageSelected": {
+    "description": "Localized string productsNoImageSelected"
+  },
+  "productsAddImagesHint": "Add one or more images from the media library.",
+  "@productsAddImagesHint": {
+    "description": "Localized string productsAddImagesHint"
+  },
+  "productsRemoveCover": "Remove cover",
+  "@productsRemoveCover": {
+    "description": "Localized string productsRemoveCover"
+  },
+  "productsRemoveImage": "Remove image",
+  "@productsRemoveImage": {
+    "description": "Localized string productsRemoveImage"
+  },
+  "productsVariantCover": "Variant cover",
+  "@productsVariantCover": {
+    "description": "Localized string productsVariantCover"
+  },
+  "productsImageUncheckable": "Cannot be checked",
+  "@productsImageUncheckable": {
+    "description": "Localized string productsImageUncheckable"
+  },
+  "productsImageUncheckableDetail": "Image cannot be loaded or timed out while reading its size.",
+  "@productsImageUncheckableDetail": {
+    "description": "Localized string productsImageUncheckableDetail"
+  },
+  "productsImageChecking": "Checking",
+  "@productsImageChecking": {
+    "description": "Localized string productsImageChecking"
+  },
+  "productsImageNoSpec": "No specification",
+  "@productsImageNoSpec": {
+    "description": "Localized string productsImageNoSpec"
+  },
+  "productsImageOutOfSpec": "Out of specification",
+  "@productsImageOutOfSpec": {
+    "description": "Localized string productsImageOutOfSpec"
+  },
+  "productsImageUrlCopied": "Image URL copied to the clipboard.",
+  "@productsImageUrlCopied": {
+    "description": "Localized string productsImageUrlCopied"
+  },
+  "productsBarcodeGenerateFailed": "Could not generate a unique barcode.",
+  "@productsBarcodeGenerateFailed": {
+    "description": "Localized string productsBarcodeGenerateFailed"
+  },
+  "productsVariantBarcodeGenerateFailed": "Could not generate a unique barcode for the variant.",
+  "@productsVariantBarcodeGenerateFailed": {
+    "description": "Localized string productsVariantBarcodeGenerateFailed"
+  },
+  "productsAttributeValues": "Attribute values",
+  "@productsAttributeValues": {
+    "description": "Localized string productsAttributeValues"
+  },
+  "productsFilterOrNewValue": "Filter or new value",
+  "@productsFilterOrNewValue": {
+    "description": "Localized string productsFilterOrNewValue"
+  },
+  "productsQuickVariantNeedsAttribute": "Enter at least a size or a colour for the quick variant.",
+  "@productsQuickVariantNeedsAttribute": {
+    "description": "Localized string productsQuickVariantNeedsAttribute"
+  },
+  "productsAddAttributeWithValues": "Add at least one attribute with one or more values.",
+  "@productsAddAttributeWithValues": {
+    "description": "Localized string productsAddAttributeWithValues"
+  },
+  "productsNoCombinationGenerated": "No combination generated.",
+  "@productsNoCombinationGenerated": {
+    "description": "Localized string productsNoCombinationGenerated"
+  },
+  "productsAllCombinationsExist": "All generated combinations are already linked to the product.",
+  "@productsAllCombinationsExist": {
+    "description": "Localized string productsAllCombinationsExist"
+  },
+  "productsCannotSaveOffline": "Cannot save in offline mode",
+  "@productsCannotSaveOffline": {
+    "description": "Localized string productsCannotSaveOffline"
+  },
+  "productsCheckRequiredFields": "Check the required fields",
+  "@productsCheckRequiredFields": {
+    "description": "Localized string productsCheckRequiredFields"
+  },
+  "productsVariableNeedsVariant": "Add at least one variant for the variable product.",
+  "@productsVariableNeedsVariant": {
+    "description": "Localized string productsVariableNeedsVariant"
+  },
+  "productsSaveStepValidating": "Validating data...",
+  "@productsSaveStepValidating": {
+    "description": "Localized string productsSaveStepValidating"
+  },
+  "productsSaveStepPreparing": "Preparing payload...",
+  "@productsSaveStepPreparing": {
+    "description": "Localized string productsSaveStepPreparing"
+  },
+  "productsSaveStepSaving": "Saving product and variants...",
+  "@productsSaveStepSaving": {
+    "description": "Localized string productsSaveStepSaving"
+  },
+  "productsSaveStepStock": "Recording MGWS stock...",
+  "@productsSaveStepStock": {
+    "description": "Localized string productsSaveStepStock"
+  },
+  "productsSaveStepDone": "Completed",
+  "@productsSaveStepDone": {
+    "description": "Localized string productsSaveStepDone"
+  },
+  "productsSaveStepError": "Error while saving",
+  "@productsSaveStepError": {
+    "description": "Localized string productsSaveStepError"
+  },
+  "productsAddAtLeastOneVariant": "Add at least one variant.",
+  "@productsAddAtLeastOneVariant": {
+    "description": "Localized string productsAddAtLeastOneVariant"
+  },
+  "productsVerifyNotFound": "Saved, but verification failed: product not found on the server.",
+  "@productsVerifyNotFound": {
+    "description": "Localized string productsVerifyNotFound"
+  },
+  "productsTypeLabel": "Product type",
+  "@productsTypeLabel": {
+    "description": "Localized string productsTypeLabel"
+  },
+  "productsCheckHighlightedFields": "Check the highlighted required fields",
+  "@productsCheckHighlightedFields": {
+    "description": "Localized string productsCheckHighlightedFields"
+  },
+  "productsUpdateButton": "Update",
+  "@productsUpdateButton": {
+    "description": "Localized string productsUpdateButton"
+  },
+  "productsSaveProduct": "Save product",
+  "@productsSaveProduct": {
+    "description": "Localized string productsSaveProduct"
+  },
+  "productsVariantDetails": "Variant details #{index}",
+  "@productsVariantDetails": {
+    "description": "Localized string productsVariantDetails",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantNumber": "Variant #{index}",
+  "@productsVariantNumber": {
+    "description": "Localized string productsVariantNumber",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantWord": "Variant",
+  "@productsVariantWord": {
+    "description": "Localized string productsVariantWord"
+  },
+  "productsImageUsedInVariants": "Used in {count} variants",
+  "@productsImageUsedInVariants": {
+    "description": "Localized string productsImageUsedInVariants",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsImageCompliant": "Compliant",
+  "@productsImageCompliant": {
+    "description": "Localized string productsImageCompliant"
+  },
+  "productsImageOutOfSpecDetail": "Out of specification: image {width} × {height} px, threshold {maxWidth} × {maxHeight} px.",
+  "@productsImageOutOfSpecDetail": {
+    "description": "Localized string productsImageOutOfSpecDetail",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "maxWidth": {
+        "type": "int"
+      },
+      "maxHeight": {
+        "type": "int"
+      }
+    }
+  },
+  "productsImageCompliantDetail": "Compliant: image {width} × {height} px, threshold {maxWidth} × {maxHeight} px.",
+  "@productsImageCompliantDetail": {
+    "description": "Localized string productsImageCompliantDetail",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "maxWidth": {
+        "type": "int"
+      },
+      "maxHeight": {
+        "type": "int"
+      }
+    }
+  },
+  "productsCreateNewOption": "+ Create new",
+  "@productsCreateNewOption": {
+    "description": "Localized string productsCreateNewOption"
+  },
+  "productsCreateNewOptionUpper": "+ CREATE NEW",
+  "@productsCreateNewOptionUpper": {
+    "description": "Localized string productsCreateNewOptionUpper"
+  },
+  "productsCreateValueOption": "+ CREATE: {value}",
+  "@productsCreateValueOption": {
+    "description": "Localized string productsCreateValueOption",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsBarcodeGenerated": "Barcode generated: {value}",
+  "@productsBarcodeGenerated": {
+    "description": "Localized string productsBarcodeGenerated",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantBarcodeGenerated": "Variant barcode generated: {value}",
+  "@productsVariantBarcodeGenerated": {
+    "description": "Localized string productsVariantBarcodeGenerated",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsAttributeValuesOf": "{attribute} values",
+  "@productsAttributeValuesOf": {
+    "description": "Localized string productsAttributeValuesOf",
+    "placeholders": {
+      "attribute": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAlreadyPresent": "The variant {summary} is already present.",
+  "@productsVariantAlreadyPresent": {
+    "description": "Localized string productsVariantAlreadyPresent",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAdded": "Variant {summary} added.",
+  "@productsVariantAdded": {
+    "description": "Localized string productsVariantAdded",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantDefaultName": "Variant {index}",
+  "@productsVariantDefaultName": {
+    "description": "Localized string productsVariantDefaultName",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantsGenerated": "Generated {count} new variants.",
+  "@productsVariantsGenerated": {
+    "description": "Localized string productsVariantsGenerated",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantCopyName": "{name} (Copy)",
+  "@productsVariantCopyName": {
+    "description": "Localized string productsVariantCopyName",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productsDeleteVariantConfirm": "Are you sure you want to delete the variant \"{name}\"?",
+  "@productsDeleteVariantConfirm": {
+    "description": "Localized string productsDeleteVariantConfirm",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantAttributeNameMissing": "Variant {variant}, attribute {attribute}: attribute name missing.",
+  "@productsVariantAttributeNameMissing": {
+    "description": "Localized string productsVariantAttributeNameMissing",
+    "placeholders": {
+      "variant": {
+        "type": "int"
+      },
+      "attribute": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantAttributeValueMissing": "Variant {variant}, attribute {attribute}: value missing.",
+  "@productsVariantAttributeValueMissing": {
+    "description": "Localized string productsVariantAttributeValueMissing",
+    "placeholders": {
+      "variant": {
+        "type": "int"
+      },
+      "attribute": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantNeedsAttribute": "Variant {variant}: add at least one valid attribute or remove the variant.",
+  "@productsVariantNeedsAttribute": {
+    "description": "Localized string productsVariantNeedsAttribute",
+    "placeholders": {
+      "variant": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantDuplicateCombination": "Variant {variant}: this combination already exists.",
+  "@productsVariantDuplicateCombination": {
+    "description": "Localized string productsVariantDuplicateCombination",
+    "placeholders": {
+      "variant": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVariantDuplicateBarcode": "Variant {variant}: duplicate internal barcode ({barcode}).",
+  "@productsVariantDuplicateBarcode": {
+    "description": "Localized string productsVariantDuplicateBarcode",
+    "placeholders": {
+      "variant": {
+        "type": "int"
+      },
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVerifyCreated": "Product created and verified ({found}/{expected} variants found).",
+  "@productsVerifyCreated": {
+    "description": "Localized string productsVerifyCreated",
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVerifyUpdated": "Product updated and verified ({found}/{expected} variants found).",
+  "@productsVerifyUpdated": {
+    "description": "Localized string productsVerifyUpdated",
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVerifyIncomplete": "Product saved, but variant verification is incomplete ({found}/{expected}).",
+  "@productsVerifyIncomplete": {
+    "description": "Localized string productsVerifyIncomplete",
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "productsVerifyMissingVariants": "Product saved, but {count} variants are missing: {barcodes}",
+  "@productsVerifyMissingVariants": {
+    "description": "Localized string productsVerifyMissingVariants",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "barcodes": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantCount": "Variants: {count}",
+  "@productsRecapVariantCount": {
+    "description": "Localized string productsRecapVariantCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsRecapNewVariant": "{label}: new variant",
+  "@productsRecapNewVariant": {
+    "description": "Localized string productsRecapNewVariant",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantSku": "{label} product code: {value}",
+  "@productsRecapVariantSku": {
+    "description": "Localized string productsRecapVariantSku",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantBarcode": "{label} internal barcode: {value}",
+  "@productsRecapVariantBarcode": {
+    "description": "Localized string productsRecapVariantBarcode",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantPrice": "{label} price: {value}",
+  "@productsRecapVariantPrice": {
+    "description": "Localized string productsRecapVariantPrice",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantSalePrice": "{label} sale price: {value}",
+  "@productsRecapVariantSalePrice": {
+    "description": "Localized string productsRecapVariantSalePrice",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantQuantity": "{label} quantity: {value}",
+  "@productsRecapVariantQuantity": {
+    "description": "Localized string productsRecapVariantQuantity",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapVariantImages": "{label} images: {value}",
+  "@productsRecapVariantImages": {
+    "description": "Localized string productsRecapVariantImages",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "productsRecapEmpty": "empty",
+  "@productsRecapEmpty": {
+    "description": "Localized string productsRecapEmpty"
+  },
+  "productsRecapVariantWithAttributes": "Variant {attributes}",
+  "@productsRecapVariantWithAttributes": {
+    "description": "Localized string productsRecapVariantWithAttributes",
+    "placeholders": {
+      "attributes": {
+        "type": "String"
+      }
+    }
+  },
+  "productsInitializing": "Initializing...",
+  "@productsInitializing": {
+    "description": "Localized string productsInitializing"
+  },
+  "productsBulkEdit": "Bulk edit",
+  "@productsBulkEdit": {
+    "description": "Localized string productsBulkEdit"
+  },
+  "productsSelectAProduct": "Select a product",
+  "@productsSelectAProduct": {
+    "description": "Localized string productsSelectAProduct"
+  },
+  "productsToSeeDetails": "to see the details",
+  "@productsToSeeDetails": {
+    "description": "Localized string productsToSeeDetails"
+  },
+  "productsOperationRunning": "Operation in progress",
+  "@productsOperationRunning": {
+    "description": "Localized string productsOperationRunning"
+  },
+  "productsSortNameAsc": "Name (A-Z)",
+  "@productsSortNameAsc": {
+    "description": "Localized string productsSortNameAsc"
+  },
+  "productsSortNameDesc": "Name (Z-A)",
+  "@productsSortNameDesc": {
+    "description": "Localized string productsSortNameDesc"
+  },
+  "productsSortPriceAsc": "Price (ascending)",
+  "@productsSortPriceAsc": {
+    "description": "Localized string productsSortPriceAsc"
+  },
+  "productsSortPriceDesc": "Price (descending)",
+  "@productsSortPriceDesc": {
+    "description": "Localized string productsSortPriceDesc"
+  },
+  "productsSortBy": "Sort by...",
+  "@productsSortBy": {
+    "description": "Localized string productsSortBy"
+  },
+  "productsOperatorNotAvailable": "Operator not available for the selected field.",
+  "@productsOperatorNotAvailable": {
+    "description": "Localized string productsOperatorNotAvailable"
+  },
+  "productsFilter": "Filter",
+  "@productsFilter": {
+    "description": "Localized string productsFilter"
+  },
+  "productsCollapseFilters": "Collapse filters",
+  "@productsCollapseFilters": {
+    "description": "Localized string productsCollapseFilters"
+  },
+  "productsExpandFilters": "Expand filters",
+  "@productsExpandFilters": {
+    "description": "Localized string productsExpandFilters"
+  },
+  "productsQuickSearch": "Quick search",
+  "@productsQuickSearch": {
+    "description": "Localized string productsQuickSearch"
+  },
+  "productsFilterValue": "Filter value",
+  "@productsFilterValue": {
+    "description": "Localized string productsFilterValue"
+  },
+  "productsSearchAllFields": "Search all fields",
+  "@productsSearchAllFields": {
+    "description": "Localized string productsSearchAllFields"
+  },
+  "productsQuickSearchExample": "E.g. Nike, 1, available",
+  "@productsQuickSearchExample": {
+    "description": "Localized string productsQuickSearchExample"
+  },
+  "productsApplySearch": "Apply search",
+  "@productsApplySearch": {
+    "description": "Localized string productsApplySearch"
+  },
+  "productsAddFilter": "Add filter",
+  "@productsAddFilter": {
+    "description": "Localized string productsAddFilter"
+  },
+  "productsUnsavedChangesLost": "Unsaved changes will be lost. Do you want to continue?",
+  "@productsUnsavedChangesLost": {
+    "description": "Localized string productsUnsavedChangesLost"
+  },
+  "productsUnnamed": "Unnamed product",
+  "@productsUnnamed": {
+    "description": "Localized string productsUnnamed"
+  },
+  "productsDeleteOneFailed": "Product deletion failed.",
+  "@productsDeleteOneFailed": {
+    "description": "Localized string productsDeleteOneFailed"
+  },
+  "productsLoadingVariants": "Loading variants...",
+  "@productsLoadingVariants": {
+    "description": "Localized string productsLoadingVariants"
+  },
+  "productsSimpleAddedWithoutVariants": "Simple product: it is added without variants.",
+  "@productsSimpleAddedWithoutVariants": {
+    "description": "Localized string productsSimpleAddedWithoutVariants"
+  },
+  "productsDetailTitle": "Product detail",
+  "@productsDetailTitle": {
+    "description": "Localized string productsDetailTitle"
+  },
+  "productsImage": "Product image",
+  "@productsImage": {
+    "description": "Localized string productsImage"
+  },
+  "productsPhotos": "Product photos",
+  "@productsPhotos": {
+    "description": "Localized string productsPhotos"
+  },
+  "productsPhotosHint": "Scroll the bar to see all photos. Tap a thumbnail to change image.",
+  "@productsPhotosHint": {
+    "description": "Localized string productsPhotosHint"
+  },
+  "productsSkuLabel": "Item code / SKU",
+  "@productsSkuLabel": {
+    "description": "Localized string productsSkuLabel"
+  },
+  "productsManufacturerBarcode": "Manufacturer barcode",
+  "@productsManufacturerBarcode": {
+    "description": "Localized string productsManufacturerBarcode"
+  },
+  "productsNoCategory": "No category",
+  "@productsNoCategory": {
+    "description": "Localized string productsNoCategory"
+  },
+  "productsNoTag": "No tag",
+  "@productsNoTag": {
+    "description": "Localized string productsNoTag"
+  },
+  "productsAvailability": "Availability",
+  "@productsAvailability": {
+    "description": "Localized string productsAvailability"
+  },
+  "productsQuickEdit": "Quick edit",
+  "@productsQuickEdit": {
+    "description": "Localized string productsQuickEdit"
+  },
+  "productsEditActive": "Editing",
+  "@productsEditActive": {
+    "description": "Localized string productsEditActive"
+  },
+  "productsMultiSelectHint": "Multi-select mode: categories, tags, status and deletion can be edited.",
+  "@productsMultiSelectHint": {
+    "description": "Localized string productsMultiSelectHint"
+  },
+  "productsDeleteModeHint": "Uses soft/hard delete according to the settings.",
+  "@productsDeleteModeHint": {
+    "description": "Localized string productsDeleteModeHint"
+  },
+  "productsNoVariantFound": "No variant found.",
+  "@productsNoVariantFound": {
+    "description": "Localized string productsNoVariantFound"
+  },
+  "productsSoldOut": "Sold out",
+  "@productsSoldOut": {
+    "description": "Localized string productsSoldOut"
+  },
+  "mediaInvalidFilePath": "Invalid file path",
+  "@mediaInvalidFilePath": {
+    "description": "Localized string mediaInvalidFilePath"
+  },
+  "mediaOnlyImages": "Please drag only image files (jpg, png, gif, webp, svg)",
+  "@mediaOnlyImages": {
+    "description": "Localized string mediaOnlyImages"
+  },
+  "mediaSelectImages": "Select images",
+  "@mediaSelectImages": {
+    "description": "Localized string mediaSelectImages"
+  },
+  "mediaSelectImage": "Select image",
+  "@mediaSelectImage": {
+    "description": "Localized string mediaSelectImage"
+  },
+  "mediaDropToUpload": "Drop here to upload",
+  "@mediaDropToUpload": {
+    "description": "Localized string mediaDropToUpload"
+  },
+  "mediaNoImageFound": "No image found",
+  "@mediaNoImageFound": {
+    "description": "Localized string mediaNoImageFound"
+  },
+  "mediaUntitledImage": "Untitled image",
+  "@mediaUntitledImage": {
+    "description": "Localized string mediaUntitledImage"
+  },
+  "mediaOverThreshold": "Over threshold",
+  "@mediaOverThreshold": {
+    "description": "Localized string mediaOverThreshold"
+  },
+  "productsAddCount": "Add ({count})",
+  "@productsAddCount": {
+    "description": "Localized string productsAddCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsPreviewOf": "Preview of {name}",
+  "@productsPreviewOf": {
+    "description": "Localized string productsPreviewOf",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productsSelectedCount": "{count} products selected",
+  "@productsSelectedCount": {
+    "description": "Localized string productsSelectedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsCategoryLabel": "Category",
+  "@productsCategoryLabel": {
+    "description": "Localized string productsCategoryLabel"
+  },
+  "productsStatusLabel": "Status",
+  "@productsStatusLabel": {
+    "description": "Localized string productsStatusLabel"
+  },
+  "productsCategoriesCount": "Categories ({count})",
+  "@productsCategoriesCount": {
+    "description": "Localized string productsCategoriesCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsTagsCount": "Tags ({count})",
+  "@productsTagsCount": {
+    "description": "Localized string productsTagsCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productsNoVariantsUseButton": "This product has no variants: select it with the button above to add it to the register.",
+  "@productsNoVariantsUseButton": {
+    "description": "Localized string productsNoVariantsUseButton"
+  },
+  "productsInternalBarcodeValue": "Internal barcode: {barcode}",
+  "@productsInternalBarcodeValue": {
+    "description": "Localized string productsInternalBarcodeValue",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "productsQtyValue": "Qty {quantity}",
+  "@productsQtyValue": {
+    "description": "Localized string productsQtyValue",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaLoadError": "Loading error: {error}",
+  "@mediaLoadError": {
+    "description": "Localized string mediaLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaSearchError": "Search error: {error}",
+  "@mediaSearchError": {
+    "description": "Localized string mediaSearchError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaFilePickError": "Error selecting the file: {error}",
+  "@mediaFilePickError": {
+    "description": "Localized string mediaFilePickError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaUploaded": "Image \"{fileName}\" uploaded successfully!",
+  "@mediaUploaded": {
+    "description": "Localized string mediaUploaded",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "mediaImagesFoundSelected": "{found} images found • {selected} selected",
+  "@mediaImagesFoundSelected": {
+    "description": "Localized string mediaImagesFoundSelected",
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaImagesFound": "{found} images found",
+  "@mediaImagesFound": {
+    "description": "Localized string mediaImagesFound",
+    "placeholders": {
+      "found": {
+        "type": "int"
+      }
+    }
+  },
+  "mediaOversizedDetail": "Size {width} × {height} above threshold {maxWidth} × {maxHeight} px",
+  "@mediaOversizedDetail": {
+    "description": "Localized string mediaOversizedDetail",
+    "placeholders": {
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      },
+      "maxWidth": {
+        "type": "String"
+      },
+      "maxHeight": {
+        "type": "String"
+      }
+    }
   }
 }

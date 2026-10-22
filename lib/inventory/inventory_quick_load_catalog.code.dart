@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../l10n/localized_text.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../products/class_products.dart';
 import '../products/product_list/product_list.code.dart';
@@ -14,7 +15,7 @@ class InventoryQuickLoadCatalogController extends ChangeNotifier {
   bool _disposed = false;
   bool isLoading = false;
   int loadedProducts = 0;
-  String? errorMessage;
+  LocalizedText? errorMessage;
 
   List<ProdottoGlobal> get products => _productsController.prodotti;
 
@@ -37,7 +38,7 @@ class InventoryQuickLoadCatalogController extends ChangeNotifier {
       errorMessage = _productsController.consumeLastLoadWarning();
     } catch (error) {
       if (_disposed) return;
-      errorMessage = error.toString();
+      errorMessage = literalText(error.toString());
     } finally {
       if (!_disposed) {
         isLoading = false;

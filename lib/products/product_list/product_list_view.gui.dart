@@ -457,9 +457,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(context.l10n.prodottiConfermaAnnullaModifiche),
-        content: const Text(
-          'Le modifiche non salvate andranno perse. Vuoi continuare?',
-        ),
+        content: Text(context.l10n.productsUnsavedChangesLost),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -489,7 +487,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_gestisci',
-        'Nessun prodotto selezionato per la modifica multipla.',
+        context.l10n.productsNoSelectionForBulk,
       );
       return;
     }
@@ -503,7 +501,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_gestisci',
-        'Nessuna modifica da salvare.',
+        context.l10n.productsNothingToSave,
       );
       return;
     }
@@ -524,13 +522,19 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
 
       final recapChanges = <String>[
         if (categoriesChanged)
-          'Categorie: ${_selectedCategoryNames.join(', ')}',
-        if (tagsChanged) 'Tag: ${_selectedTagNames.join(', ')}',
-        if (statusChanged) 'Stato: $normalizedStatus',
+          context.l10n.productsRecapCategories(
+            _selectedCategoryNames.join(', '),
+          ),
+        if (tagsChanged)
+          context.l10n.productsRecapTags(_selectedTagNames.join(', ')),
+        if (statusChanged)
+          context.l10n.productsRecapStatus(
+            ProdottoUtils.getStatusLabel(context.l10n, normalizedStatus),
+          ),
         if (isMulti && _bulkDelete)
-          'Eliminazione dei ${controller.selectedProductsCount} prodotti selezionati',
+          context.l10n.productsRecapDelete(controller.selectedProductsCount),
         if (!isMulti && !categoriesChanged && !tagsChanged && !statusChanged)
-          'Prezzi o quantità delle varianti',
+          context.l10n.productsRecapVariantPrices,
       ];
       final confirmed = await NotificationRecapDialog.edit(
         context,
@@ -542,10 +546,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
 
       setState(() => _isSaving = true);
 
-      var categoryResult = const BulkCategoryUpdateResult(
+      var categoryResult = BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessuna modifica categorie.',
+        message: (l10n) => l10n.productsNoCategoryChange,
       );
       if (categoriesChanged) {
         final categories = await controller.resolveCategoryNames(
@@ -557,10 +561,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         );
       }
 
-      var tagResult = const BulkCategoryUpdateResult(
+      var tagResult = BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessuna modifica tag.',
+        message: (l10n) => l10n.productsNoTagChange,
       );
       if (tagsChanged) {
         final tags = await controller.resolveTagNames(
@@ -572,10 +576,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         );
       }
 
-      var statusResult = const BulkCategoryUpdateResult(
+      var statusResult = BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessuna modifica stato.',
+        message: (l10n) => l10n.productsNoStatusChange,
       );
       if (statusChanged) {
         statusResult = await controller.bulkUpdateSelectedProductsStatus(
@@ -583,10 +587,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         );
       }
 
-      var deleteResult = const BulkCategoryUpdateResult(
+      var deleteResult = BulkCategoryUpdateResult(
         successCount: 0,
         failedCount: 0,
-        message: 'Nessuna eliminazione.',
+        message: (l10n) => l10n.productsNoDeletion,
       );
       if (isMulti && _bulkDelete) {
         final settings = AppSettings();
@@ -596,10 +600,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         );
       }
 
-      var variantResult = const QuickVariantSaveResult(
+      var variantResult = QuickVariantSaveResult(
         updated: 0,
         failed: 0,
-        message: 'Nessuna modifica varianti.',
+        message: (l10n) => l10n.productsNoVariantChange,
       );
       if (!isMulti) {
         final edits = <int, QuickVariantEdit>{};
@@ -647,7 +651,13 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       NotificationService.instance.messageBar(
         hasErrors ? 'warning' : 'successo',
         'prodotti_gestisci',
-        '${categoryResult.message} ${tagResult.message} ${statusResult.message} ${deleteResult.message} ${variantResult.message}',
+        [
+          categoryResult.message,
+          tagResult.message,
+          statusResult.message,
+          deleteResult.message,
+          variantResult.message,
+        ].map((message) => message(context.l10n)).join(' '),
       );
 
       controller.clearBulkSelection();
@@ -663,7 +673,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       NotificationService.instance.messageBar(
         'errore',
         'prodotti_gestisci',
-        'Errore salvataggio rapido: $e',
+        context.l10n.productsQuickSaveError('$e'),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1024,7 +1034,8 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
             : await NotificationRecapDialog.delete(
                 context,
                 items: [widget.prodotto],
-                itemLabel: (product) => product.nome ?? 'Prodotto senza nome',
+                itemLabel: (product) =>
+                    product.nome ?? context.l10n.productsUnnamed,
                 isDestructive: true,
               );
 
@@ -1037,8 +1048,8 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
           removed ? 'successo' : 'errore',
           'prodotti_gestisci',
           removed
-              ? 'Prodotto eliminato con successo.'
-              : 'Eliminazione prodotto non riuscita.',
+              ? context.l10n.productsDeletedOne
+              : context.l10n.productsDeleteOneFailed,
         );
         if (removed) {
           widget.onProductDeleted?.call();
@@ -1196,7 +1207,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        'Caricamento varianti...',
+                        context.l10n.productsLoadingVariants,
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -1211,8 +1222,8 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                     onChanged: (value) => widget.onProdottoSempliceCassaChecked
                         ?.call(value ?? false),
                     title: Text(context.l10n.prodottiAggiungiAllaCassa),
-                    subtitle: const Text(
-                      'Prodotto semplice: viene aggiunto senza varianti.',
+                    subtitle: Text(
+                      context.l10n.productsSimpleAddedWithoutVariants,
                     ),
                     secondary: const Icon(Icons.add_shopping_cart),
                     controlAffinity: ListTileControlAffinity.leading,
@@ -1265,7 +1276,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text(widget.prodotto.nome ?? 'Dettaglio prodotto'),
+          title: Text(widget.prodotto.nome ?? context.l10n.productsDetailTitle),
         ),
         body: body,
       );
@@ -1471,7 +1482,7 @@ class _DettaglioHeroState extends State<_DettaglioHero> {
                                     widget.currentImage,
                                     title:
                                         widget.prodotto.nome ??
-                                        'Immagine prodotto',
+                                        context.l10n.productsImage,
                                     imageUrls: widget.galleryImages,
                                   ),
                                   icon: const Icon(
@@ -1491,7 +1502,7 @@ class _DettaglioHeroState extends State<_DettaglioHero> {
               if (widget.galleryImages.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Text(
-                  'Foto prodotto',
+                  context.l10n.productsPhotos,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: theme.primaryColor,
@@ -1524,7 +1535,7 @@ class _DettaglioHeroState extends State<_DettaglioHero> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Scorri la barra per vedere tutte le foto. Tocca una miniatura per cambiare immagine.',
+                  context.l10n.productsPhotosHint,
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -1557,36 +1568,39 @@ class _ReadonlyInfoCard extends StatelessWidget {
           const SizedBox(height: _kDetailGap),
           _InfoRow(label: 'ID', value: '${prodotto.id ?? '-'}'),
           _InfoRow(
-            label: 'Codice articolo / SKU',
+            label: context.l10n.productsSkuLabel,
             value: prodotto.codiceProdotto ?? '-',
           ),
-          _InfoRow(label: 'Barcode', value: prodotto.barcodeInterno ?? '-'),
           _InfoRow(
-            label: 'Barcode produttore',
+            label: context.l10n.prodottiBarcode,
+            value: prodotto.barcodeInterno ?? '-',
+          ),
+          _InfoRow(
+            label: context.l10n.productsManufacturerBarcode,
             value: prodotto.barcodeProduttore ?? '-',
           ),
           // Categorie con chip
           _InfoRowWithChips(
-            label: 'Categoria',
+            label: context.l10n.productsCategoryLabel,
             items: prodotto.categoria?.map((c) => c.nome).toList() ?? [],
             color: customColors.stockAvailable,
             icon: Icons.category_outlined,
-            emptyText: 'Nessuna categoria',
+            emptyText: context.l10n.productsNoCategory,
           ),
           // Tag con chip
           _InfoRowWithChips(
-            label: 'Tag',
+            label: context.l10n.prodottiTags,
             items: prodotto.tag?.map((t) => t.nome).toList() ?? [],
             color: theme.primaryColor,
             icon: Icons.tag,
-            emptyText: 'Nessun tag',
+            emptyText: context.l10n.productsNoTag,
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _InlineInfoField(
-                  label: 'Stato',
+                  label: context.l10n.productsStatusLabel,
                   value: ProdottoUtils.getStatusLabel(
                     context.l10n,
                     prodotto.status,
@@ -1599,7 +1613,7 @@ class _ReadonlyInfoCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _InlineInfoField(
-                  label: 'Disponibilità',
+                  label: context.l10n.productsAvailability,
                   value: ClassFormtter.getDisponibilitaText(prodotto.inStock),
                 ),
               ),
@@ -1644,7 +1658,10 @@ class _ReadonlyInfoCard extends StatelessWidget {
               );
             },
           ),
-          _InfoRow(label: 'Marca', value: prodotto.marca ?? '-'),
+          _InfoRow(
+            label: context.l10n.prodottiMarchio,
+            value: prodotto.marca ?? '-',
+          ),
         ],
       ),
     );
@@ -1842,7 +1859,9 @@ class _QuickEditCard extends StatelessWidget {
         children: [
           _SectionTitle(
             icon: Icons.edit_note_outlined,
-            title: isMultiEdit ? 'Modifica in massa' : 'Modifica rapida',
+            title: isMultiEdit
+                ? context.l10n.productsBulkEdit
+                : context.l10n.productsQuickEdit,
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -1853,7 +1872,11 @@ class _QuickEditCard extends StatelessWidget {
               FilledButton.icon(
                 onPressed: (isSaving || isEditMode) ? null : onToggleEdit,
                 icon: Icon(isEditMode ? Icons.lock_open : Icons.edit),
-                label: Text(isEditMode ? 'Modifica attiva' : 'Modifica rapida'),
+                label: Text(
+                  isEditMode
+                      ? context.l10n.productsEditActive
+                      : context.l10n.productsQuickEdit,
+                ),
               ),
               if (isEditMode)
                 OutlinedButton(
@@ -1880,7 +1903,7 @@ class _QuickEditCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  'Modalita multi-select: sono editabili categorie, tag, stato ed eliminazione.',
+                  context.l10n.productsMultiSelectHint,
                   style: theme.textTheme.bodySmall,
                 ),
               ),
@@ -1893,8 +1916,10 @@ class _QuickEditCard extends StatelessWidget {
                   icon: const Icon(Icons.category_outlined),
                   label: Text(
                     selectedCategoryNames.isEmpty
-                        ? 'Categorie'
-                        : 'Categorie (${selectedCategoryNames.length})',
+                        ? context.l10n.prodottiCategories
+                        : context.l10n.productsCategoriesCount(
+                            selectedCategoryNames.length,
+                          ),
                   ),
                 ),
                 OutlinedButton.icon(
@@ -1902,8 +1927,10 @@ class _QuickEditCard extends StatelessWidget {
                   icon: const Icon(Icons.tag),
                   label: Text(
                     selectedTagNames.isEmpty
-                        ? 'Tag'
-                        : 'Tag (${selectedTagNames.length})',
+                        ? context.l10n.prodottiTags
+                        : context.l10n.productsTagsCount(
+                            selectedTagNames.length,
+                          ),
                   ),
                 ),
                 SizedBox(
@@ -1948,9 +1975,7 @@ class _QuickEditCard extends StatelessWidget {
                 onChanged: isSaving ? null : onBulkDeleteChanged,
                 contentPadding: EdgeInsets.zero,
                 title: Text(context.l10n.prodottiEliminaSelezionati),
-                subtitle: const Text(
-                  'Usa soft/hard delete in base alle impostazioni.',
-                ),
+                subtitle: Text(context.l10n.productsDeleteModeHint),
               ),
             ],
           ],
@@ -2012,12 +2037,11 @@ class _VariantsListCard extends StatelessWidget {
           if (varianti.isEmpty)
             modalitaSelezioneCassa
                 ? Text(
-                    'Questo prodotto non ha varianti: selezionalo con il '
-                    'pulsante qui sopra per aggiungerlo alla cassa.',
+                    context.l10n.productsNoVariantsUseButton,
                     style: theme.textTheme.bodyMedium,
                   )
                 : Text(
-                    'Nessuna variante trovata.',
+                    context.l10n.productsNoVariantFound,
                     style: theme.textTheme.bodyMedium,
                   )
           else
@@ -2114,7 +2138,9 @@ class _VariantsListCard extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Barcode interno: ${variante.barcodeInterno}',
+                                      context.l10n.productsInternalBarcodeValue(
+                                        variante.barcodeInterno,
+                                      ),
                                       style: theme.textTheme.bodySmall,
                                     ),
                                     if (variante.attributi.isNotEmpty) ...[
@@ -2178,14 +2204,16 @@ class _VariantsListCard extends StatelessWidget {
                               _VariantPriceLabel(variante: variante),
                               _StatusPill(
                                 label: isOutOfStock
-                                    ? 'Esaurito'
-                                    : 'Disponibile',
+                                    ? context.l10n.productsSoldOut
+                                    : context.l10n.productsAvailable,
                                 color: isOutOfStock
                                     ? customColors.stockUnavailable
                                     : customColors.stockAvailable,
                               ),
                               Text(
-                                'Qty ${variante.quantita}',
+                                context.l10n.productsQtyValue(
+                                  variante.quantita,
+                                ),
                                 style: theme.textTheme.bodySmall,
                               ),
                             ],

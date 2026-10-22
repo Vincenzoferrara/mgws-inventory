@@ -228,7 +228,14 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     } catch (e) {
       if (mounted) {
         setState(() {
-          _initializationError = '${context.l10n.productsFormInitFailed}: $e';
+          final detail = e is ProductNotFoundException
+              ? context.l10n.productsNotFoundOnServer(
+                  '${e.productId ?? '-'}',
+                  e.productCode ?? '-',
+                )
+              : '$e';
+          _initializationError =
+              '${context.l10n.productsFormInitFailed}: $detail';
         });
       }
     } finally {
@@ -943,7 +950,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               Expanded(
                 child: _buildSmartTextFormField(
                   controller: _barcodeInternoController,
-                  label: 'Barcode',
+                  label: context.l10n.prodottiBarcode,
                   icon: Icons.qr_code,
                   validator: (v) => (v == null || v.isEmpty)
                       ? context.l10n.productsRequiredField
@@ -1637,7 +1644,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         children: [
           _buildVariantGridHeader(
             primaryAttribute: primaryAttribute,
-            secondaryAttribute: secondaryAttribute ?? 'Sottogruppo',
+            secondaryAttribute:
+                secondaryAttribute ?? context.l10n.productsSubgroup,
           ),
           const Divider(height: 1),
           ...primaryGroups.entries.map(
@@ -1717,7 +1725,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       excluding: primaryAttribute,
     );
     final secondaryGroups = secondaryAttribute == null
-        ? <String, List<int>>{'Senza valore': indexes}
+        ? <String, List<int>>{context.l10n.productsNoValue: indexes}
         : _groupVariantIndexesByAttribute(secondaryAttribute, indexes: indexes);
 
     // The non-positioned content determines the height. The positioned cell
@@ -1978,7 +1986,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     for (final index
         in indexes ?? List<int>.generate(_varianti.length, (i) => i)) {
       final value = _attributeValue(_varianti[index], attributeName);
-      groups.putIfAbsent(value ?? 'Senza valore', () => <int>[]).add(index);
+      groups
+          .putIfAbsent(value ?? context.l10n.productsNoValue, () => <int>[])
+          .add(index);
     }
     final sortedEntries = groups.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
@@ -2122,12 +2132,12 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Attributi del prodotto',
+              context.l10n.productsAttributesTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),
             Text(
-              'Seleziona o scrivi nome attributo e scegli più valori. Il campo valori mostra i selezionati separati da virgola.',
+              context.l10n.productsAttributesHint,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: context.colors.subtitleColor,
               ),
@@ -2150,7 +2160,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Nessun attributo configurato',
+                      context.l10n.productsNoAttributeConfigured,
                       style: TextStyle(color: context.colors.subtitleColor),
                     ),
                   ],
@@ -2176,7 +2186,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         Row(
           children: [
             Text(
-              'Dettagli variante #${index + 1}',
+              context.l10n.productsVariantDetails(index + 1),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const Spacer(),
@@ -2397,7 +2407,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               children: [
                 Expanded(
                   child: Text(
-                    'Foto variante',
+                    context.l10n.productsVariantPhoto,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
@@ -2411,7 +2421,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             const SizedBox(height: 10),
             if (urls.isEmpty)
               Text(
-                'Nessuna foto associata alla variante.',
+                context.l10n.productsVariantNoPhoto,
                 style: Theme.of(context).textTheme.bodySmall,
               )
             else
@@ -2584,13 +2594,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Attributi',
+                  context.l10n.productsAttributes,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Variante #${varianteIndex + 1}',
+                  context.l10n.productsVariantNumber(varianteIndex + 1),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -2609,7 +2619,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Nessun attributo definito',
+                        context.l10n.productsNoAttributeDefined,
                         style: TextStyle(color: context.colors.subtitleColor),
                       ),
                     ],
@@ -2761,26 +2771,26 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Immagini prodotto',
+                    context.l10n.settingsProdottiImages,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Una sola copertina. Le immagini possono essere selezionate anche cliccando sulla riga.',
+                    context.l10n.productsImagesHint,
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
               ),
             ),
             _buildImagesCounterChip(
-              'Totale',
+              context.l10n.commonTotal,
               rows.length,
               Icons.image_outlined,
             ),
             _buildImagesCounterChip(
-              'Selezionate',
+              context.l10n.productsImagesSelected,
               selectedCount,
               Icons.check_box_outlined,
             ),
@@ -2836,12 +2846,12 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             ),
             const SizedBox(height: 10),
             Text(
-              'Nessuna immagine selezionata',
+              context.l10n.productsNoImageSelected,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 4),
             Text(
-              'Aggiungi una o più immagini dalla libreria media.',
+              context.l10n.productsAddImagesHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 14),
@@ -3013,8 +3023,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                   ),
                   IconButton(
                     tooltip: row.isMain
-                        ? 'Rimuovi copertina'
-                        : 'Rimuovi immagine',
+                        ? context.l10n.productsRemoveCover
+                        : context.l10n.productsRemoveImage,
                     onPressed: () => row.isMain
                         ? _rimuoviImmaginePrincipale()
                         : _rimuoviImmagineGallery(row.url),
@@ -3061,7 +3071,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             label: Text(
               usages.length == 1
                   ? usages.first
-                  : 'Usata in ${usages.length} varianti',
+                  : context.l10n.productsImageUsedInVariants(usages.length),
               overflow: TextOverflow.ellipsis,
             ),
             backgroundColor: context.colors.infoColor.withValues(alpha: 0.10),
@@ -3094,7 +3104,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           .map((attr) => attr.opzione.trim())
           .where((value) => value.isNotEmpty)
           .join(' / ');
-      final prefix = isVariantCover ? 'Copertina variante' : 'Variante';
+      final prefix = isVariantCover
+          ? context.l10n.productsVariantCover
+          : context.l10n.productsVariantWord;
       labels.add(
         attributeLabel.isEmpty
             ? '$prefix #${index + 1}'
@@ -3148,17 +3160,16 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     if (_failedImagePixelSizeUrls.contains(url)) {
       return _buildImageDimensionStatusLabel(
-        label: 'Non verificabile',
+        label: context.l10n.productsImageUncheckable,
         color: context.colors.errorColorStatus,
-        tooltip:
-            'Immagine non caricabile o timeout durante la lettura dimensioni.',
+        tooltip: context.l10n.productsImageUncheckableDetail,
       );
     }
 
     if (width == null || height == null) {
       _ensureImagePixelSize(url);
       return _buildImageDimensionStatusLabel(
-        label: 'Verifica in corso',
+        label: context.l10n.productsImageChecking,
         color: context.colors.neutralColor,
         tooltip: context.l10n.prodottiLetturaDimensioni,
       );
@@ -3168,7 +3179,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         (_imageWarningThresholdWidth <= 0 &&
             _imageWarningThresholdHeight <= 0)) {
       return _buildImageDimensionStatusLabel(
-        label: 'Nessuna specifica',
+        label: context.l10n.productsImageNoSpec,
         color: context.colors.neutralColor,
         tooltip: context.l10n.prodottiNessunaSogliaPixel,
       );
@@ -3182,13 +3193,25 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       thresholdHeight: _imageWarningThresholdHeight,
     );
     return _buildImageDimensionStatusLabel(
-      label: isOversized ? 'Fuori specifica' : 'Conforme',
+      label: isOversized
+          ? context.l10n.productsImageOutOfSpec
+          : context.l10n.productsImageCompliant,
       color: isOversized
           ? context.colors.warningColor
           : context.colors.successColor,
       tooltip: isOversized
-          ? 'Fuori specifica: immagine $width × $height px, soglia $_imageWarningThresholdWidth × $_imageWarningThresholdHeight px.'
-          : 'Conforme: immagine $width × $height px, soglia $_imageWarningThresholdWidth × $_imageWarningThresholdHeight px.',
+          ? context.l10n.productsImageOutOfSpecDetail(
+              width,
+              height,
+              _imageWarningThresholdWidth,
+              _imageWarningThresholdHeight,
+            )
+          : context.l10n.productsImageCompliantDetail(
+              width,
+              height,
+              _imageWarningThresholdWidth,
+              _imageWarningThresholdHeight,
+            ),
     );
   }
 
@@ -3364,7 +3387,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'URL immagine copiato negli appunti.',
+      context.l10n.productsImageUrlCopied,
     );
   }
 
@@ -3530,7 +3553,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           children: [
             Text(
               _saveProgressLabel.isEmpty
-                  ? 'Salvataggio in corso...'
+                  ? context.l10n.employeesSaving
                   : _saveProgressLabel,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -3566,8 +3589,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     bool required = false,
     bool enableCreateOption = false,
     void Function(String)? onCreateOption,
-    String createOptionText = '+ Crea nuovo',
+    String? createOptionText,
   }) {
+    final createLabel =
+        createOptionText ?? context.l10n.productsCreateNewOption;
     // Se non è fornito un controller, usa initialValue direttamente (senza controller)
     // Questo evita problemi con il testo che si scrive al contrario
 
@@ -3577,7 +3602,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       // Con autocompletamento
       return Autocomplete<String>(
         displayStringForOption: (option) {
-          if (enableCreateOption && option == createOptionText) {
+          if (enableCreateOption && option == createLabel) {
             return lastAutocompleteQuery;
           }
           return option;
@@ -3596,13 +3621,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           );
 
           if (enableCreateOption && query.isNotEmpty && !exactExists) {
-            return <String>[...filtered, createOptionText];
+            return <String>[...filtered, createLabel];
           }
 
           return filtered;
         },
         onSelected: (selection) {
-          if (enableCreateOption && selection == createOptionText) {
+          if (enableCreateOption && selection == createLabel) {
             final created = lastAutocompleteQuery.trim();
             if (created.isEmpty) {
               return;
@@ -3705,8 +3730,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       controller: _categoriaController,
       readOnly: true,
       onTap: _apriSelettoreCategorie,
-      validator: (value) =>
-          _categorieSelezionate.isEmpty ? 'Campo obbligatorio' : null,
+      validator: (value) => _categorieSelezionate.isEmpty
+          ? context.l10n.productsRequiredField
+          : null,
       decoration: InputDecoration(
         labelText: context.l10n.prodottiCategorieObbligatorie,
         prefixIcon: Icon(Icons.category),
@@ -3808,11 +3834,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     });
   }
 
-  String _brandCreateOptionLabel(String value) => '+ CREA: $value';
+  String _brandCreateOptionLabel(String value) =>
+      context.l10n.productsCreateValueOption(value);
 
   String? _extractCreatedBrandValue(String value) {
-    if (!value.startsWith('+ CREA: ')) return null;
-    final created = value.substring('+ CREA: '.length).trim();
+    final prefix = context.l10n.productsCreateValueOption('');
+    if (!value.startsWith(prefix)) return null;
+    final created = value.substring(prefix.length).trim();
     return created.isEmpty ? null : created;
   }
 
@@ -3831,7 +3859,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               ),
             )
           : Icon(_isUpdatingExisting ? Icons.update : Icons.save),
-      label: Text(_isUpdatingExisting ? 'Aggiorna' : 'Salva Prodotto'),
+      label: Text(
+        _isUpdatingExisting
+            ? context.l10n.productsUpdateButton
+            : context.l10n.productsSaveProduct,
+      ),
       backgroundColor: _isLoading
           ? context.colors.neutralColor
           : Theme.of(context).primaryColor,
@@ -3902,7 +3934,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'error',
         'prodotti_crea',
-        'Impossibile generare un barcode unico.',
+        context.l10n.productsBarcodeGenerateFailed,
       );
       return;
     }
@@ -3916,7 +3948,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'Barcode generato: $value',
+      context.l10n.productsBarcodeGenerated(value),
     );
   }
 
@@ -3929,7 +3961,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'error',
         'prodotti_crea',
-        'Impossibile generare un barcode unico per la variante.',
+        context.l10n.productsVariantBarcodeGenerateFailed,
       );
       return;
     }
@@ -3943,7 +3975,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'Barcode variante generato: $value',
+      context.l10n.productsVariantBarcodeGenerated(value),
     );
   }
 
@@ -3957,7 +3989,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'error',
         'prodotti_crea',
-        'Impossibile generare un barcode unico per la variante.',
+        context.l10n.productsVariantBarcodeGenerateFailed,
       );
       return;
     }
@@ -3970,7 +4002,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'Barcode variante generato: $value',
+      context.l10n.productsVariantBarcodeGenerated(value),
     );
   }
 
@@ -4016,11 +4048,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           Expanded(
             child: _buildSmartTextFormField(
               controller: attributo.nomeController,
-              label: 'Nome Attributo',
+              label: context.l10n.prodottiNomeAttributo,
               icon: Icons.tune,
               suggestions: _suggerimentiAttributi,
               enableCreateOption: true,
-              createOptionText: '+ CREA NUOVO',
+              createOptionText: context.l10n.productsCreateNewOptionUpper,
               onCreateOption: (value) {
                 final normalized = value.trim();
                 if (normalized.isEmpty) return;
@@ -4090,8 +4122,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     final selected = await SearchableCheckboxDialog.show(
       context,
-      title: attrName.isEmpty ? 'Valori attributo' : 'Valori $attrName',
-      inputLabel: 'Filtra o nuovo valore',
+      title: attrName.isEmpty
+          ? context.l10n.productsAttributeValues
+          : context.l10n.productsAttributeValuesOf(attrName),
+      inputLabel: context.l10n.productsFilterOrNewValue,
       input_list: _suggerimentiOpzioni[attrName] ?? const <String>[],
       preselected_list: attributo.valori,
     );
@@ -4122,7 +4156,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'Inserisci almeno taglia o colore per la variante rapida.',
+        context.l10n.productsQuickVariantNeedsAttribute,
       );
       return;
     }
@@ -4138,7 +4172,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'La variante ${_buildAttributeSummary(attributi)} è già presente.',
+        context.l10n.productsVariantAlreadyPresent(
+          _buildAttributeSummary(attributi),
+        ),
       );
       return;
     }
@@ -4146,7 +4182,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     setState(() {
       _varianti.add(
         VarianteTemp(
-          nome: 'Variante ${_varianti.length + 1}',
+          nome: context.l10n.productsVariantDefaultName(_varianti.length + 1),
           codiceProdotto: _quickVarianteBarcodeController.text.trim(),
           barcodeInterno: _quickVarianteBarcodeInternoController.text.trim(),
           barcode: '',
@@ -4171,7 +4207,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'Variante ${_buildAttributeSummary(attributi)} aggiunta.',
+      context.l10n.productsVariantAdded(_buildAttributeSummary(attributi)),
     );
   }
 
@@ -4185,7 +4221,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'Aggiungi almeno un attributo con uno o più valori.',
+        context.l10n.productsAddAttributeWithValues,
       );
       return;
     }
@@ -4195,7 +4231,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'Nessuna combinazione generata.',
+        context.l10n.productsNoCombinationGenerated,
       );
       return;
     }
@@ -4216,7 +4252,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'successo',
         'prodotti_crea',
-        'Tutte le combinazioni generate sono già associate al prodotto.',
+        context.l10n.productsAllCombinationsExist,
       );
       return;
     }
@@ -4228,7 +4264,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           final index = entry.key;
           final attributi = entry.value;
           return VarianteTemp(
-            nome: 'Variante ${firstNewVariantIndex + index + 1}',
+            nome: context.l10n.productsVariantDefaultName(
+              firstNewVariantIndex + index + 1,
+            ),
             barcodeInterno: '',
             barcode: '',
             prezzo: double.tryParse(_prezzoNormaleController.text) ?? 0.0,
@@ -4252,7 +4290,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
-      'Generate ${combinazioniNuove.length} nuove varianti.',
+      context.l10n.productsVariantsGenerated(combinazioniNuove.length),
     );
   }
 
@@ -4262,7 +4300,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _varianti.insert(
         index + 1,
         VarianteTemp(
-          nome: '${variante.nome} (Copia)',
+          nome: context.l10n.productsVariantCopyName(variante.nome),
           codiceProdotto: variante.codiceProdotto.trim().isEmpty
               ? ''
               : '${variante.codiceProdotto}_copy',
@@ -4311,7 +4349,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       builder: (context) => AlertDialog(
         title: Text(context.l10n.prodottiConfermaEliminazione),
         content: Text(
-          'Sei sicuro di voler eliminare la variante "${_varianti[index].nome}"?',
+          context.l10n.productsDeleteVariantConfirm(_varianti[index].nome),
         ),
         actions: [
           TextButton(
@@ -4591,7 +4629,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'errore',
         'prodotti_crea',
-        'Impossibile salvare in modalità offline',
+        context.l10n.productsCannotSaveOffline,
       );
       return;
     }
@@ -4617,7 +4655,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'Controlla i campi obbligatori',
+        context.l10n.productsCheckRequiredFields,
       );
       return;
     }
@@ -4628,7 +4666,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_crea',
-        'Aggiungi almeno una variante per il prodotto variabile.',
+        context.l10n.productsVariableNeedsVariant,
       );
       return;
     }
@@ -4645,18 +4683,18 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     setState(() {
       _isLoading = true;
       _saveProgress = 0.05;
-      _saveProgressLabel = 'Validazione dati...';
+      _saveProgressLabel = context.l10n.productsSaveStepValidating;
     });
 
     try {
-      _updateSaveProgress(0.2, 'Preparazione payload...');
+      _updateSaveProgress(0.2, context.l10n.productsSaveStepPreparing);
       final prodotto = prodottoPreparato;
       log.d(
         'PCREA_SAVE_START mode=${_isUpdatingExisting ? 'update' : 'create'} productId=${prodotto.id} sku=${prodotto.barcodeInterno} expectedVariants=${prodotto.varianti?.length ?? 0}',
       );
 
       // Usa salvaProductoConVarianti per gestire sia il prodotto che le varianti
-      _updateSaveProgress(0.45, 'Salvataggio prodotto e varianti...');
+      _updateSaveProgress(0.45, context.l10n.productsSaveStepSaving);
       final savedProduct = await _prodottiController!.salvaProductoConVarianti(
         prodotto,
       );
@@ -4673,7 +4711,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
       ProductMgwsStockFeedback? mgwsFeedback;
       if (_mgwsInventoryEnabled) {
-        _updateSaveProgress(0.65, 'Registrazione stock MGWS...');
+        _updateSaveProgress(0.65, context.l10n.productsSaveStepStock);
         mgwsFeedback = await _prodottiController!.reconcileMgwsStockAfterSave(
           l10n: context.l10n,
           savedProduct: savedProduct,
@@ -4694,7 +4732,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         expected: prodotto,
         saved: savedProduct,
       );
-      _updateSaveProgress(1.0, 'Completato');
+      _updateSaveProgress(1.0, context.l10n.productsSaveStepDone);
 
       if (mounted) {
         final isFullSuccess = verify.productExists && verify.variantsComplete;
@@ -4715,9 +4753,15 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         }
       }
     } catch (e) {
-      _updateSaveProgress(1.0, 'Errore durante il salvataggio');
+      _updateSaveProgress(1.0, context.l10n.productsSaveStepError);
       if (mounted) {
-        final errorMessage = e.toString();
+        final errorMessage = switch (e) {
+          ProductSaveException(isUpdate: true, :final cause) =>
+            context.l10n.productsUpdateFailed('$cause'),
+          ProductSaveException(:final cause) =>
+            context.l10n.productsCreateFailed('$cause'),
+          _ => e.toString(),
+        };
         NotificationService.instance.messageBar(
           'errore',
           'prodotti_crea',
@@ -4735,7 +4779,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     }
 
     if (_varianti.isEmpty) {
-      return 'Aggiungi almeno una variante.';
+      return context.l10n.productsAddAtLeastOneVariant;
     }
 
     final seenComboKeys = <String>{};
@@ -4752,22 +4796,28 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
         if (nome.isEmpty && opzione.isEmpty) continue;
         if (nome.isEmpty && opzione.isNotEmpty) {
-          return 'Variante ${vIndex + 1}, attributo ${aIndex + 1}: nome attributo mancante.';
+          return context.l10n.productsVariantAttributeNameMissing(
+            vIndex + 1,
+            aIndex + 1,
+          );
         }
         if (nome.isNotEmpty && opzione.isEmpty) {
-          return 'Variante ${vIndex + 1}, attributo ${aIndex + 1}: valore mancante.';
+          return context.l10n.productsVariantAttributeValueMissing(
+            vIndex + 1,
+            aIndex + 1,
+          );
         }
         validAttributePairs++;
       }
 
       if (validAttributePairs == 0) {
-        return 'Variante ${vIndex + 1}: aggiungi almeno un attributo valido oppure rimuovi la variante.';
+        return context.l10n.productsVariantNeedsAttribute(vIndex + 1);
       }
 
       final comboKey = VariantCombinations.key(variante.attributi);
       if (comboKey.isNotEmpty) {
         if (seenComboKeys.contains(comboKey)) {
-          return 'Variante ${vIndex + 1}: questa combinazione esiste già.';
+          return context.l10n.productsVariantDuplicateCombination(vIndex + 1);
         }
         seenComboKeys.add(comboKey);
       }
@@ -4777,7 +4827,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           .toLowerCase();
       if (barcodeInternoNormalizzato.isNotEmpty) {
         if (barcodeInterniVisti.contains(barcodeInternoNormalizzato)) {
-          return 'Variante ${vIndex + 1}: Barcode interno duplicato (${variante.barcodeInterno.trim()}).';
+          return context.l10n.productsVariantDuplicateBarcode(
+            vIndex + 1,
+            variante.barcodeInterno.trim(),
+          );
         }
         barcodeInterniVisti.add(barcodeInternoNormalizzato);
       }
@@ -4881,17 +4934,31 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   }
 
   String _buildVerifyMessage(_PcreaVerifyResult verify) {
-    final action = _isUpdatingExisting ? 'aggiornato' : 'creato';
+    final l10n = context.l10n;
     if (verify.productExists && verify.variantsComplete) {
-      return 'Prodotto $action e verificato (${verify.foundVariants}/${verify.expectedVariants} varianti trovate).';
+      return _isUpdatingExisting
+          ? l10n.productsVerifyUpdated(
+              verify.foundVariants,
+              verify.expectedVariants,
+            )
+          : l10n.productsVerifyCreated(
+              verify.foundVariants,
+              verify.expectedVariants,
+            );
     }
     if (!verify.productExists) {
-      return 'Salvataggio eseguito ma verifica fallita: prodotto non trovato lato server.';
+      return context.l10n.productsVerifyNotFound;
     }
     if (verify.barcodeInterniMancanti.isEmpty) {
-      return 'Prodotto salvato, ma verifica varianti incompleta (${verify.foundVariants}/${verify.expectedVariants}).';
+      return l10n.productsVerifyIncomplete(
+        verify.foundVariants,
+        verify.expectedVariants,
+      );
     }
-    return 'Prodotto salvato, ma mancano ${verify.barcodeInterniMancanti.length} varianti: ${verify.barcodeInterniMancanti.join(', ')}';
+    return l10n.productsVerifyMissingVariants(
+      verify.barcodeInterniMancanti.length,
+      verify.barcodeInterniMancanti.join(', '),
+    );
   }
 
   List<String> _buildModifiedFieldList(ProdottoGlobal current) {
@@ -5004,7 +5071,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         original.varianti ?? const <VarianteProductGlobal>[];
     final currentVariants = current.varianti ?? const <VarianteProductGlobal>[];
     if (originalVariants.length != currentVariants.length) {
-      changes.add('Varianti: ${currentVariants.length}');
+      changes.add(
+        context.l10n.productsRecapVariantCount(currentVariants.length),
+      );
     }
 
     final originalByKey = <String, VarianteProductGlobal>{
@@ -5016,35 +5085,61 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       final originalVariant = originalByKey[_variantCompareKey(variant)];
       final label = _variantRecapLabel(variant, index);
       if (originalVariant == null) {
-        changes.add('$label: nuova variante');
+        changes.add(context.l10n.productsRecapNewVariant(label));
         continue;
       }
       if (originalVariant.codiceProdotto != variant.codiceProdotto) {
         changes.add(
-          '$label codice prodotto: ${variant.codiceProdotto.isEmpty ? 'vuoto' : variant.codiceProdotto}',
+          context.l10n.productsRecapVariantSku(
+            label,
+            variant.codiceProdotto.isEmpty
+                ? context.l10n.productsRecapEmpty
+                : variant.codiceProdotto,
+          ),
         );
       }
       if (originalVariant.barcodeInterno != variant.barcodeInterno) {
         changes.add(
-          '$label barcode interno: ${variant.barcodeInterno.isEmpty ? 'vuoto' : variant.barcodeInterno}',
+          context.l10n.productsRecapVariantBarcode(
+            label,
+            variant.barcodeInterno.isEmpty
+                ? context.l10n.productsRecapEmpty
+                : variant.barcodeInterno,
+          ),
         );
       }
       if (originalVariant.prezzo != variant.prezzo) {
-        changes.add('$label prezzo: ${variant.prezzo}');
+        changes.add(
+          context.l10n.productsRecapVariantPrice(label, '${variant.prezzo}'),
+        );
       }
       if (originalVariant.prezzoScontato != variant.prezzoScontato) {
         changes.add(
-          '$label prezzo scontato: ${variant.prezzoScontato ?? 'vuoto'}',
+          context.l10n.productsRecapVariantSalePrice(
+            label,
+            variant.prezzoScontato?.toString() ??
+                context.l10n.productsRecapEmpty,
+          ),
         );
       }
       if (originalVariant.quantita != variant.quantita) {
-        changes.add('$label quantità: ${variant.quantita}');
+        changes.add(
+          context.l10n.productsRecapVariantQuantity(
+            label,
+            '${variant.quantita}',
+          ),
+        );
       }
       final originalImages = _variantProductGlobalImageUrls(originalVariant);
       final currentImages = _variantProductGlobalImageUrls(variant);
       if (originalImages.join(',') != currentImages.join(',')) {
         changes.add(
-          '$label immagini: ${currentImages.isEmpty ? 'vuote' : currentImages.join(', ')}',
+          context.l10n.productsRecapVariantImages(
+            label,
+            currentImages.isEmpty
+                ? context.l10n.productsRecapEmpty
+                : currentImages.join(', '),
+          ),
         );
       }
     }
@@ -5057,10 +5152,11 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     String? validationError,
   }) {
     final fields = <String>[];
-    if (_nomeController.text.trim().isEmpty) fields.add('Nome prodotto');
-    if (_productType == null) fields.add('Tipo prodotto');
+    if (_nomeController.text.trim().isEmpty)
+      fields.add(context.l10n.productsNameLabel);
+    if (_productType == null) fields.add(context.l10n.productsTypeLabel);
     if (!formValid && fields.isEmpty) {
-      fields.add('Controlla i campi obbligatori evidenziati');
+      fields.add(context.l10n.productsCheckHighlightedFields);
     }
     if (validationError != null) fields.add(validationError);
     return fields;
@@ -5069,25 +5165,28 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   List<String> _buildMissingFieldWarnings() {
     final fields = <String>[];
     if (_codiceProdottoController.text.trim().isEmpty) {
-      fields.add('Codice prodotto');
+      fields.add(context.l10n.productsProductCode);
     }
     if (_productType == ProductTypeSelection.simple &&
         _barcodeInternoController.text.trim().isEmpty) {
-      fields.add('Barcode interno');
+      fields.add(context.l10n.productsInternalBarcode);
     }
-    if (_categorieSelezionate.isEmpty) fields.add('Categorie');
-    if (_tags.isEmpty) fields.add('Tag');
+    if (_categorieSelezionate.isEmpty)
+      fields.add(context.l10n.prodottiCategories);
+    if (_tags.isEmpty) fields.add(context.l10n.prodottiTags);
     if (_descrizioneBreveController.text.trim().isEmpty) {
-      fields.add('Descrizione breve');
+      fields.add(context.l10n.productsShortDescription);
     }
     if (_descrizioneCompletaController.text.trim().isEmpty) {
-      fields.add('Descrizione completa');
+      fields.add(context.l10n.productsFullDescription);
     }
-    if (_marcaController.text.trim().isEmpty) fields.add('Marchio');
-    if (_immagineUrlController.text.trim().isEmpty) fields.add('Copertina');
+    if (_marcaController.text.trim().isEmpty)
+      fields.add(context.l10n.prodottiMarchio);
+    if (_immagineUrlController.text.trim().isEmpty)
+      fields.add(context.l10n.prodottiCopertina);
     if (_productType == ProductTypeSelection.simple &&
         _pesoController.text.trim().isEmpty) {
-      fields.add('Peso');
+      fields.add(context.l10n.prodottiWeight);
     }
     return fields;
   }
@@ -5102,7 +5201,9 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         .map((attr) => attr.opzione.trim())
         .where((value) => value.isNotEmpty)
         .join(' / ');
-    return attrs.isEmpty ? 'Variante #${index + 1}' : 'Variante $attrs';
+    return attrs.isEmpty
+        ? context.l10n.productsVariantNumber(index + 1)
+        : context.l10n.productsRecapVariantWithAttributes(attrs);
   }
 
   List<String> _variantProductGlobalImageUrls(VarianteProductGlobal variante) {
