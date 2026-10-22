@@ -224,23 +224,46 @@ Recommended values:
 
 - `Flutter Build` (`flutter-build.yml`) builds Linux, Windows and macOS
   artifacts on every push and pull request.
-- `Velopack Release` (`velopack-release.yml`) publishes the GitHub release:
-  Windows installer and portable zip, Linux AppImage, Android APK and AAB.
-  It runs:
+- `Velopack Release` (`velopack-release.yml`) releases the app everywhere. It
+  runs:
   - on every push to `main` or `master`: version `major.minor.<run number>`,
     with `major.minor` taken from `pubspec.yaml`;
-  - on a `v*` tag: the version is the tag (`v1.0.58` → `1.0.58`, build 58);
-  - by hand, with a version and an optional build number.
+  - by hand, with a version and an optional build number;
+  - on a `v*` tag pushed by hand: the version is the tag (`v1.0.58` →
+    `1.0.58`, build 58) and the tagged commit is released as it is.
+- On a push or a manual run the first job writes the release commit itself:
+  `version: X.Y.Z+N` in `pubspec.yaml`, the store changelogs
+  `fastlane/metadata/android/{en-US,it-IT}/changelogs/N.txt`, a
+  `Release vX.Y.Z` commit by `github-actions[bot]` on the branch and the tag
+  `vX.Y.Z` on that commit. All builds use that commit, so the tag and
+  `pubspec.yaml` always match, as F-Droid requires. Pull before working on the
+  branch again.
+- The changelogs list the subjects of the commits since the previous tag
+  (500 characters at most), in English for both languages. To write them by
+  hand, commit `changelogs/N.txt` before the release: an existing file is kept.
+- Then the workflow builds and publishes:
+  - the GitHub release: Windows installer and portable zip, Linux AppImage,
+    Android APK and AAB (donations and update check on);
+  - Google Play: a separate AAB with `DONATIONS=false` and
+    `UPDATE_CHECK=false`, skipped while the service-account secret is missing.
+- `N`, the Android version code, is the last number of the version. It must
+  grow with every release: Google Play refuses a code it has already seen.
+- The release commit is pushed with `GITHUB_TOKEN`, which starts no other
+  workflow, so it does not loop. If `master` is protected, allow
+  `github-actions[bot]` to push to it.
+- A re-run of a release finds its tag and builds it again without a new
+  commit.
 - `Manual Prerelease` publishes a prerelease from an existing tag and never
   marks it as latest.
 - `check translations` checks the ARB files.
-- The Android version code is the last number of the version.
-- **For releases that go to F-Droid, use a tag and write the same version in
-  `pubspec.yaml` first** (for example `version: 1.0.58+58` and tag
-  `v1.0.58`). F-Droid builds the tag and reads the version from
-  `pubspec.yaml`, so the two must match.
 - Desktop release notes come from the GitHub release and are shown once
   after the update.
+- The library [report_flutter](https://github.com/Vincenzoferrara/report_flutter)
+  publishes to pub.dev on its own `vX.Y.Z` tags (`publish.yml`); the tag must
+  match its `pubspec.yaml`.
+- The WordPress plugin publishes on its own `vX.Y.Z` tags (`release.yml`):
+  the zip goes to a GitHub release and to wordpress.org SVN. The tag must
+  match the plugin version and the `Stable tag` of `readme.txt`.
 
 ## Stores and F-Droid
 
@@ -262,6 +285,61 @@ Recommended values:
   and printing.
 - Reviewers need a demo WordPress site with test credentials, because the
   app shows nothing without a backend.
+
+### One-time setup
+
+Until each step is done, the matching job is skipped or does nothing; no
+other change to the workflows is needed.
+
+- **Google Play**
+  1. Create the app in the Play Console (`it.mgws.mgws_inventory`) and upload
+     the first AAB by hand: the API cannot create an app. Use
+     `mgws_inventory-google-play.aab` from the run artifacts
+     (`google-play-bundle`), not the AAB of the GitHub release. Enrol in Play
+     App Signing with the same upload key as the `ANDROID_KEYSTORE_*` secrets.
+  2. In Google Cloud, enable the "Google Play Android Developer API" and
+     create a service account with a JSON key.
+  3. In the Play Console, under Users and permissions, invite the service
+     account's e-mail with release permissions for this app.
+  4. In the app repository, add the secret `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
+     (the whole JSON file). Optional repository variables:
+     `GOOGLE_PLAY_TRACK` (default `internal`; also `alpha`, `beta`,
+     `production`), `GOOGLE_PLAY_RELEASE_STATUS` (default `completed`; use
+     `draft` while the app has never been published) and
+     `GOOGLE_PLAY_PACKAGE_NAME`.
+  5. Every release is a Play review: move to `production` only when ready.
+- **F-Droid**
+  1. Open a merge request on
+     [fdroiddata](https://gitlab.com/fdroid/fdroiddata) with
+     `metadata/it.mgws.mgws_inventory.yml`: Flutter build recipe with
+     `--dart-define=UPDATE_CHECK=false`, the `NonFreeNet` anti-feature,
+     `AutoUpdateMode: Version`, `UpdateCheckMode: Tags`. report_flutter must
+     be on pub.dev (or a pinned public commit) because F-Droid builds from
+     source.
+  2. After inclusion F-Droid builds each new `vX.Y.Z` tag by itself and reads
+     texts and changelogs from `fastlane/`. Nothing to set in GitHub.
+  3. F-Droid signs with its own key, so its APK does not update over the
+     GitHub one (and the other way round).
+- **pub.dev (report_flutter)**
+  1. Publish the first version by hand: `flutter pub publish` in the library.
+  2. On pub.dev, package Admin → Automated publishing: enable "Publishing from
+     GitHub Actions", repository `Vincenzoferrara/report_flutter`, tag pattern
+     `v{{version}}`.
+  3. Then bump `version:` in the library, commit, and push the tag `vX.Y.Z`.
+  4. Point the app's `report_flutter` dependency to the pub.dev version
+     instead of the Git commit.
+- **wordpress.org (plugin)**
+  1. Submit the zip at <https://wordpress.org/plugins/developers/add/> and
+     wait for approval. The slug assigned by the review must be
+     `mg-warehouse-stock`; otherwise set the repository variable
+     `WPORG_SLUG` in the plugin repository.
+  2. In the plugin repository, add the secrets `SVN_USERNAME` (the
+     wordpress.org username) and `SVN_PASSWORD` (the SVN password from the
+     wordpress.org account page).
+  3. Optional: banners, icons and screenshots for the plugin page go in
+     `.wordpress-org/` in the plugin repository.
+  4. Release: bump the plugin version and `Stable tag`, commit, and push the
+     tag `vX.Y.Z`.
 
 ## Verification
 

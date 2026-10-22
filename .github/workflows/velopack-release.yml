@@ -1,14 +1,20 @@
 name: Velopack Release
 
+# Every release ends on a tagged commit whose pubspec.yaml carries the release
+# version, because F-Droid builds the tag and reads the version from pubspec.
+# On a push to master (or a manual run) the workflow writes that commit itself:
+# pubspec version, store changelogs, "Release vX.Y.Z" commit and tag. The push
+# uses GITHUB_TOKEN, which never starts another workflow run, so it cannot loop.
+
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: Versione release senza prefisso v, es. 1.2.3
+        description: Release version without the v prefix, e.g. 1.2.3
         required: true
         type: string
       build_number:
-        description: Build number Flutter opzionale
+        description: Optional Android version code, by default the last number of the version
         required: false
         type: string
   push:
@@ -21,6 +27,11 @@ on:
 permissions:
   contents: write
 
+# Releases run one after the other: each one pushes a commit to the branch.
+concurrency:
+  group: velopack-release
+  cancel-in-progress: false
+
 env:
   FLUTTER_VERSION: '3.47.5'
   PROJECT_PATH: src/mgws_inventory
@@ -28,24 +39,31 @@ env:
   APP_EXE: mgws_inventory
   ANDROID_APK_NAME: mgws_inventory.apk
   ANDROID_AAB_NAME: mgws_inventory.aab
+  GOOGLE_PLAY_AAB_NAME: mgws_inventory-google-play.aab
   REPORT_REPO: ${{ vars.REPORT_REPO || 'Vincenzoferrara/report_flutter' }}
   REPORT_REF: ${{ vars.REPORT_REF || 'main' }}
   ADS_CONNECTOR_REPO: ${{ vars.ADS_CONNECTOR_REPO || 'Vincenzoferrara/ads_connector_flutter' }}
 
 jobs:
   resolve-version:
-    name: Resolve version
+    name: Prepare release commit and tag
+    # A release commit pushed with a personal token would start the workflow
+    # again: it is already tagged, so there is nothing to do.
+    if: github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Release v')
     runs-on: ubuntu-latest
     outputs:
       flutter_version: ${{ steps.version.outputs.flutter_version }}
       pack_version: ${{ steps.version.outputs.pack_version }}
       build_number: ${{ steps.version.outputs.build_number }}
       tag: ${{ steps.version.outputs.tag }}
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - name: Checkout app repository
         uses: actions/checkout@v7
         with:
           path: ${{ env.PROJECT_PATH }}
+          fetch-depth: 0
+          fetch-tags: true
           sparse-checkout: |
             /*
             !/docker/
@@ -81,12 +99,83 @@ jobs:
           if [ -z "$build_number" ]; then
             build_number="${pack_version##*.}"
           fi
+          if ! [[ "$pack_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$build_number" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid release version '$pack_version' or build number '$build_number'."
+            exit 1
+          fi
           flutter_version="$pack_version"
 
           echo "flutter_version=$flutter_version" >> "$GITHUB_OUTPUT"
           echo "pack_version=$pack_version" >> "$GITHUB_OUTPUT"
           echo "build_number=$build_number" >> "$GITHUB_OUTPUT"
           echo "tag=v$pack_version" >> "$GITHUB_OUTPUT"
+
+      - name: Commit version and changelogs, then tag
+        id: commit
+        shell: bash
+        working-directory: ${{ env.PROJECT_PATH }}
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.pack_version }}
+          BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+          # Branch the release commit goes to: the pushed branch, or the
+          # default branch for a manual run.
+          BRANCH: ${{ github.event_name == 'push' && github.ref_name || github.event.repository.default_branch }}
+        run: |
+          # A pushed tag is released as it is: its commit cannot change.
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            if ! grep -qx "version: ${VERSION}+${BUILD_NUMBER}" pubspec.yaml; then
+              echo "::warning::pubspec.yaml does not say 'version: ${VERSION}+${BUILD_NUMBER}': F-Droid will not accept tag $TAG."
+            fi
+            echo "sha=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # A re-run finds its tag already pushed: build that commit again.
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "::notice::Tag $TAG already exists, releasing it as it is."
+            echo "sha=$(git rev-parse "$TAG^{commit}")" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            git checkout -q "origin/$BRANCH"
+          fi
+
+          sed -i "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
+
+          # Store changelogs are named after the Android version code. A file
+          # written by hand before the release wins; otherwise the subjects of
+          # the commits since the previous tag are used, within the 500
+          # characters that Google Play and F-Droid accept.
+          previous_tag=$(git describe --tags --abbrev=0 --match 'v[0-9]*' HEAD 2>/dev/null || true)
+          range=${previous_tag:+$previous_tag..}HEAD
+          notes=$(git log --no-merges --format='- %s' "$range" | grep -v '^- Release v' | head -n 30 || true)
+          [ -n "$notes" ] || notes="- Maintenance release"
+          notes=$(printf '%s\n' "$notes" | awk '{ total += length($0) + 1; if (total > 500) exit; print }')
+          for locale in en-US it-IT; do
+            changelog="fastlane/metadata/android/$locale/changelogs/${BUILD_NUMBER}.txt"
+            if [ ! -s "$changelog" ]; then
+              mkdir -p "$(dirname "$changelog")"
+              printf '%s\n' "$notes" > "$changelog"
+            fi
+          done
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pubspec.yaml fastlane/metadata/android/*/changelogs/"${BUILD_NUMBER}.txt"
+          git commit -q -m "Release $TAG"
+
+          # Someone may have pushed while this run was starting: put the release
+          # commit on top of the branch once and try again.
+          if ! git push -q origin "HEAD:refs/heads/$BRANCH"; then
+            git fetch -q origin "$BRANCH"
+            git rebase -q "origin/$BRANCH"
+            git push -q origin "HEAD:refs/heads/$BRANCH"
+          fi
+          git tag -a "$TAG" -m "Release $TAG"
+          git push -q origin "refs/tags/$TAG"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build-windows:
     name: Build Windows Velopack
@@ -100,6 +189,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: ${{ env.PROJECT_PATH }}
+          ref: ${{ needs.resolve-version.outputs.sha }}
           sparse-checkout: |
             /*
             !/docker/
@@ -195,6 +285,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: ${{ env.PROJECT_PATH }}
+          ref: ${{ needs.resolve-version.outputs.sha }}
           sparse-checkout: |
             /*
             !/docker/
@@ -295,6 +386,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           path: ${{ env.PROJECT_PATH }}
+          ref: ${{ needs.resolve-version.outputs.sha }}
           sparse-checkout: |
             /*
             !/docker/
@@ -391,11 +483,31 @@ jobs:
           cp build/app/outputs/flutter-apk/app-release.apk "dist/android/${ANDROID_APK_NAME}"
           cp build/app/outputs/bundle/release/app-release.aab "dist/android/${ANDROID_AAB_NAME}"
 
+      # Google Play has its own updates and does not allow donation links that
+      # skip its billing, so its bundle turns both off.
+      - name: Build signed Google Play App Bundle
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          flutter build appbundle --release \
+            --build-name "${{ needs.resolve-version.outputs.flutter_version }}" \
+            --build-number "${{ needs.resolve-version.outputs.build_number }}" \
+            --dart-define=DONATIONS=false \
+            --dart-define=UPDATE_CHECK=false
+          mkdir -p dist/google-play
+          cp build/app/outputs/bundle/release/app-release.aab "dist/google-play/${GOOGLE_PLAY_AAB_NAME}"
+
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7
         with:
           name: android-release
           path: ${{ env.PROJECT_PATH }}/dist/android/**
+          if-no-files-found: error
+
+      - name: Upload Google Play bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: google-play-bundle
+          path: ${{ env.PROJECT_PATH }}/dist/google-play/**
           if-no-files-found: error
 
   publish-release:
@@ -407,18 +519,89 @@ jobs:
       - build-android
     runs-on: ubuntu-latest
     steps:
+      # The Google Play bundle stays out of the GitHub release.
       - name: Download Velopack artifacts
         uses: actions/download-artifact@v8
         with:
+          pattern: velopack-*
           path: release-assets
+
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: android-release
+          path: release-assets/android-release
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.resolve-version.outputs.tag }}
-          target_commitish: ${{ github.sha }}
+          target_commitish: ${{ needs.resolve-version.outputs.sha }}
           name: ${{ needs.resolve-version.outputs.tag }}
           generate_release_notes: true
           draft: false
           prerelease: false
           files: release-assets/**
+
+  publish-google-play:
+    name: Publish to Google Play
+    needs:
+      - resolve-version
+      - build-android
+    runs-on: ubuntu-latest
+    steps:
+      # Secrets cannot be tested in an if: the job reports a skip and succeeds
+      # until the service account is configured.
+      - name: Check Google Play credentials
+        id: credentials
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::notice::Secret GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not set: Google Play upload skipped."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout store changelogs
+        if: steps.credentials.outputs.enabled == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve-version.outputs.sha }}
+          sparse-checkout: fastlane
+          sparse-checkout-cone-mode: true
+
+      - name: Download Google Play bundle
+        if: steps.credentials.outputs.enabled == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: google-play-bundle
+          path: google-play
+
+      # The Play Developer API wants one whatsnew-<locale> file per language.
+      - name: Prepare release notes
+        if: steps.credentials.outputs.enabled == 'true'
+        env:
+          BUILD_NUMBER: ${{ needs.resolve-version.outputs.build_number }}
+        run: |
+          mkdir -p whatsnew
+          for locale in en-US it-IT; do
+            changelog="fastlane/metadata/android/$locale/changelogs/${BUILD_NUMBER}.txt"
+            if [ -f "$changelog" ]; then
+              cp "$changelog" "whatsnew/whatsnew-$locale"
+            fi
+          done
+
+      - name: Upload to Google Play
+        if: steps.credentials.outputs.enabled == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ vars.GOOGLE_PLAY_PACKAGE_NAME || 'it.mgws.mgws_inventory' }}
+          releaseFiles: google-play/${{ env.GOOGLE_PLAY_AAB_NAME }}
+          releaseName: ${{ needs.resolve-version.outputs.tag }}
+          track: ${{ vars.GOOGLE_PLAY_TRACK || 'internal' }}
+          # 'draft' while the app has never been published on Play.
+          status: ${{ vars.GOOGLE_PLAY_RELEASE_STATUS || 'completed' }}
+          whatsNewDirectory: whatsnew
