@@ -127,7 +127,8 @@ class WooQueryCoupon {
       minimumAmount: minimumAmount as double? ?? existingCoupon.minimumAmount,
       maximumAmount: maximumAmount as double? ?? existingCoupon.maximumAmount,
       productIds: productIds ?? existingCoupon.productIds,
-      excludedProductIds: excludedProductIds ?? existingCoupon.excludedProductIds,
+      excludedProductIds:
+          excludedProductIds ?? existingCoupon.excludedProductIds,
       usageLimit: usageLimit ?? existingCoupon.usageLimit,
       usageLimitPerUser: usageLimitPerUser ?? existingCoupon.usageLimitPerUser,
       dateExpires: dateExpires ?? existingCoupon.dateExpires,

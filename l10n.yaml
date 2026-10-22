@@ -1,8 +1,8 @@
 # Configurazione della generazione delle traduzioni.
-# I file ARB sorgente e il codice generato stanno entrambi sotto lib/traduzioni.
+# I file ARB sorgente e il codice generato stanno entrambi sotto lib/l10n.
 
-arb-dir: lib/traduzioni
-output-dir: lib/traduzioni/generato
+arb-dir: lib/l10n
+output-dir: lib/l10n/generated
 output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 
@@ -10,7 +10,7 @@ output-class: AppLocalizations
 template-arb-file: app_en.arb
 
 # In Flutter 3.41 il codice viene scritto direttamente nel progetto (output-dir),
-# quindi restiamo dentro lib/traduzioni senza package sintetico.
+# quindi restiamo dentro lib/l10n senza package sintetico.
 
 # Le chiavi devono essere nomi di metodo Dart validi: camelCase, in inglese,
 # prefissate dal modulo di appartenenza (cassaTotal, productsAdd, settingsLanguage).
@@ -22,7 +22,7 @@ preferred-supported-locales:
   - it
 
 # Le chiavi non tradotte nelle altre lingue finiscono qui, utili in CI.
-untranslated-messages-file: lib/traduzioni/non_tradotte.json
+untranslated-messages-file: lib/l10n/untranslated.json
 
 # AppLocalizations.of(context) restituisce il valore diretto, senza nullable.
 nullable-getter: false

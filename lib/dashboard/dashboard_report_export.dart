@@ -11,7 +11,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import 'dashboard.code.dart';
 import '../log_viewer/app_logger.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Contratto per l'export dei report dashboard
 abstract interface class DashboardExportGateway {

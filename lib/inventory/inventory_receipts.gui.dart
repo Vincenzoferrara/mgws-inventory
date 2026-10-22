@@ -8,7 +8,7 @@ import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
 import '../theme/theme.dart';
 import 'inventory.code.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventoryReceiptPanel extends StatefulWidget {
   InventoryReceiptPanel({
@@ -502,9 +502,8 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
         child: CheckboxListTile(
           key: const ValueKey('inventory-receipt-pending-verification-field'),
           value: _pendingVerification,
-          onChanged: (value) => setState(
-            () => _pendingVerification = value ?? false,
-          ),
+          onChanged: (value) =>
+              setState(() => _pendingVerification = value ?? false),
           title: Text(context.l10n.inventoryRichiedeVerificaManager),
           subtitle: Text(context.l10n.inventoryNonCaricaStockFinche),
           controlAffinity: ListTileControlAffinity.leading,
@@ -541,9 +540,8 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
           for (final site in _sites)
             DropdownMenuItem<int>(value: site.id, child: Text(site.name)),
         ],
-        onChanged: (value) => setState(
-          () => _siteController.text = value?.toString() ?? '',
-        ),
+        onChanged: (value) =>
+            setState(() => _siteController.text = value?.toString() ?? ''),
       ),
     );
   }

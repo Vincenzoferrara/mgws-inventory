@@ -1,6 +1,6 @@
 import 'package:report_flutter/report_flutter.dart';
 
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'print_sample_data.dart';
 
 /// Default print library: the templates and categories loaded on MGWS the

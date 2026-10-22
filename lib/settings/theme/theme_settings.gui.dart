@@ -3,7 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'theme_settings.dart';
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 /// GUI per le impostazioni del tema
 class ThemeSettingsTab extends StatelessWidget {
@@ -248,7 +248,10 @@ class ThemeSettingsTab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: currentColor,
                 borderRadius: context.shapes.s,
-                border: Border.all(color: context.colors.dividerColor, width: 2),
+                border: Border.all(
+                  color: context.colors.dividerColor,
+                  width: 2,
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -312,10 +315,7 @@ class ThemeSettingsTab extends StatelessWidget {
                   portraitOnly: true,
                   paletteType: PaletteType.hsvWithHue,
                   pickerAreaBorderRadius: context.shapes.s,
-                  labelTypes: const [
-                    ColorLabelType.rgb,
-                    ColorLabelType.hsv,
-                  ],
+                  labelTypes: const [ColorLabelType.rgb, ColorLabelType.hsv],
                   hexInputBar: true,
                   hexInputController: hexController,
                   colorPickerWidth: 320,
@@ -360,8 +360,7 @@ class ThemeSettingsTab extends StatelessWidget {
         ),
         SwitchListTile(
           value: themeSettings.backgroundFollowsTheme,
-          onChanged: (value) =>
-              themeSettings.setBackgroundFollowsTheme(value),
+          onChanged: (value) => themeSettings.setBackgroundFollowsTheme(value),
           title: Text(context.l10n.settingsThemeBackgroundFollowsTheme),
           subtitle: Text(
             context.l10n.settingsThemeBackgroundFollowsThemeDescription,

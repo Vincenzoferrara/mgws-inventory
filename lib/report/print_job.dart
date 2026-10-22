@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../prodotti/class_prodotti.dart';
-import '../traduzioni/mappa_attributi.dart';
+import '../products/class_products.dart';
+import '../l10n/attribute_map.dart';
 import 'package:report_flutter/report_flutter.dart';
 
 import 'print_sample_data.dart';

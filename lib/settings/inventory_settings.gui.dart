@@ -6,7 +6,7 @@ import '../login/mgws/query/query_mgws_inventory.dart';
 import '../login/mgws/query/query_mgws_site.dart';
 import 'inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventorySettingsTab extends StatefulWidget {
   const InventorySettingsTab({super.key});

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'theme/theme_settings.gui.dart';
-import 'prodotti_settings.gui.dart';
+import 'product_settings.gui.dart';
 import 'ai_settings.gui.dart';
-import 'cassa_settings.dart';
-import 'cassa_settings.gui.dart';
-import '../cassa/fiscal_register/fiscal_register_repository.dart';
+import 'checkout_settings.dart';
+import 'checkout_settings.gui.dart';
+import '../checkout/fiscal_register/fiscal_register_repository.dart';
 import 'rfid_settings.gui.dart';
 import 'shortcuts_settings.gui.dart';
 import 'app_settings.dart';
-import 'prodotti_image_settings.dart';
+import 'product_image_settings.dart';
 import 'general_settings.gui.dart';
 import 'inventory_quick_load_settings.dart';
 import 'inventory_settings.gui.dart';
 import 'about_settings.gui.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Pagina principale delle impostazioni con TabView
 class SettingsPage extends StatefulWidget {

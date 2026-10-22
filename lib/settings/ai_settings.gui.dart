@@ -3,7 +3,7 @@ import '../notification/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'app_settings.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Tab per le impostazioni dell'Intelligenza Artificiale
 class AISettingsTab extends StatefulWidget {
@@ -373,7 +373,10 @@ class _AISettingsTabState extends State<AISettingsTab> {
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: context.colors.warningColor),
+                    Icon(
+                      Icons.info_outline,
+                      color: context.colors.warningColor,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(

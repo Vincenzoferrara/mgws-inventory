@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'updater.code.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class UpdaterPage extends StatefulWidget {
   const UpdaterPage({super.key});

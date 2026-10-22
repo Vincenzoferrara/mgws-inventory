@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../settings/app_settings.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Nomi dei provider IA mostrati nella richiesta di consenso.
 const _providerNames = {

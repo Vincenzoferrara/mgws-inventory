@@ -509,7 +509,8 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
       infoColor: infoColor ?? this.infoColor,
       neutralColor: neutralColor ?? this.neutralColor,
       surfaceVariantColor: surfaceVariantColor ?? this.surfaceVariantColor,
-      onSurfaceVariantColor: onSurfaceVariantColor ?? this.onSurfaceVariantColor,
+      onSurfaceVariantColor:
+          onSurfaceVariantColor ?? this.onSurfaceVariantColor,
       dividerColor: dividerColor ?? this.dividerColor,
       shadowColor: shadowColor ?? this.shadowColor,
       chipBackground: chipBackground ?? this.chipBackground,
@@ -868,7 +869,10 @@ class AppSpacingExtension extends ThemeExtension<AppSpacingExtension> {
   }
 
   @override
-  AppSpacingExtension lerp(ThemeExtension<AppSpacingExtension>? other, double t) {
+  AppSpacingExtension lerp(
+    ThemeExtension<AppSpacingExtension>? other,
+    double t,
+  ) {
     if (other is! AppSpacingExtension) return this;
     return AppSpacingExtension(
       xs: lerpDouble(xs, other.xs, t)!,
@@ -911,11 +915,13 @@ extension AppThemeContext on BuildContext {
 
   /// Raggi di arrotondamento condivisi.
   AppShapeExtension get shapes =>
-      Theme.of(this).extension<AppShapeExtension>() ?? const AppShapeExtension();
+      Theme.of(this).extension<AppShapeExtension>() ??
+      const AppShapeExtension();
 
   /// Scala di spaziature condivisa.
   AppSpacingExtension get spacing =>
-      Theme.of(this).extension<AppSpacingExtension>() ?? const AppSpacingExtension();
+      Theme.of(this).extension<AppSpacingExtension>() ??
+      const AppSpacingExtension();
 
   /// Accenti categoriali delle sezioni della Home.
   AppAccentExtension get accents {

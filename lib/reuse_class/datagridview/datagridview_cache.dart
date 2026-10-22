@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../../prodotti/class_prodotti.dart';
-import '../../traduzioni/generato/app_localizations.dart';
+import '../../products/class_products.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../class_formtter.dart';
 
 /// Informazioni di pricing derivate per un prodotto (prezzo, sconto,

@@ -3,7 +3,7 @@ import 'package:mgws_inventory/login/jwt_api/error_list.dart';
 import 'package:mgws_inventory/login/jwt_api/jwt_connect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 import 'login.code.dart';
 import '../jwt_api/url_validator.dart';
 import '../smartcard/smartcard_login_widget.dart';
@@ -198,7 +198,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const SizedBox(height: 12),
                             RadioListTile<AuthType>(
-                              title: Text(context.l10n.loginAutenticazioneWordpress),
+                              title: Text(
+                                context.l10n.loginAutenticazioneWordpress,
+                              ),
                               subtitle: Text(context.l10n.loginUsaWpAdmin),
                               value: AuthType.wordpress,
                               contentPadding: EdgeInsets.zero,
@@ -315,7 +317,7 @@ class _LoginPageState extends State<LoginPage> {
                       _authType == AuthType.woocommerceApi) ...[
                     TextFormField(
                       controller: _consumerKeyController,
-                      decoration:  InputDecoration(
+                      decoration: InputDecoration(
                         labelText: context.l10n.loginConsumerKey,
                         prefixIcon: const Icon(Icons.key),
                         hintText: 'ck_...',

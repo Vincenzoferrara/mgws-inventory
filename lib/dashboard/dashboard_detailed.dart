@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'dashboard.code.dart';
 import 'dashboard_charts.dart';
 import '../log_viewer/app_logger.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 // =======================================================
 // ==        REPORT TOP PRODOTTI DETTAGLIATO            ==

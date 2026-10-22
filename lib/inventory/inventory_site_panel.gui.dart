@@ -13,7 +13,7 @@
 import 'package:flutter/material.dart';
 
 import '../login/mgws/query/query_mgws_site.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventorySitePanel extends StatefulWidget {
   const InventorySitePanel({

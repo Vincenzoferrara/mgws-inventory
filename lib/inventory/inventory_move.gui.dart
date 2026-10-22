@@ -12,11 +12,11 @@
 
 import 'package:flutter/material.dart';
 
-import '../prodotti/prodotti_gestisci/product_picker.dart';
+import '../products/product_list/product_picker.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory_move.code.dart';
 import 'inventory_module.code.dart';
 import 'inventory_movement_groups.code.dart';
@@ -24,7 +24,7 @@ import 'inventory_product_section.gui.dart';
 import 'inventory_quick_load.code.dart';
 import 'inventory_quick_load_catalog.code.dart';
 import 'inventory_restock_feedback.code.dart';
-import 'inventory_rettifica.code.dart';
+import 'inventory_adjustment.code.dart';
 
 class InventoryMovePanel extends StatefulWidget {
   const InventoryMovePanel({
@@ -234,12 +234,13 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       origins.add(product);
       seeded.add(
         _MoveRow(
-          productId: product.productId,
-          variationId: product.variationId,
-          label: context.l10n.inventoryProdottoNumero(
-            product.productId.toString(),
-          ),
-        )..toSiteController.text = '${product.siteTo}'
+            productId: product.productId,
+            variationId: product.variationId,
+            label: context.l10n.inventoryProdottoNumero(
+              product.productId.toString(),
+            ),
+          )
+          ..toSiteController.text = '${product.siteTo}'
           ..toWarehouseController.text = '${product.warehouseTo}'
           ..quantity = product.quantity
           ..syncQuantityField(),
@@ -317,9 +318,9 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
     final row = _MoveRow(
       productId: productId,
       variationId: match?.variationId ?? 0,
-      label: match?.label ?? context.l10n.inventoryProdottoNumero(
-        productId.toString(),
-      ),
+      label:
+          match?.label ??
+          context.l10n.inventoryProdottoNumero(productId.toString()),
       imageUrl: match?.imageUrl,
       barcodeInterno: match?.barcodeInterno.isEmpty == true
           ? null
@@ -649,7 +650,8 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
                     controller: row.toWarehouseController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: context.l10n
+                      labelText: context
+                          .l10n
                           .inventoryEtichettaMagazzinoArrivoObbligatorio,
                       isDense: true,
                     ),

@@ -9,7 +9,7 @@ import '../wp_admin_api/wordpress_connect.dart';
 import 'error_list.dart';
 import '../mgws/connection/mgws_auth.dart';
 import '../mgws/connection/mgws_connection.dart';
-import '../../utenti/class_user_global.dart';
+import '../../users/class_user_global.dart';
 
 /// Classe singleton per gestire la connessione WooCommerce
 ///

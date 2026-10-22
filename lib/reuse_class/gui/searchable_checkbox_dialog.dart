@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 class SearchableCheckboxDialog extends StatefulWidget {
   final String title;
@@ -206,7 +206,9 @@ class _SearchableCheckboxDialogState extends State<SearchableCheckboxDialog> {
             final output_list = _selected.toList()..sort();
             Navigator.pop(context, output_list);
           },
-          child: Text(context.l10n.sharedConfermaConteggio('${_selected.length}')),
+          child: Text(
+            context.l10n.sharedConfermaConteggio('${_selected.length}'),
+          ),
         ),
       ],
     );

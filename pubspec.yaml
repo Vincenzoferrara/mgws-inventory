@@ -35,7 +35,7 @@ dependencies:
     sdk: flutter
 
   # Internazionalizzazione: localizzazioni Material/Cupertino ufficiali.
-  # I messaggi dell'app stanno nei file ARB sotto lib/traduzioni.
+  # I messaggi dell'app stanno nei file ARB sotto lib/l10n.
   flutter_localizations:
     sdk: flutter
 
@@ -143,7 +143,7 @@ flutter_launcher_icons:
 flutter:
 
   # Genera automaticamente le classi di localizzazione dai file ARB
-  # in lib/traduzioni (vedi l10n.yaml nella root del progetto).
+  # in lib/l10n (vedi l10n.yaml nella root del progetto).
   generate: true
 
   # The following line ensures that the Material Icons font is

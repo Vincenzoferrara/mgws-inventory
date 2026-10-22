@@ -1,5 +1,5 @@
 import '../../login/jwt_api/adapter/platform_manager.dart';
-import '../../login/jwt_api/query_woocommerce/woo_query_prodotti.dart';
+import '../../login/jwt_api/query_woocommerce/woo_query_products.dart';
 import '../app_notification.dart';
 import 'notification_provider.dart';
 

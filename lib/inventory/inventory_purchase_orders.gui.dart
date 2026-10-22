@@ -6,7 +6,7 @@ import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
 import '../theme/theme.dart';
 import 'inventory.code.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventoryPurchaseOrderPanel extends StatefulWidget {
   InventoryPurchaseOrderPanel({
@@ -432,7 +432,9 @@ class _InventoryPurchaseOrderPanelState
         key: const ValueKey('inventory-po-warehouse-field'),
         initialValue: _warehouses.any((w) => w.id == current) ? current : null,
         isExpanded: true,
-        decoration: InputDecoration(labelText: context.l10n.inventoryEtichettaMagazzino),
+        decoration: InputDecoration(
+          labelText: context.l10n.inventoryEtichettaMagazzino,
+        ),
         items: [
           for (final warehouse in _warehouses)
             DropdownMenuItem<int>(
@@ -440,9 +442,8 @@ class _InventoryPurchaseOrderPanelState
               child: Text(warehouse.name),
             ),
         ],
-        onChanged: (value) => setState(
-          () => _warehouseController.text = value?.toString() ?? '',
-        ),
+        onChanged: (value) =>
+            setState(() => _warehouseController.text = value?.toString() ?? ''),
       ),
     );
   }

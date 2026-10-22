@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './rfid.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Widget per testare RFID nel dashboard o inventory
 class RFIDTestWidget extends StatefulWidget {

@@ -4,7 +4,7 @@ import '../login/gui/login.code.dart';
 import '../settings/inventory_quick_load_settings.dart';
 import '../reuse_class/datagridview/datagridview_image_preview.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 import 'inventory_quick_load_picker.gui.dart';
 import 'inventory_quick_load_widgets.gui.dart';

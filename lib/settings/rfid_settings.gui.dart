@@ -4,7 +4,7 @@ import './app_settings.dart';
 import '../notification/notification_service.dart';
 import '../rfid/rfid.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Tab delle impostazioni RFID
 class RFIDSettingsTab extends StatefulWidget {

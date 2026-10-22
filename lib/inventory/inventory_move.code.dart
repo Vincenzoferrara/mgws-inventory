@@ -134,10 +134,7 @@ class InventoryMoveLine {
 /// Il motivo e' uno solo perche' e' una sola operazione di magazzino; origine
 /// e destinazione stanno nella riga, perche' cambiano da prodotto a prodotto.
 class InventoryMovePlan {
-  const InventoryMovePlan({
-    required this.lines,
-    this.details = '',
-  });
+  const InventoryMovePlan({required this.lines, this.details = ''});
 
   final List<InventoryMoveLine> lines;
 

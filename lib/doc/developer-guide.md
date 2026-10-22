@@ -86,7 +86,7 @@ waits for ADB and starts the debugger on `emulator-5554`.
 ## Localization
 
 Every visible string goes through `context.l10n.<key>` and the ARB files in
-`lib/traduzioni/`.
+`lib/l10n/`.
 
 - `app_en.arb` is the template; `app_it.arb` is Italian. To add a language,
   add `app_<code>.arb`.
@@ -95,8 +95,8 @@ Every visible string goes through `context.l10n.<key>` and the ARB files in
 - Never translate user data, protocol fields, persistence keys or backend
   payload names.
 - After changing strings run `flutter gen-l10n` and
-  `dart run lib/traduzioni/verifica_traduzioni.dart`. Untranslated keys are
-  listed in `lib/traduzioni/non_tradotte.json` (generated, not committed).
+  `dart run lib/l10n/check_translations.dart`. Untranslated keys are
+  listed in `lib/l10n/untranslated.json` (generated, not committed).
 - Read translations in `build`, never once into a field: see
   [Language changes](architecture.md#language-changes).
 - The screens of `report_flutter` use its own `ReportLocalizations`.
@@ -233,7 +233,7 @@ Recommended values:
   - by hand, with a version and an optional build number.
 - `Manual Prerelease` publishes a prerelease from an existing tag and never
   marks it as latest.
-- `verifica traduzioni` checks the ARB files.
+- `check translations` checks the ARB files.
 - The Android version code is the last number of the version.
 - **For releases that go to F-Droid, use a tag and write the same version in
   `pubspec.yaml` first** (for example `version: 1.0.58+58` and tag

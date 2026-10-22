@@ -13,7 +13,7 @@ import 'package:intl/intl.dart';
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
 import 'class_report.dart';
 import '../log_viewer/app_logger.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Eccezione personalizzata per errori report
 class ReportException implements Exception {

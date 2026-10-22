@@ -777,15 +777,11 @@ class _DataGridViewState<T> extends State<DataGridView<T>> {
                 ? DecoratedBox(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      border: Border.all(
-                        color: colors.dividerColor,
-                      ),
+                      border: Border.all(color: colors.dividerColor),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: colors.shadowColor.withValues(
-                            alpha: 0.08,
-                          ),
+                          color: colors.shadowColor.withValues(alpha: 0.08),
                           blurRadius: 24,
                           offset: const Offset(0, 12),
                         ),

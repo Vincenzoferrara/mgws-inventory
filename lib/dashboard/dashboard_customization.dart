@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
 import '../notification/notification_service.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'dashboard.code.dart';
 import 'dashboard_detailed.dart';
 import 'dashboard_layout.dart';

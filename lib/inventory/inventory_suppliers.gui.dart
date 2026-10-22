@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../theme/theme.dart';
 import 'inventory.code.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventorySupplierPanel extends StatefulWidget {
   InventorySupplierPanel({super.key, InventorySupplierController? controller})
@@ -29,13 +29,15 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
     final query = _searchController.text.trim().toLowerCase();
     final suppliers = widget.controller.suppliers;
     if (query.isEmpty) return suppliers;
-    return suppliers.where((supplier) {
-      return supplier.id.toString().contains(query) ||
-          supplier.name.toLowerCase().contains(query) ||
-          supplier.email.toLowerCase().contains(query) ||
-          supplier.phone.toLowerCase().contains(query) ||
-          supplier.taxId.toLowerCase().contains(query);
-    }).toList(growable: false);
+    return suppliers
+        .where((supplier) {
+          return supplier.id.toString().contains(query) ||
+              supplier.name.toLowerCase().contains(query) ||
+              supplier.email.toLowerCase().contains(query) ||
+              supplier.phone.toLowerCase().contains(query) ||
+              supplier.taxId.toLowerCase().contains(query);
+        })
+        .toList(growable: false);
   }
 
   @override
@@ -94,8 +96,8 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-          title: Text(context.l10n.inventoryDisattivaFornitore),
-          content: Text(
+        title: Text(context.l10n.inventoryDisattivaFornitore),
+        content: Text(
           'Disattivare ${supplier.name}? Lo storico degli ordini resta collegato.',
         ),
         actions: [
@@ -296,9 +298,7 @@ class _SupplierListItem extends StatelessWidget {
         trailing: Chip(
           label: Text(supplier.active ? 'Attivo' : 'Inattivo'),
           side: BorderSide(
-            color: supplier.active
-                ? colors.successColor
-                : colors.warningColor,
+            color: supplier.active ? colors.successColor : colors.warningColor,
           ),
         ),
       ),
@@ -439,10 +439,8 @@ Future<bool?> showInventorySupplierForm(
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (context) => _SupplierFormDialog(
-      controller: controller,
-      supplier: supplier,
-    ),
+    builder: (context) =>
+        _SupplierFormDialog(controller: controller, supplier: supplier),
   );
 }
 
@@ -609,8 +607,8 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Chip(
     label: Text(
-        context.l10n.commonLabelValue(label, value.isEmpty ? '-' : value),
-      ),
+      context.l10n.commonLabelValue(label, value.isEmpty ? '-' : value),
+    ),
   );
 }
 
@@ -669,7 +667,9 @@ class _Feedback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorExtension>()!;
-    final tone = feedback.success ? colors.successColor : colors.errorColorStatus;
+    final tone = feedback.success
+        ? colors.successColor
+        : colors.errorColorStatus;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

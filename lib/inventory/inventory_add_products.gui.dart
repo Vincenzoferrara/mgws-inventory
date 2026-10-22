@@ -14,10 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
-import '../prodotti/prodotti_gestisci/product_picker.dart';
+import '../products/product_list/product_picker.dart';
 import '../settings/inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory_add_products.code.dart';
 import 'inventory_product_section.gui.dart';
 import 'inventory_quick_load.code.dart';

@@ -1,6 +1,6 @@
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
-import '../../../prodotti/class_prodotti.dart';
+import '../../../products/class_products.dart';
 import '../../../log_viewer/app_logger.dart';
 
 /// Query class per la gestione dei tag prodotti WooCommerce

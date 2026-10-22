@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 import '../welcome_tour_controller.dart';
 import '../welcome_tour_ids.dart';
 

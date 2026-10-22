@@ -1,6 +1,6 @@
 import '../jwt_api/woo_connect.dart';
 import '../mgws/connection/mgws_connection.dart';
-import '../../utenti/class_user_global.dart';
+import '../../users/class_user_global.dart';
 import '../../settings/user_settings_sync.dart';
 
 class LoginCode {

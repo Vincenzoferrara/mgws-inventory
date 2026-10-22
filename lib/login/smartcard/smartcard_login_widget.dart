@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'smartcard_service.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 import '../gui/login.code.dart';
 import '../../log_viewer/app_logger.dart';
 
@@ -73,7 +73,8 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
     } catch (e) {
       log.e('Error reading smartcard', e);
       setState(() {
-        _statusMessage = '❌ ${context.l10n.smartcardErroreLettura(e.toString())}';
+        _statusMessage =
+            '❌ ${context.l10n.smartcardErroreLettura(e.toString())}';
       });
     } finally {
       setState(() {

@@ -11,7 +11,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'dashboard.code.dart';
 import 'dashboard_layout.dart';
 import 'dashboard_report.dart';

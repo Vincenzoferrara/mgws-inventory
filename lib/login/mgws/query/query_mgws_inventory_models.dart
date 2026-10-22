@@ -1,5 +1,6 @@
 abstract class MgwsInventoryGateway {
   Future<bool> isInventoryServiceAvailable();
+
   /// Stock of a product; [variationId] reads one variant of a variable
   /// product (0 for simple products).
   Future<Map<String, dynamic>> getProductStock(
@@ -14,6 +15,7 @@ abstract class MgwsInventoryGateway {
     required int wooStock,
     required String syncType,
   });
+
   /// Riscrive il totale di un prodotto in una sede.
   ///
   /// [siteId] e' obbligatorio e dichiara il perimetro: il totale che il backend
@@ -779,7 +781,9 @@ class MgwsQuickLoad {
     final currentStock = MgwsRestockParser.integer(value['current_stock']);
     final reason = MgwsRestockParser.string(value['reason']);
     final movementId = MgwsRestockParser.integer(value['movement_id']);
-    final ledgerMovementId = MgwsRestockParser.integer(value['ledger_movement_id']);
+    final ledgerMovementId = MgwsRestockParser.integer(
+      value['ledger_movement_id'],
+    );
     final location = MgwsLocation.fromMap(
       MgwsRestockParser.map(value['location']),
     );
@@ -976,7 +980,8 @@ class MgwsSupplier {
     final paymentTermsDays =
         MgwsRestockParser.integer(value['payment_terms_days']) ?? 0;
     final iban = MgwsRestockParser.string(value['iban']) ?? '';
-    final leadTimeDays = MgwsRestockParser.integer(value['lead_time_days']) ?? 0;
+    final leadTimeDays =
+        MgwsRestockParser.integer(value['lead_time_days']) ?? 0;
     final createdAtGmt = MgwsRestockParser.string(value['created_at_gmt']);
     final updatedAtGmt = MgwsRestockParser.string(value['updated_at_gmt']);
     return id == null ||
@@ -1011,9 +1016,7 @@ class MgwsDeleteResult {
   final int id;
   static MgwsDeleteResult? supplier(Map<String, Object?> value) {
     final id = MgwsRestockParser.integer(value['supplier_id']);
-    return value['ok'] == true && id != null
-        ? MgwsDeleteResult(id: id)
-        : null;
+    return value['ok'] == true && id != null ? MgwsDeleteResult(id: id) : null;
   }
 
   static MgwsDeleteResult? reorderRule(Map<String, Object?> value) {
@@ -1944,10 +1947,7 @@ class MgwsMovement {
     final movementId = _intOrZero(value['movement_id']);
     final warehouseFrom = _intOrZero(value['warehouse_from']);
     final warehouseTo = _intOrZero(value['warehouse_to']);
-    final quantityDelta = _signedMovementQty(
-      ints[3]!,
-      strings[1]!,
-    );
+    final quantityDelta = _signedMovementQty(ints[3]!, strings[1]!);
     if (ints.any((item) => item == null) ||
         strings.any((item) => item == null) ||
         location == null ||

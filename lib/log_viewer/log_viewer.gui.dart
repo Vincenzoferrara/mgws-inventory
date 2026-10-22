@@ -6,7 +6,7 @@ import 'package:mgws_inventory/theme/theme.dart';
 import 'package:share_plus/share_plus.dart';
 import '../notification/notification_service.dart';
 import 'app_logger.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Schermata per visualizzare i log dell'applicazione
 class LogViewerScreen extends StatefulWidget {

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../home/home.gui.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'welcome.code.dart';
 import 'welcome_tour_controller.dart';
 import 'widgets/welcome_appearance_page.dart';

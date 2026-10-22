@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 /// Recap uniforme per tutte le operazioni persistenti.
 ///
@@ -141,7 +141,9 @@ class NotificationRecapDialog {
                       if (changes.isEmpty &&
                           missingFields.isEmpty &&
                           blockingMissingFields.isEmpty)
-                        SelectableText(dialogContext.l10n.sharedNessunaModifica),
+                        SelectableText(
+                          dialogContext.l10n.sharedNessunaModifica,
+                        ),
                     ],
                   ),
                 ),

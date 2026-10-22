@@ -44,8 +44,8 @@ large enough, UI and logic are split into sibling files:
 | `login/jwt_api/` | Integration layer for WordPress and WooCommerce (`WooConnect`, connectors, WooCommerce queries, `PlatformManager`) |
 | `login/mgws/connection/` | The MGWS connection state (`MgwsConnection`) |
 | `login/mgws/query/` | The MGWS API clients (`QueryMgws*`) |
-| `cassa/` | Point of sale, checkout history, fiscal register |
-| `prodotti/` | Products list, details and editor |
+| `checkout/` | Point of sale, checkout history, fiscal register |
+| `products/` | Products list, details and editor |
 | `inventory/` | MGWS stock operations and the movement ledger |
 | `report/` | The shop side of `Templates and print` |
 | `dashboard/` | Widgets, reports and exports |
@@ -53,7 +53,7 @@ large enough, UI and logic are split into sibling files:
 | `settings/` | Settings page and one view per module |
 | `log_viewer/` | Logger and the `View logs` screen |
 | `updater/` | Update check and Velopack install |
-| `traduzioni/` | ARB files and generated localizations |
+| `l10n/` | ARB files and generated localizations |
 | `theme/` | `AppTheme` and the theme extensions |
 | `reuse_class/` | Components used by more than one screen |
 | `doc/` | These guides |
@@ -143,7 +143,7 @@ in its `_HomeSection`: the card does not open and shows the notice. Today
 these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
 `Employees` and `Templates and print`.
 
-## Point of sale (`cassa/`)
+## Point of sale (`checkout/`)
 
 - `QueryMgwsPos` handles the shift, the idempotent checkout and the
   receipts; see [Integrations](integrations.md#point-of-sale).
@@ -165,7 +165,7 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   server figure is the one that counts.
 - `StoricoCassaStore` keeps on the device the presentation data: closing
   totals, shifts and pending receipts.
-- `cassa/fiscal_register/` isolates the fiscal register behind a driver
+- `checkout/fiscal_register/` isolates the fiscal register behind a driver
   contract; the POS never speaks a vendor protocol. `FiscalRegisterRepository`
   selects and stores the driver. Simulation is a declared mode, not a
   fallback: it issues nothing and returns no number, and
@@ -243,9 +243,9 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   transfer and undo. Suppliers, reorder, purchase orders, delivery drafts
   and counts are stock-neutral.
 
-## Products (`prodotti/`)
+## Products (`products/`)
 
-- `prodotti_gestisci/` publishes each WooCommerce page as soon as it loads
+- `product_list/` publishes each WooCommerce page as soon as it loads
   and keeps loading the next ones in the background. Selecting a variable
   product loads every page of its variants and passes the product
   attributes to their conversion. Quick edit uses the WooCommerce statuses
@@ -260,7 +260,7 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   `reconcileStock` (one `movement_key` per deletion), and the WooCommerce
   variation is deleted (`force: true`) only when that succeeded. Nothing is
   deleted while MGWS is unavailable. `onVariantsChanged` refreshes the page.
-- `prodotti_crea/` is a stepper (basic info, prices and stock, images,
+- `product_editor/` is a stepper (basic info, prices and stock, images,
   details, variants). In edit mode it reloads a fresh `ProdottoGlobal` by
   ID, with the product code as fallback. Top-level barcodes are sent only
   for simple products. On update the parent's variation attributes are not

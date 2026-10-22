@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'ads_dashboard.code.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Finestra dettagliata per visualizzare campagne e insights Meta Ads
 class MetaAdsDetailPage extends StatefulWidget {

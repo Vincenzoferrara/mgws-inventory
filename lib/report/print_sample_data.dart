@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
-import '../prodotti/class_prodotti.dart';
-import '../traduzioni/estensioni.dart';
+import '../products/class_products.dart';
+import '../l10n/extensions.dart';
 import 'print_job.dart';
 import 'package:report_flutter/report_flutter.dart';
 

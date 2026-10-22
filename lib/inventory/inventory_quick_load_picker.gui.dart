@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
-import '../prodotti/class_prodotti.dart';
+import '../products/class_products.dart';
 import '../reuse_class/datagridview/datagridview_image_preview.dart';
 import 'inventory_quick_load.code.dart';
 import 'inventory_quick_load_catalog.code.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 Future<List<InventoryQuickLoadLineDraft>?> showInventoryQuickLoadPicker(
   BuildContext context, {

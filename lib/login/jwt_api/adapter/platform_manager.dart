@@ -1,15 +1,15 @@
-import '../query_woocommerce/woo_query_prodotti.dart';
-import '../query_woocommerce/woo_query_categoria.dart';
+import '../query_woocommerce/woo_query_products.dart';
+import '../query_woocommerce/woo_query_categories.dart';
 import '../query_woocommerce/woo_query_tag.dart';
 import '../query_woocommerce/woo_query_coupon.dart';
-import '../query_woocommerce/woo_query_clienti.dart';
-import '../query_woocommerce/woo_query_ordini.dart';
-import '../query_woocommerce/woo_query_varianti.dart';
-import '../query_woocommerce/woo_query_attributi.dart';
+import '../query_woocommerce/woo_query_customers.dart';
+import '../query_woocommerce/woo_query_orders.dart';
+import '../query_woocommerce/woo_query_variations.dart';
+import '../query_woocommerce/woo_query_attributes.dart';
 import '../query_woocommerce/woo_query_media.dart';
 import '../query_woocommerce/woo_query_report.dart';
 import '../query_woocommerce/woo_query_batch.dart';
-import '../query_woocommerce/woo_query_marchi.dart';
+import '../query_woocommerce/woo_query_brands.dart';
 import '../../mgws/query/query_mgws_pos.dart';
 import '../../mgws/query/query_mgws_employees.dart';
 import '../../mgws/query/query_mgws_user_settings.dart';
@@ -64,7 +64,8 @@ class PlatformManager {
   static bool get canUseMgws => isReady && isMgwsAvailable;
 
   /// Riesegue la verifica centralizzata dei servizi MGWS.
-  static Future<bool> refreshMgwsAvailability() => MgwsConnection.instance.verify();
+  static Future<bool> refreshMgwsAvailability() =>
+      MgwsConnection.instance.verify();
 
   /// Garantisce che lo stato MGWS sia noto e restituisce se è utilizzabile.
   ///

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'cassa_settings.dart';
+import 'checkout_settings.dart';
 import '../notification/app_notification.dart';
 import '../notification/notification_bell.gui.dart';
 import '../notification/notification_center.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
-import '../traduzioni/locale_settings.dart';
+import '../l10n/extensions.dart';
+import '../l10n/locale_settings.dart';
 
 /// Impostazioni generali operative dell'app.
 class GeneralSettingsTab extends StatefulWidget {

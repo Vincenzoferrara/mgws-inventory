@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'caldav_service.dart';
 import '../login/gui/login.gui.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class CalDavGui extends StatefulWidget {
   const CalDavGui({super.key});

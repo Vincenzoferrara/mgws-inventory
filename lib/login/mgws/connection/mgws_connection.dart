@@ -96,7 +96,9 @@ class MgwsConnection {
   /// Va chiamata a ogni cambio di sessione (login, logout, cambio sito) e
   /// quando una chiamata MGWS fallisce. La verifica successiva riparte da
   /// zero, cosi' uno stato stale non blocca i moduli.
-  void markDisconnected({MgwsUnavailableReason reason = MgwsUnavailableReason.unknown}) {
+  void markDisconnected({
+    MgwsUnavailableReason reason = MgwsUnavailableReason.unknown,
+  }) {
     _generation++;
     _isConnected = false;
     _isChecked = false;

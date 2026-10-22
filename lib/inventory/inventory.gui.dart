@@ -26,7 +26,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/theme.dart';
 import '../login/mgws/query/query_mgws_site.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory_site_panel.gui.dart';
 import 'inventory.code.dart';
 import 'inventory_add_products.gui.dart';
@@ -34,7 +34,7 @@ import 'inventory_module.code.dart';
 import 'inventory_movement_groups.code.dart';
 import 'inventory_move.gui.dart';
 import 'inventory_movements.gui.dart';
-import 'inventory_rettifica.gui.dart';
+import 'inventory_adjustment.gui.dart';
 
 /// Icona del modulo nel dropdown.
 ///

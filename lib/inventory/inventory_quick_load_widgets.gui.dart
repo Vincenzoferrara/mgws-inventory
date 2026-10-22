@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 
 /// "3 righe · 12 pezzi": due numeri e le due parole che li descrivono.
@@ -42,9 +42,7 @@ Future<bool?> showInventoryQuickLoadConfirmDialog({
               '${context.l10n.inventoryEtichettaQuantitaDaAggiungere}: '
               '${request.quantityDelta}',
             ),
-            Text(
-              '${context.l10n.inventoryEtichettaMotivo}: ${request.reason}',
-            ),
+            Text('${context.l10n.inventoryEtichettaMotivo}: ${request.reason}'),
             if ((request.note ?? '').isNotEmpty)
               Text('${context.l10n.inventoryEtichettaNota}: ${request.note}'),
             const SizedBox(height: 12),
@@ -95,12 +93,7 @@ Future<bool?> showInventoryQuickLoadBatchConfirmDialog({
             if (plan.warehouseId != null || plan.room != null)
               Text(
                 '${context.l10n.inventoryEtichettaPosizioneCondivisa} '
-                '${[
-                  if (plan.warehouseId != null)
-                    '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}',
-                  if (plan.room != null)
-                    '${context.l10n.inventoryEtichettaStanza} ${plan.room}',
-                ].join(' · ')}',
+                '${[if (plan.warehouseId != null) '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}', if (plan.room != null) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
               ),
             if ((plan.note ?? '').isNotEmpty)
               Text('${context.l10n.inventoryEtichettaNota}: ${plan.note}'),
@@ -114,9 +107,7 @@ Future<bool?> showInventoryQuickLoadBatchConfirmDialog({
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(context.l10n.inventoryNotaConfermaCarico),
-                ),
+                Expanded(child: Text(context.l10n.inventoryNotaConfermaCarico)),
               ],
             ),
             const SizedBox(height: 12),

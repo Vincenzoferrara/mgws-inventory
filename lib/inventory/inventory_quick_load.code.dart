@@ -83,9 +83,7 @@ class InventoryQuickLoadSubmissionPlan {
   /// Va passata identica su tutte: e' l'unica cosa che tiene insieme un carico
   /// di trenta codici, che sul backend sono trenta richieste separate. Senza,
   /// lo storico mostrerebbe trenta carichi da un pezzo.
-  InventoryFormParse<List<MgwsQuickLoadRequest>> parse({
-    String? movementKey,
-  }) {
+  InventoryFormParse<List<MgwsQuickLoadRequest>> parse({String? movementKey}) {
     if (lines.isEmpty) {
       return const InventoryFormInvalid(
         'Seleziona almeno un prodotto o variante',

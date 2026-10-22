@@ -7,7 +7,7 @@ import '../login/gui/login.code.dart';
 import '../login/mgws/connection/mgws_auth.dart';
 import '../log_viewer/app_logger.dart';
 import '../notification/notification_center.dart';
-import '../utenti/class_user_global.dart';
+import '../users/class_user_global.dart';
 
 const double homeSmallScreenBreakpoint = 768;
 
@@ -51,8 +51,11 @@ class HomeTabMeta {
 }
 
 class HomeLogic extends ChangeNotifier {
-  HomeLogic({required this.setState, this.showLoginCallback, this.showMgwsUnavailableCallback})
-    : desktopLayout = DockingLayout();
+  HomeLogic({
+    required this.setState,
+    this.showLoginCallback,
+    this.showMgwsUnavailableCallback,
+  }) : desktopLayout = DockingLayout();
 
   final VoidCallback setState;
   final VoidCallback? showLoginCallback;
@@ -262,9 +265,7 @@ class HomeLogic extends ChangeNotifier {
     try {
       final connected = await loginCode.ensureMgwsConnected();
       if (!connected) {
-        showMgwsUnavailableCallback?.call(
-          loginCode.mgwsConnection.lastFailure,
-        );
+        showMgwsUnavailableCallback?.call(loginCode.mgwsConnection.lastFailure);
         return;
       }
     } catch (error, stack) {
@@ -275,9 +276,7 @@ class HomeLogic extends ChangeNotifier {
         null,
         stack,
       );
-      showMgwsUnavailableCallback?.call(
-        loginCode.mgwsConnection.lastFailure,
-      );
+      showMgwsUnavailableCallback?.call(loginCode.mgwsConnection.lastFailure);
       return;
     }
     _openSectionTab(

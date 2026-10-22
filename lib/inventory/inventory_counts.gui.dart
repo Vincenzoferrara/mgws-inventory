@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../login/gui/login.code.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 import 'inventory_counts_forms.gui.dart';
 import 'inventory_counts_grids.gui.dart';
@@ -251,7 +251,10 @@ class _InventoryCountPanelState extends State<InventoryCountPanel> {
                 child: InventoryCountLinesGrid(lines: _lines),
               ),
               const SizedBox(height: 12),
-              Text(context.l10n.inventoryDiscrepanze, style: theme.textTheme.titleMedium),
+              Text(
+                context.l10n.inventoryDiscrepanze,
+                style: theme.textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               SizedBox(
                 height: 160,

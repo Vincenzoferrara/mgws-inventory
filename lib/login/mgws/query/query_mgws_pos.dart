@@ -100,7 +100,9 @@ class QueryMgwsPos {
       return response.data as Map<String, dynamic>;
     }
 
-    _log.w('MGWS POS updateReceiptStatus ha restituito una risposta non strutturata');
+    _log.w(
+      'MGWS POS updateReceiptStatus ha restituito una risposta non strutturata',
+    );
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,
@@ -197,7 +199,9 @@ class QueryMgwsPos {
       return response.data as Map<String, dynamic>;
     }
 
-    _log.w('MGWS POS addClosingCorrection ha restituito una risposta non strutturata');
+    _log.w(
+      'MGWS POS addClosingCorrection ha restituito una risposta non strutturata',
+    );
     return <String, dynamic>{
       'success': false,
       'status_code': response.statusCode,

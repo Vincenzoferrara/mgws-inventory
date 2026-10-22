@@ -4,7 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Indirizzi del progetto mostrati nella scheda Info.
 const _sourceUrl = 'https://github.com/Vincenzoferrara/mgws-inventory';

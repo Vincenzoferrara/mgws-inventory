@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:report_flutter/report_flutter.dart';
 
 import '../notification/notification_service.dart';
-import '../prodotti/prodotti_gestisci/product_picker.dart';
+import '../products/product_list/product_picker.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'mgws_print_store.dart';
 import 'print_job.dart';
 import 'print_sample_data.dart';

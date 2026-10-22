@@ -85,10 +85,10 @@ workspace-vscode.code-workspace
 
 # Codice di localizzazione generato da `flutter gen-l10n`.
 # Si rigenera con `flutter gen-l10n` (o `flutter pub get`), non va versionato.
-lib/traduzioni/generato/
+lib/l10n/generated/
 
 # Elenco delle chiavi non tradotte, generato dalla stessa configurazione.
-lib/traduzioni/non_tradotte.json
+lib/l10n/untranslated.json
 
 # Configurazione shell locale e copie di backup
 .zshrc

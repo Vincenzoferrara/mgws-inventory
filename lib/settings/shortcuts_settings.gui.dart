@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'app_settings.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class ShortcutsSettingsTab extends StatelessWidget {
   const ShortcutsSettingsTab({super.key});

@@ -72,10 +72,7 @@ class ThemeSettings extends ChangeNotifier {
       await prefs.setInt(_primaryColorKey, _primaryColor.toARGB32());
       await prefs.setBool(_useDockingOnMobileKey, _useDockingOnMobile);
       await prefs.setBool(_showHomeReportKey, _showHomeReport);
-      await prefs.setBool(
-        _backgroundFollowsThemeKey,
-        _backgroundFollowsTheme,
-      );
+      await prefs.setBool(_backgroundFollowsThemeKey, _backgroundFollowsTheme);
     } catch (e) {
       log.d('Error saving theme preferences: $e');
     }
@@ -179,12 +176,8 @@ class ThemeSettings extends ChangeNotifier {
 
     return base.copyWith(
       primaryColor: _primaryColor,
-      colorScheme: base.colorScheme.copyWith(
-        primary: _primaryColor,
-      ),
-      appBarTheme: base.appBarTheme.copyWith(
-        backgroundColor: _primaryColor,
-      ),
+      colorScheme: base.colorScheme.copyWith(primary: _primaryColor),
+      appBarTheme: base.appBarTheme.copyWith(backgroundColor: _primaryColor),
       // Aggiorna InputDecorationTheme con il nuovo colore primario
       inputDecorationTheme: base.inputDecorationTheme.copyWith(
         border: OutlineInputBorder(
@@ -213,9 +206,7 @@ class ThemeSettings extends ChangeNotifier {
 
     return base.copyWith(
       primaryColor: _primaryColor,
-      colorScheme: base.colorScheme.copyWith(
-        primary: _primaryColor,
-      ),
+      colorScheme: base.colorScheme.copyWith(primary: _primaryColor),
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: _primaryColor.withValues(alpha: 0.9),
       ),

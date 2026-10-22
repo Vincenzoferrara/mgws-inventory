@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'app_notification.dart';
 import 'notification_center.dart';
 

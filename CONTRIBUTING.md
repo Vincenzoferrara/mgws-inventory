@@ -42,8 +42,8 @@ The guides are in [`lib/doc/`](lib/doc/README.md): start from the
 
 ## Translations
 
-The texts are in `lib/traduzioni/app_en.arb` (English, the template) and
-`lib/traduzioni/app_it.arb` (Italian). To add a language, copy `app_en.arb`
+The texts are in `lib/l10n/app_en.arb` (English, the template) and
+`lib/l10n/app_it.arb` (Italian). To add a language, copy `app_en.arb`
 to `app_<code>.arb`, translate the values and open a pull request.
 
 ## License of contributions

@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import '../reuse_class/barcode/barcode_scanner.dart';
 import '../reuse_class/datagridview/datagridview_image_preview.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory_quick_load.code.dart';
 
 typedef InventoryProductSectionBarcodeLauncher =

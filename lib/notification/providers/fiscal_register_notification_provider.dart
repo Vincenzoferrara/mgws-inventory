@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../../cassa/fiscal_register/fiscal_register_repository.dart';
-import '../../settings/cassa_settings.dart';
+import '../../checkout/fiscal_register/fiscal_register_repository.dart';
+import '../../settings/checkout_settings.dart';
 import '../app_notification.dart';
 import 'notification_provider.dart';
 

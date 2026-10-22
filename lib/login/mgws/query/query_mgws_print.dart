@@ -24,7 +24,11 @@ class MgwsPrintItem {
   final String name;
   final Map<String, dynamic> data;
 
-  const MgwsPrintItem({required this.id, required this.name, required this.data});
+  const MgwsPrintItem({
+    required this.id,
+    required this.name,
+    required this.data,
+  });
 
   /// Returns null when the entry is unreadable, so one bad item does not
   /// hide the rest of the library.
@@ -75,7 +79,10 @@ class MgwsPrintLibrary {
     List<MgwsPrintItem> items(MgwsPrintCollection collection) {
       final raw = json[collection.listKey];
       if (raw is! List) return const [];
-      return raw.map(MgwsPrintItem.tryFromJson).whereType<MgwsPrintItem>().toList();
+      return raw
+          .map(MgwsPrintItem.tryFromJson)
+          .whereType<MgwsPrintItem>()
+          .toList();
     }
 
     return MgwsPrintLibrary(
@@ -112,9 +119,15 @@ class QueryMgwsPrint {
     final response = await _base.post(
       '/wp-json/mgws/v1/print/defaults',
       data: {
-        MgwsPrintCollection.templates.listKey: templates.map((item) => item.toRequest()).toList(),
-        MgwsPrintCollection.paperFormats.listKey: paperFormats.map((item) => item.toRequest()).toList(),
-        MgwsPrintCollection.categories.listKey: categories.map((item) => item.toRequest()).toList(),
+        MgwsPrintCollection.templates.listKey: templates
+            .map((item) => item.toRequest())
+            .toList(),
+        MgwsPrintCollection.paperFormats.listKey: paperFormats
+            .map((item) => item.toRequest())
+            .toList(),
+        MgwsPrintCollection.categories.listKey: categories
+            .map((item) => item.toRequest())
+            .toList(),
       },
     );
     return MgwsPrintLibrary.fromJson(_map(response.data, 'defaults'));

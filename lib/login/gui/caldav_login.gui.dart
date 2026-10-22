@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 class CalDavLoginTab extends StatefulWidget {
   const CalDavLoginTab({super.key});
@@ -173,7 +173,7 @@ class _CalDavLoginTabState extends State<CalDavLoginTab> {
           const SizedBox(height: 16),
           TextField(
             controller: _usernameController,
-            decoration:  InputDecoration(
+            decoration: InputDecoration(
               labelText: context.l10n.loginUsername,
               border: OutlineInputBorder(),
             ),

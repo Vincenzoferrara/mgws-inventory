@@ -6,7 +6,7 @@
 // il dropdown, ma anche i pannelli e il seme di modifica lo nominano, e senza
 // questo file separato si chiuderebbe un ciclo di import fra pagina e pannelli.
 
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// I moduli del magazzino.
 ///
@@ -71,5 +71,6 @@ extension InventoryModuleX on InventoryModule {
   ///
   /// Meglio un pulsante assente che un pulsante che produce un movimento
   /// diverso da quello che l'operatore sta guardando.
-  bool get canResumeFromLedger => this == InventoryModule.fix || this == InventoryModule.move;
+  bool get canResumeFromLedger =>
+      this == InventoryModule.fix || this == InventoryModule.move;
 }

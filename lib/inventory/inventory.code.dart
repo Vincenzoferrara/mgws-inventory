@@ -13,7 +13,7 @@ export 'inventory_quick_load_catalog.code.dart';
 export 'inventory_receipts.code.dart';
 export 'inventory_reorder.code.dart';
 export 'inventory_restock_feedback.code.dart';
-export 'inventory_rettifica.code.dart';
+export 'inventory_adjustment.code.dart';
 export 'inventory_suppliers.code.dart';
 
 /// Testo libero che finisce sul movimento MGWS.

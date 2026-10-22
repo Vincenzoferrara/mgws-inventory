@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
 import '../theme/theme.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 import 'inventory_movement_groups.code.dart';
 import 'inventory_movements_detail.gui.dart';

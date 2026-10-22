@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../settings/theme/theme_settings.dart';
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 import 'welcome_page_frame.dart';
 
 /// Fourth welcome page: the appearance of the app.

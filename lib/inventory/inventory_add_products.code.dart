@@ -13,7 +13,7 @@
 // viene scritto attorno al carico, non al posto del carico.
 
 import '../login/mgws/query/query_mgws_inventory.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'inventory_purchase_orders.code.dart';
 import 'inventory_quick_load.code.dart';
 import 'inventory_receipts.code.dart';

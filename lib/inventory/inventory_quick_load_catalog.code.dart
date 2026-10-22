@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../login/jwt_api/adapter/platform_manager.dart';
-import '../prodotti/class_prodotti.dart';
-import '../prodotti/prodotti_gestisci/prodotti_gestisci.code.dart';
+import '../products/class_products.dart';
+import '../products/product_list/product_list.code.dart';
 import 'inventory_quick_load.code.dart';
 
 class InventoryQuickLoadCatalogController extends ChangeNotifier {

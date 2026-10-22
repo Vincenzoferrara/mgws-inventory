@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'dashboard_report.dart';
 import 'dashboard_widget_view.dart';
 

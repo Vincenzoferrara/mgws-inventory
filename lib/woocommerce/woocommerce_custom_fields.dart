@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../notification/notification_service.dart';
 import 'package:dio/dio.dart';
 import '../login/jwt_api/jwt_connect.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class WooCommerceCustomFields {
   final JwtConnect _jwtConnect = JwtConnect();

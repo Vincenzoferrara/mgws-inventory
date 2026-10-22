@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 import 'welcome_page_frame.dart';
-import '../../traduzioni/locale_settings.dart';
+import '../../l10n/locale_settings.dart';
 
 /// Third welcome page: the language of the interface.
 ///

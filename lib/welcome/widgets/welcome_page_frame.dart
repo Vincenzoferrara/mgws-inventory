@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 /// Shared layout of the welcome pages that offer a set of options.
 ///

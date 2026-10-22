@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 import 'dashboard.code.dart';
 import 'dashboard_layout.dart';
 import 'dashboard_report.dart';

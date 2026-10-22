@@ -5,7 +5,7 @@ import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
 import '../theme/theme.dart';
 import 'inventory.code.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class InventoryReorderPanel extends StatefulWidget {
   InventoryReorderPanel({super.key, InventoryReorderController? controller})
@@ -225,14 +225,22 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
       children: [
         Chip(
           label: Text(
-                    context.l10n.inventorySuggestionCount(
-                      '${widget.controller.suggestions.length}',
-                    ),
-                  ),
+            context.l10n.inventorySuggestionCount(
+              '${widget.controller.suggestions.length}',
+            ),
+          ),
         ),
         if (selected != null) ...[
-          Chip(label: Text(context.l10n.inventoryRegolaNumero('${selected.ruleId}'))),
-          Chip(label: Text(context.l10n.inventoryMagazzinoNumero('${selected.warehouseId}'))),
+          Chip(
+            label: Text(
+              context.l10n.inventoryRegolaNumero('${selected.ruleId}'),
+            ),
+          ),
+          Chip(
+            label: Text(
+              context.l10n.inventoryMagazzinoNumero('${selected.warehouseId}'),
+            ),
+          ),
           Chip(
             label: Text(
               'Stock ${selected.currentStock} -> ${selected.targetStock}',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'updater_service.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 enum UpdaterStatus {
   idle,

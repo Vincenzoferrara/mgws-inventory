@@ -7,7 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:velopack_flutter/velopack_flutter.dart';
 import '../log_viewer/app_logger.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 class UpdaterReleaseNotes {
   final String version;

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import '../notification/notification_service.dart';
 import 'ads_comment_manager.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Dialog per aggiungere o modificare un commento su un'inserzione
 class AdsCommentDialog extends StatefulWidget {

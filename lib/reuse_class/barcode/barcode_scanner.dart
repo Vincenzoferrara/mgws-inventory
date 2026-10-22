@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import '../../theme/theme.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 /// Schermata fullscreen per lo scanner di barcode/QR
 class BarcodeScannerDialog extends StatefulWidget {

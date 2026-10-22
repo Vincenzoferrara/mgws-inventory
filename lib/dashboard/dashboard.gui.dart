@@ -18,7 +18,7 @@ import 'ads_dashboard.code.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/gui/login.code.dart';
 import '../notification/notification_service.dart';
-import '../traduzioni/estensioni.dart';
+import '../l10n/extensions.dart';
 
 /// Pagina principale della dashboard con statistiche
 class DashboardPage extends StatefulWidget {

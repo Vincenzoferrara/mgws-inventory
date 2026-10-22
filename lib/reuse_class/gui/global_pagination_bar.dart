@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../settings/app_settings.dart';
 import '../logic/global_pagination_controller.dart';
-import '../../traduzioni/estensioni.dart';
+import '../../l10n/extensions.dart';
 
 /// Larghezza del campo "righe visualizzate".
 ///
