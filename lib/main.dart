@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:report_flutter/report_flutter.dart' show ReportLocalizations;
 import 'updater/updater_service.dart';
 import 'log_viewer/app_logger.dart';
 import 'notification/notification_service.dart';
@@ -80,7 +81,11 @@ class MyApp extends StatelessWidget {
 
                 // Traduce anche i widget interni di Material e Cupertino,
                 // non solo le stringhe dell'app.
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                // The report_flutter print screens bring their own texts.
+                localizationsDelegates: const [
+                  ...AppLocalizations.localizationsDelegates,
+                  ReportLocalizations.delegate,
+                ],
 
                 // Con locale null l'app segue l'impostazione del sistema.
                 supportedLocales: LocaleSettings.supportate,

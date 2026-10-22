@@ -11,7 +11,7 @@
 import 'package:intl/intl.dart';
 
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
-import '../login/jwt_api/class_prodotti.dart';
+import 'class_report.dart';
 import '../log_viewer/app_logger.dart';
 import '../traduzioni/estensioni.dart';
 

@@ -1,6 +1,6 @@
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
-import '../class_prodotti.dart';
+import '../../../dashboard/class_report.dart';
 import 'woo_report_parser_helper.dart';
 
 /// Query class per report e statistiche WooCommerce

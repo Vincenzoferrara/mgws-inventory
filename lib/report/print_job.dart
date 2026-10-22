@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../prodotti/class_prodotti.dart';
 import '../traduzioni/mappa_attributi.dart';
+import 'package:report_flutter/report_flutter.dart';
+
+import 'print_sample_data.dart';
 
 /// One product or variant to label. It always prints one label per piece in
 /// stock: the number cannot be changed, only the whole line removed.
@@ -85,54 +88,42 @@ class PrintLabelItem {
   }
 }
 
-/// Labels requested from another section, e.g. the products list.
-class PrintJob {
-  final List<PrintLabelItem> items;
-
-  const PrintJob(this.items);
-
-  int get totalLabels => items.fold(0, (sum, item) => sum + item.quantity);
-
-  /// One entry per label to print, in order.
-  List<PrintLabelItem> get expanded => [
-    for (final item in items)
-      for (var copy = 0; copy < item.quantity; copy++) item,
-  ];
-
-  /// The job with the lines of [other] it does not have yet, appended at
-  /// the end: a variant already in the job is never doubled.
-  PrintJob merge(PrintJob other) {
-    final known = items.map((item) => item.key).toSet();
-    return PrintJob([
-      ...items,
-      for (final item in other.items)
-        if (known.add(item.key)) item,
-    ]);
-  }
-
-  /// The job without the line [key].
-  PrintJob without(String key) => PrintJob([
-    for (final item in items)
-      if (item.key != key) item,
-  ]);
-
-  /// Builds the job from products and their selected variants: one line per
-  /// variant (or per simple product) with pieces in stock. Variants and
-  /// products with no pieces are left out.
-  factory PrintJob.fromProducts(List<ProdottoGlobal> products) {
-    final items = <PrintLabelItem>[];
-    for (final product in products) {
-      final variants = product.varianti ?? const <VarianteProductGlobal>[];
-      final lines = variants.isEmpty
-          ? [PrintLabelItem(product: product)]
-          : [
-              for (final variant in variants)
-                PrintLabelItem(product: product, variant: variant),
-            ];
-      items.addAll(lines.where((item) => item.stock > 0));
+/// Print job for the library: one row per variant (or simple product) with
+/// pieces in stock, printing one label per piece. Variants and products with
+/// no pieces are left out. [localeName] formats the prices.
+PrintJob labelJobFromProducts(
+  List<ProdottoGlobal> products,
+  String localeName,
+) {
+  final rows = <PrintRow>[];
+  for (final product in products) {
+    final variants = product.varianti ?? const <VarianteProductGlobal>[];
+    final items = variants.isEmpty
+        ? [PrintLabelItem(product: product)]
+        : [
+            for (final variant in variants)
+              PrintLabelItem(product: product, variant: variant),
+          ];
+    for (final item in items.where((item) => item.stock > 0)) {
+      rows.add(
+        PrintRow(
+          key: item.key,
+          title: item.name,
+          subtitle: [
+            if (item.color.isNotEmpty) item.color,
+            if (item.size.isNotEmpty) item.size,
+          ].join(' · '),
+          quantity: item.quantity,
+          dataFor: (template) => PrintSampleData.labelData(
+            item,
+            localeName,
+            separator: PrintSampleData.variantSeparatorOf(template),
+          ),
+        ),
+      );
     }
-    return PrintJob(items);
   }
+  return PrintJob(rows);
 }
 
 /// Id of the "Templates and print" section in the home. It stays `report`

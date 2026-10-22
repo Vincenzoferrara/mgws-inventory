@@ -6,7 +6,7 @@ import 'package:mgws_inventory/log_viewer/app_logger.dart';
 import '../../../notification/notification_service.dart';
 import '../../../settings/prodotti_image_settings.dart';
 import '../../../login/jwt_api/query_woocommerce/woo_query_media.dart';
-import '../../../login/jwt_api/class_prodotti.dart';
+import '../../class_media.dart';
 import '../../../reuse_class/image_url_resolver.dart';
 import '../../../traduzioni/estensioni.dart';
 

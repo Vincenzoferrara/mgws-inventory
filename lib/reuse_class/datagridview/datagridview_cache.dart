@@ -1,29 +1,54 @@
 import 'dart:async';
 
 import '../../prodotti/class_prodotti.dart';
+import '../../traduzioni/generato/app_localizations.dart';
 import '../class_formtter.dart';
 
 /// Informazioni di pricing derivate per un prodotto (prezzo, sconto,
 /// variabilità). Vivono nel layer datagrid perché sono i valori che le
 /// griglie mostrano nelle colonne Prezzo/Sconto.
+///
+/// La cache non ha un BuildContext: conserva solo i valori formattati e i
+/// flag di variabilità; il testo tradotto per i casi variabili si sceglie al
+/// momento della visualizzazione, così segue la lingua corrente.
 class ProdottoPricingInfo {
-  final String prezzoLabel;
-  final String scontoLabel;
-  final String percentualeScontoLabel;
-  final String prezzoCompletoLabel;
+  final String _prezzo;
+  final String _sconto;
+  final String _percentualeSconto;
+  final String _prezzoCompleto;
   final bool hasSconto;
   final bool prezzoVariabile;
   final bool scontoVariabile;
+  final bool percentualeVariabile;
 
   const ProdottoPricingInfo({
-    required this.prezzoLabel,
-    required this.scontoLabel,
-    required this.percentualeScontoLabel,
-    required this.prezzoCompletoLabel,
+    required String prezzo,
+    required String sconto,
+    required String percentualeSconto,
+    required String prezzoCompleto,
     required this.hasSconto,
     required this.prezzoVariabile,
     required this.scontoVariabile,
-  });
+    this.percentualeVariabile = false,
+  }) : _prezzo = prezzo,
+       _sconto = sconto,
+       _percentualeSconto = percentualeSconto,
+       _prezzoCompleto = prezzoCompleto;
+
+  String prezzoLabel(AppLocalizations l10n) =>
+      prezzoVariabile ? l10n.productsVariablePrices : _prezzo;
+
+  String scontoLabel(AppLocalizations l10n) =>
+      hasSconto && scontoVariabile ? l10n.productsVariablePrices : _sconto;
+
+  String percentualeScontoLabel(AppLocalizations l10n) => percentualeVariabile
+      ? l10n.productsVariablePercentage
+      : _percentualeSconto;
+
+  String prezzoCompletoLabel(AppLocalizations l10n) =>
+      prezzoVariabile || (hasSconto && scontoVariabile)
+      ? l10n.productsVariablePrices
+      : _prezzoCompleto;
 }
 
 class DataGridViewCache {
@@ -235,7 +260,7 @@ class DataGridViewCache {
   ///
   /// Regole (priorità alle varianti quando presenti):
   /// - varianti caricate con tutte lo stesso prezzo → valore unico;
-  /// - varianti con prezzi o sconti diversi → "Prezzi variabili";
+  /// - varianti con prezzi o sconti diversi → flag di variabilità;
   /// - varianti assenti → campi base del prodotto (prezzoNormale/prezzoScontato).
   static ProdottoPricingInfo getPricingInfo(ProdottoGlobal prodotto) {
     final productId = prodotto.id;
@@ -283,10 +308,10 @@ class DataGridViewCache {
           ? '-'
           : '${prodotto.percentualeSconto!.toStringAsFixed(0)}%';
       return ProdottoPricingInfo(
-        prezzoLabel: prezzoLabel,
-        scontoLabel: scontoLabel,
-        percentualeScontoLabel: percentualeScontoLabel,
-        prezzoCompletoLabel: ClassFormtter.formatPrezzoConSconto(
+        prezzo: prezzoLabel,
+        sconto: scontoLabel,
+        percentualeSconto: percentualeScontoLabel,
+        prezzoCompleto: ClassFormtter.formatPrezzoConSconto(
           prodotto.prezzoNormale ?? 0,
           prodotto.prezzoScontato,
         ),
@@ -306,24 +331,27 @@ class DataGridViewCache {
         .where((variante) => variante.percentualeSconto != null)
         .map((variante) => variante.percentualeSconto!)
         .toSet();
+    final percentualeVariabile = percentualiSconto.length > 1;
     final percentualeScontoLabel = percentualiSconto.isEmpty
         ? '-'
-        : percentualiSconto.length > 1
-        ? 'Percentuale variabile'
+        : percentualeVariabile
+        ? ''
         : '${percentualiSconto.first.toStringAsFixed(0)}%';
 
+    // Nei casi variabili il valore resta vuoto: il testo tradotto lo sceglie
+    // ProdottoPricingInfo in base ai flag.
     final prezzoLabel = prezzoVariabile
-        ? 'Prezzi variabili'
+        ? ''
         : ClassFormtter.formatPrezzo(regularPrices.first);
     final scontoLabel = !hasSconto
         ? '-'
         : scontoVariabile
-        ? 'Prezzi variabili'
+        ? ''
         : ClassFormtter.formatPrezzo(saleValues.first!);
 
     final prezzoCompletoLabel = hasSconto
         ? prezzoVariabile || scontoVariabile
-              ? 'Prezzi variabili'
+              ? ''
               : ClassFormtter.formatPrezzoConSconto(
                   regularPrices.first,
                   saleValues.first,
@@ -331,13 +359,14 @@ class DataGridViewCache {
         : prezzoLabel;
 
     return ProdottoPricingInfo(
-      prezzoLabel: prezzoLabel,
-      scontoLabel: scontoLabel,
-      percentualeScontoLabel: percentualeScontoLabel,
-      prezzoCompletoLabel: prezzoCompletoLabel,
+      prezzo: prezzoLabel,
+      sconto: scontoLabel,
+      percentualeSconto: percentualeScontoLabel,
+      prezzoCompleto: prezzoCompletoLabel,
       hasSconto: hasSconto,
       prezzoVariabile: prezzoVariabile,
       scontoVariabile: scontoVariabile,
+      percentualeVariabile: percentualeVariabile,
     );
   }
 }

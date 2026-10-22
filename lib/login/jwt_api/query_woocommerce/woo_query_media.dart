@@ -3,7 +3,7 @@ import '../woo_connect.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../error_list.dart';
-import '../class_prodotti.dart';
+import '../../../prodotti/class_media.dart';
 import '../../../log_viewer/app_logger.dart';
 
 /// Query class per gestione media/file WordPress

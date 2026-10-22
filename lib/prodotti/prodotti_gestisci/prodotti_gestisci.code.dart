@@ -1990,10 +1990,11 @@ class ProdottiGestioneController {
     if (deletedIds.isNotEmpty) {
       final productIndex = _prodotti.indexWhere((p) => p.id == productId);
       if (productIndex >= 0) {
-        final remaining = (_prodotti[productIndex].varianti ??
-                const <VarianteProductGlobal>[])
-            .where((variant) => !deletedIds.contains(variant.id))
-            .toList();
+        final remaining =
+            (_prodotti[productIndex].varianti ??
+                    const <VarianteProductGlobal>[])
+                .where((variant) => !deletedIds.contains(variant.id))
+                .toList();
         DataGridViewCache.replaceVariants(
           productId,
           remaining,
@@ -2034,7 +2035,8 @@ class ProdottiGestioneController {
       );
       final piecesBySite = <int, int>{};
       for (final level in snapshot?.levels ?? const <InventoryStockLevel>[]) {
-        piecesBySite[level.siteId] = (piecesBySite[level.siteId] ?? 0) + level.qty;
+        piecesBySite[level.siteId] =
+            (piecesBySite[level.siteId] ?? 0) + level.qty;
       }
       // A total without per-site detail still has to go: on a single-site
       // shop site 0 stands for the only site.
@@ -2292,8 +2294,8 @@ class ProdottoDisplayInfo {
       codiceProdotto: prodotto.codiceProdotto ?? '',
       barcodeInterno: prodotto.barcodeInterno ?? '',
       categoria: prodotto.categoria?.map((c) => c.nome).join(', ') ?? '',
-      prezzo: pricing.prezzoCompletoLabel,
-      sconto: pricing.scontoLabel,
+      prezzo: pricing.prezzoCompletoLabel(l10n),
+      sconto: pricing.scontoLabel(l10n),
       status: ProdottoUtils.getStatusLabel(l10n, prodotto.status),
       disponibilita: ClassFormtter.getDisponibilitaText(prodotto.inStock),
       variantiCount: ClassFormtter.getVariantiCountText(

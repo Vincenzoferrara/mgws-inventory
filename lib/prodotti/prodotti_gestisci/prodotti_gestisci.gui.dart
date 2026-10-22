@@ -60,7 +60,13 @@ const double _kEdgeInsetVertical = 4;
 // Enum azioni contesto
 // ---------------------------------------------------------------------------
 
-enum _ProductContextAction { crea, modifica, modificaInMassa, printLabels, elimina }
+enum _ProductContextAction {
+  crea,
+  modifica,
+  modificaInMassa,
+  printLabels,
+  elimina,
+}
 
 // ---------------------------------------------------------------------------
 // Utility globale: viewer immagine
@@ -677,10 +683,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   /// variant, one label per piece in stock. Missing variants are loaded first.
   Future<void> _printLabels(List<ProdottoGlobal> products) async {
     if (products.isEmpty) return;
+    final localeName = context.l10n.localeName;
     try {
       final withVariants = await _controller.productsWithVariants(products);
-      final job = PrintJob.fromProducts(withVariants);
-      if (job.items.isEmpty) {
+      final job = labelJobFromProducts(withVariants, localeName);
+      if (job.rows.isEmpty) {
         if (!mounted) return;
         NotificationService.instance.messageBar(
           'warning',
@@ -884,10 +891,8 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       DataGridViewContextAction<ProdottoGlobal>(
         label: context.l10n.productsPrintLabels,
         icon: Icons.print_outlined,
-        onSelected: (product) => _handleProductAction(
-          _ProductContextAction.printLabels,
-          product,
-        ),
+        onSelected: (product) =>
+            _handleProductAction(_ProductContextAction.printLabels, product),
       ),
     );
     actions.add(
@@ -1438,8 +1443,12 @@ class _ProductsGridState extends State<_ProductsGrid> {
             info.categoria,
             overflow: TextOverflow.ellipsis,
           ),
-          ProductGridColumnId.prezzo.storageKey: Text(pricing.prezzoLabel),
-          ProductGridColumnId.sconto.storageKey: Text(pricing.scontoLabel),
+          ProductGridColumnId.prezzo.storageKey: Text(
+            pricing.prezzoLabel(context.l10n),
+          ),
+          ProductGridColumnId.sconto.storageKey: Text(
+            pricing.scontoLabel(context.l10n),
+          ),
           ProductGridColumnId.disponibilita.storageKey: _StatusChip(
             label: info.disponibilita,
             color: info.inStock

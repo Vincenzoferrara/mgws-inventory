@@ -3,7 +3,23 @@ import 'package:intl/intl.dart';
 import '../prodotti/class_prodotti.dart';
 import '../traduzioni/estensioni.dart';
 import 'print_job.dart';
-import 'print_template.dart';
+import 'package:report_flutter/report_flutter.dart';
+
+/// What data a template is bound to: a product (labels and shop signs) or
+/// report figures. It is a setting of the template, stored under `kind`, the
+/// key already saved with the templates; templates without it are product
+/// labels.
+enum ShopTemplateKind { productLabel, shopSign, report }
+
+extension ShopTemplateKindOf on PrintTemplate {
+  static const String settingKey = 'kind';
+
+  ShopTemplateKind get shopKind =>
+      ShopTemplateKind.values
+          .where((kind) => kind.name == settings[settingKey])
+          .firstOrNull ??
+      ShopTemplateKind.productLabel;
+}
 
 /// Data the print templates are bound to.
 ///
@@ -23,18 +39,29 @@ class PrintSampleData {
     AppLocalizations l10n,
     String localeName,
   ) {
-    switch (template.kind) {
-      case PrintTemplateKind.productLabel:
-      case PrintTemplateKind.shopSign:
+    switch (template.shopKind) {
+      case ShopTemplateKind.productLabel:
+      case ShopTemplateKind.shopSign:
         return labelData(
           sampleItem(l10n),
           localeName,
-          separator: template.variantSeparator,
+          separator: variantSeparatorOf(template),
         );
-      case PrintTemplateKind.report:
+      case ShopTemplateKind.report:
         return report(l10n, localeName);
     }
   }
+
+  /// Template setting that holds the colour/size separator; the key is the
+  /// one already stored with the templates.
+  static const String variantSeparatorKey = 'variant_separator';
+
+  /// Separator printed between colour and size when none was chosen.
+  static const String defaultVariantSeparator = ' - ';
+
+  static String variantSeparatorOf(PrintTemplate template) =>
+      template.settings[variantSeparatorKey]?.toString() ??
+      defaultVariantSeparator;
 
   /// Colour first, then size: "Navy blue - M".
   static String colorAndSize(String color, String size, String separator) =>
@@ -73,7 +100,7 @@ class PrintSampleData {
   static Map<String, dynamic> labelData(
     PrintLabelItem item,
     String localeName, {
-    String separator = PrintTemplate.defaultVariantSeparator,
+    String separator = defaultVariantSeparator,
   }) {
     final money = NumberFormat.currency(locale: localeName, symbol: '€');
     final oldPrice = item.oldPrice;
@@ -110,7 +137,7 @@ class PrintSampleData {
       l10n.reportSampleProduct5,
       l10n.reportSampleProduct6,
     ];
-    const separator = PrintTemplate.defaultVariantSeparator;
+    const separator = defaultVariantSeparator;
     final variants = [
       colorAndSize(l10n.reportSampleColorNavy, 'M', separator),
       colorAndSize(l10n.reportSampleColorBlack, 'L', separator),

@@ -184,7 +184,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     NotificationService.instance.messageBar(
       'successo',
       'log_viewer',
-      '$_filteredLines righe copiate negli appunti',
+      context.l10n.logLinesCopied(_filteredLines),
     );
   }
 
@@ -192,6 +192,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     // Cattura il tema PRIMA del dialog per evitare problemi di context
     final colorScheme = Theme.of(context).colorScheme;
     final appColors = Theme.of(context).extension<AppColorExtension>();
+    final l10n = context.l10n;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -222,7 +223,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
         NotificationService.instance.messageBar(
           'warning',
           'log_viewer',
-          'Contenuto log cancellato',
+          l10n.logContentCleared,
         );
       }
     }
@@ -241,14 +242,15 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       'successo',
       'log_viewer',
       log.isRecording
-          ? 'Registrazione temporanea avviata'
-          : 'Registrazione temporanea fermata',
+          ? context.l10n.logRecordingStarted
+          : context.l10n.logRecordingStopped,
     );
   }
 
   Future<void> _shareAndClearLogs() async {
     if (_filteredContent.trim().isEmpty) return;
 
+    final l10n = context.l10n;
     setState(() => _isLoading = true);
     try {
       await log.stopTemporaryRecording();
@@ -256,10 +258,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       if (file == null) return;
 
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: 'Log temporaneo mgws_inventory',
-        ),
+        ShareParams(files: [XFile(file.path)], subject: l10n.logShareSubject),
       );
       await log.clearAllLogs();
       if (await file.exists()) {
@@ -272,14 +271,14 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       NotificationService.instance.messageBar(
         'successo',
         'log_viewer',
-        'Log condiviso e memoria temporanea svuotata',
+        l10n.logSharedAndCleared,
       );
     } catch (error) {
       if (!mounted) return;
       NotificationService.instance.messageBar(
         'errore',
         'log_viewer',
-        'Errore condivisione log: $error',
+        l10n.logShareError(error.toString()),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -324,8 +323,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                   ),
                   child: Text(
                     _selectedLogLevel == null
-                        ? '$_totalLines righe'
-                        : '$_filteredLines / $_totalLines righe',
+                        ? context.l10n.logLineCount(_totalLines)
+                        : context.l10n.logFilteredLineCount(
+                            _filteredLines,
+                            _totalLines,
+                          ),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -343,7 +345,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.ios_share),
-            tooltip: 'Condividi log temporaneo e pulisci',
+            tooltip: context.l10n.logShareAndClearTooltip,
             onPressed: _filteredContent.isNotEmpty ? _shareAndClearLogs : null,
           ),
           IconButton(
@@ -353,8 +355,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                   : Icons.fiber_manual_record,
             ),
             tooltip: _isRecordingLogs
-                ? 'Ferma registrazione temporanea'
-                : 'Avvia registrazione temporanea',
+                ? context.l10n.logStopRecordingTooltip
+                : context.l10n.logStartRecordingTooltip,
             color: _isRecordingLogs
                 ? Theme.of(context).colorScheme.error
                 : null,
@@ -398,9 +400,9 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           value: _selectedFile?.path ?? '__memory__',
                           isExpanded: true,
                           items: [
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: '__memory__',
-                              child: Text('Buffer memoria temporaneo'),
+                              child: Text(context.l10n.logMemoryBuffer),
                             ),
                             ..._logFiles.map((file) {
                               final name = file.path.split('/').last;
@@ -444,7 +446,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Filtra per livello:',
+                      context.l10n.logFilterByLevel,
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(width: 12),
@@ -495,7 +497,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                             value: LogLevel.error,
                             child: Row(
                               children: [
-                                Icon(Icons.error, size: 18, color: context.colors.errorColorStatus),
+                                Icon(
+                                  Icons.error,
+                                  size: 18,
+                                  color: context.colors.errorColorStatus,
+                                ),
                                 const SizedBox(width: 8),
                                 const Text('ERROR'),
                               ],
@@ -517,7 +523,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Filtra per tag:',
+                        context.l10n.logFilterByTag,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(width: 12),
@@ -526,9 +532,9 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           value: _selectedTag,
                           isExpanded: true,
                           items: [
-                            const DropdownMenuItem<String?>(
+                            DropdownMenuItem<String?>(
                               value: null,
-                              child: Text('Tutti i tag'),
+                              child: Text(context.l10n.logAllTags),
                             ),
                             ..._availableTags.map(
                               (tag) => DropdownMenuItem<String?>(
@@ -562,8 +568,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       ),
                       label: Text(
                         _isRecordingLogs
-                            ? 'Ferma log temporaneo'
-                            : 'Registra log temporaneo',
+                            ? context.l10n.logStopTemporary
+                            : context.l10n.logRecordTemporary,
                       ),
                     ),
                     OutlinedButton.icon(
@@ -571,7 +577,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           ? _shareAndClearLogs
                           : null,
                       icon: const Icon(Icons.ios_share),
-                      label: const Text('Condividi e pulisci'),
+                      label: Text(context.l10n.logShareAndClear),
                     ),
                   ],
                 ),
@@ -598,8 +604,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         const SizedBox(height: 16),
                         Text(
                           _selectedLogLevel != null
-                              ? 'Nessun log per il livello selezionato'
-                              : 'Nessun log disponibile',
+                              ? context.l10n.logNoneForLevel
+                              : context.l10n.logNoneAvailable,
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(color: context.colors.subtitleColor),
                         ),

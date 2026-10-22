@@ -7,6 +7,30 @@ import '../settings/app_settings.dart';
 /// Provider IA disponibili
 enum AIProvider { openai, anthropic, google, mistral, cohere, ollama }
 
+/// Il provider IA selezionato non ha un token configurato.
+///
+/// Il messaggio per l'utente lo traduce il livello UI
+/// (`aiProviderNotConfigured`).
+class AiProviderNotConfiguredException implements Exception {
+  final String provider;
+
+  const AiProviderNotConfiguredException(this.provider);
+
+  @override
+  String toString() => 'AI provider "$provider" is not configured';
+}
+
+/// Il provider IA selezionato non è ancora implementato
+/// (`aiProviderNotImplemented` nel livello UI).
+class AiProviderNotImplementedException implements Exception {
+  final String provider;
+
+  const AiProviderNotImplementedException(this.provider);
+
+  @override
+  String toString() => 'AI provider "$provider" is not implemented yet';
+}
+
 /// Servizio centrale per le funzionalità IA
 class AIService {
   final AppSettings _settings;
@@ -193,9 +217,7 @@ Rispondi SOLO con la descrizione, senza virgolette o intestazioni.
         break;
     }
 
-    throw Exception(
-      'Provider IA "$activeProvider" non configurato. Vai in Impostazioni > IA per aggiungere un token.',
-    );
+    throw AiProviderNotConfiguredException(activeProvider);
   }
 
   /// Chiama Ollama (locale)
@@ -268,8 +290,6 @@ Rispondi SOLO con la descrizione, senza virgolette o intestazioni.
     // Mistral usa API compatibile con OpenAI
     // Per ora usa dart_openai con base URL diverso
     // TODO: implementare con mistralai_dart quando supporterà meglio
-    throw Exception(
-      'Mistral AI non ancora implementato. Usa un altro provider.',
-    );
+    throw const AiProviderNotImplementedException('Mistral AI');
   }
 }

@@ -109,7 +109,11 @@ class _SearchableCheckboxDialogState extends State<SearchableCheckboxDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            // Wrap e non Row: su telefono il dialog è largo ~250px e i due
+            // pulsanti (padding 24px dal tema) non ci stanno affiancati.
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 TextButton.icon(
                   onPressed: _options.isEmpty
@@ -123,7 +127,6 @@ class _SearchableCheckboxDialogState extends State<SearchableCheckboxDialog> {
                   icon: const Icon(Icons.done_all),
                   label: Text(context.l10n.sharedSelezionaTutto),
                 ),
-                const SizedBox(width: 8),
                 TextButton(
                   onPressed: _selected.isEmpty
                       ? null

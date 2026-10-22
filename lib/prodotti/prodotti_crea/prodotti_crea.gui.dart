@@ -6,7 +6,7 @@ import '../class_prodotti.dart';
 import '../../theme/theme.dart';
 import '../../settings/app_settings.dart';
 import '../../settings/prodotti_image_settings.dart';
-import '../../login/jwt_api/class_prodotti.dart' as woo_models;
+import '../class_media.dart';
 import '../../ai/ai_service.dart';
 import '../../log_viewer/app_logger.dart';
 import '../../notification/notification_service.dart';
@@ -138,7 +138,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   final ProductImageUiConfig _mainImageConfig = ProductImageUiConfig();
   final ProductImageUiConfig _defaultImageConfig = ProductImageUiConfig();
   List<String> _mainImageSetUrls = [];
-  final Map<String, woo_models.MediaFile> _mainImageMetadata = {};
+  final Map<String, MediaFile> _mainImageMetadata = {};
   final Map<String, _ImagePixelSize> _resolvedImagePixelSizes = {};
   final Set<String> _failedImagePixelSizeUrls = {};
   final Set<String> _loadingImagePixelSizeUrls = {};
@@ -3140,10 +3140,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     );
   }
 
-  Widget _buildImageDimensionStatus(
-    String url,
-    woo_models.MediaFile? metadata,
-  ) {
+  Widget _buildImageDimensionStatus(String url, MediaFile? metadata) {
     final cachedSize = _resolvedImagePixelSizes[url];
     final width = metadata?.width ?? cachedSize?.width;
     final height = metadata?.height ?? cachedSize?.height;
@@ -3789,7 +3786,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     final selected = await SearchableCheckboxDialog.show(
       context,
       title: context.l10n.prodottiCategorieProdotto,
-      inputLabel: 'Filtra o nuova categoria',
+      inputLabel: context.l10n.productsFilterOrNewCategory,
       input_list: _suggerimentiCategoria,
       preselected_list: _categorieSelezionate,
     );
@@ -4395,7 +4392,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   // Metodi per generazione IA
   Future<void> _generateShortDescription() async {
     if (_nomeController.text.trim().isEmpty) {
-      _showAIError('Inserisci prima il nome del prodotto');
+      _showAIError(context.l10n.productsEnterNameFirst);
       return;
     }
 
@@ -4423,7 +4420,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         _descrizioneBreveController.text = description;
       });
     } catch (e) {
-      _showAIError(e.toString());
+      if (mounted) _showAIError(_aiErrorMessage(e));
     } finally {
       setState(() => _isGeneratingShortDesc = false);
     }
@@ -4431,7 +4428,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
   Future<void> _generateLongDescription() async {
     if (_nomeController.text.trim().isEmpty) {
-      _showAIError('Inserisci prima il nome del prodotto');
+      _showAIError(context.l10n.productsEnterNameFirst);
       return;
     }
 
@@ -4459,7 +4456,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         _descrizioneCompletaController.text = description;
       });
     } catch (e) {
-      _showAIError(e.toString());
+      if (mounted) _showAIError(_aiErrorMessage(e));
     } finally {
       setState(() => _isGeneratingLongDesc = false);
     }
@@ -4467,7 +4464,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
   Future<void> _generateCategories() async {
     if (_nomeController.text.trim().isEmpty) {
-      _showAIError('Inserisci prima il nome del prodotto');
+      _showAIError(context.l10n.productsEnterNameFirst);
       return;
     }
 
@@ -4490,7 +4487,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           final selected = await SearchableCheckboxDialog.show(
             context,
             title: context.l10n.prodottiCategorieSuggerite,
-            inputLabel: 'Filtra o nuova categoria',
+            inputLabel: context.l10n.productsFilterOrNewCategory,
             input_list: categories,
             preselected_list: _categorieSelezionate,
           );
@@ -4512,7 +4509,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         }
       }
     } catch (e) {
-      _showAIError(e.toString());
+      if (mounted) _showAIError(_aiErrorMessage(e));
     } finally {
       setState(() => _isGeneratingCategories = false);
     }
@@ -4520,7 +4517,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
   Future<void> _generateTags() async {
     if (_nomeController.text.trim().isEmpty) {
-      _showAIError('Inserisci prima il nome del prodotto');
+      _showAIError(context.l10n.productsEnterNameFirst);
       return;
     }
 
@@ -4545,7 +4542,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         final selectedTags = await SearchableCheckboxDialog.show(
           context,
           title: context.l10n.prodottiTagSuggeriti,
-          inputLabel: 'Filtra o nuovo tag',
+          inputLabel: context.l10n.productsFilterOrNewTag,
           input_list: suggestedTags,
           preselected_list: _tags,
         );
@@ -4561,11 +4558,21 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         }
       }
     } catch (e) {
-      _showAIError(e.toString());
+      if (mounted) _showAIError(_aiErrorMessage(e));
     } finally {
       setState(() => _isGeneratingTags = false);
     }
   }
+
+  /// Traduce gli errori noti del servizio IA; gli altri (risposte dei
+  /// provider) restano nel testo originale.
+  String _aiErrorMessage(Object error) => switch (error) {
+    AiProviderNotConfiguredException(:final provider) =>
+      context.l10n.aiProviderNotConfigured(provider),
+    AiProviderNotImplementedException(:final provider) =>
+      context.l10n.aiProviderNotImplemented(provider),
+    _ => error.toString(),
+  };
 
   void _showAIError(String message) {
     if (!mounted) return;

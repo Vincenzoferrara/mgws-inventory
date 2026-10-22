@@ -6538,205 +6538,6 @@
       "errore": {}
     }
   },
-  "reportPrintCenterTitle": "Template e stampa",
-  "@reportPrintCenterTitle": {
-    "description": "Title of the labels, signs and reports screen"
-  },
-  "reportKindLabelsTitle": "Etichette prodotto",
-  "@reportKindLabelsTitle": {
-    "description": "Card title: product price tags"
-  },
-  "reportKindSignsTitle": "Cartelli negozio",
-  "@reportKindSignsTitle": {
-    "description": "Card title: shop and window signs"
-  },
-  "reportKindReportsTitle": "Report da stampare",
-  "@reportKindReportsTitle": {
-    "description": "Card title: A4 reports"
-  },
-  "reportTemplateQuestion": "Scegli un modello",
-  "@reportTemplateQuestion": {
-    "description": "Title of wizard step 2"
-  },
-  "reportTemplateActions": "Opzioni modello",
-  "@reportTemplateActions": {
-    "description": "Tooltip of the template menu"
-  },
-  "reportRename": "Rinomina",
-  "@reportRename": {
-    "description": "Menu action that renames a template"
-  },
-  "reportDeleteTemplateTitle": "Elimina modello",
-  "@reportDeleteTemplateTitle": {
-    "description": "Title of the delete template dialog"
-  },
-  "reportDeleteTemplateMessage": "Eliminare il modello \"{name}\"? I modelli pronti non vengono toccati.",
-  "@reportDeleteTemplateMessage": {
-    "description": "Body of the delete template dialog",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportTemplateNameLabel": "Nome del modello",
-  "@reportTemplateNameLabel": {
-    "description": "Label of the template name field"
-  },
-  "reportTemplateSaved": "Modello \"{name}\" salvato",
-  "@reportTemplateSaved": {
-    "description": "Confirmation after saving a template",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSavePdf": "Salva PDF",
-  "@reportSavePdf": {
-    "description": "Button saving or sharing the PDF"
-  },
-  "reportPrintError": "Stampa non riuscita: {error}",
-  "@reportPrintError": {
-    "description": "Error shown when printing or saving fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "reportPreviewTitle": "Anteprima",
-  "@reportPreviewTitle": {
-    "description": "Title of the preview panel"
-  },
-  "reportPreviewOneLabel": "Una",
-  "@reportPreviewOneLabel": {
-    "description": "Preview switch: show a single label enlarged"
-  },
-  "reportPreviewWholeSheet": "Foglio intero",
-  "@reportPreviewWholeSheet": {
-    "description": "Preview switch: show the whole sheet"
-  },
-  "reportPreviewSampleNotice": "Dati di esempio: la stampa sarà esattamente cosi.",
-  "@reportPreviewSampleNotice": {
-    "description": "Notice under the preview title"
-  },
-  "reportPreviewSheetNotice": "Le linee tratteggiate e i riquadri grigi mostrano i bordi delle etichette e le posizioni già usate: non vengono stampati.",
-  "@reportPreviewSheetNotice": {
-    "description": "Notice under the preview title when the whole sheet is shown"
-  },
-  "reportPreviewError": "Anteprima non disponibile: {error}",
-  "@reportPreviewError": {
-    "description": "Error shown in the preview panel",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "reportReportSampleExplanation": "Per ora questo report mostra numeri di esempio, cosi puoi scegliere come deve apparire. I dati del negozio verranno inseriti quando il report sarà collegato a MGWS.",
-  "@reportReportSampleExplanation": {
-    "description": "Info box in the report editor"
-  },
-  "reportSectionQuantity": "Quante",
-  "@reportSectionQuantity": {
-    "description": "Editor section: number of copies"
-  },
-  "reportSectionPaper": "Formato carta",
-  "@reportSectionPaper": {
-    "description": "Editor section: paper format"
-  },
-  "reportCopiesQuestion": "Quante copie stampare?",
-  "@reportCopiesQuestion": {
-    "description": "Label of the copies stepper"
-  },
-  "reportFullSheet": "Foglio intero ({count})",
-  "@reportFullSheet": {
-    "description": "Chip filling a whole sheet of labels",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "reportSkipQuestion": "Posti già usati su ogni foglio",
-  "@reportSkipQuestion": {
-    "description": "Label of the skipped positions stepper"
-  },
-  "reportSkipHelp": "Per ogni foglio indica quante etichette mancano all'inizio: la stampa su quel foglio parte subito dopo. I rotoli partono sempre dalla prima etichetta.",
-  "@reportSkipHelp": {
-    "description": "Help of the skipped positions stepper"
-  },
-  "reportSheetsNeeded": "{count, plural, =1{1 foglio da stampare} other{{count} fogli da stampare}}",
-  "@reportSheetsNeeded": {
-    "description": "Number of sheets the print needs",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "reportDecrease": "Diminuisci",
-  "@reportDecrease": {
-    "description": "Tooltip of the minus button"
-  },
-  "reportIncrease": "Aumenta",
-  "@reportIncrease": {
-    "description": "Tooltip of the plus button"
-  },
-  "reportPaperGroupSheets": "Fogli A4 adesivi (stampante normale)",
-  "@reportPaperGroupSheets": {
-    "description": "Paper group title"
-  },
-  "reportPaperGroupRolls": "Rotolo (stampante per etichette)",
-  "@reportPaperGroupRolls": {
-    "description": "Paper group title"
-  },
-  "reportPaperLabelSheet": "Foglio A4 · {count} etichette {size} mm",
-  "@reportPaperLabelSheet": {
-    "description": "Paper format: adhesive A4 sheet",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "reportPaperRoll": "Rotolo · etichetta {size} mm",
-  "@reportPaperRoll": {
-    "description": "Paper format: thermal roll",
-    "placeholders": {
-      "size": {
-        "type": "String"
-      }
-    }
-  },
-  "reportPaperSignA4Portrait": "A4 verticale · 1 per foglio",
-  "@reportPaperSignA4Portrait": {
-    "description": "Paper format"
-  },
-  "reportPaperSignA4Landscape": "A4 orizzontale · 1 per foglio",
-  "@reportPaperSignA4Landscape": {
-    "description": "Paper format"
-  },
-  "reportPaperSignA5": "A5 · 2 per foglio A4",
-  "@reportPaperSignA5": {
-    "description": "Paper format"
-  },
-  "reportPaperSignA6": "A6 · 4 per foglio A4",
-  "@reportPaperSignA6": {
-    "description": "Paper format"
-  },
-  "reportPaperReportPortrait": "A4 verticale",
-  "@reportPaperReportPortrait": {
-    "description": "Paper format"
-  },
-  "reportPaperReportLandscape": "A4 orizzontale",
-  "@reportPaperReportLandscape": {
-    "description": "Paper format"
-  },
   "reportTemplateLabelClassic": "Classica",
   "@reportTemplateLabelClassic": {
     "description": "Built-in template name"
@@ -7076,39 +6877,6 @@
   "reportSampleMovementTransfer": "Trasferimento",
   "@reportSampleMovementTransfer": {
     "description": "Example movement type"
-  },
-  "reportEditDesign": "Modifica modello",
-  "@reportEditDesign": {
-    "description": "Button opening the drag-and-drop designer"
-  },
-  "reportDesignerTitle": "Modifica: {name}",
-  "@reportDesignerTitle": {
-    "description": "Title of the designer screen",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportApplyDesign": "Usa queste modifiche",
-  "@reportApplyDesign": {
-    "description": "Button closing the designer and applying the layout"
-  },
-  "reportDiscardDesignTitle": "Annullare le modifiche?",
-  "@reportDiscardDesignTitle": {
-    "description": "Title of the dialog shown when closing the designer with changes"
-  },
-  "reportDiscardDesignMessage": "Le modifiche fatte nel designer andranno perse.",
-  "@reportDiscardDesignMessage": {
-    "description": "Body of the discard changes dialog"
-  },
-  "reportKeepEditing": "Continua a modificare",
-  "@reportKeepEditing": {
-    "description": "Button that keeps the designer open"
-  },
-  "reportDiscardDesign": "Annulla modifiche",
-  "@reportDiscardDesign": {
-    "description": "Button that closes the designer without applying"
   },
   "reportPrefixPrintedOn": "Stampato il",
   "@reportPrefixPrintedOn": {
@@ -8042,184 +7810,6 @@
       }
     }
   },
-  "reportTabPrint": "Stampa",
-  "@reportTabPrint": {
-    "description": "Tab that prints templates"
-  },
-  "reportTabTemplates": "Template",
-  "@reportTabTemplates": {
-    "description": "Tab that manages templates"
-  },
-  "reportReload": "Ricarica",
-  "@reportReload": {
-    "description": "Reloads the print library from the server"
-  },
-  "reportLoadError": "Non è stato possibile caricare i modelli dal server. Controlla la connessione e riprova.",
-  "@reportLoadError": {
-    "description": "Shown when the print library cannot be loaded"
-  },
-  "reportPrintHelp": "Tocca un modello per vedere l'anteprima e stampare.",
-  "@reportPrintHelp": {
-    "description": "Help of the Print tab"
-  },
-  "reportJobTemplateQuestion": "Scegli il modello di etichetta",
-  "@reportJobTemplateQuestion": {
-    "description": "Title of the Print tab when printing labels for products"
-  },
-  "reportJobSummary": "Etichette per {products, plural, =1{1 articolo} other{{products} articoli}}: {labels, plural, =1{1 etichetta} other{{labels} etichette}}",
-  "@reportJobSummary": {
-    "description": "Summary of the labels requested from the products list",
-    "placeholders": {
-      "products": {
-        "type": "int"
-      },
-      "labels": {
-        "type": "int"
-      }
-    }
-  },
-  "reportJobCancel": "Annulla",
-  "@reportJobCancel": {
-    "description": "Discards the labels requested from the products list"
-  },
-  "reportJobLabelsTitle": "Etichette da stampare",
-  "@reportJobLabelsTitle": {
-    "description": "Section with the labels per product"
-  },
-  "reportJobQuantityHelp": "Un'etichetta per ogni pezzo in magazzino. Le varianti senza pezzi non sono elencate.",
-  "@reportJobQuantityHelp": {
-    "description": "Help of the labels per product"
-  },
-  "reportChangeTemplate": "Cambia modello",
-  "@reportChangeTemplate": {
-    "description": "Back to the template list"
-  },
-  "reportPreviewRealNotice": "Dati dei prodotti: la stampa sarà esattamente così.",
-  "@reportPreviewRealNotice": {
-    "description": "Notice above the preview of real product labels"
-  },
-  "reportNoTemplates": "Non ci sono ancora modelli.",
-  "@reportNoTemplates": {
-    "description": "Shown when the library has no templates"
-  },
-  "reportNoCategory": "Senza categoria",
-  "@reportNoCategory": {
-    "description": "Group of templates without a category"
-  },
-  "reportEmptyCategory": "Nessun modello in questa categoria.",
-  "@reportEmptyCategory": {
-    "description": "Shown under an empty category"
-  },
-  "reportManagersOnly": "Solo i responsabili possono creare, modificare o eliminare modelli, categorie e formati carta.",
-  "@reportManagersOnly": {
-    "description": "Notice for staff without management rights"
-  },
-  "reportNewTemplate": "Nuovo modello",
-  "@reportNewTemplate": {
-    "description": "Button that creates a template"
-  },
-  "reportNewCategory": "Nuova categoria",
-  "@reportNewCategory": {
-    "description": "Button that creates a category"
-  },
-  "reportPaperFormats": "Formati carta",
-  "@reportPaperFormats": {
-    "description": "Button and title of the paper formats page"
-  },
-  "reportDuplicate": "Duplica",
-  "@reportDuplicate": {
-    "description": "Template action"
-  },
-  "reportMoveToCategory": "Sposta in categoria",
-  "@reportMoveToCategory": {
-    "description": "Template action"
-  },
-  "reportCopyOf": "Copia di {name}",
-  "@reportCopyOf": {
-    "description": "Name of a duplicated template",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportTemplateDeleted": "Modello \"{name}\" eliminato",
-  "@reportTemplateDeleted": {
-    "description": "Confirmation after deleting a template",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportSaveError": "Non salvato sul server: {error}",
-  "@reportSaveError": {
-    "description": "Error when a change is refused by the server",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "reportCategoryActions": "Opzioni categoria",
-  "@reportCategoryActions": {
-    "description": "Tooltip of the category menu"
-  },
-  "reportMoveUp": "Sposta su",
-  "@reportMoveUp": {
-    "description": "Category action"
-  },
-  "reportMoveDown": "Sposta giù",
-  "@reportMoveDown": {
-    "description": "Category action"
-  },
-  "reportCategoryNameLabel": "Nome della categoria",
-  "@reportCategoryNameLabel": {
-    "description": "Label of the category name field"
-  },
-  "reportCategorySaved": "Categoria \"{name}\" salvata",
-  "@reportCategorySaved": {
-    "description": "Confirmation after saving a category",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportCategoryDeleted": "Categoria \"{name}\" eliminata",
-  "@reportCategoryDeleted": {
-    "description": "Confirmation after deleting a category",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportDeleteCategoryTitle": "Elimina categoria",
-  "@reportDeleteCategoryTitle": {
-    "description": "Title of the delete category dialog"
-  },
-  "reportDeleteCategoryMessage": "Eliminare la categoria \"{name}\"? I suoi modelli restano e finiscono in \"Senza categoria\".",
-  "@reportDeleteCategoryMessage": {
-    "description": "Body of the delete category dialog",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportCategoryLabel": "Categoria",
-  "@reportCategoryLabel": {
-    "description": "Label of the category choice"
-  },
-  "reportTemplateKindLabel": "Tipo",
-  "@reportTemplateKindLabel": {
-    "description": "Label of the template type choice"
-  },
-  "reportOpenDesigner": "Apri il designer",
-  "@reportOpenDesigner": {
-    "description": "Creates the template and opens the designer"
-  },
   "reportCategoryLabels": "Etichette",
   "@reportCategoryLabels": {
     "description": "Default category"
@@ -8236,188 +7826,9 @@
   "@reportCategoryReports": {
     "description": "Default category"
   },
-  "reportPaperFormatsHelp": "Fogli e rotoli usati dai modelli. Tutte le misure sono in millimetri.",
-  "@reportPaperFormatsHelp": {
-    "description": "Help of the paper formats page"
-  },
-  "reportNewPaperFormat": "Nuovo formato carta",
-  "@reportNewPaperFormat": {
-    "description": "Button and dialog title"
-  },
-  "reportEditPaperFormat": "Modifica formato carta",
-  "@reportEditPaperFormat": {
-    "description": "Dialog title"
-  },
-  "reportPaperFormatSaved": "Formato carta \"{name}\" salvato",
-  "@reportPaperFormatSaved": {
-    "description": "Confirmation after saving a paper format",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportDeletePaperFormatTitle": "Elimina formato carta",
-  "@reportDeletePaperFormatTitle": {
-    "description": "Title of the delete paper format dialog"
-  },
-  "reportDeletePaperFormatMessage": "Eliminare il formato carta \"{name}\"?",
-  "@reportDeletePaperFormatMessage": {
-    "description": "Body of the delete paper format dialog",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "reportDeletePaperFormatUsedMessage": "Eliminare il formato carta \"{name}\"? {count, plural, =1{1 modello lo usa e stamperà} other{{count} modelli lo usano e stamperanno}} su un altro formato dello stesso tipo finché non ne scegli uno.",
-  "@reportDeletePaperFormatUsedMessage": {
-    "description": "Body of the delete dialog when templates use the format",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "reportPaperMissing": "Nessun formato carta per questo tipo: aggiungine uno in Formati carta.",
-  "@reportPaperMissing": {
-    "description": "Shown when a type has no paper format"
-  },
-  "reportPaperNameLabel": "Nome",
-  "@reportPaperNameLabel": {
-    "description": "Label of the paper format name"
-  },
-  "reportPaperNameHelp": "Lascia vuoto per mostrare le misure.",
-  "@reportPaperNameHelp": {
-    "description": "Helper of the paper format name"
-  },
-  "reportPaperFeedSheet": "Foglio",
-  "@reportPaperFeedSheet": {
-    "description": "Paper feed option"
-  },
-  "reportPaperFeedRoll": "Rotolo",
-  "@reportPaperFeedRoll": {
-    "description": "Paper feed option"
-  },
-  "reportPaperLabelSizeTitle": "Misura etichetta (mm)",
-  "@reportPaperLabelSizeTitle": {
-    "description": "Section title in the paper format dialog"
-  },
-  "reportPaperCellSizeTitle": "Misura di ogni etichetta o cartello (mm)",
-  "@reportPaperCellSizeTitle": {
-    "description": "Section title in the paper format dialog"
-  },
-  "reportPaperPageTitle": "Misura del foglio (mm)",
-  "@reportPaperPageTitle": {
-    "description": "Section title in the paper format dialog"
-  },
-  "reportPaperGridTitle": "Disposizione sul foglio",
-  "@reportPaperGridTitle": {
-    "description": "Section title in the paper format dialog"
-  },
-  "reportPaperWidth": "Larghezza",
-  "@reportPaperWidth": {
-    "description": "Paper format field"
-  },
-  "reportPaperHeight": "Altezza",
-  "@reportPaperHeight": {
-    "description": "Paper format field"
-  },
-  "reportPaperColumns": "Colonne",
-  "@reportPaperColumns": {
-    "description": "Paper format field"
-  },
-  "reportPaperRows": "Righe",
-  "@reportPaperRows": {
-    "description": "Paper format field"
-  },
-  "reportPaperMarginTop": "Margine sopra",
-  "@reportPaperMarginTop": {
-    "description": "Paper format field"
-  },
-  "reportPaperMarginLeft": "Margine sinistro",
-  "@reportPaperMarginLeft": {
-    "description": "Paper format field"
-  },
-  "reportPaperGapX": "Spazio tra colonne",
-  "@reportPaperGapX": {
-    "description": "Paper format field"
-  },
-  "reportPaperGapY": "Spazio tra righe",
-  "@reportPaperGapY": {
-    "description": "Paper format field"
-  },
-  "reportPaperErrorSize": "Inserisci la misura del foglio e di ogni etichetta.",
-  "@reportPaperErrorSize": {
-    "description": "Paper format validation error"
-  },
-  "reportPaperErrorGrid": "Le colonne devono essere da 1 a 20 e le righe da 1 a 40.",
-  "@reportPaperErrorGrid": {
-    "description": "Paper format validation error"
-  },
-  "reportPaperErrorOutside": "Le etichette non stanno nel foglio: controlla misure, margini e spazi.",
-  "@reportPaperErrorOutside": {
-    "description": "Paper format validation error"
-  },
-  "reportPaperSheetDescription": "Foglio {page} mm · {count} × {cell} mm",
-  "@reportPaperSheetDescription": {
-    "description": "Description of a sheet paper format",
-    "placeholders": {
-      "page": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "cell": {
-        "type": "String"
-      }
-    }
-  },
-  "reportJobLabelCount": "{count, plural, =1{1 etichetta} other{{count} etichette}}",
-  "@reportJobLabelCount": {
-    "description": "Labels printed for one product or variant",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "reportJobRemove": "Togli dalle etichette",
-  "@reportJobRemove": {
-    "description": "Tooltip of the button removing a product or variant from the labels"
-  },
-  "reportJobEmpty": "Non ci sono più etichette da stampare.",
-  "@reportJobEmpty": {
-    "description": "Shown when every line was removed"
-  },
   "productsPrintLabelsNoStock": "I prodotti selezionati non hanno pezzi in magazzino: non ci sono etichette da stampare.",
   "@productsPrintLabelsNoStock": {
     "description": "Warning when every selected variant has zero stock"
-  },
-  "reportSheetNumber": "Foglio {number}",
-  "@reportSheetNumber": {
-    "description": "Label of one sheet in the positions already used list",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "reportAddLabels": "Aggiungi etichetta",
-  "@reportAddLabels": {
-    "description": "Opens the product picker to add products to the labels"
-  },
-  "reportAddLabelsHelp": "Per stampare le etichette di prodotti veri, aggiungili dal catalogo.",
-  "@reportAddLabelsHelp": {
-    "description": "Help above the add label button when printing example labels"
-  },
-  "reportAddLabelsAlreadyListed": "I prodotti scelti sono già tra le etichette.",
-  "@reportAddLabelsAlreadyListed": {
-    "description": "Shown when every chosen variant is already listed"
   },
   "productsVariantsSelected": "{count, plural, =1{1 variante selezionata} other{{count} varianti selezionate}}",
   "@productsVariantsSelected": {
@@ -8527,6 +7938,151 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "logLinesCopied": "{count, plural, =1{1 riga copiata negli appunti} other{{count} righe copiate negli appunti}}",
+  "@logLinesCopied": {
+    "description": "Conferma dopo la copia delle righe di log filtrate",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logContentCleared": "Contenuto log cancellato",
+  "@logContentCleared": {
+    "description": "Avviso dopo la cancellazione di tutti i log"
+  },
+  "logRecordingStarted": "Registrazione temporanea avviata",
+  "@logRecordingStarted": {
+    "description": "Avviso all'avvio della registrazione temporanea dei log"
+  },
+  "logRecordingStopped": "Registrazione temporanea fermata",
+  "@logRecordingStopped": {
+    "description": "Avviso all'arresto della registrazione temporanea dei log"
+  },
+  "logShareSubject": "Log temporaneo MGWS Inventory",
+  "@logShareSubject": {
+    "description": "Oggetto della condivisione del log temporaneo"
+  },
+  "logSharedAndCleared": "Log condiviso e memoria temporanea svuotata",
+  "@logSharedAndCleared": {
+    "description": "Avviso dopo la condivisione e la pulizia del log"
+  },
+  "logShareError": "Errore condivisione log: {error}",
+  "@logShareError": {
+    "description": "Errore mostrato quando la condivisione del log non riesce",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "logLineCount": "{count, plural, =1{1 riga} other{{count} righe}}",
+  "@logLineCount": {
+    "description": "Badge con il numero di righe di log",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logFilteredLineCount": "{filtered} / {total} righe",
+  "@logFilteredLineCount": {
+    "description": "Badge con righe di log filtrate e totali",
+    "placeholders": {
+      "filtered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "logShareAndClearTooltip": "Condividi log temporaneo e pulisci",
+  "@logShareAndClearTooltip": {
+    "description": "Tooltip del pulsante condividi e pulisci nella barra"
+  },
+  "logStartRecordingTooltip": "Avvia registrazione temporanea",
+  "@logStartRecordingTooltip": {
+    "description": "Tooltip del pulsante che avvia la registrazione temporanea"
+  },
+  "logStopRecordingTooltip": "Ferma registrazione temporanea",
+  "@logStopRecordingTooltip": {
+    "description": "Tooltip del pulsante che ferma la registrazione temporanea"
+  },
+  "logMemoryBuffer": "Buffer memoria temporaneo",
+  "@logMemoryBuffer": {
+    "description": "Voce della sorgente log per il buffer in memoria"
+  },
+  "logFilterByLevel": "Filtra per livello:",
+  "@logFilterByLevel": {
+    "description": "Etichetta del filtro per livello di log"
+  },
+  "logFilterByTag": "Filtra per tag:",
+  "@logFilterByTag": {
+    "description": "Etichetta del filtro per tag di log"
+  },
+  "logAllTags": "Tutti i tag",
+  "@logAllTags": {
+    "description": "Voce del filtro tag che mostra tutti i tag"
+  },
+  "logRecordTemporary": "Registra log temporaneo",
+  "@logRecordTemporary": {
+    "description": "Pulsante che avvia la registrazione temporanea del log"
+  },
+  "logStopTemporary": "Ferma log temporaneo",
+  "@logStopTemporary": {
+    "description": "Pulsante che ferma la registrazione temporanea del log"
+  },
+  "logShareAndClear": "Condividi e pulisci",
+  "@logShareAndClear": {
+    "description": "Pulsante che condivide il log temporaneo e lo pulisce"
+  },
+  "logNoneForLevel": "Nessun log per il livello selezionato",
+  "@logNoneForLevel": {
+    "description": "Stato vuoto quando il filtro per livello non trova nulla"
+  },
+  "logNoneAvailable": "Nessun log disponibile",
+  "@logNoneAvailable": {
+    "description": "Stato vuoto quando non ci sono log"
+  },
+  "productsVariablePrices": "Prezzi variabili",
+  "@productsVariablePrices": {
+    "description": "Cella prezzo quando le varianti hanno prezzi diversi"
+  },
+  "productsVariablePercentage": "Percentuale variabile",
+  "@productsVariablePercentage": {
+    "description": "Cella percentuale sconto quando le varianti hanno sconti diversi"
+  },
+  "productsEnterNameFirst": "Inserisci prima il nome del prodotto",
+  "@productsEnterNameFirst": {
+    "description": "Mostrato quando si usa un'azione IA prima di inserire il nome del prodotto"
+  },
+  "productsFilterOrNewCategory": "Filtra o nuova categoria",
+  "@productsFilterOrNewCategory": {
+    "description": "Etichetta del campo nel dialog di selezione categorie"
+  },
+  "productsFilterOrNewTag": "Filtra o nuovo tag",
+  "@productsFilterOrNewTag": {
+    "description": "Etichetta del campo nel dialog di selezione tag"
+  },
+  "aiProviderNotConfigured": "Provider IA \"{provider}\" non configurato. Vai in Impostazioni > IA per aggiungere un token.",
+  "@aiProviderNotConfigured": {
+    "description": "Errore quando il provider IA selezionato non ha un token",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiProviderNotImplemented": "{provider} non è ancora supportato. Usa un altro provider.",
+  "@aiProviderNotImplemented": {
+    "description": "Errore quando il provider IA selezionato non è implementato",
+    "placeholders": {
+      "provider": {
+        "type": "String"
       }
     }
   }

@@ -6,7 +6,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'dashboard.code.dart';
-import '../login/jwt_api/class_prodotti.dart';
+import 'class_report.dart';
 
 // =======================================================
 // ==         GRAFICO A LINEE - VENDITE NEL TEMPO       ==

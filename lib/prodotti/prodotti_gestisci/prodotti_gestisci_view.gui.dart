@@ -330,9 +330,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
       _checkedVariantIds = <int>{};
     } else {
       // A reload may have removed variants: keep only the ones still there.
-      final existing = (widget.prodotto.varianti ?? const <VarianteProductGlobal>[])
-          .map((variant) => variant.id)
-          .toSet();
+      final existing =
+          (widget.prodotto.varianti ?? const <VarianteProductGlobal>[])
+              .map((variant) => variant.id)
+              .toSet();
       _checkedVariantIds = _checkedVariantIds.where(existing.contains).toSet();
     }
     if (!identical(oldWidget.prodotto, widget.prodotto) ||
@@ -763,10 +764,10 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
 
   /// Opens "Templates and print" on the ticked variants only.
   void _printCheckedVariants() {
-    final job = PrintJob.fromProducts([
+    final job = labelJobFromProducts([
       widget.prodotto.copyWith(varianti: _checkedVariants),
-    ]);
-    if (job.items.isEmpty) {
+    ], context.l10n.localeName);
+    if (job.rows.isEmpty) {
       NotificationService.instance.messageBar(
         'warning',
         'prodotti_gestisci',
@@ -803,7 +804,9 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
           immaginiAggiuntive: variant.immaginiAggiuntive,
           peso: variant.peso,
           dimensioni: variant.dimensioni,
-          attiva: change.quantity == null ? variant.attiva : change.quantity! > 0,
+          attiva: change.quantity == null
+              ? variant.attiva
+              : change.quantity! > 0,
         ),
     };
     setState(() => _isSaving = true);
@@ -1223,7 +1226,9 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                   count: _checkedVariantIds.length,
                   busy: _isSaving,
                   onPrint: _printCheckedVariants,
-                  onBulkEdit: _controller == null ? null : _bulkEditCheckedVariants,
+                  onBulkEdit: _controller == null
+                      ? null
+                      : _bulkEditCheckedVariants,
                   onDelete: _controller == null ? null : _deleteCheckedVariants,
                   onClear: () => setState(() => _checkedVariantIds = <int>{}),
                 ),
@@ -1606,16 +1611,16 @@ class _ReadonlyInfoCard extends StatelessWidget {
               // illeggibili: impila in verticale sotto i 360px.
               final prezzoFields = <Widget>[
                 _InlineInfoField(
-                  label: 'Prezzo',
-                  value: prezzoInfo.prezzoLabel,
+                  label: context.l10n.prodottiColonnaPrezzo,
+                  value: prezzoInfo.prezzoLabel(context.l10n),
                 ),
                 _InlineInfoField(
-                  label: 'Sconto',
-                  value: prezzoInfo.scontoLabel,
+                  label: context.l10n.prodottiColonnaSconto,
+                  value: prezzoInfo.scontoLabel(context.l10n),
                 ),
                 _InlineInfoField(
                   label: '%',
-                  value: prezzoInfo.percentualeScontoLabel,
+                  value: prezzoInfo.percentualeScontoLabel(context.l10n),
                 ),
               ];
               if (constraints.maxWidth < 360) {
@@ -2583,7 +2588,6 @@ class _ImagePlaceholder extends StatelessWidget {
   }
 }
 
-
 /// Actions on the variants ticked in the variants list.
 class _VariantActionsBar extends StatelessWidget {
   const _VariantActionsBar({
@@ -2695,7 +2699,8 @@ class _VariantBulkEditDialogState extends State<_VariantBulkEditDialog> {
     final salePrice = _decimal(_salePrice);
     final quantityText = _quantity.text.trim();
     final quantity = quantityText.isEmpty ? null : int.tryParse(quantityText);
-    final quantityValid = quantityText.isEmpty || (quantity != null && quantity >= 0);
+    final quantityValid =
+        quantityText.isEmpty || (quantity != null && quantity >= 0);
     final change = _VariantBulkChange(
       price: price.value,
       salePrice: salePrice.value,
@@ -2708,7 +2713,11 @@ class _VariantBulkEditDialogState extends State<_VariantBulkEditDialog> {
     Navigator.pop(context, change);
   }
 
-  Widget _field(TextEditingController controller, String label, {bool decimal = true}) {
+  Widget _field(
+    TextEditingController controller,
+    String label, {
+    bool decimal = true,
+  }) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.numberWithOptions(decimal: decimal),
@@ -2734,7 +2743,11 @@ class _VariantBulkEditDialogState extends State<_VariantBulkEditDialog> {
             const SizedBox(height: 8),
             _field(_salePrice, l10n.productsVariantsBulkSalePrice),
             const SizedBox(height: 8),
-            _field(_quantity, l10n.productsVariantsBulkQuantity, decimal: false),
+            _field(
+              _quantity,
+              l10n.productsVariantsBulkQuantity,
+              decimal: false,
+            ),
             if (_invalid) ...[
               const SizedBox(height: 12),
               Text(
@@ -2750,7 +2763,10 @@ class _VariantBulkEditDialogState extends State<_VariantBulkEditDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.commonCancel),
         ),
-        FilledButton(onPressed: _submit, child: Text(l10n.productsVariantsBulkApply)),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l10n.productsVariantsBulkApply),
+        ),
       ],
     );
   }

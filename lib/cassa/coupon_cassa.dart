@@ -47,7 +47,7 @@ class CouponCassa {
       codice: codice,
       tipo: coupon.discountType ?? WooCouponDiscountType.unknown,
       valore: coupon.amount ?? 0,
-      scadenza: coupon.dateExpiresGmt ?? coupon.dateExpires,
+      scadenza: _gmtCorretta(coupon.dateExpiresGmt) ?? coupon.dateExpires,
       limiteUtilizzi: coupon.usageLimit,
       utilizzi: coupon.usageCount ?? 0,
       // WooCommerce usa 0 per "nessun limite".
@@ -69,6 +69,25 @@ class CouponCassa {
         for (final email in coupon.emailRestrictions ?? const <String>[])
           if (email.trim().isNotEmpty) email.trim().toLowerCase(),
       ],
+    );
+  }
+
+  /// WooCommerce manda i campi `*_gmt` senza suffisso `Z` (es.
+  /// "2026-06-08T19:25:09"). `woocommerce_flutter_api` 2.0.1 li legge come
+  /// ora locale e poi chiama `toUtc()`, quindi l'istante risulta sfasato del
+  /// fuso del dispositivo (-1/-2 h in Italia). Qui si ripristinano gli stessi
+  /// componenti data/ora come UTC, che è ciò che il campo significa davvero.
+  static DateTime? _gmtCorretta(DateTime? letta) {
+    if (letta == null) return null;
+    final l = letta.toLocal();
+    return DateTime.utc(
+      l.year,
+      l.month,
+      l.day,
+      l.hour,
+      l.minute,
+      l.second,
+      l.millisecond,
     );
   }
 
