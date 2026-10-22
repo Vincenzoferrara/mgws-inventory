@@ -8197,5 +8197,849 @@
   "notificationSourceLogs": "Logs",
   "@notificationSourceLogs": {
     "description": "Title of message bars raised by the log viewer"
+  },
+  "cassaErrorShiftAlreadyOpen": "A shift is already open for this register. Close it before opening another one.",
+  "@cassaErrorShiftAlreadyOpen": {
+    "description": "Localized string cassaErrorShiftAlreadyOpen"
+  },
+  "cassaErrorShiftNotFound": "Shift not found.",
+  "@cassaErrorShiftNotFound": {
+    "description": "Localized string cassaErrorShiftNotFound"
+  },
+  "cassaErrorShiftAlreadyClosed": "Shift already closed: add an adjustment instead.",
+  "@cassaErrorShiftAlreadyClosed": {
+    "description": "Localized string cassaErrorShiftAlreadyClosed"
+  },
+  "cassaErrorNoOpenShift": "No open shift.",
+  "@cassaErrorNoOpenShift": {
+    "description": "Localized string cassaErrorNoOpenShift"
+  },
+  "cassaErrorOpenShiftBeforeAdding": "Open a register shift before adding products.",
+  "@cassaErrorOpenShiftBeforeAdding": {
+    "description": "Localized string cassaErrorOpenShiftBeforeAdding"
+  },
+  "cassaErrorCloseReceiptBeforeShiftClose": "Close or suspend the current receipt before closing the shift.",
+  "@cassaErrorCloseReceiptBeforeShiftClose": {
+    "description": "Localized string cassaErrorCloseReceiptBeforeShiftClose"
+  },
+  "cassaErrorDifferenceReasonRequired": "A reason is required when the counted and expected amounts differ.",
+  "@cassaErrorDifferenceReasonRequired": {
+    "description": "Localized string cassaErrorDifferenceReasonRequired"
+  },
+  "cassaErrorInvalidServerResponse": "Invalid response from the MGWS backend.",
+  "@cassaErrorInvalidServerResponse": {
+    "description": "Localized string cassaErrorInvalidServerResponse"
+  },
+  "cassaErrorShiftOperationFailed": "The MGWS register shift operation failed.",
+  "@cassaErrorShiftOperationFailed": {
+    "description": "Localized string cassaErrorShiftOperationFailed"
+  },
+  "cassaErrorInvalidLine": "Invalid line.",
+  "@cassaErrorInvalidLine": {
+    "description": "Localized string cassaErrorInvalidLine"
+  },
+  "cassaErrorInsufficientStock": "Insufficient stock. Available: {available}, requested: {requested}",
+  "@cassaErrorInsufficientStock": {
+    "description": "Localized string cassaErrorInsufficientStock",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "requested": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorReturnNotAllowed": "Return not allowed.",
+  "@cassaErrorReturnNotAllowed": {
+    "description": "Localized string cassaErrorReturnNotAllowed"
+  },
+  "cassaErrorSaleLineNotFound": "Sale line not found in the receipt.",
+  "@cassaErrorSaleLineNotFound": {
+    "description": "Localized string cassaErrorSaleLineNotFound"
+  },
+  "cassaErrorLineFullyReturned": "This line has already been fully returned.",
+  "@cassaErrorLineFullyReturned": {
+    "description": "Localized string cassaErrorLineFullyReturned"
+  },
+  "cassaErrorInvalidReturnQuantity": "Invalid return quantity.",
+  "@cassaErrorInvalidReturnQuantity": {
+    "description": "Localized string cassaErrorInvalidReturnQuantity"
+  },
+  "cassaErrorReturnReasonRequired": "A return reason is required.",
+  "@cassaErrorReturnReasonRequired": {
+    "description": "Localized string cassaErrorReturnReasonRequired"
+  },
+  "cassaErrorReturnExceedsRemaining": "Return exceeds the remainder: {available} available.",
+  "@cassaErrorReturnExceedsRemaining": {
+    "description": "Localized string cassaErrorReturnExceedsRemaining",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorReturnExceedsRemainingDetail": "Available for return: {available} (sold {sold}, already returned {returned}).",
+  "@cassaErrorReturnExceedsRemainingDetail": {
+    "description": "Localized string cassaErrorReturnExceedsRemainingDetail",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorOriginReceiptNotFound": "Original receipt not found or not available on the server.",
+  "@cassaErrorOriginReceiptNotFound": {
+    "description": "Localized string cassaErrorOriginReceiptNotFound"
+  },
+  "cassaErrorOriginReceiptCancelled": "The original receipt was cancelled.",
+  "@cassaErrorOriginReceiptCancelled": {
+    "description": "Localized string cassaErrorOriginReceiptCancelled"
+  },
+  "cassaErrorReceiptNotFound": "Receipt not found.",
+  "@cassaErrorReceiptNotFound": {
+    "description": "Localized string cassaErrorReceiptNotFound"
+  },
+  "cassaErrorReceiptAlreadyCancelled": "Receipt already cancelled.",
+  "@cassaErrorReceiptAlreadyCancelled": {
+    "description": "Localized string cassaErrorReceiptAlreadyCancelled"
+  },
+  "cassaErrorOnlyClosedReceiptsCancellable": "Only closed receipts can be cancelled.",
+  "@cassaErrorOnlyClosedReceiptsCancellable": {
+    "description": "Localized string cassaErrorOnlyClosedReceiptsCancellable"
+  },
+  "cassaErrorCancelReasonRequired": "A cancellation reason is required.",
+  "@cassaErrorCancelReasonRequired": {
+    "description": "Localized string cassaErrorCancelReasonRequired"
+  },
+  "cassaErrorAdjustmentNoteRequired": "An adjustment note is required.",
+  "@cassaErrorAdjustmentNoteRequired": {
+    "description": "Localized string cassaErrorAdjustmentNoteRequired"
+  },
+  "cassaCouponNotFound": "coupon not found",
+  "@cassaCouponNotFound": {
+    "description": "Localized string cassaCouponNotFound"
+  },
+  "cassaCouponCheckFailed": "coupon check failed",
+  "@cassaCouponCheckFailed": {
+    "description": "Localized string cassaCouponCheckFailed"
+  },
+  "cassaCouponUnsupportedType": "unsupported discount type",
+  "@cassaCouponUnsupportedType": {
+    "description": "Localized string cassaCouponUnsupportedType"
+  },
+  "cassaCouponExpired": "coupon expired",
+  "@cassaCouponExpired": {
+    "description": "Localized string cassaCouponExpired"
+  },
+  "cassaCouponUsageLimitReached": "usage limit reached",
+  "@cassaCouponUsageLimitReached": {
+    "description": "Localized string cassaCouponUsageLimitReached"
+  },
+  "cassaCouponCustomerRequired": "coupon restricted to specific customers: select the customer",
+  "@cassaCouponCustomerRequired": {
+    "description": "Localized string cassaCouponCustomerRequired"
+  },
+  "cassaCouponNotForCustomer": "coupon not valid for this customer",
+  "@cassaCouponNotForCustomer": {
+    "description": "Localized string cassaCouponNotForCustomer"
+  },
+  "cassaCouponMinimumSpend": "minimum spend of {amount}",
+  "@cassaCouponMinimumSpend": {
+    "description": "Localized string cassaCouponMinimumSpend",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponMaximumSpend": "maximum spend of {amount}",
+  "@cassaCouponMaximumSpend": {
+    "description": "Localized string cassaCouponMaximumSpend",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponNoEligibleItems": "no item on the receipt is eligible",
+  "@cassaCouponNoEligibleItems": {
+    "description": "Localized string cassaCouponNoEligibleItems"
+  },
+  "cassaOperatorUnassigned": "Operator not assigned",
+  "@cassaOperatorUnassigned": {
+    "description": "Localized string cassaOperatorUnassigned"
+  },
+  "cassaFloatHint": "The float is set when the shift opens and used when it closes.",
+  "@cassaFloatHint": {
+    "description": "Localized string cassaFloatHint"
+  },
+  "cassaShiftOpened": "Register shift opened.",
+  "@cassaShiftOpened": {
+    "description": "Localized string cassaShiftOpened"
+  },
+  "cassaShiftNotOpened": "Shift not opened.",
+  "@cassaShiftNotOpened": {
+    "description": "Localized string cassaShiftNotOpened"
+  },
+  "cassaShiftClosed": "Register shift closed.",
+  "@cassaShiftClosed": {
+    "description": "Localized string cassaShiftClosed"
+  },
+  "cassaShiftNotClosed": "Shift not closed.",
+  "@cassaShiftNotClosed": {
+    "description": "Localized string cassaShiftNotClosed"
+  },
+  "cassaInitialFloatValue": "Initial float: {amount}",
+  "@cassaInitialFloatValue": {
+    "description": "Localized string cassaInitialFloatValue",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftTakings": "Shift takings - cash {cash} · card {card} · other {other} · refunds {refunds}",
+  "@cassaShiftTakings": {
+    "description": "Localized string cassaShiftTakings",
+    "placeholders": {
+      "cash": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      },
+      "refunds": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftOpenedAt": "Shift opened at {time} · float {amount}",
+  "@cassaShiftOpenedAt": {
+    "description": "Localized string cassaShiftOpenedAt",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftOpenShort": "Open {time}",
+  "@cassaShiftOpenShort": {
+    "description": "Localized string cassaShiftOpenShort",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaAddedAsReturn": "{name} added as a return",
+  "@cassaAddedAsReturn": {
+    "description": "Localized string cassaAddedAsReturn",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaAddedToCart": "{name} added to the cart",
+  "@cassaAddedToCart": {
+    "description": "Localized string cassaAddedToCart",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaBarcodeNotFound": "Barcode not found",
+  "@cassaBarcodeNotFound": {
+    "description": "Localized string cassaBarcodeNotFound"
+  },
+  "cassaProductNoLongerAvailable": "The product is no longer available",
+  "@cassaProductNoLongerAvailable": {
+    "description": "Localized string cassaProductNoLongerAvailable"
+  },
+  "cassaNoProductSelected": "No product selected to add.",
+  "@cassaNoProductSelected": {
+    "description": "Localized string cassaNoProductSelected"
+  },
+  "cassaProductsAdded": "{count} products added to the register",
+  "@cassaProductsAdded": {
+    "description": "Localized string cassaProductsAdded",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaProductsPartlyAdded": "{added} products added. {failed} not added because of insufficient stock.",
+  "@cassaProductsPartlyAdded": {
+    "description": "Localized string cassaProductsPartlyAdded",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaNoProductAdded": "No product added: {reason}",
+  "@cassaNoProductAdded": {
+    "description": "Localized string cassaNoProductAdded",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSearchProducts": "Product search",
+  "@cassaSearchProducts": {
+    "description": "Localized string cassaSearchProducts"
+  },
+  "cassaEmptyCart": "Empty cart",
+  "@cassaEmptyCart": {
+    "description": "Localized string cassaEmptyCart"
+  },
+  "cassaEmptyCartHint": "Add products by barcode, QR or manual selection",
+  "@cassaEmptyCartHint": {
+    "description": "Localized string cassaEmptyCartHint"
+  },
+  "cassaReceiptHeader": "RECEIPT",
+  "@cassaReceiptHeader": {
+    "description": "Localized string cassaReceiptHeader"
+  },
+  "cassaNoCustomer": "No customer linked",
+  "@cassaNoCustomer": {
+    "description": "Localized string cassaNoCustomer"
+  },
+  "cassaCouponLabel": "Coupon: {code}",
+  "@cassaCouponLabel": {
+    "description": "Localized string cassaCouponLabel",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaNoCoupon": "No coupon",
+  "@cassaNoCoupon": {
+    "description": "Localized string cassaNoCoupon"
+  },
+  "cassaSuspendedCount": "{count} suspended",
+  "@cassaSuspendedCount": {
+    "description": "Localized string cassaSuspendedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaNoneSuspended": "None suspended",
+  "@cassaNoneSuspended": {
+    "description": "Localized string cassaNoneSuspended"
+  },
+  "cassaReceiptSuspended": "Receipt suspended",
+  "@cassaReceiptSuspended": {
+    "description": "Localized string cassaReceiptSuspended"
+  },
+  "cassaTotalSales": "Sales:",
+  "@cassaTotalSales": {
+    "description": "Localized string cassaTotalSales"
+  },
+  "cassaTotalReturns": "Returns:",
+  "@cassaTotalReturns": {
+    "description": "Localized string cassaTotalReturns"
+  },
+  "cassaNetSubtotal": "Net subtotal:",
+  "@cassaNetSubtotal": {
+    "description": "Localized string cassaNetSubtotal"
+  },
+  "cassaTotalDiscount": "Discount:",
+  "@cassaTotalDiscount": {
+    "description": "Localized string cassaTotalDiscount"
+  },
+  "cassaPercentDiscount": "Discount {percent}%:",
+  "@cassaPercentDiscount": {
+    "description": "Localized string cassaPercentDiscount",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponTotal": "Coupon ({code}):",
+  "@cassaCouponTotal": {
+    "description": "Localized string cassaCouponTotal",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaVatTotal": "VAT ({percent}%):",
+  "@cassaVatTotal": {
+    "description": "Localized string cassaVatTotal",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaRefundTotal": "REFUND:",
+  "@cassaRefundTotal": {
+    "description": "Localized string cassaRefundTotal"
+  },
+  "cassaGrandTotal": "TOTAL:",
+  "@cassaGrandTotal": {
+    "description": "Localized string cassaGrandTotal"
+  },
+  "cassaPayButton": "PAY",
+  "@cassaPayButton": {
+    "description": "Localized string cassaPayButton"
+  },
+  "cassaLoyaltyCardFound": "Loyalty card found! {points} points available",
+  "@cassaLoyaltyCardFound": {
+    "description": "Localized string cassaLoyaltyCardFound",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaNameRequired": "The name is required",
+  "@cassaNameRequired": {
+    "description": "Localized string cassaNameRequired"
+  },
+  "cassaConfirmExchangeTitle": "Confirm exchange",
+  "@cassaConfirmExchangeTitle": {
+    "description": "Localized string cassaConfirmExchangeTitle"
+  },
+  "cassaConfirmRefundTitle": "Confirm refund",
+  "@cassaConfirmRefundTitle": {
+    "description": "Localized string cassaConfirmRefundTitle"
+  },
+  "cassaConfirmPaymentTitle": "Confirm payment",
+  "@cassaConfirmPaymentTitle": {
+    "description": "Localized string cassaConfirmPaymentTitle"
+  },
+  "cassaEvenExchange": "EVEN EXCHANGE",
+  "@cassaEvenExchange": {
+    "description": "Localized string cassaEvenExchange"
+  },
+  "cassaAmountToRefund": "AMOUNT TO REFUND",
+  "@cassaAmountToRefund": {
+    "description": "Localized string cassaAmountToRefund"
+  },
+  "cassaAmountToPay": "TOTAL TO PAY",
+  "@cassaAmountToPay": {
+    "description": "Localized string cassaAmountToPay"
+  },
+  "cassaRefundMethod": "Refund method:",
+  "@cassaRefundMethod": {
+    "description": "Localized string cassaRefundMethod"
+  },
+  "cassaPaymentMethod": "Payment method:",
+  "@cassaPaymentMethod": {
+    "description": "Localized string cassaPaymentMethod"
+  },
+  "cassaChangeDue": "CHANGE DUE",
+  "@cassaChangeDue": {
+    "description": "Localized string cassaChangeDue"
+  },
+  "cassaAmountInsufficient": "AMOUNT INSUFFICIENT",
+  "@cassaAmountInsufficient": {
+    "description": "Localized string cassaAmountInsufficient"
+  },
+  "cassaAmountMissing": "{amount} short",
+  "@cassaAmountMissing": {
+    "description": "Localized string cassaAmountMissing",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangeRecorded": "Exchange recorded successfully!",
+  "@cassaExchangeRecorded": {
+    "description": "Localized string cassaExchangeRecorded"
+  },
+  "cassaExchangeCustomerCredit": "Exchange recorded. Customer credit: {amount}",
+  "@cassaExchangeCustomerCredit": {
+    "description": "Localized string cassaExchangeCustomerCredit",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangeBalanceDue": "Exchange recorded. Balance to collect: {amount}",
+  "@cassaExchangeBalanceDue": {
+    "description": "Localized string cassaExchangeBalanceDue",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReturnRecorded": "Return recorded. Refund: {amount}",
+  "@cassaReturnRecorded": {
+    "description": "Localized string cassaReturnRecorded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSaleCompleted": "Sale completed successfully!",
+  "@cassaSaleCompleted": {
+    "description": "Localized string cassaSaleCompleted"
+  },
+  "cassaSaleCompletedChange": "Sale completed! Change: {amount}",
+  "@cassaSaleCompletedChange": {
+    "description": "Localized string cassaSaleCompletedChange",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSaleFailed": "Error while completing the sale",
+  "@cassaSaleFailed": {
+    "description": "Localized string cassaSaleFailed"
+  },
+  "cassaCardFoundCustomer": "Card found! Customer: {name} - {points} points",
+  "@cassaCardFoundCustomer": {
+    "description": "Localized string cassaCardFoundCustomer",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCardNotFound": "Card not found: {number}",
+  "@cassaCardNotFound": {
+    "description": "Localized string cassaCardNotFound",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaErrorDetail": "Error: {error}",
+  "@cassaErrorDetail": {
+    "description": "Localized string cassaErrorDetail",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponApplied": "Coupon \"{code}\" applied!",
+  "@cassaCouponApplied": {
+    "description": "Localized string cassaCouponApplied",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponInvalid": "Coupon \"{code}\" not valid: {reason}",
+  "@cassaCouponInvalid": {
+    "description": "Localized string cassaCouponInvalid",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaWholeNumbersOnly": "Enter whole numbers only.",
+  "@cassaWholeNumbersOnly": {
+    "description": "Localized string cassaWholeNumbersOnly"
+  },
+  "cassaQuantityMustBePositive": "The quantity must be greater than zero.",
+  "@cassaQuantityMustBePositive": {
+    "description": "Localized string cassaQuantityMustBePositive"
+  },
+  "cassaReturnBadge": "RETURN",
+  "@cassaReturnBadge": {
+    "description": "Localized string cassaReturnBadge"
+  },
+  "cassaLineDiscount": "Discount: -{amount}",
+  "@cassaLineDiscount": {
+    "description": "Localized string cassaLineDiscount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaMetricSales": "Sales",
+  "@cassaMetricSales": {
+    "description": "Localized string cassaMetricSales"
+  },
+  "cassaMetricReturns": "Returns",
+  "@cassaMetricReturns": {
+    "description": "Localized string cassaMetricReturns"
+  },
+  "cassaMetricExchanges": "Exchanges",
+  "@cassaMetricExchanges": {
+    "description": "Localized string cassaMetricExchanges"
+  },
+  "cassaMetricSalesValue": "Sales value",
+  "@cassaMetricSalesValue": {
+    "description": "Localized string cassaMetricSalesValue"
+  },
+  "cassaMetricReturnsValue": "Returns value",
+  "@cassaMetricReturnsValue": {
+    "description": "Localized string cassaMetricReturnsValue"
+  },
+  "cassaMetricNetBalance": "Net balance",
+  "@cassaMetricNetBalance": {
+    "description": "Localized string cassaMetricNetBalance"
+  },
+  "cassaMetricBalancesCollected": "Balances collected",
+  "@cassaMetricBalancesCollected": {
+    "description": "Localized string cassaMetricBalancesCollected"
+  },
+  "cassaMetricBalancesRefunded": "Balances refunded",
+  "@cassaMetricBalancesRefunded": {
+    "description": "Localized string cassaMetricBalancesRefunded"
+  },
+  "cassaAdd": "Add",
+  "@cassaAdd": {
+    "description": "Localized string cassaAdd"
+  },
+  "cassaHistoryCount": "{count} POS receipts (POS channel, kept apart from Woo orders)",
+  "@cassaHistoryCount": {
+    "description": "Localized string cassaHistoryCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaHistoryEmpty": "No POS receipt stored with these filters.",
+  "@cassaHistoryEmpty": {
+    "description": "Localized string cassaHistoryEmpty"
+  },
+  "cassaHistoryOrderRef": "order {id}",
+  "@cassaHistoryOrderRef": {
+    "description": "Localized string cassaHistoryOrderRef",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReceiptTitle": "Receipt {number}",
+  "@cassaReceiptTitle": {
+    "description": "Localized string cassaReceiptTitle",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReceiptCancelledNote": "Receipt cancelled: excluded from totals and returns.",
+  "@cassaReceiptCancelledNote": {
+    "description": "Localized string cassaReceiptCancelledNote"
+  },
+  "cassaRegisterRef": "Register {name}",
+  "@cassaRegisterRef": {
+    "description": "Localized string cassaRegisterRef",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaLinkedOrder": "Linked Woo/MGWS order: {id} (reference only, separate cycle)",
+  "@cassaLinkedOrder": {
+    "description": "Localized string cassaLinkedOrder",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSoldLinesTitle": "Sold lines and returnable remainder",
+  "@cassaSoldLinesTitle": {
+    "description": "Localized string cassaSoldLinesTitle"
+  },
+  "cassaReturnableLine": "Internal barcode {barcode} · sold {sold} · already returned {returned} · returnable {returnable}",
+  "@cassaReturnableLine": {
+    "description": "Localized string cassaReturnableLine",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      },
+      "returnable": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaRecordedLinesTitle": "Recorded lines",
+  "@cassaRecordedLinesTitle": {
+    "description": "Localized string cassaRecordedLinesTitle"
+  },
+  "cassaReturnLinePrefix": "[RETURN]",
+  "@cassaReturnLinePrefix": {
+    "description": "Localized string cassaReturnLinePrefix"
+  },
+  "cassaAdjustmentsTitle": "Adjustments",
+  "@cassaAdjustmentsTitle": {
+    "description": "Localized string cassaAdjustmentsTitle"
+  },
+  "cassaReturnableSummary": "Returnable: {returnable} (sold {sold}, already returned {returned}). The price stays the one paid: {price}.",
+  "@cassaReturnableSummary": {
+    "description": "Localized string cassaReturnableSummary",
+    "placeholders": {
+      "returnable": {
+        "type": "int"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangePrepared": "Exchange prepared: add the replacement product and complete the checkout.",
+  "@cassaExchangePrepared": {
+    "description": "Localized string cassaExchangePrepared"
+  },
+  "cassaReturnPrepared": "Return added to the cart: complete the checkout to record it.",
+  "@cassaReturnPrepared": {
+    "description": "Localized string cassaReturnPrepared"
+  },
+  "cassaReceiptCancelled": "Receipt cancelled.",
+  "@cassaReceiptCancelled": {
+    "description": "Localized string cassaReceiptCancelled"
+  },
+  "cassaAdjustmentSaved": "Adjustment saved.",
+  "@cassaAdjustmentSaved": {
+    "description": "Localized string cassaAdjustmentSaved"
+  },
+  "cassaCashSummary": "Expected cash {expected} · counted {counted} · difference {difference}",
+  "@cassaCashSummary": {
+    "description": "Localized string cassaCashSummary",
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "String"
+      },
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCardSummary": "Expected card {expected} · counted {counted} · difference {difference}",
+  "@cassaCardSummary": {
+    "description": "Localized string cassaCardSummary",
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "String"
+      },
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftSummary": "Shift: {shift} · Operator: {operator} · Initial float {amount}.",
+  "@cassaShiftSummary": {
+    "description": "Localized string cassaShiftSummary",
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      },
+      "operator": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaClosingRecorded": "Closing recorded. Cash difference {cash}, card {card}.",
+  "@cassaClosingRecorded": {
+    "description": "Localized string cassaClosingRecorded",
+    "placeholders": {
+      "cash": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaClosingNotRecorded": "Closing not recorded.",
+  "@cassaClosingNotRecorded": {
+    "description": "Localized string cassaClosingNotRecorded"
+  },
+  "cassaShiftSettingNotSynced": "Register shift setting not saved on the server",
+  "@cassaShiftSettingNotSynced": {
+    "description": "Localized string cassaShiftSettingNotSynced"
+  },
+  "cassaShiftClosingSection": "Shift closing",
+  "@cassaShiftClosingSection": {
+    "description": "Localized string cassaShiftClosingSection"
+  },
+  "cassaShiftStatusValue": "Shift status: {status}",
+  "@cassaShiftStatusValue": {
+    "description": "Localized string cassaShiftStatusValue",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaOtherCounted": "Other counted",
+  "@cassaOtherCounted": {
+    "description": "Localized string cassaOtherCounted"
+  },
+  "cassaDifferenceReasonOrNote": "Difference reason / note",
+  "@cassaDifferenceReasonOrNote": {
+    "description": "Localized string cassaDifferenceReasonOrNote"
+  },
+  "cassaOptional": "Optional",
+  "@cassaOptional": {
+    "description": "Localized string cassaOptional"
+  },
+  "cassaOpenShiftBeforeClosing": "No open shift. Open a shift before closing.",
+  "@cassaOpenShiftBeforeClosing": {
+    "description": "Localized string cassaOpenShiftBeforeClosing"
   }
 }

@@ -9,6 +9,7 @@ import '../products/class_products.dart';
 import '../products/product_list/product_picker.dart';
 import 'class_receipt.dart';
 import 'checkout_coupon.dart';
+import 'checkout_failure.dart';
 import 'checkout_payload.dart';
 import 'checkout_metrics.dart';
 import 'fiscal_register/fiscal_register_repository.dart';
@@ -136,12 +137,14 @@ class CassaController {
   int? get operatoreId => _operatoreId;
   String? get operatoreNome => _operatoreNome;
   String? get operatoreCognome => _operatoreCognome;
-  String get operatoreLabel {
+
+  /// Nome dell'operatore, `null` se nessun operatore e assegnato.
+  String? get operatoreLabel {
     final nome = [
       _operatoreNome ?? '',
       _operatoreCognome ?? '',
     ].join(' ').trim();
-    if (nome.isEmpty) return 'Operatore non assegnato';
+    if (nome.isEmpty) return null;
     if (_operatoreId != null) return '$nome (id $_operatoreId)';
     return nome;
   }
@@ -162,21 +165,11 @@ class CassaController {
   bool get hasTurnoAperto => turnoCorrente != null;
   bool get richiedeTurnoAperto => cassaSettings.turnoObbligatorio;
 
-  String get turnoLabel {
+  /// Ora di apertura del turno corrente (HH:mm), `null` senza turno.
+  String? get turnoOraApertura {
     final turno = turnoCorrente;
-    if (turno == null) return 'Turno non aperto';
-    final ora =
-        '${turno.dataApertura.hour.toString().padLeft(2, '0')}:${turno.dataApertura.minute.toString().padLeft(2, '0')}';
-    return 'Turno aperto $ora · fondo €${turno.fondoIniziale.toStringAsFixed(2)}';
-  }
-
-  /// Etichetta compatta per la barra cassa: evita overflow su schermi stretti.
-  String get turnoBreve {
-    final turno = turnoCorrente;
-    if (turno == null) return 'Turno non aperto';
-    final ora =
-        '${turno.dataApertura.hour.toString().padLeft(2, '0')}:${turno.dataApertura.minute.toString().padLeft(2, '0')}';
-    return 'Aperto $ora';
+    if (turno == null) return null;
+    return '${turno.dataApertura.hour.toString().padLeft(2, '0')}:${turno.dataApertura.minute.toString().padLeft(2, '0')}';
   }
 
   TipoOperazioneCassa get tipoOperazioneCorrente =>
@@ -231,7 +224,7 @@ class CassaController {
     final sede = sedeCorrenteLabel;
     if (storicoStore.turnoAperto(cassaNome: cassa) != null) {
       return const EsitoReso.ko(
-        'Esiste già un turno aperto per questa cassa. Chiudilo prima di aprirne un altro.',
+        CassaFailure(CassaFailureCode.shiftAlreadyOpen),
       );
     }
     final now = DateTime.now();
@@ -257,7 +250,7 @@ class CassaController {
       'cassa_name': turno.cassaNome,
       'sede': turno.sede ?? '',
       'operator_id': turno.operatoreId ?? 0,
-      'operator_name': turno.operatoreLabel,
+      'operator_name': turno.operatoreLabel ?? '',
       'fondo_iniziale': turno.fondoIniziale,
     });
     final esitoServer = _esitoShiftServer(shiftResponse);
@@ -274,7 +267,9 @@ class CassaController {
   /// locale NON viene eseguita.
   EsitoReso _esitoShiftServer(dynamic risposta) {
     if (risposta is! Map) {
-      return const EsitoReso.ko('Risposta del backend MGWS non valida.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.invalidServerResponse),
+      );
     }
     final map = risposta;
     final ok =
@@ -285,10 +280,13 @@ class CassaController {
             (map['status_code'] as num) >= 200 &&
             (map['status_code'] as num) < 300);
     if (ok) return const EsitoReso.ok();
-    final messaggio =
-        map['message']?.toString() ??
-        'Operazione turno cassa MGWS non riuscita';
-    return EsitoReso.ko(messaggio);
+    final messaggio = map['message']?.toString();
+    if (messaggio == null || messaggio.isEmpty) {
+      return EsitoReso.ko(
+        const CassaFailure(CassaFailureCode.shiftOperationFailed),
+      );
+    }
+    return EsitoReso.ko(CassaFailure.server(messaggio));
   }
 
   /// Estrae `expected_totals` dalla chiusura server (root
@@ -317,10 +315,11 @@ class CassaController {
   }) async {
     await storicoStore.init();
     final turno = turnoCorrente;
-    if (turno == null) return const EsitoReso.ko('Nessun turno aperto.');
+    if (turno == null)
+      return const EsitoReso.ko(CassaFailure(CassaFailureCode.noOpenShift));
     if (!_scontrinoCorrente.isVuoto) {
       return const EsitoReso.ko(
-        'Chiudi o sospendi lo scontrino corrente prima di chiudere il turno.',
+        CassaFailure(CassaFailureCode.closeReceiptBeforeShiftClose),
       );
     }
     // Enforcement server-first: si chiude lo shift MGWS col «contato» PRIMA
@@ -401,8 +400,8 @@ class CassaController {
 
   /// Reso vincolato rigido: parte da una riga vendita dello storico POS,
   /// eredita prezzo/sconti reali e blocca quantita oltre il residuo rendibile.
-  /// Restituisce null in caso di successo, altrimenti il messaggio di errore.
-  Future<String?> preparaResoVincolato({
+  /// Restituisce null in caso di successo, altrimenti il motivo del rifiuto.
+  Future<CassaFailure?> preparaResoVincolato({
     required String scontrinoOrigineId,
     required String chiaveRiga,
     required int quantita,
@@ -429,7 +428,10 @@ class CassaController {
       quantita: quantita,
       motivo: motivo,
     );
-    if (!esito.ok) return esito.errore ?? 'Reso non consentito.';
+    if (!esito.ok) {
+      return esito.errore ??
+          const CassaFailure(CassaFailureCode.returnNotAllowed);
+    }
 
     final origine = storicoStore.cercaPerId(scontrinoOrigineId);
     RigaScontrino? venduta;
@@ -446,7 +448,9 @@ class CassaController {
         (quantita > 0
             ? _lineForReturn(scontrinoOrigineId, chiaveRiga, quantita)
             : null);
-    if (rigaVenduta == null) return 'Riga vendita non trovata.';
+    if (rigaVenduta == null) {
+      return const CassaFailure(CassaFailureCode.saleLineNotFound);
+    }
     venduta = rigaVenduta;
 
     // Nuovo scontrino di reso collegato, con prezzo reale della vendita.
@@ -706,9 +710,9 @@ class CassaController {
   }
 
   /// Aggiorna la quantità di una riga
-  String? aggiornaQuantitaRiga(int index, int nuovaQuantita) {
+  CassaFailure? aggiornaQuantitaRiga(int index, int nuovaQuantita) {
     if (index < 0 || index >= _scontrinoCorrente.righe.length) {
-      return 'Riga non valida.';
+      return const CassaFailure(CassaFailureCode.invalidLine);
     }
 
     if (nuovaQuantita <= 0) {
@@ -721,7 +725,11 @@ class CassaController {
       final stockDisponibile =
           riga.variante?.quantita ?? riga.prodotto.quantitaTotale ?? 0;
       if (nuovaQuantita > stockDisponibile) {
-        return 'Stock insufficiente. Disponibili: $stockDisponibile, Richiesti: $nuovaQuantita';
+        return CassaFailure(
+          CassaFailureCode.insufficientStock,
+          disponibili: stockDisponibile,
+          richiesti: nuovaQuantita,
+        );
       }
     }
 
@@ -731,9 +739,9 @@ class CassaController {
   }
 
   /// Incrementa quantità di una riga dello scontrino
-  String? incrementaQuantitaRiga(int index) {
+  CassaFailure? incrementaQuantitaRiga(int index) {
     if (index < 0 || index >= _scontrinoCorrente.righe.length) {
-      return 'Riga non valida.';
+      return const CassaFailure(CassaFailureCode.invalidLine);
     }
     final riga = _scontrinoCorrente.righe[index];
     return aggiornaQuantitaRiga(index, riga.quantita + 1);
@@ -828,26 +836,38 @@ class CassaController {
   }) {
     if (righeRendibili.isEmpty) {
       return const EsitoReso.ko(
-        'Scontrino di origine non trovato o non disponibile sul server.',
+        CassaFailure(CassaFailureCode.originReceiptNotFound),
       );
     }
     if (motivo.trim().isEmpty) {
-      return const EsitoReso.ko('Motivo del reso obbligatorio.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.returnReasonRequired),
+      );
     }
     RigaRendibile? riga;
     for (final candidate in righeRendibili) {
       if (candidate.chiaveRiga == chiaveRiga) riga = candidate;
     }
-    if (riga == null) return const EsitoReso.ko('Riga venduta non trovata.');
+    if (riga == null)
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.saleLineNotFound),
+      );
     if (riga.isEsaurita) {
-      return const EsitoReso.ko('Riga gia interamente restituita.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.lineFullyReturned),
+      );
     }
     if (quantita <= 0) {
-      return const EsitoReso.ko('Quantita di reso non valida.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.invalidReturnQuantity),
+      );
     }
     if (quantita > riga.quantitaRendibile) {
       return EsitoReso.ko(
-        'Reso superiore al residuo: disponibili ${riga.quantitaRendibile}.',
+        CassaFailure(
+          CassaFailureCode.returnExceedsRemaining,
+          disponibili: riga.quantitaRendibile,
+        ),
       );
     }
     return const EsitoReso.ok();
@@ -940,7 +960,7 @@ class CassaController {
 
       if (!success) {
         throw Exception(
-          response['message']?.toString() ?? 'Checkout MGWS non completato',
+          response['message']?.toString() ?? 'MGWS checkout not completed',
         );
       }
 
@@ -1173,7 +1193,7 @@ class CassaController {
   ///
   /// Restituisce `null` se il coupon è stato applicato, altrimenti il motivo
   /// del rifiuto da mostrare all'operatore.
-  Future<String?> applicaCoupon(String codice) async {
+  Future<CassaFailure?> applicaCoupon(String codice) async {
     final codiceNormalizzato = codice.trim().toLowerCase();
     try {
       AppLogger().i('🎟️ Verifica coupon: $codiceNormalizzato');
@@ -1185,7 +1205,7 @@ class CassaController {
         );
       } catch (e) {
         AppLogger().w('⚠️ Coupon non trovato: $codiceNormalizzato');
-        return 'coupon non trovato';
+        return const CassaFailure(CassaFailureCode.couponNotFound);
       }
 
       final regole = CouponCassa.daWoo(coupon, codiceNormalizzato);
@@ -1208,7 +1228,7 @@ class CassaController {
       return null;
     } catch (e) {
       AppLogger().e('❌ Errore applicazione coupon', e);
-      return 'errore di verifica del coupon';
+      return const CassaFailure(CassaFailureCode.couponCheckFailed);
     }
   }
 
@@ -1269,8 +1289,8 @@ class CassaController {
   }
 
   /// Verifica disponibilità stock prima di aggiungere
-  /// Restituisce null se disponibile, altrimenti il messaggio di errore
-  String? verificaDisponibilitaStock(
+  /// Restituisce null se disponibile, altrimenti il motivo del rifiuto
+  CassaFailure? verificaDisponibilitaStock(
     ElementoCassa elemento,
     int quantitaRichiesta,
   ) {
@@ -1288,21 +1308,25 @@ class CassaController {
     final stockDisponibile = elemento.quantitaStock;
 
     if (quantitaTotale > stockDisponibile) {
-      return 'Stock insufficiente. Disponibili: $stockDisponibile, Richiesti: $quantitaTotale';
+      return CassaFailure(
+        CassaFailureCode.insufficientStock,
+        disponibili: stockDisponibile,
+        richiesti: quantitaTotale,
+      );
     }
 
     return null; // Disponibile
   }
 
   /// Aggiunge elemento con controllo stock
-  /// Restituisce un messaggio di errore se fallisce, null se successo
-  String? aggiungiElementoConControlloStock(
+  /// Restituisce il motivo del rifiuto se fallisce, null se successo
+  CassaFailure? aggiungiElementoConControlloStock(
     ElementoCassa elemento, {
     int quantita = 1,
     TipoRigaCassa tipoMovimento = TipoRigaCassa.vendita,
   }) {
     if (richiedeTurnoAperto && !hasTurnoAperto) {
-      return 'Apri un turno cassa prima di aggiungere prodotti.';
+      return const CassaFailure(CassaFailureCode.openShiftBeforeAdding);
     }
     if (tipoMovimento == TipoRigaCassa.vendita) {
       final errore = verificaDisponibilitaStock(elemento, quantita);

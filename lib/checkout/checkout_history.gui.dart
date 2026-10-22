@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../theme/theme.dart';
 import 'checkout.code.dart';
 import 'class_receipt.dart';
+import 'checkout_failure_text.dart';
 import 'checkout_history.code.dart';
 import '../l10n/extensions.dart';
 
@@ -151,7 +152,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      '${receipts.length} scontrini POS (canale pos, separati dagli ordini Woo)',
+                      context.l10n.cassaHistoryCount(receipts.length),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -175,7 +176,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
           child: receipts.isEmpty
               ? Center(
                   child: Text(
-                    'Nessuno scontrino POS archiviato con questi filtri.',
+                    context.l10n.cassaHistoryEmpty,
                     style: theme.textTheme.bodyMedium,
                   ),
                 )
@@ -189,6 +190,23 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
       ],
     );
   }
+
+  /// Nome tradotto del metodo di pagamento salvato nello scontrino.
+  String _metodoLabel(BuildContext context, String metodo) {
+    switch (metodo) {
+      case 'contanti':
+        return context.l10n.cassaContanti;
+      case 'carta':
+        return context.l10n.cassaCarta;
+      case 'bancomat':
+        return context.l10n.cassaBancomat;
+      default:
+        return metodo;
+    }
+  }
+
+  String _operatore(BuildContext context, String? label) =>
+      label ?? context.l10n.cassaOperatorUnassigned;
 
   Widget _cardScontrino(BuildContext context, Scontrino s) {
     final theme = Theme.of(context);
@@ -210,16 +228,16 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
               : custom.successColor,
         ),
         title: Text(
-          '$numero - €${s.totale.toStringAsFixed(2)} - ${s.metodoPagamento}'
-          '${s.stato == 'annullato' ? ' · ANNULLATO' : ''}',
+          '$numero - €${s.totale.toStringAsFixed(2)} - ${_metodoLabel(context, s.metodoPagamento)}'
+          '${s.stato == 'annullato' ? ' · ${context.l10n.cassaStatoAnnullato.toUpperCase()}' : ''}',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
         subtitle: Text(
-          '${s.data} · ${s.operatoreLabel}'
+          '${s.data} · ${_operatore(context, s.operatoreLabel)}'
           '${s.cassaNome != null ? ' · ${s.cassaNome}' : ''}'
-          '${s.wooOrderId != null ? ' · ordine ${s.wooOrderId}' : ''}'
+          '${s.wooOrderId != null ? ' · ${context.l10n.cassaHistoryOrderRef('${s.wooOrderId}')}' : ''}'
           '${s.clienteNome != null ? ' · ${s.clienteNome}' : ''}',
         ),
         trailing: const Icon(Icons.chevron_right),
@@ -235,7 +253,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Scontrino ${s.numeroProgressivo != null ? '#${s.numeroProgressivo}' : s.id}',
+          context.l10n.cassaReceiptTitle(
+            s.numeroProgressivo != null ? '#${s.numeroProgressivo}' : s.id,
+          ),
         ),
         content: SizedBox(
           width: 520,
@@ -245,31 +265,31 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'POS · ${s.data} · ${s.metodoPagamento} · €${s.totale.toStringAsFixed(2)}',
+                  'POS · ${s.data} · ${_metodoLabel(context, s.metodoPagamento)} · €${s.totale.toStringAsFixed(2)}',
                   style: theme.textTheme.bodySmall,
                 ),
                 if (s.stato == 'annullato')
                   Text(
-                    'Scontrino annullato: escluso da totali e resi.',
+                    context.l10n.cassaReceiptCancelledNote,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 Text(
-                  'Operatore: ${s.operatoreLabel}'
-                  '${s.cassaNome != null ? ' · Cassa ${s.cassaNome}' : ''}'
+                  '${context.l10n.cassaEtichettaOperatore(_operatore(context, s.operatoreLabel))}'
+                  '${s.cassaNome != null ? ' · ${context.l10n.cassaRegisterRef(s.cassaNome!)}' : ''}'
                   '${s.sede != null ? ' · ${s.sede}' : ''}',
                   style: theme.textTheme.bodySmall,
                 ),
                 if (s.wooOrderId != null)
                   Text(
-                    'Ordine Woo/MGWS collegato: ${s.wooOrderId} (solo riferimento, ciclo separato)',
+                    context.l10n.cassaLinkedOrder('${s.wooOrderId}'),
                     style: theme.textTheme.bodySmall,
                   ),
                 const Divider(),
                 Text(
-                  'Righe vendute e residuo rendibile',
+                  context.l10n.cassaSoldLinesTitle,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -284,9 +304,12 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                       '${r.nome} - €${r.prezzoUnitario.toStringAsFixed(2)}',
                     ),
                     subtitle: Text(
-                      'Barcode interno ${r.barcodeInterno} · venduti ${r.quantitaVenduta} · '
-                      'gia resi ${r.quantitaGiaResa} · '
-                      'rendibili ${r.quantitaRendibile}',
+                      context.l10n.cassaReturnableLine(
+                        '${r.barcodeInterno}',
+                        r.quantitaVenduta,
+                        r.quantitaGiaResa,
+                        r.quantitaRendibile,
+                      ),
                     ),
                     trailing: r.isEsaurita
                         ? Chip(label: Text(context.l10n.cassaEsaurita))
@@ -321,14 +344,14 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                   ),
                 const Divider(),
                 Text(
-                  'Righe registrate',
+                  context.l10n.cassaRecordedLinesTitle,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 for (final riga in s.righe)
                   Text(
-                    '${riga.isReso ? '[RESO] ' : ''}${riga.nomeCompleto} x${riga.quantita} '
+                    '${riga.isReso ? '${context.l10n.cassaReturnLinePrefix} ' : ''}${riga.nomeCompleto} x${riga.quantita} '
                     '- €${riga.subtotale.toStringAsFixed(2)}'
                     '${riga.motivoReso != null ? ' (${riga.motivoReso})' : ''}',
                     style: theme.textTheme.bodySmall,
@@ -336,7 +359,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                 if (s.rettifiche.isNotEmpty) ...[
                   const Divider(),
                   Text(
-                    'Rettifiche',
+                    context.l10n.cassaAdjustmentsTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -399,9 +422,12 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Rendibili: ${riga.quantitaRendibile} '
-                  '(venduti ${riga.quantitaVenduta}, gia resi ${riga.quantitaGiaResa}). '
-                  'Il prezzo resta quello pagato: €${riga.prezzoUnitario.toStringAsFixed(2)}.',
+                  context.l10n.cassaReturnableSummary(
+                    riga.quantitaRendibile,
+                    riga.quantitaVenduta,
+                    riga.quantitaGiaResa,
+                    '€${riga.prezzoUnitario.toStringAsFixed(2)}',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -486,15 +512,15 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     if (errore != null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(errore)));
+      ).showSnackBar(SnackBar(content: Text(errore.testo(context.l10n))));
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           cambio
-              ? 'Cambio preparato: aggiungi il prodotto sostitutivo e completa il checkout.'
-              : 'Reso preparato nel carrello: completa il checkout per registrarlo.',
+              ? context.l10n.cassaExchangePrepared
+              : context.l10n.cassaReturnPrepared,
         ),
       ),
     );
@@ -543,7 +569,11 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(esito.ok ? 'Scontrino annullato.' : esito.errore!),
+        content: Text(
+          esito.ok
+              ? context.l10n.cassaReceiptCancelled
+              : esito.errore!.testo(context.l10n),
+        ),
       ),
     );
   }
@@ -589,7 +619,13 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     if (!mounted) return;
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(esito.ok ? 'Rettifica salvata.' : esito.errore!)),
+      SnackBar(
+        content: Text(
+          esito.ok
+              ? context.l10n.cassaAdjustmentSaved
+              : esito.errore!.testo(context.l10n),
+        ),
+      ),
     );
   }
 
@@ -626,14 +662,18 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                     context.l10n.cassaEtichettaTurno('${esistente.turnoId}'),
                   ),
                 Text(
-                  'Contante atteso €${esistente.contanteAtteso.toStringAsFixed(2)} · '
-                  'contato €${esistente.contanteContato.toStringAsFixed(2)} · '
-                  'differenza €${esistente.differenzaContanti.toStringAsFixed(2)}',
+                  context.l10n.cassaCashSummary(
+                    '€${esistente.contanteAtteso.toStringAsFixed(2)}',
+                    '€${esistente.contanteContato.toStringAsFixed(2)}',
+                    '€${esistente.differenzaContanti.toStringAsFixed(2)}',
+                  ),
                 ),
                 Text(
-                  'Carta attesa €${esistente.cartaAttesa.toStringAsFixed(2)} · '
-                  'contattata €${esistente.cartaContato.toStringAsFixed(2)} · '
-                  'differenza €${esistente.differenzaCarta.toStringAsFixed(2)}',
+                  context.l10n.cassaCardSummary(
+                    '€${esistente.cartaAttesa.toStringAsFixed(2)}',
+                    '€${esistente.cartaContato.toStringAsFixed(2)}',
+                    '€${esistente.differenzaCarta.toStringAsFixed(2)}',
+                  ),
                 ),
                 if ((esistente.causaleDifferenza ?? '').isNotEmpty)
                   Text(
@@ -709,14 +749,19 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Incassi turno - contanti €${(totali['contanti'] ?? 0).toStringAsFixed(2)} · '
-                  'carta €${(totali['carta'] ?? 0).toStringAsFixed(2)} · '
-                  'altri €${(totali['altri'] ?? 0).toStringAsFixed(2)} · '
-                  'rimborsi €${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                  context.l10n.cassaShiftTakings(
+                    '€${(totali['contanti'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['carta'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['altri'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                  ),
                 ),
                 Text(
-                  'Turno: ${turno.id} · Operatore: ${turno.operatoreLabel} · '
-                  'Fondo iniziale €${turno.fondoIniziale.toStringAsFixed(2)}.',
+                  context.l10n.cassaShiftSummary(
+                    turno.id,
+                    _operatore(context, turno.operatoreLabel),
+                    '€${turno.fondoIniziale.toStringAsFixed(2)}',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -791,8 +836,12 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
       SnackBar(
         content: Text(
           esito.ok
-              ? 'Chiusura registrata. Differenza contanti €${(chiusura?.differenzaContanti ?? 0).toStringAsFixed(2)}, carta €${(chiusura?.differenzaCarta ?? 0).toStringAsFixed(2)}.'
-              : (esito.errore ?? 'Chiusura non registrata.'),
+              ? context.l10n.cassaClosingRecorded(
+                  '€${(chiusura?.differenzaContanti ?? 0).toStringAsFixed(2)}',
+                  '€${(chiusura?.differenzaCarta ?? 0).toStringAsFixed(2)}',
+                )
+              : (esito.errore?.testo(context.l10n) ??
+                    context.l10n.cassaClosingNotRecorded),
         ),
       ),
     );

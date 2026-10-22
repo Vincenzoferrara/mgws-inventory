@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'class_receipt.dart';
 import 'checkout.code.dart';
+import 'checkout_failure_text.dart';
 import 'checkout_history.gui.dart';
 import '../products/class_products.dart';
 import '../products/product_list/product_picker.dart';
@@ -59,7 +60,8 @@ class CassaPageState extends State<CassaPage>
             children: [
               Text(
                 context.l10n.cassaEtichettaOperatore(
-                  '${_controller.operatoreLabel}',
+                  _controller.operatoreLabel ??
+                      context.l10n.cassaOperatorUnassigned,
                 ),
               ),
               Text(
@@ -87,7 +89,7 @@ class CassaPageState extends State<CassaPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'Il fondo viene fissato all\'apertura e usato nella chiusura del turno.',
+                context.l10n.cassaFloatHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -114,7 +116,10 @@ class CassaPageState extends State<CassaPage>
     NotificationService.instance.messageBar(
       esito.ok ? 'successo' : 'errore',
       'cassa',
-      esito.ok ? 'Turno cassa aperto.' : (esito.errore ?? 'Turno non aperto.'),
+      esito.ok
+          ? context.l10n.cassaShiftOpened
+          : (esito.errore?.testo(context.l10n) ??
+                context.l10n.cassaShiftNotOpened),
     );
     setState(() {});
   }
@@ -125,7 +130,7 @@ class CassaPageState extends State<CassaPage>
       NotificationService.instance.messageBar(
         'warning',
         'cassa',
-        'Nessun turno aperto da chiudere.',
+        context.l10n.cassaNessunTurnoAperto,
       );
       return;
     }
@@ -148,18 +153,23 @@ class CassaPageState extends State<CassaPage>
                 Text(context.l10n.cassaEtichettaTurno('${turno.id}')),
                 Text(
                   context.l10n.cassaEtichettaOperatore(
-                    '${turno.operatoreLabel}',
+                    turno.operatoreLabel ??
+                        context.l10n.cassaOperatorUnassigned,
                   ),
                 ),
                 Text(
-                  'Fondo iniziale: €${turno.fondoIniziale.toStringAsFixed(2)}',
+                  context.l10n.cassaInitialFloatValue(
+                    '€${turno.fondoIniziale.toStringAsFixed(2)}',
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Incassi turno - contanti €${(totali['contanti'] ?? 0).toStringAsFixed(2)} · '
-                  'carta €${(totali['carta'] ?? 0).toStringAsFixed(2)} · '
-                  'altri €${(totali['altri'] ?? 0).toStringAsFixed(2)} · '
-                  'rimborsi €${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                  context.l10n.cassaShiftTakings(
+                    '€${(totali['contanti'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['carta'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['altri'] ?? 0).toStringAsFixed(2)}',
+                    '€${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -227,7 +237,10 @@ class CassaPageState extends State<CassaPage>
     NotificationService.instance.messageBar(
       esito.ok ? 'successo' : 'errore',
       'cassa',
-      esito.ok ? 'Turno cassa chiuso.' : (esito.errore ?? 'Turno non chiuso.'),
+      esito.ok
+          ? context.l10n.cassaShiftClosed
+          : (esito.errore?.testo(context.l10n) ??
+                context.l10n.cassaShiftNotClosed),
     );
     setState(() {});
   }
@@ -377,7 +390,7 @@ class CassaPageState extends State<CassaPage>
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 260),
           child: Text(
-            'Operatore: ${_controller.operatoreLabel}'
+            '${context.l10n.cassaEtichettaOperatore(_controller.operatoreLabel ?? context.l10n.cassaOperatorUnassigned)}'
             '${cassaSettings.hasCassa ? ' · ${cassaSettings.nomeCassa}' : ''}'
             '${cassaSettings.hasSede ? ' · ${cassaSettings.sede}' : ''}',
             overflow: TextOverflow.ellipsis,
@@ -388,7 +401,12 @@ class CassaPageState extends State<CassaPage>
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 170),
             child: Tooltip(
-              message: _controller.turnoLabel,
+              message: _controller.hasTurnoAperto
+                  ? context.l10n.cassaShiftOpenedAt(
+                      _controller.turnoOraApertura ?? '',
+                      '€${_controller.turnoCorrente!.fondoIniziale.toStringAsFixed(2)}',
+                    )
+                  : context.l10n.cassaShiftNotOpened,
               child: Chip(
                 avatar: Icon(
                   _controller.hasTurnoAperto
@@ -397,7 +415,11 @@ class CassaPageState extends State<CassaPage>
                   size: 16,
                 ),
                 label: Text(
-                  _controller.turnoBreve,
+                  _controller.hasTurnoAperto
+                      ? context.l10n.cassaShiftOpenShort(
+                          _controller.turnoOraApertura ?? '',
+                        )
+                      : context.l10n.cassaShiftNotOpened,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -411,7 +433,9 @@ class CassaPageState extends State<CassaPage>
               _controller.hasTurnoAperto ? Icons.lock : Icons.lock_open,
             ),
             label: Text(
-              _controller.hasTurnoAperto ? 'Chiudi turno' : 'Apri turno',
+              _controller.hasTurnoAperto
+                  ? context.l10n.cassaChiudiTurno
+                  : context.l10n.cassaApriTurno,
             ),
           ),
         ],
@@ -520,12 +544,16 @@ class _LatoSinistroWidget extends StatelessWidget {
         'successo',
         'cassa',
         tipoMovimento == TipoRigaCassa.reso
-            ? '${elemento.nome} aggiunto come reso'
-            : '${elemento.nome} aggiunto al carrello',
+            ? context.l10n.cassaAddedAsReturn(elemento.nome)
+            : context.l10n.cassaAddedToCart(elemento.nome),
       );
       return true;
     } else {
-      NotificationService.instance.messageBar('errore', 'cassa', errore);
+      NotificationService.instance.messageBar(
+        'errore',
+        'cassa',
+        errore.testo(context.l10n),
+      );
       return false;
     }
   }
@@ -541,7 +569,7 @@ class _LatoSinistroWidget extends StatelessWidget {
       NotificationService.instance.messageBar(
         'errore',
         'cassa',
-        'Il barcode non esiste',
+        context.l10n.cassaBarcodeNotFound,
       );
       return;
     }
@@ -550,7 +578,7 @@ class _LatoSinistroWidget extends StatelessWidget {
       NotificationService.instance.messageBar(
         'errore',
         'cassa',
-        'Il prodotto non è più disponibile',
+        context.l10n.cassaProductNoLongerAvailable,
       );
       return;
     }
@@ -582,7 +610,7 @@ class _LatoSinistroWidget extends StatelessWidget {
       NotificationService.instance.messageBar(
         'warning',
         'cassa',
-        'Nessun prodotto selezionato da aggiungere.',
+        context.l10n.cassaNoProductSelected,
       );
       return;
     }
@@ -597,7 +625,7 @@ class _LatoSinistroWidget extends StatelessWidget {
       if (errore == null) {
         aggiunti++;
       } else {
-        errori.add('${elemento.nome}: $errore');
+        errori.add('${elemento.nome}: ${errore.testo(context.l10n)}');
       }
     }
 
@@ -606,15 +634,15 @@ class _LatoSinistroWidget extends StatelessWidget {
       NotificationService.instance.messageBar(
         'successo',
         'cassa',
-        '$aggiunti prodotti aggiunti alla cassa',
+        context.l10n.cassaProductsAdded(aggiunti),
       );
     } else {
       NotificationService.instance.messageBar(
         aggiunti > 0 ? 'warning' : 'errore',
         'cassa',
         aggiunti > 0
-            ? '$aggiunti prodotti aggiunti. ${errori.length} non aggiunti per stock insufficiente.'
-            : 'Nessun prodotto aggiunto: ${errori.first}',
+            ? context.l10n.cassaProductsPartlyAdded(aggiunti, errori.length)
+            : context.l10n.cassaNoProductAdded(errori.first),
       );
     }
   }
@@ -641,7 +669,7 @@ class _LatoSinistroWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ricerca Prodotti',
+                context.l10n.cassaSearchProducts,
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -807,7 +835,9 @@ class _CarrelloScontrinoWidget extends StatelessWidget {
                     color: theme.colorScheme.outline,
                   ),
                   const SizedBox(width: 10),
-                  Flexible(child: Text('Carrello vuoto', style: titleStyle)),
+                  Flexible(
+                    child: Text(context.l10n.cassaEmptyCart, style: titleStyle),
+                  ),
                 ],
               ),
             );
@@ -824,12 +854,12 @@ class _CarrelloScontrinoWidget extends StatelessWidget {
                   color: theme.colorScheme.outline,
                 ),
                 const SizedBox(height: 16),
-                Text('Carrello vuoto', style: titleStyle),
+                Text(context.l10n.cassaEmptyCart, style: titleStyle),
                 const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    'Aggiungi prodotti con barcode, QR o selezione manuale',
+                    context.l10n.cassaEmptyCartHint,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: context.colors.subtitleColor,
@@ -1028,7 +1058,7 @@ class _LatoDestroWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'SCONTRINO',
+                        context.l10n.cassaReceiptHeader,
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1121,7 +1151,7 @@ class _LatoDestroWidget extends StatelessWidget {
                   child: Text(
                     controller.hasCliente
                         ? controller.clienteNome!
-                        : 'Cliente non associato',
+                        : context.l10n.cassaNoCustomer,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -1134,7 +1164,11 @@ class _LatoDestroWidget extends StatelessWidget {
                     );
                   },
                   icon: Icon(controller.hasCliente ? Icons.edit : Icons.add),
-                  label: Text(controller.hasCliente ? 'Modifica' : 'Aggiungi'),
+                  label: Text(
+                    controller.hasCliente
+                        ? context.l10n.commonEdit
+                        : context.l10n.cassaAdd,
+                  ),
                 ),
               ],
             ),
@@ -1155,7 +1189,7 @@ class _LatoDestroWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Carta Fedeltà',
+                    context.l10n.cassaCartaFedelta,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -1188,8 +1222,8 @@ class _LatoDestroWidget extends StatelessWidget {
                 Expanded(
                   child: Text(
                     scontrino.couponCode != null
-                        ? 'Coupon: ${scontrino.couponCode}'
-                        : 'Nessun coupon',
+                        ? context.l10n.cassaCouponLabel(scontrino.couponCode!)
+                        : context.l10n.cassaNoCoupon,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -1235,8 +1269,10 @@ class _LatoDestroWidget extends StatelessWidget {
                 Expanded(
                   child: Text(
                     controller.hasScontriniSospesi
-                        ? '${controller.numeroScontriniSospesi} sospesi'
-                        : 'Nessuno sospeso',
+                        ? context.l10n.cassaSuspendedCount(
+                            controller.numeroScontriniSospesi,
+                          )
+                        : context.l10n.cassaNoneSuspended,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -1258,7 +1294,7 @@ class _LatoDestroWidget extends StatelessWidget {
                       NotificationService.instance.messageBar(
                         'successo',
                         'cassa',
-                        'Scontrino sospeso',
+                        context.l10n.cassaReceiptSuspended,
                       );
                     },
                     icon: const Icon(Icons.pause),
@@ -1289,26 +1325,26 @@ class _LatoDestroWidget extends StatelessWidget {
               children: [
                 // Subtotale
                 _RigaTotale(
-                  label: 'Vendite:',
+                  label: context.l10n.cassaTotalSales,
                   valore: '€${scontrino.totaleVendite.toStringAsFixed(2)}',
                 ),
 
                 if (scontrino.totaleResi > 0)
                   _RigaTotale(
-                    label: 'Resi:',
+                    label: context.l10n.cassaTotalReturns,
                     valore: '-€${scontrino.totaleResi.toStringAsFixed(2)}',
                     colore: customColors.errorColorStatus,
                   ),
 
                 _RigaTotale(
-                  label: 'Subtotale netto:',
+                  label: context.l10n.cassaNetSubtotal,
                   valore: '€${scontrino.subtotale.toStringAsFixed(2)}',
                 ),
 
                 // Sconto fisso (se presente)
                 if (scontrino.sconto > 0)
                   _RigaTotale(
-                    label: 'Sconto:',
+                    label: context.l10n.cassaTotalDiscount,
                     valore: '-€${scontrino.sconto.toStringAsFixed(2)}',
                     colore: customColors.errorColorStatus,
                   ),
@@ -1316,8 +1352,9 @@ class _LatoDestroWidget extends StatelessWidget {
                 // Sconto percentuale (se presente)
                 if (scontrino.scontoPercentuale > 0)
                   _RigaTotale(
-                    label:
-                        'Sconto ${scontrino.scontoPercentuale.toStringAsFixed(0)}%:',
+                    label: context.l10n.cassaPercentDiscount(
+                      scontrino.scontoPercentuale.toStringAsFixed(0),
+                    ),
                     valore:
                         '-€${(scontrino.subtotale * scontrino.scontoPercentuale / 100).toStringAsFixed(2)}',
                     colore: customColors.errorColorStatus,
@@ -1326,7 +1363,9 @@ class _LatoDestroWidget extends StatelessWidget {
                 // Coupon (se presente)
                 if (scontrino.couponSconto > 0)
                   _RigaTotale(
-                    label: 'Coupon (${scontrino.couponCode}):',
+                    label: context.l10n.cassaCouponTotal(
+                      scontrino.couponCode ?? '',
+                    ),
                     valore: '-€${scontrino.couponSconto.toStringAsFixed(2)}',
                     colore: customColors.errorColorStatus,
                   ),
@@ -1334,8 +1373,9 @@ class _LatoDestroWidget extends StatelessWidget {
                 // IVA (scorporata)
                 if (scontrino.iva > 0)
                   _RigaTotale(
-                    label:
-                        'IVA (${scontrino.aliquotaIva.toStringAsFixed(0)}%):',
+                    label: context.l10n.cassaVatTotal(
+                      scontrino.aliquotaIva.toStringAsFixed(0),
+                    ),
                     valore: '€${scontrino.iva.toStringAsFixed(2)}',
                   ),
 
@@ -1343,7 +1383,9 @@ class _LatoDestroWidget extends StatelessWidget {
 
                 // TOTALE
                 _RigaTotale(
-                  label: scontrino.totale < 0 ? 'RIMBORSO:' : 'TOTALE:',
+                  label: scontrino.totale < 0
+                      ? context.l10n.cassaRefundTotal
+                      : context.l10n.cassaGrandTotal,
                   valore: '€${scontrino.totale.toStringAsFixed(2)}',
                   isGrande: true,
                   colore: scontrino.totale < 0
@@ -1396,8 +1438,8 @@ class _LatoDestroWidget extends StatelessWidget {
                                 );
                               },
                         icon: const Icon(Icons.payment, size: 24),
-                        label: const Text(
-                          'PAGA',
+                        label: Text(
+                          context.l10n.cassaPayButton,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1547,7 +1589,7 @@ class _LatoDestroWidget extends StatelessWidget {
                     NotificationService.instance.messageBar(
                       'successo',
                       'cassa',
-                      'Carta fedeltà trovata! ${carta['points']} punti disponibili',
+                      context.l10n.cassaLoyaltyCardFound('${carta['points']}'),
                     );
                   }
                 }
@@ -1555,7 +1597,7 @@ class _LatoDestroWidget extends StatelessWidget {
                 NotificationService.instance.messageBar(
                   'errore',
                   'cassa',
-                  'Il nome è obbligatorio',
+                  context.l10n.cassaNameRequired,
                 );
               }
             },
@@ -1585,16 +1627,17 @@ class _LatoDestroWidget extends StatelessWidget {
     final isRimborso = totale < 0;
     final isCambio = tipoOperazione == TipoOperazioneCassa.cambio;
     final isCambioPari = isCambio && absTotale < 0.009;
+    final l10n = context.l10n;
     final dialogTitle = isCambioPari
-        ? 'Conferma Cambio'
+        ? l10n.cassaConfirmExchangeTitle
         : isRimborso
-        ? 'Conferma Rimborso'
-        : 'Conferma Pagamento';
+        ? l10n.cassaConfirmRefundTitle
+        : l10n.cassaConfirmPaymentTitle;
     final actionLabel = isCambioPari
-        ? 'Conferma cambio'
+        ? l10n.cassaConfirmExchangeTitle
         : isRimborso
-        ? 'Conferma rimborso'
-        : 'Conferma';
+        ? l10n.cassaConfirmRefundTitle
+        : l10n.commonConfirm;
 
     showDialog(
       context: context,
@@ -1623,10 +1666,10 @@ class _LatoDestroWidget extends StatelessWidget {
                       children: [
                         Text(
                           isCambioPari
-                              ? 'CAMBIO A PARI VALORE'
+                              ? l10n.cassaEvenExchange
                               : isRimborso
-                              ? 'IMPORTO DA RIMBORSARE'
-                              : 'TOTALE DA PAGARE',
+                              ? l10n.cassaAmountToRefund
+                              : l10n.cassaAmountToPay,
                           style: TextStyle(fontSize: 12),
                         ),
                         const SizedBox(height: 4),
@@ -1648,8 +1691,8 @@ class _LatoDestroWidget extends StatelessWidget {
                     const SizedBox(height: 20),
                     Text(
                       isRimborso
-                          ? 'Metodo di rimborso:'
-                          : 'Metodo di pagamento:',
+                          ? l10n.cassaRefundMethod
+                          : l10n.cassaPaymentMethod,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -1788,8 +1831,8 @@ class _LatoDestroWidget extends StatelessWidget {
                           children: [
                             Text(
                               resto > 0
-                                  ? 'RESTO DA DARE'
-                                  : 'IMPORTO INSUFFICIENTE',
+                                  ? l10n.cassaChangeDue
+                                  : l10n.cassaAmountInsufficient,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: resto > 0
@@ -1801,7 +1844,9 @@ class _LatoDestroWidget extends StatelessWidget {
                             Text(
                               resto > 0
                                   ? '€${resto.toStringAsFixed(2)}'
-                                  : 'Mancano €${(totale - importoRicevuto).toStringAsFixed(2)}',
+                                  : l10n.cassaAmountMissing(
+                                      '€${(totale - importoRicevuto).toStringAsFixed(2)}',
+                                    ),
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -1846,20 +1891,27 @@ class _LatoDestroWidget extends StatelessWidget {
                           Navigator.pop(context);
                           if (success) {
                             String message = isCambioPari
-                                ? 'Cambio registrato con successo!'
+                                ? l10n.cassaExchangeRecorded
                                 : isCambio
                                 ? isRimborso
-                                      ? 'Cambio registrato. Credito cliente: €${absTotale.toStringAsFixed(2)}'
-                                      : 'Cambio registrato. Conguaglio da incassare: €${absTotale.toStringAsFixed(2)}'
+                                      ? l10n.cassaExchangeCustomerCredit(
+                                          '€${absTotale.toStringAsFixed(2)}',
+                                        )
+                                      : l10n.cassaExchangeBalanceDue(
+                                          '€${absTotale.toStringAsFixed(2)}',
+                                        )
                                 : isRimborso
-                                ? 'Reso registrato. Rimborso: €${absTotale.toStringAsFixed(2)}'
-                                : 'Vendita completata con successo!';
+                                ? l10n.cassaReturnRecorded(
+                                    '€${absTotale.toStringAsFixed(2)}',
+                                  )
+                                : l10n.cassaSaleCompleted;
                             if (!isRimborso &&
                                 !isCambioPari &&
                                 metodoPagamento == 'contanti' &&
                                 resto > 0) {
-                              message =
-                                  'Vendita completata! Resto: €${resto.toStringAsFixed(2)}';
+                              message = l10n.cassaSaleCompletedChange(
+                                '€${resto.toStringAsFixed(2)}',
+                              );
                             }
                             NotificationService.instance.messageBar(
                               'successo',
@@ -1871,7 +1923,7 @@ class _LatoDestroWidget extends StatelessWidget {
                             NotificationService.instance.messageBar(
                               'errore',
                               'cassa',
-                              'Errore durante il completamento della vendita',
+                              l10n.cassaSaleFailed,
                             );
                           }
                         }
@@ -1954,14 +2006,17 @@ class _LatoDestroWidget extends StatelessWidget {
                     NotificationService.instance.messageBar(
                       'successo',
                       'cassa',
-                      'Carta trovata! Cliente: ${carta['first_name']} ${carta['last_name']} - ${carta['points']} punti',
+                      context.l10n.cassaCardFoundCustomer(
+                        '${carta['first_name']} ${carta['last_name']}',
+                        '${carta['points']}',
+                      ),
                     );
                   }
                 } else if (context.mounted) {
                   NotificationService.instance.messageBar(
                     'errore',
                     'cassa',
-                    'Carta non trovata: $numeroCarta',
+                    context.l10n.cassaCardNotFound(numeroCarta),
                   );
                 }
               } catch (e) {
@@ -1969,7 +2024,7 @@ class _LatoDestroWidget extends StatelessWidget {
                   NotificationService.instance.messageBar(
                     'errore',
                     'cassa',
-                    'Errore: $e',
+                    context.l10n.cassaErrorDetail('$e'),
                   );
                 }
               }
@@ -2015,6 +2070,7 @@ class _LatoDestroWidget extends StatelessWidget {
               final codice = couponController.text.trim();
               if (codice.isEmpty) return;
 
+              final l10n = context.l10n;
               Navigator.pop(context);
 
               final motivo = await controller.applicaCoupon(codice);
@@ -2024,13 +2080,13 @@ class _LatoDestroWidget extends StatelessWidget {
                   NotificationService.instance.messageBar(
                     'successo',
                     'cassa',
-                    'Coupon "$codice" applicato!',
+                    l10n.cassaCouponApplied(codice),
                   );
                 } else {
                   NotificationService.instance.messageBar(
                     'errore',
                     'cassa',
-                    'Coupon "$codice" non valido: $motivo',
+                    l10n.cassaCouponInvalid(codice, motivo.testo(l10n)),
                   );
                 }
               }
@@ -2214,13 +2270,13 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
     final nuovaQuantita = int.tryParse(trimmed);
     if (nuovaQuantita == null) {
       _ripristinaValorePrecedente(
-        messaggioErrore: 'Inserisci solo numeri interi.',
+        messaggioErrore: context.l10n.cassaWholeNumbersOnly,
       );
       return;
     }
     if (nuovaQuantita <= 0) {
       _ripristinaValorePrecedente(
-        messaggioErrore: 'La quantità deve essere maggiore di zero.',
+        messaggioErrore: context.l10n.cassaQuantityMustBePositive,
       );
       return;
     }
@@ -2230,7 +2286,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
       _lastValidQuantita = nuovaQuantita;
       onStateChanged();
     } else {
-      _ripristinaValorePrecedente(messaggioErrore: errore);
+      _ripristinaValorePrecedente(messaggioErrore: errore.testo(context.l10n));
       onStateChanged();
     }
   }
@@ -2306,7 +2362,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
-                              'RESO',
+                              context.l10n.cassaReturnBadge,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: customColors.errorColorStatus,
                                 fontWeight: FontWeight.bold,
@@ -2384,7 +2440,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                                         NotificationService.instance.messageBar(
                                           'errore',
                                           'cassa',
-                                          errore,
+                                          errore.testo(context.l10n),
                                         );
                                       }
                                     },
@@ -2465,7 +2521,9 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Sconto: -€${riga.totaleSconto.toStringAsFixed(2)}',
+                        context.l10n.cassaLineDiscount(
+                          '€${riga.totaleSconto.toStringAsFixed(2)}',
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: customColors.errorColorStatus,
                           fontStyle: FontStyle.italic,
@@ -2596,42 +2654,42 @@ class _MetricheCassaCard extends StatelessWidget {
         runSpacing: 12,
         children: [
           _MetricChip(
-            label: 'Vendite',
+            label: context.l10n.cassaMetricSales,
             value: metriche.numeroVendite.toString(),
             icon: Icons.point_of_sale,
           ),
           _MetricChip(
-            label: 'Resi',
+            label: context.l10n.cassaMetricReturns,
             value: metriche.numeroResi.toString(),
             icon: Icons.assignment_return,
           ),
           _MetricChip(
-            label: 'Cambi',
+            label: context.l10n.cassaMetricExchanges,
             value: metriche.numeroCambi.toString(),
             icon: Icons.swap_horiz,
           ),
           _MetricChip(
-            label: 'Valore vendite',
+            label: context.l10n.cassaMetricSalesValue,
             value: '€${metriche.valoreVendite.toStringAsFixed(2)}',
             icon: Icons.trending_up,
           ),
           _MetricChip(
-            label: 'Valore resi',
+            label: context.l10n.cassaMetricReturnsValue,
             value: '€${metriche.valoreResi.toStringAsFixed(2)}',
             icon: Icons.undo,
           ),
           _MetricChip(
-            label: 'Saldo netto',
+            label: context.l10n.cassaMetricNetBalance,
             value: '€${metriche.saldoNetto.toStringAsFixed(2)}',
             icon: Icons.analytics_outlined,
           ),
           _MetricChip(
-            label: 'Conguagli incassati',
+            label: context.l10n.cassaMetricBalancesCollected,
             value: '€${metriche.conguagliPositivi.toStringAsFixed(2)}',
             icon: Icons.arrow_circle_up,
           ),
           _MetricChip(
-            label: 'Conguagli rimborsati',
+            label: context.l10n.cassaMetricBalancesRefunded,
             value: '€${metriche.conguagliNegativi.toStringAsFixed(2)}',
             icon: Icons.arrow_circle_down,
           ),

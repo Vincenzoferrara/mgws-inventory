@@ -1,5 +1,6 @@
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 
+import 'checkout_failure.dart';
 import 'class_receipt.dart';
 
 /// Coupon WooCommerce applicato allo scontrino in cassa.
@@ -92,40 +93,46 @@ class CouponCassa {
   }
 
   /// Motivo per cui il coupon non si può usare, o `null` se è valido.
-  String? motivoNonValido({
+  CassaFailure? motivoNonValido({
     required List<RigaScontrino> righe,
     String? emailCliente,
     DateTime? adesso,
   }) {
     final ora = (adesso ?? DateTime.now()).toUtc();
     if (tipo == WooCouponDiscountType.unknown || valore <= 0) {
-      return 'tipo di sconto non supportato';
+      return const CassaFailure(CassaFailureCode.couponUnsupportedType);
     }
     if (scadenza != null && scadenza!.toUtc().isBefore(ora)) {
-      return 'coupon scaduto';
+      return const CassaFailure(CassaFailureCode.couponExpired);
     }
     final limite = limiteUtilizzi;
     if (limite != null && limite > 0 && utilizzi >= limite) {
-      return 'limite di utilizzi raggiunto';
+      return const CassaFailure(CassaFailureCode.couponUsageLimitReached);
     }
     if (emailConsentite.isNotEmpty) {
       final email = (emailCliente ?? '').trim().toLowerCase();
       if (email.isEmpty) {
-        return 'coupon riservato a clienti specifici: seleziona il cliente';
+        return const CassaFailure(CassaFailureCode.couponCustomerRequired);
       }
       if (!emailConsentite.any((regola) => _emailCorrisponde(email, regola))) {
-        return 'coupon non valido per questo cliente';
+        return const CassaFailure(CassaFailureCode.couponNotForCustomer);
       }
     }
     final totale = _totaleVendite(righe);
     if (importoMinimo != null && totale < importoMinimo!) {
-      return 'spesa minima di €${importoMinimo!.toStringAsFixed(2)}';
+      return CassaFailure(
+        CassaFailureCode.couponMinimumSpend,
+        importo: importoMinimo,
+      );
     }
     if (importoMassimo != null && totale > importoMassimo!) {
-      return 'spesa massima di €${importoMassimo!.toStringAsFixed(2)}';
+      return CassaFailure(
+        CassaFailureCode.couponMaximumSpend,
+        importo: importoMassimo,
+      );
     }
     if (!righe.any(_rigaIdonea)) {
-      return 'nessun articolo dello scontrino è idoneo';
+      return const CassaFailure(CassaFailureCode.couponNoEligibleItems);
     }
     return null;
   }

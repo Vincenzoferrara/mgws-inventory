@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../products/class_products.dart';
+import 'checkout_failure.dart';
 import 'class_receipt.dart';
 
 /// Sold line with the quantity still returnable.
@@ -41,10 +42,10 @@ class RigaRendibile {
 /// Outcome of a strict return check.
 class EsitoReso {
   final bool ok;
-  final String? errore;
+  final CassaFailure? errore;
 
   const EsitoReso.ok() : ok = true, errore = null;
-  const EsitoReso.ko(this.errore) : ok = false;
+  const EsitoReso.ko(CassaFailure this.errore) : ok = false;
 }
 
 /// Daily closing for a register. Immutable once recorded: corrections go
@@ -284,7 +285,7 @@ class StoricoCassaStore {
     await init();
     if (turnoAperto(cassaNome: turno.cassaNome) != null) {
       return const EsitoReso.ko(
-        'Esiste gia un turno aperto per questa cassa. Chiudilo prima di aprirne un altro.',
+        CassaFailure(CassaFailureCode.shiftAlreadyOpen),
       );
     }
     _turni.insert(0, turno);
@@ -301,10 +302,13 @@ class StoricoCassaStore {
   }) async {
     await init();
     final index = _turni.indexWhere((turno) => turno.id == turnoId);
-    if (index < 0) return const EsitoReso.ko('Turno non trovato.');
+    if (index < 0)
+      return const EsitoReso.ko(CassaFailure(CassaFailureCode.shiftNotFound));
     final turno = _turni[index];
     if (!turno.isAperto) {
-      return const EsitoReso.ko('Turno gia chiuso: usare una rettifica.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.shiftAlreadyClosed),
+      );
     }
     final esitoChiusura = await registraChiusura(chiusura);
     if (!esitoChiusura.ok) return esitoChiusura;
@@ -715,7 +719,9 @@ class StoricoCassaStore {
   }) async {
     await init();
     if (reason.trim().isEmpty) {
-      return const EsitoReso.ko('Motivo annullamento obbligatorio.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.cancelReasonRequired),
+      );
     }
 
     try {
@@ -730,7 +736,7 @@ class StoricoCassaStore {
       }
       final message = response['message']?.toString();
       if (message != null && message.isNotEmpty) {
-        return EsitoReso.ko(message);
+        return EsitoReso.ko(CassaFailure.server(message));
       }
     } catch (error) {
       AppLogger().w(
@@ -760,18 +766,23 @@ class StoricoCassaStore {
     required String reason,
   }) async {
     final index = _scontrini.indexWhere((s) => s.id == receiptId);
-    if (index < 0) return const EsitoReso.ko('Scontrino non trovato.');
+    if (index < 0)
+      return const EsitoReso.ko(CassaFailure(CassaFailureCode.receiptNotFound));
     final receipt = _scontrini[index];
     if (receipt.stato == 'annullato') {
-      return const EsitoReso.ko('Scontrino gia annullato.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.receiptAlreadyCancelled),
+      );
     }
     if (receipt.stato == 'aperto' || receipt.stato == 'sospeso') {
       return const EsitoReso.ko(
-        'Solo scontrini chiusi possono essere annullati.',
+        CassaFailure(CassaFailureCode.onlyClosedReceiptsCancellable),
       );
     }
     if (reason.trim().isEmpty) {
-      return const EsitoReso.ko('Motivo annullo obbligatorio.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.cancelReasonRequired),
+      );
     }
     receipt.stato = 'annullato';
     receipt.aggiungiRettifica('ANNULLO: ${reason.trim()}');
@@ -785,9 +796,12 @@ class StoricoCassaStore {
   }) async {
     await init();
     final scontrino = cercaPerId(scontrinoId);
-    if (scontrino == null) return const EsitoReso.ko('Scontrino non trovato.');
+    if (scontrino == null)
+      return const EsitoReso.ko(CassaFailure(CassaFailureCode.receiptNotFound));
     if (nota.trim().isEmpty)
-      return const EsitoReso.ko('Nota rettifica obbligatoria.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.adjustmentNoteRequired),
+      );
     scontrino.aggiungiRettifica(nota);
     await _save();
     return const EsitoReso.ok();
@@ -836,28 +850,42 @@ class StoricoCassaStore {
     required String? motivo,
   }) {
     if (cercaPerId(scontrinoOrigineId) == null) {
-      return const EsitoReso.ko('Scontrino di origine non trovato.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.originReceiptNotFound),
+      );
     }
     if (cercaPerId(scontrinoOrigineId)!.stato == 'annullato') {
-      return const EsitoReso.ko('Scontrino di origine annullato.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.originReceiptCancelled),
+      );
     }
     if (quantita <= 0) {
-      return const EsitoReso.ko('Quantita reso non valida.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.invalidReturnQuantity),
+      );
     }
     if (motivo == null || motivo.trim().isEmpty) {
-      return const EsitoReso.ko('Motivo del reso obbligatorio.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.returnReasonRequired),
+      );
     }
     RigaRendibile? target;
     for (final r in righeRendibili(scontrinoOrigineId)) {
       if (r.chiaveRiga == chiaveRiga) target = r;
     }
     if (target == null) {
-      return const EsitoReso.ko('Riga vendita non trovata nello scontrino.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.saleLineNotFound),
+      );
     }
     if (quantita > target.quantitaRendibile) {
       return EsitoReso.ko(
-        'Disponibili per il reso: ${target.quantitaRendibile} '
-        '(venduti ${target.quantitaVenduta}, gia resi ${target.quantitaGiaResa}).',
+        CassaFailure(
+          CassaFailureCode.returnExceedsRemaining,
+          disponibili: target.quantitaRendibile,
+          venduti: target.quantitaVenduta,
+          giaResi: target.quantitaGiaResa,
+        ),
       );
     }
     return const EsitoReso.ok();
@@ -914,12 +942,14 @@ class StoricoCassaStore {
   Future<EsitoReso> registraChiusura(ChiusuraCassa chiusura) async {
     await init();
     if (hasChiusura(chiusura.giornataId, turnoId: chiusura.turnoId)) {
-      return const EsitoReso.ko('Turno gia chiuso: usare una rettifica.');
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.shiftAlreadyClosed),
+      );
     }
     if (chiusura.hasDifferenze &&
         (chiusura.causaleDifferenza ?? '').trim().isEmpty) {
       return const EsitoReso.ko(
-        'Causale differenza obbligatoria quando contato e atteso non coincidono.',
+        CassaFailure(CassaFailureCode.differenceReasonRequired),
       );
     }
     _chiusure.insert(0, chiusura);

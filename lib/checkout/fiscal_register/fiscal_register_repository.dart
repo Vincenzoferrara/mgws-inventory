@@ -54,7 +54,7 @@ class FiscalRegisterRepository extends ChangeNotifier {
 
   Future<void> setActiveDriver(String driverId) async {
     if (!_drivers.any((driver) => driver.id == driverId)) {
-      throw ArgumentError('Driver registratore sconosciuto: $driverId');
+      throw ArgumentError('Unknown register driver: $driverId');
     }
     _activeDriverId = driverId;
     final prefs = await SharedPreferences.getInstance();

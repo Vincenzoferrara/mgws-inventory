@@ -307,9 +307,10 @@ class Scontrino {
   /// Scontrini POS e ordini Woo non condividono mai il ciclo documentale.
   bool get isPos => canale == 'pos';
 
-  String get operatoreLabel {
+  /// Nome dell'operatore, `null` se nessun operatore e assegnato.
+  String? get operatoreLabel {
     final nome = [operatoreNome ?? '', operatoreCognome ?? ''].join(' ').trim();
-    if (nome.isEmpty) return 'Operatore non assegnato';
+    if (nome.isEmpty) return null;
     if (operatoreId != null) return '$nome (id $operatoreId)';
     return nome;
   }
@@ -456,9 +457,10 @@ class TurnoCassa {
 
   bool get isAperto => stato == StatoTurnoCassa.aperto;
 
-  String get operatoreLabel {
+  /// Nome dell'operatore, `null` se nessun operatore e assegnato.
+  String? get operatoreLabel {
     final nome = [operatoreNome ?? '', operatoreCognome ?? ''].join(' ').trim();
-    if (nome.isEmpty) return 'Operatore non assegnato';
+    if (nome.isEmpty) return null;
     if (operatoreId != null) return '$nome (id $operatoreId)';
     return nome;
   }
@@ -574,13 +576,13 @@ class RigaScontrino {
     return prodotto.prezzoEffettivo;
   }
 
-  /// Ottiene il nome visualizzabile
+  /// Ottiene il nome visualizzabile. Per le righe di reso la GUI aggiunge
+  /// il proprio prefisso tradotto.
   String get nomeCompleto {
-    final prefix = tipoMovimento == TipoRigaCassa.reso ? '[RESO] ' : '';
     if (variante != null) {
-      return '$prefix${prodotto.nome ?? ''} - ${variante!.nomeVisualizzabile}';
+      return '${prodotto.nome ?? ''} - ${variante!.nomeVisualizzabile}';
     }
-    return '$prefix${prodotto.nome ?? ''}';
+    return prodotto.nome ?? '';
   }
 
   /// Ottiene l'immagine URL

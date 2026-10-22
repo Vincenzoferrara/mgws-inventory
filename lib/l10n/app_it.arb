@@ -8194,5 +8194,849 @@
   "notificationSourceLogs": "Log",
   "@notificationSourceLogs": {
     "description": "Title of message bars raised by the log viewer"
+  },
+  "cassaErrorShiftAlreadyOpen": "Esiste già un turno aperto per questa cassa. Chiudilo prima di aprirne un altro.",
+  "@cassaErrorShiftAlreadyOpen": {
+    "description": "Localized string cassaErrorShiftAlreadyOpen"
+  },
+  "cassaErrorShiftNotFound": "Turno non trovato.",
+  "@cassaErrorShiftNotFound": {
+    "description": "Localized string cassaErrorShiftNotFound"
+  },
+  "cassaErrorShiftAlreadyClosed": "Turno già chiuso: usare una rettifica.",
+  "@cassaErrorShiftAlreadyClosed": {
+    "description": "Localized string cassaErrorShiftAlreadyClosed"
+  },
+  "cassaErrorNoOpenShift": "Nessun turno aperto.",
+  "@cassaErrorNoOpenShift": {
+    "description": "Localized string cassaErrorNoOpenShift"
+  },
+  "cassaErrorOpenShiftBeforeAdding": "Apri un turno cassa prima di aggiungere prodotti.",
+  "@cassaErrorOpenShiftBeforeAdding": {
+    "description": "Localized string cassaErrorOpenShiftBeforeAdding"
+  },
+  "cassaErrorCloseReceiptBeforeShiftClose": "Chiudi o sospendi lo scontrino corrente prima di chiudere il turno.",
+  "@cassaErrorCloseReceiptBeforeShiftClose": {
+    "description": "Localized string cassaErrorCloseReceiptBeforeShiftClose"
+  },
+  "cassaErrorDifferenceReasonRequired": "Causale differenza obbligatoria quando contato e atteso non coincidono.",
+  "@cassaErrorDifferenceReasonRequired": {
+    "description": "Localized string cassaErrorDifferenceReasonRequired"
+  },
+  "cassaErrorInvalidServerResponse": "Risposta del backend MGWS non valida.",
+  "@cassaErrorInvalidServerResponse": {
+    "description": "Localized string cassaErrorInvalidServerResponse"
+  },
+  "cassaErrorShiftOperationFailed": "Operazione turno cassa MGWS non riuscita.",
+  "@cassaErrorShiftOperationFailed": {
+    "description": "Localized string cassaErrorShiftOperationFailed"
+  },
+  "cassaErrorInvalidLine": "Riga non valida.",
+  "@cassaErrorInvalidLine": {
+    "description": "Localized string cassaErrorInvalidLine"
+  },
+  "cassaErrorInsufficientStock": "Stock insufficiente. Disponibili: {available}, richiesti: {requested}",
+  "@cassaErrorInsufficientStock": {
+    "description": "Localized string cassaErrorInsufficientStock",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "requested": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorReturnNotAllowed": "Reso non consentito.",
+  "@cassaErrorReturnNotAllowed": {
+    "description": "Localized string cassaErrorReturnNotAllowed"
+  },
+  "cassaErrorSaleLineNotFound": "Riga vendita non trovata nello scontrino.",
+  "@cassaErrorSaleLineNotFound": {
+    "description": "Localized string cassaErrorSaleLineNotFound"
+  },
+  "cassaErrorLineFullyReturned": "Riga già interamente restituita.",
+  "@cassaErrorLineFullyReturned": {
+    "description": "Localized string cassaErrorLineFullyReturned"
+  },
+  "cassaErrorInvalidReturnQuantity": "Quantità di reso non valida.",
+  "@cassaErrorInvalidReturnQuantity": {
+    "description": "Localized string cassaErrorInvalidReturnQuantity"
+  },
+  "cassaErrorReturnReasonRequired": "Motivo del reso obbligatorio.",
+  "@cassaErrorReturnReasonRequired": {
+    "description": "Localized string cassaErrorReturnReasonRequired"
+  },
+  "cassaErrorReturnExceedsRemaining": "Reso superiore al residuo: disponibili {available}.",
+  "@cassaErrorReturnExceedsRemaining": {
+    "description": "Localized string cassaErrorReturnExceedsRemaining",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorReturnExceedsRemainingDetail": "Disponibili per il reso: {available} (venduti {sold}, già resi {returned}).",
+  "@cassaErrorReturnExceedsRemainingDetail": {
+    "description": "Localized string cassaErrorReturnExceedsRemainingDetail",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaErrorOriginReceiptNotFound": "Scontrino di origine non trovato o non disponibile sul server.",
+  "@cassaErrorOriginReceiptNotFound": {
+    "description": "Localized string cassaErrorOriginReceiptNotFound"
+  },
+  "cassaErrorOriginReceiptCancelled": "Scontrino di origine annullato.",
+  "@cassaErrorOriginReceiptCancelled": {
+    "description": "Localized string cassaErrorOriginReceiptCancelled"
+  },
+  "cassaErrorReceiptNotFound": "Scontrino non trovato.",
+  "@cassaErrorReceiptNotFound": {
+    "description": "Localized string cassaErrorReceiptNotFound"
+  },
+  "cassaErrorReceiptAlreadyCancelled": "Scontrino già annullato.",
+  "@cassaErrorReceiptAlreadyCancelled": {
+    "description": "Localized string cassaErrorReceiptAlreadyCancelled"
+  },
+  "cassaErrorOnlyClosedReceiptsCancellable": "Solo scontrini chiusi possono essere annullati.",
+  "@cassaErrorOnlyClosedReceiptsCancellable": {
+    "description": "Localized string cassaErrorOnlyClosedReceiptsCancellable"
+  },
+  "cassaErrorCancelReasonRequired": "Motivo annullamento obbligatorio.",
+  "@cassaErrorCancelReasonRequired": {
+    "description": "Localized string cassaErrorCancelReasonRequired"
+  },
+  "cassaErrorAdjustmentNoteRequired": "Nota rettifica obbligatoria.",
+  "@cassaErrorAdjustmentNoteRequired": {
+    "description": "Localized string cassaErrorAdjustmentNoteRequired"
+  },
+  "cassaCouponNotFound": "coupon non trovato",
+  "@cassaCouponNotFound": {
+    "description": "Localized string cassaCouponNotFound"
+  },
+  "cassaCouponCheckFailed": "errore di verifica del coupon",
+  "@cassaCouponCheckFailed": {
+    "description": "Localized string cassaCouponCheckFailed"
+  },
+  "cassaCouponUnsupportedType": "tipo di sconto non supportato",
+  "@cassaCouponUnsupportedType": {
+    "description": "Localized string cassaCouponUnsupportedType"
+  },
+  "cassaCouponExpired": "coupon scaduto",
+  "@cassaCouponExpired": {
+    "description": "Localized string cassaCouponExpired"
+  },
+  "cassaCouponUsageLimitReached": "limite di utilizzi raggiunto",
+  "@cassaCouponUsageLimitReached": {
+    "description": "Localized string cassaCouponUsageLimitReached"
+  },
+  "cassaCouponCustomerRequired": "coupon riservato a clienti specifici: seleziona il cliente",
+  "@cassaCouponCustomerRequired": {
+    "description": "Localized string cassaCouponCustomerRequired"
+  },
+  "cassaCouponNotForCustomer": "coupon non valido per questo cliente",
+  "@cassaCouponNotForCustomer": {
+    "description": "Localized string cassaCouponNotForCustomer"
+  },
+  "cassaCouponMinimumSpend": "spesa minima di {amount}",
+  "@cassaCouponMinimumSpend": {
+    "description": "Localized string cassaCouponMinimumSpend",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponMaximumSpend": "spesa massima di {amount}",
+  "@cassaCouponMaximumSpend": {
+    "description": "Localized string cassaCouponMaximumSpend",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponNoEligibleItems": "nessun articolo dello scontrino è idoneo",
+  "@cassaCouponNoEligibleItems": {
+    "description": "Localized string cassaCouponNoEligibleItems"
+  },
+  "cassaOperatorUnassigned": "Operatore non assegnato",
+  "@cassaOperatorUnassigned": {
+    "description": "Localized string cassaOperatorUnassigned"
+  },
+  "cassaFloatHint": "Il fondo viene fissato all'apertura e usato nella chiusura del turno.",
+  "@cassaFloatHint": {
+    "description": "Localized string cassaFloatHint"
+  },
+  "cassaShiftOpened": "Turno cassa aperto.",
+  "@cassaShiftOpened": {
+    "description": "Localized string cassaShiftOpened"
+  },
+  "cassaShiftNotOpened": "Turno non aperto.",
+  "@cassaShiftNotOpened": {
+    "description": "Localized string cassaShiftNotOpened"
+  },
+  "cassaShiftClosed": "Turno cassa chiuso.",
+  "@cassaShiftClosed": {
+    "description": "Localized string cassaShiftClosed"
+  },
+  "cassaShiftNotClosed": "Turno non chiuso.",
+  "@cassaShiftNotClosed": {
+    "description": "Localized string cassaShiftNotClosed"
+  },
+  "cassaInitialFloatValue": "Fondo iniziale: {amount}",
+  "@cassaInitialFloatValue": {
+    "description": "Localized string cassaInitialFloatValue",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftTakings": "Incassi turno - contanti {cash} · carta {card} · altri {other} · rimborsi {refunds}",
+  "@cassaShiftTakings": {
+    "description": "Localized string cassaShiftTakings",
+    "placeholders": {
+      "cash": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      },
+      "refunds": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftOpenedAt": "Turno aperto alle {time} · fondo {amount}",
+  "@cassaShiftOpenedAt": {
+    "description": "Localized string cassaShiftOpenedAt",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftOpenShort": "Aperto {time}",
+  "@cassaShiftOpenShort": {
+    "description": "Localized string cassaShiftOpenShort",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaAddedAsReturn": "{name} aggiunto come reso",
+  "@cassaAddedAsReturn": {
+    "description": "Localized string cassaAddedAsReturn",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaAddedToCart": "{name} aggiunto al carrello",
+  "@cassaAddedToCart": {
+    "description": "Localized string cassaAddedToCart",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaBarcodeNotFound": "Il barcode non esiste",
+  "@cassaBarcodeNotFound": {
+    "description": "Localized string cassaBarcodeNotFound"
+  },
+  "cassaProductNoLongerAvailable": "Il prodotto non è più disponibile",
+  "@cassaProductNoLongerAvailable": {
+    "description": "Localized string cassaProductNoLongerAvailable"
+  },
+  "cassaNoProductSelected": "Nessun prodotto selezionato da aggiungere.",
+  "@cassaNoProductSelected": {
+    "description": "Localized string cassaNoProductSelected"
+  },
+  "cassaProductsAdded": "{count} prodotti aggiunti alla cassa",
+  "@cassaProductsAdded": {
+    "description": "Localized string cassaProductsAdded",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaProductsPartlyAdded": "{added} prodotti aggiunti. {failed} non aggiunti per stock insufficiente.",
+  "@cassaProductsPartlyAdded": {
+    "description": "Localized string cassaProductsPartlyAdded",
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaNoProductAdded": "Nessun prodotto aggiunto: {reason}",
+  "@cassaNoProductAdded": {
+    "description": "Localized string cassaNoProductAdded",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSearchProducts": "Ricerca prodotti",
+  "@cassaSearchProducts": {
+    "description": "Localized string cassaSearchProducts"
+  },
+  "cassaEmptyCart": "Carrello vuoto",
+  "@cassaEmptyCart": {
+    "description": "Localized string cassaEmptyCart"
+  },
+  "cassaEmptyCartHint": "Aggiungi prodotti con barcode, QR o selezione manuale",
+  "@cassaEmptyCartHint": {
+    "description": "Localized string cassaEmptyCartHint"
+  },
+  "cassaReceiptHeader": "SCONTRINO",
+  "@cassaReceiptHeader": {
+    "description": "Localized string cassaReceiptHeader"
+  },
+  "cassaNoCustomer": "Cliente non associato",
+  "@cassaNoCustomer": {
+    "description": "Localized string cassaNoCustomer"
+  },
+  "cassaCouponLabel": "Coupon: {code}",
+  "@cassaCouponLabel": {
+    "description": "Localized string cassaCouponLabel",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaNoCoupon": "Nessun coupon",
+  "@cassaNoCoupon": {
+    "description": "Localized string cassaNoCoupon"
+  },
+  "cassaSuspendedCount": "{count} sospesi",
+  "@cassaSuspendedCount": {
+    "description": "Localized string cassaSuspendedCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaNoneSuspended": "Nessuno sospeso",
+  "@cassaNoneSuspended": {
+    "description": "Localized string cassaNoneSuspended"
+  },
+  "cassaReceiptSuspended": "Scontrino sospeso",
+  "@cassaReceiptSuspended": {
+    "description": "Localized string cassaReceiptSuspended"
+  },
+  "cassaTotalSales": "Vendite:",
+  "@cassaTotalSales": {
+    "description": "Localized string cassaTotalSales"
+  },
+  "cassaTotalReturns": "Resi:",
+  "@cassaTotalReturns": {
+    "description": "Localized string cassaTotalReturns"
+  },
+  "cassaNetSubtotal": "Subtotale netto:",
+  "@cassaNetSubtotal": {
+    "description": "Localized string cassaNetSubtotal"
+  },
+  "cassaTotalDiscount": "Sconto:",
+  "@cassaTotalDiscount": {
+    "description": "Localized string cassaTotalDiscount"
+  },
+  "cassaPercentDiscount": "Sconto {percent}%:",
+  "@cassaPercentDiscount": {
+    "description": "Localized string cassaPercentDiscount",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponTotal": "Coupon ({code}):",
+  "@cassaCouponTotal": {
+    "description": "Localized string cassaCouponTotal",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaVatTotal": "IVA ({percent}%):",
+  "@cassaVatTotal": {
+    "description": "Localized string cassaVatTotal",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaRefundTotal": "RIMBORSO:",
+  "@cassaRefundTotal": {
+    "description": "Localized string cassaRefundTotal"
+  },
+  "cassaGrandTotal": "TOTALE:",
+  "@cassaGrandTotal": {
+    "description": "Localized string cassaGrandTotal"
+  },
+  "cassaPayButton": "PAGA",
+  "@cassaPayButton": {
+    "description": "Localized string cassaPayButton"
+  },
+  "cassaLoyaltyCardFound": "Carta fedeltà trovata! {points} punti disponibili",
+  "@cassaLoyaltyCardFound": {
+    "description": "Localized string cassaLoyaltyCardFound",
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaNameRequired": "Il nome è obbligatorio",
+  "@cassaNameRequired": {
+    "description": "Localized string cassaNameRequired"
+  },
+  "cassaConfirmExchangeTitle": "Conferma cambio",
+  "@cassaConfirmExchangeTitle": {
+    "description": "Localized string cassaConfirmExchangeTitle"
+  },
+  "cassaConfirmRefundTitle": "Conferma rimborso",
+  "@cassaConfirmRefundTitle": {
+    "description": "Localized string cassaConfirmRefundTitle"
+  },
+  "cassaConfirmPaymentTitle": "Conferma pagamento",
+  "@cassaConfirmPaymentTitle": {
+    "description": "Localized string cassaConfirmPaymentTitle"
+  },
+  "cassaEvenExchange": "CAMBIO A PARI VALORE",
+  "@cassaEvenExchange": {
+    "description": "Localized string cassaEvenExchange"
+  },
+  "cassaAmountToRefund": "IMPORTO DA RIMBORSARE",
+  "@cassaAmountToRefund": {
+    "description": "Localized string cassaAmountToRefund"
+  },
+  "cassaAmountToPay": "TOTALE DA PAGARE",
+  "@cassaAmountToPay": {
+    "description": "Localized string cassaAmountToPay"
+  },
+  "cassaRefundMethod": "Metodo di rimborso:",
+  "@cassaRefundMethod": {
+    "description": "Localized string cassaRefundMethod"
+  },
+  "cassaPaymentMethod": "Metodo di pagamento:",
+  "@cassaPaymentMethod": {
+    "description": "Localized string cassaPaymentMethod"
+  },
+  "cassaChangeDue": "RESTO DA DARE",
+  "@cassaChangeDue": {
+    "description": "Localized string cassaChangeDue"
+  },
+  "cassaAmountInsufficient": "IMPORTO INSUFFICIENTE",
+  "@cassaAmountInsufficient": {
+    "description": "Localized string cassaAmountInsufficient"
+  },
+  "cassaAmountMissing": "Mancano {amount}",
+  "@cassaAmountMissing": {
+    "description": "Localized string cassaAmountMissing",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangeRecorded": "Cambio registrato con successo!",
+  "@cassaExchangeRecorded": {
+    "description": "Localized string cassaExchangeRecorded"
+  },
+  "cassaExchangeCustomerCredit": "Cambio registrato. Credito cliente: {amount}",
+  "@cassaExchangeCustomerCredit": {
+    "description": "Localized string cassaExchangeCustomerCredit",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangeBalanceDue": "Cambio registrato. Conguaglio da incassare: {amount}",
+  "@cassaExchangeBalanceDue": {
+    "description": "Localized string cassaExchangeBalanceDue",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReturnRecorded": "Reso registrato. Rimborso: {amount}",
+  "@cassaReturnRecorded": {
+    "description": "Localized string cassaReturnRecorded",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSaleCompleted": "Vendita completata con successo!",
+  "@cassaSaleCompleted": {
+    "description": "Localized string cassaSaleCompleted"
+  },
+  "cassaSaleCompletedChange": "Vendita completata! Resto: {amount}",
+  "@cassaSaleCompletedChange": {
+    "description": "Localized string cassaSaleCompletedChange",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSaleFailed": "Errore durante il completamento della vendita",
+  "@cassaSaleFailed": {
+    "description": "Localized string cassaSaleFailed"
+  },
+  "cassaCardFoundCustomer": "Carta trovata! Cliente: {name} - {points} punti",
+  "@cassaCardFoundCustomer": {
+    "description": "Localized string cassaCardFoundCustomer",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCardNotFound": "Carta non trovata: {number}",
+  "@cassaCardNotFound": {
+    "description": "Localized string cassaCardNotFound",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaErrorDetail": "Errore: {error}",
+  "@cassaErrorDetail": {
+    "description": "Localized string cassaErrorDetail",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponApplied": "Coupon \"{code}\" applicato!",
+  "@cassaCouponApplied": {
+    "description": "Localized string cassaCouponApplied",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCouponInvalid": "Coupon \"{code}\" non valido: {reason}",
+  "@cassaCouponInvalid": {
+    "description": "Localized string cassaCouponInvalid",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaWholeNumbersOnly": "Inserisci solo numeri interi.",
+  "@cassaWholeNumbersOnly": {
+    "description": "Localized string cassaWholeNumbersOnly"
+  },
+  "cassaQuantityMustBePositive": "La quantità deve essere maggiore di zero.",
+  "@cassaQuantityMustBePositive": {
+    "description": "Localized string cassaQuantityMustBePositive"
+  },
+  "cassaReturnBadge": "RESO",
+  "@cassaReturnBadge": {
+    "description": "Localized string cassaReturnBadge"
+  },
+  "cassaLineDiscount": "Sconto: -{amount}",
+  "@cassaLineDiscount": {
+    "description": "Localized string cassaLineDiscount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaMetricSales": "Vendite",
+  "@cassaMetricSales": {
+    "description": "Localized string cassaMetricSales"
+  },
+  "cassaMetricReturns": "Resi",
+  "@cassaMetricReturns": {
+    "description": "Localized string cassaMetricReturns"
+  },
+  "cassaMetricExchanges": "Cambi",
+  "@cassaMetricExchanges": {
+    "description": "Localized string cassaMetricExchanges"
+  },
+  "cassaMetricSalesValue": "Valore vendite",
+  "@cassaMetricSalesValue": {
+    "description": "Localized string cassaMetricSalesValue"
+  },
+  "cassaMetricReturnsValue": "Valore resi",
+  "@cassaMetricReturnsValue": {
+    "description": "Localized string cassaMetricReturnsValue"
+  },
+  "cassaMetricNetBalance": "Saldo netto",
+  "@cassaMetricNetBalance": {
+    "description": "Localized string cassaMetricNetBalance"
+  },
+  "cassaMetricBalancesCollected": "Conguagli incassati",
+  "@cassaMetricBalancesCollected": {
+    "description": "Localized string cassaMetricBalancesCollected"
+  },
+  "cassaMetricBalancesRefunded": "Conguagli rimborsati",
+  "@cassaMetricBalancesRefunded": {
+    "description": "Localized string cassaMetricBalancesRefunded"
+  },
+  "cassaAdd": "Aggiungi",
+  "@cassaAdd": {
+    "description": "Localized string cassaAdd"
+  },
+  "cassaHistoryCount": "{count} scontrini POS (canale pos, separati dagli ordini Woo)",
+  "@cassaHistoryCount": {
+    "description": "Localized string cassaHistoryCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaHistoryEmpty": "Nessuno scontrino POS archiviato con questi filtri.",
+  "@cassaHistoryEmpty": {
+    "description": "Localized string cassaHistoryEmpty"
+  },
+  "cassaHistoryOrderRef": "ordine {id}",
+  "@cassaHistoryOrderRef": {
+    "description": "Localized string cassaHistoryOrderRef",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReceiptTitle": "Scontrino {number}",
+  "@cassaReceiptTitle": {
+    "description": "Localized string cassaReceiptTitle",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaReceiptCancelledNote": "Scontrino annullato: escluso da totali e resi.",
+  "@cassaReceiptCancelledNote": {
+    "description": "Localized string cassaReceiptCancelledNote"
+  },
+  "cassaRegisterRef": "Cassa {name}",
+  "@cassaRegisterRef": {
+    "description": "Localized string cassaRegisterRef",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaLinkedOrder": "Ordine Woo/MGWS collegato: {id} (solo riferimento, ciclo separato)",
+  "@cassaLinkedOrder": {
+    "description": "Localized string cassaLinkedOrder",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaSoldLinesTitle": "Righe vendute e residuo rendibile",
+  "@cassaSoldLinesTitle": {
+    "description": "Localized string cassaSoldLinesTitle"
+  },
+  "cassaReturnableLine": "Barcode interno {barcode} · venduti {sold} · già resi {returned} · rendibili {returnable}",
+  "@cassaReturnableLine": {
+    "description": "Localized string cassaReturnableLine",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      },
+      "returnable": {
+        "type": "int"
+      }
+    }
+  },
+  "cassaRecordedLinesTitle": "Righe registrate",
+  "@cassaRecordedLinesTitle": {
+    "description": "Localized string cassaRecordedLinesTitle"
+  },
+  "cassaReturnLinePrefix": "[RESO]",
+  "@cassaReturnLinePrefix": {
+    "description": "Localized string cassaReturnLinePrefix"
+  },
+  "cassaAdjustmentsTitle": "Rettifiche",
+  "@cassaAdjustmentsTitle": {
+    "description": "Localized string cassaAdjustmentsTitle"
+  },
+  "cassaReturnableSummary": "Rendibili: {returnable} (venduti {sold}, già resi {returned}). Il prezzo resta quello pagato: {price}.",
+  "@cassaReturnableSummary": {
+    "description": "Localized string cassaReturnableSummary",
+    "placeholders": {
+      "returnable": {
+        "type": "int"
+      },
+      "sold": {
+        "type": "int"
+      },
+      "returned": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaExchangePrepared": "Cambio preparato: aggiungi il prodotto sostitutivo e completa il checkout.",
+  "@cassaExchangePrepared": {
+    "description": "Localized string cassaExchangePrepared"
+  },
+  "cassaReturnPrepared": "Reso preparato nel carrello: completa il checkout per registrarlo.",
+  "@cassaReturnPrepared": {
+    "description": "Localized string cassaReturnPrepared"
+  },
+  "cassaReceiptCancelled": "Scontrino annullato.",
+  "@cassaReceiptCancelled": {
+    "description": "Localized string cassaReceiptCancelled"
+  },
+  "cassaAdjustmentSaved": "Rettifica salvata.",
+  "@cassaAdjustmentSaved": {
+    "description": "Localized string cassaAdjustmentSaved"
+  },
+  "cassaCashSummary": "Contante atteso {expected} · contato {counted} · differenza {difference}",
+  "@cassaCashSummary": {
+    "description": "Localized string cassaCashSummary",
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "String"
+      },
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaCardSummary": "Carta attesa {expected} · contata {counted} · differenza {difference}",
+  "@cassaCardSummary": {
+    "description": "Localized string cassaCardSummary",
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "counted": {
+        "type": "String"
+      },
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaShiftSummary": "Turno: {shift} · Operatore: {operator} · Fondo iniziale {amount}.",
+  "@cassaShiftSummary": {
+    "description": "Localized string cassaShiftSummary",
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      },
+      "operator": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaClosingRecorded": "Chiusura registrata. Differenza contanti {cash}, carta {card}.",
+  "@cassaClosingRecorded": {
+    "description": "Localized string cassaClosingRecorded",
+    "placeholders": {
+      "cash": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaClosingNotRecorded": "Chiusura non registrata.",
+  "@cassaClosingNotRecorded": {
+    "description": "Localized string cassaClosingNotRecorded"
+  },
+  "cassaShiftSettingNotSynced": "Impostazione turno cassa non salvata sul server",
+  "@cassaShiftSettingNotSynced": {
+    "description": "Localized string cassaShiftSettingNotSynced"
+  },
+  "cassaShiftClosingSection": "Chiusura turno",
+  "@cassaShiftClosingSection": {
+    "description": "Localized string cassaShiftClosingSection"
+  },
+  "cassaShiftStatusValue": "Stato turno: {status}",
+  "@cassaShiftStatusValue": {
+    "description": "Localized string cassaShiftStatusValue",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "cassaOtherCounted": "Altri contato",
+  "@cassaOtherCounted": {
+    "description": "Localized string cassaOtherCounted"
+  },
+  "cassaDifferenceReasonOrNote": "Causale differenza / nota",
+  "@cassaDifferenceReasonOrNote": {
+    "description": "Localized string cassaDifferenceReasonOrNote"
+  },
+  "cassaOptional": "Facoltativo",
+  "@cassaOptional": {
+    "description": "Localized string cassaOptional"
+  },
+  "cassaOpenShiftBeforeClosing": "Nessun turno aperto. Apri un turno prima di chiudere.",
+  "@cassaOpenShiftBeforeClosing": {
+    "description": "Localized string cassaOpenShiftBeforeClosing"
   }
 }

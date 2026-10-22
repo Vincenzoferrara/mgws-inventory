@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../checkout/fiscal_register/fiscal_register_repository.dart';
 import '../checkout/checkout.code.dart' show CassaController;
+import '../checkout/checkout_failure_text.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 import 'checkout_settings.dart';
@@ -81,9 +82,9 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
   /// dagli ordini collegati allo shift e restituisce eventuali differenze.
   Future<void> _chiudiTurnoMGWS(BuildContext context) async {
     if (!context.read<CassaController>().hasTurnoAperto) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nessun turno aperto')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.cassaErrorNoOpenShift)),
+      );
       return;
     }
     // Raccogli i valori dai controller o dai campi di input
@@ -104,12 +105,17 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
       _cartaChiudiController.text = '';
       _altriChiudiController.text = '';
       _notaChiudiController.text = '';
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Turno chiuso con successo')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.cassaShiftClosed)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(esito.errore ?? 'Errore chiusura turno')),
+        SnackBar(
+          content: Text(
+            esito.errore?.testo(context.l10n) ??
+                context.l10n.cassaShiftNotClosed,
+          ),
+        ),
       );
     }
   }
@@ -300,7 +306,12 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          context.l10n.cassaSalvataggioFallito('$error'),
+                          context.l10n.cassaSalvataggioFallito(
+                            error is CassaSettingsSyncException
+                                ? (error.serverMessage ??
+                                      context.l10n.cassaShiftSettingNotSynced)
+                                : '$error',
+                          ),
                         ),
                       ),
                     );
@@ -311,7 +322,7 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
             const SizedBox(height: 20),
             // NUOVA SEZIONE: Chiusura turno
             Text(
-              'Chiusura turno',
+              context.l10n.cassaShiftClosingSection,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -319,17 +330,24 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
             const SizedBox(height: 8),
             // Stato turno corrente
             Text(
-              'Stato turno: ${hasTurnoAperto ? 'aperto' : 'chiuso'}',
+              context.l10n.cassaShiftStatusValue(
+                hasTurnoAperto
+                    ? context.l10n.cassaStatoAperto
+                    : context.l10n.cassaStatoChiuso,
+              ),
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 8),
             // Solo se c'è un turno aperto
             if (hasTurnoAperto) ...[
-              Text('Fondo iniziale', style: theme.textTheme.bodySmall),
+              Text(
+                context.l10n.cassaFondoIniziale,
+                style: theme.textTheme.bodySmall,
+              ),
               TextField(
                 controller: _cassaChiudiController,
-                decoration: const InputDecoration(
-                  labelText: 'Contanti contato',
+                decoration: InputDecoration(
+                  labelText: context.l10n.cassaContantiContati,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.money),
                 ),
@@ -339,11 +357,11 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
-              Text('Carta', style: theme.textTheme.bodySmall),
+              Text(context.l10n.cassaCarta, style: theme.textTheme.bodySmall),
               TextField(
                 controller: _cartaChiudiController,
-                decoration: const InputDecoration(
-                  labelText: 'Carta contatto',
+                decoration: InputDecoration(
+                  labelText: context.l10n.cassaCartaPosContato,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.credit_card),
                 ),
@@ -353,11 +371,11 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
-              Text('Altri', style: theme.textTheme.bodySmall),
+              Text(context.l10n.cassaAltri, style: theme.textTheme.bodySmall),
               TextField(
                 controller: _altriChiudiController,
-                decoration: const InputDecoration(
-                  labelText: 'Altri contatto',
+                decoration: InputDecoration(
+                  labelText: context.l10n.cassaOtherCounted,
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.miscellaneous_services),
                 ),
@@ -369,10 +387,10 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
               const SizedBox(height: 8),
               TextField(
                 controller: _notaChiudiController,
-                decoration: const InputDecoration(
-                  labelText: 'Causale differenza / nota',
-                  border: OutlineInputBorder(),
-                  hintText: 'Facoltativo',
+                decoration: InputDecoration(
+                  labelText: context.l10n.cassaDifferenceReasonOrNote,
+                  border: const OutlineInputBorder(),
+                  hintText: context.l10n.cassaOptional,
                 ),
                 onChanged: (_) => setState(() {}),
               ),
@@ -385,11 +403,9 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
               const SizedBox(height: 16),
             ] else ...[
               // Nessun turno aperto: mostra info
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Nessun turno aperto. Apri un turno prima di chiudere.',
-                ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(context.l10n.cassaOpenShiftBeforeClosing),
               ),
             ],
             const SizedBox(height: 24),
@@ -397,9 +413,9 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
               onPressed: () async {
                 await settings.setValori(nomeCassa: _cassaController.text);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Salvato')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(context.l10n.cassaSalvato)),
+                  );
                 }
               },
               icon: const Icon(Icons.save),

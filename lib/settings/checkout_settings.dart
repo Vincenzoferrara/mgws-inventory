@@ -15,6 +15,18 @@ import '../login/jwt_api/adapter/platform_manager.dart';
 /// identifier required by the Italian POS/registratore telematico pairing.
 final cassaSettings = CassaSettings();
 
+/// Il server non ha salvato un'impostazione di cassa. [serverMessage] e il
+/// testo del backend, se presente; altrimenti la GUI mostra un testo tradotto.
+class CassaSettingsSyncException implements Exception {
+  final String? serverMessage;
+
+  const CassaSettingsSyncException(this.serverMessage);
+
+  @override
+  String toString() =>
+      serverMessage ?? 'Register shift setting not saved on the server';
+}
+
 class CassaSettings extends ChangeNotifier {
   static const _nomeCassaKey = 'cassa_nome_cassa';
   static const _sedeKey = 'cassa_sede';
@@ -106,7 +118,7 @@ class CassaSettings extends ChangeNotifier {
   Future<void> setPosIdentifier(String value) async {
     final error = validatePosIdentifier(value);
     if (error != null) {
-      throw ArgumentError('Identificativo POS non valido: $error');
+      throw ArgumentError('Invalid POS identifier: $error');
     }
     _posIdentifier = value.trim().toUpperCase();
     final prefs = await SharedPreferences.getInstance();
@@ -154,10 +166,7 @@ class CassaSettings extends ChangeNotifier {
           turnoObbligatorio: value,
         );
         if (response['success'] == false || response['ok'] == false) {
-          throw Exception(
-            response['message']?.toString() ??
-                'Impostazione turno cassa non salvata sul server',
-          );
+          throw CassaSettingsSyncException(response['message']?.toString());
         }
         final remoteValue = response['turno_obbligatorio'];
         if (remoteValue is bool) {
