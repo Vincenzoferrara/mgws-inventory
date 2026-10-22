@@ -1,0 +1,4 @@
+- Add issue forms and fix the privacy policy link
+- Publish every release to GitHub, Google Play and F-Droid
+- Localize the live dashboard screens
+- Localize the orders module
