@@ -2430,11 +2430,11 @@
   "@settingsWordpressBackendTitle": {
     "description": "Title of the WordPress backend settings screen"
   },
-  "settingsWordpressBackendTileTitle": "Backend settings",
+  "settingsWordpressBackendTileTitle": "Impostazioni backend",
   "@settingsWordpressBackendTileTitle": {
     "description": "Tile title for the backend settings"
   },
-  "settingsWordpressBackendTileSubtitle": "Configure WordPress backend connections",
+  "settingsWordpressBackendTileSubtitle": "Configura le connessioni al backend WordPress",
   "@settingsWordpressBackendTileSubtitle": {
     "description": "Subtitle of the backend settings tile"
   },
@@ -2454,7 +2454,7 @@
   "@settingsThemePreviewCard": {
     "description": "Preview card for theme settings"
   },
-  "settingsThemePreviewCardDescription": "Preview card description",
+  "settingsThemePreviewCardDescription": "Descrizione della scheda di anteprima",
   "@settingsThemePreviewCardDescription": {
     "description": "Preview card description for theme settings"
   },
@@ -2574,11 +2574,11 @@
   "@couponsStatUtilizzi": {
     "description": "Usages label"
   },
-  "couponsStatScontoTotale": "Total discount",
+  "couponsStatScontoTotale": "Sconto totale",
   "@couponsStatScontoTotale": {
     "description": "Total discount label"
   },
-  "couponsNessunCouponDisponibile": "No available coupons",
+  "couponsNessunCouponDisponibile": "Nessun coupon disponibile",
   "@couponsNessunCouponDisponibile": {
     "description": "Message when no coupons are available"
   },
@@ -2598,23 +2598,23 @@
   "@couponsValido": {
     "description": "Validity label"
   },
-  "couponsVerificaTitolo": "Verify coupon",
+  "couponsVerificaTitolo": "Verifica coupon",
   "@couponsVerificaTitolo": {
     "description": "Verify coupon title"
   },
-  "couponsVerificaHint": "Enter coupon code",
+  "couponsVerificaHint": "Inserisci il codice coupon",
   "@couponsVerificaHint": {
     "description": "Coupon hint"
   },
-  "couponsVerificaAzione": "Verify action",
+  "couponsVerificaAzione": "Verifica",
   "@couponsVerificaAzione": {
     "description": "Verify action label"
   },
-  "couponsSelezionaTitolo": "Select coupon",
+  "couponsSelezionaTitolo": "Seleziona coupon",
   "@couponsSelezionaTitolo": {
     "description": "Select coupon title"
   },
-  "couponsSelezionaHint": "Enter coupon code",
+  "couponsSelezionaHint": "Inserisci il codice coupon",
   "@couponsSelezionaHint": {
     "description": "Select coupon hint"
   },
@@ -2622,7 +2622,7 @@
   "@settingsThemeModeSystem": {
     "description": "Theme mode system"
   },
-  "settingsThemeModeSystemDescription": "System default",
+  "settingsThemeModeSystemDescription": "Predefinito di sistema",
   "@settingsThemeModeSystemDescription": {
     "description": "System default description"
   },
@@ -2634,7 +2634,7 @@
   "@settingsThemeShowReport": {
     "description": "Show report button"
   },
-  "settingsThemeShowReportDescription": "Show report link",
+  "settingsThemeShowReportDescription": "Mostra il collegamento ai report",
   "@settingsThemeShowReportDescription": {
     "description": "Show report link description"
   },
@@ -2650,15 +2650,15 @@
   "@settingsThemePreviewDescription": {
     "description": "Preview description"
   },
-  "settingsThemePreviewElevated": "Elevated preview",
+  "settingsThemePreviewElevated": "Anteprima in rilievo",
   "@settingsThemePreviewElevated": {
     "description": "Elevated preview"
   },
-  "settingsThemePreviewOutlined": "Outlined preview",
+  "settingsThemePreviewOutlined": "Anteprima con bordo",
   "@settingsThemePreviewOutlined": {
     "description": "Outlined preview"
   },
-  "couponsErroreEmailNonValida": "Invalid email",
+  "couponsErroreEmailNonValida": "Email non valida",
   "@couponsErroreEmailNonValida": {
     "description": "Error when email is invalid"
   },
@@ -2670,11 +2670,11 @@
   "@couponsStatTotali": {
     "description": "Total amount label"
   },
-  "couponsErroreLimiteNonValido": "Limit invalid",
+  "couponsErroreLimiteNonValido": "Limite non valido",
   "@couponsErroreLimiteNonValido": {
     "description": "Error message for invalid limit"
   },
-  "couponsErroreLimiteTroppoBasso": "Limit too low",
+  "couponsErroreLimiteTroppoBasso": "Limite troppo basso",
   "@couponsErroreLimiteTroppoBasso": {
     "description": "Error message for limit too low"
   },
@@ -2690,7 +2690,7 @@
   "@couponsErroreMassimoNegativo": {
     "description": "Error message for max negative"
   },
-  "couponsErroreMassimoMinoreMinimo": "Max less than minimum",
+  "couponsErroreMassimoMinoreMinimo": "Il massimo è minore del minimo",
   "@couponsErroreMassimoMinoreMinimo": {
     "description": "Error message when max is less than minimum"
   },
@@ -2702,39 +2702,39 @@
   "@couponsErroreMinimoNegativo": {
     "description": "Error message for min negative"
   },
-  "couponsErroreMinimoMaggioreMassimo": "Min greater than max",
+  "couponsErroreMinimoMaggioreMassimo": "Il minimo è maggiore del massimo",
   "@couponsErroreMinimoMaggioreMassimo": {
     "description": "Error message when min is greater than max"
   },
-  "couponsErroreImportoNonValido": "Invalid amount",
+  "couponsErroreImportoNonValido": "Importo non valido",
   "@couponsErroreImportoNonValido": {
     "description": "Error for invalid amount"
   },
-  "couponsErroreImportoNonPositivo": "Non positive amount",
+  "couponsErroreImportoNonPositivo": "L'importo deve essere positivo",
   "@couponsErroreImportoNonPositivo": {
     "description": "Error for non-positive amount"
   },
-  "couponsErrorePercentualeTroppoAlta": "Percentage too high",
+  "couponsErrorePercentualeTroppoAlta": "Percentuale troppo alta",
   "@couponsErrorePercentualeTroppoAlta": {
     "description": "Error when percentage exceeds 100"
   },
-  "couponsErroreCodiceTroppoLungo": "Code too long",
+  "couponsErroreCodiceTroppoLungo": "Codice troppo lungo",
   "@couponsErroreCodiceTroppoLungo": {
     "description": "Error for code that is too long"
   },
-  "couponsErroreCodiceCaratteri": "Invalid characters in code",
+  "couponsErroreCodiceCaratteri": "Caratteri non validi nel codice",
   "@couponsErroreCodiceCaratteri": {
     "description": "Error for invalid characters in coupon code"
   },
-  "couponsErroreCodiceObbligatorio": "Code is required",
+  "couponsErroreCodiceObbligatorio": "Il codice è obbligatorio",
   "@couponsErroreCodiceObbligatorio": {
     "description": "Code required label"
   },
-  "couponsErroreCodiceTroppoCorto": "Code too short",
+  "couponsErroreCodiceTroppoCorto": "Codice troppo corto",
   "@couponsErroreCodiceTroppoCorto": {
     "description": "Code length error"
   },
-  "couponsErroreImportoObbligatorio": "Amount is required",
+  "couponsErroreImportoObbligatorio": "L'importo è obbligatorio",
   "@couponsErroreImportoObbligatorio": {
     "description": "Amount required label"
   },
@@ -2743,22 +2743,22 @@
     "description": "Trash status label",
     "placeholders": {}
   },
-  "couponsNessunaScadenza": "No expiration",
+  "couponsNessunaScadenza": "Nessuna scadenza",
   "@couponsNessunaScadenza": {
     "description": "No expiration label",
     "placeholders": {}
   },
-  "couponsScadeOggi": "Expires today",
+  "couponsScadeOggi": "Scade oggi",
   "@couponsScadeOggi": {
     "description": "Expires today label",
     "placeholders": {}
   },
-  "couponsScadeDomani": "Expires tomorrow",
+  "couponsScadeDomani": "Scade domani",
   "@couponsScadeDomani": {
     "description": "Expires tomorrow label",
     "placeholders": {}
   },
-  "couponsScadutoGiorniFa": "Expired {days} days ago",
+  "couponsScadutoGiorniFa": "Scaduto {days} giorni fa",
   "@couponsScadutoGiorniFa": {
     "description": "Expired days ago message",
     "placeholders": {
@@ -2767,7 +2767,7 @@
       }
     }
   },
-  "couponsScadeTraGiorni": "Expires in {days} days",
+  "couponsScadeTraGiorni": "Scade tra {days} giorni",
   "@couponsScadeTraGiorni": {
     "description": "Expires in days message",
     "placeholders": {
@@ -2776,7 +2776,7 @@
       }
     }
   },
-  "couponsScadeTraSettimane": "Expires in {settimane} weeks",
+  "couponsScadeTraSettimane": "Scade tra {settimane} settimane",
   "@couponsScadeTraSettimane": {
     "description": "Expires in weeks message",
     "placeholders": {
@@ -2785,7 +2785,7 @@
       }
     }
   },
-  "couponsScadeTraMesi": "Expires in {mesi} months",
+  "couponsScadeTraMesi": "Scade tra {mesi} mesi",
   "@couponsScadeTraMesi": {
     "description": "Expires in months message",
     "placeholders": {
@@ -2794,7 +2794,7 @@
       }
     }
   },
-  "couponsScadutoIl": "Expired on {date}",
+  "couponsScadutoIl": "Scaduto il {date}",
   "@couponsScadutoIl": {
     "description": "Expired on date message",
     "placeholders": {
@@ -2803,7 +2803,7 @@
       }
     }
   },
-  "couponsMinImporto": "Min amount: {amount}",
+  "couponsMinImporto": "Importo minimo: {amount}",
   "@couponsMinImporto": {
     "description": "Min amount label",
     "placeholders": {
@@ -2812,7 +2812,7 @@
       }
     }
   },
-  "couponsMaxUtilizzi": "Max uses: {count}",
+  "couponsMaxUtilizzi": "Utilizzi massimi: {count}",
   "@couponsMaxUtilizzi": {
     "description": "Max uses label",
     "placeholders": {
@@ -2821,7 +2821,7 @@
       }
     }
   },
-  "couponsRestrizioneImportoMinimo": "Min amount: {amount}",
+  "couponsRestrizioneImportoMinimo": "Importo minimo: {amount}",
   "@couponsRestrizioneImportoMinimo": {
     "description": "Min amount restriction",
     "placeholders": {
@@ -2830,7 +2830,7 @@
       }
     }
   },
-  "couponsRestrizioneImportoMassimo": "Max amount: {amount}",
+  "couponsRestrizioneImportoMassimo": "Importo massimo: {amount}",
   "@couponsRestrizioneImportoMassimo": {
     "description": "Max amount restriction",
     "placeholders": {
@@ -2839,7 +2839,7 @@
       }
     }
   },
-  "couponsRestrizioneLimiteUtilizzi": "Usage limit: {limit}, used: {used}",
+  "couponsRestrizioneLimiteUtilizzi": "Limite utilizzi: {limit}, usati: {used}",
   "@couponsRestrizioneLimiteUtilizzi": {
     "description": "Usage limit restriction",
     "placeholders": {
@@ -2851,7 +2851,7 @@
       }
     }
   },
-  "couponsRestrizioneLimitePerUtente": "Max per user: {limit}",
+  "couponsRestrizioneLimitePerUtente": "Massimo per utente: {limit}",
   "@couponsRestrizioneLimitePerUtente": {
     "description": "Max per user restriction",
     "placeholders": {
@@ -2869,7 +2869,7 @@
       }
     }
   },
-  "couponsRestrizioneProdottiSpecifici": "Specific products: {count}",
+  "couponsRestrizioneProdottiSpecifici": "Prodotti specifici: {count}",
   "@couponsRestrizioneProdottiSpecifici": {
     "description": "Specific products restriction",
     "placeholders": {
@@ -2878,7 +2878,7 @@
       }
     }
   },
-  "couponsRestrizioneProdottiEsclusi": "Excluded products: {count}",
+  "couponsRestrizioneProdottiEsclusi": "Prodotti esclusi: {count}",
   "@couponsRestrizioneProdottiEsclusi": {
     "description": "Excluded products restriction",
     "placeholders": {
@@ -2887,7 +2887,7 @@
       }
     }
   },
-  "couponsRestrizioneCategorieSpecifiche": "Specific categories: {count}",
+  "couponsRestrizioneCategorieSpecifiche": "Categorie specifiche: {count}",
   "@couponsRestrizioneCategorieSpecifiche": {
     "description": "Specific categories restriction",
     "placeholders": {
@@ -2896,7 +2896,7 @@
       }
     }
   },
-  "couponsRestrizioneCategorieEscluse": "Excluded categories: {count}",
+  "couponsRestrizioneCategorieEscluse": "Categorie escluse: {count}",
   "@couponsRestrizioneCategorieEscluse": {
     "description": "Excluded categories restriction",
     "placeholders": {
@@ -2905,17 +2905,17 @@
       }
     }
   },
-  "couponsRestrizioneEsclusiSaldo": "Exclude sale items",
+  "couponsRestrizioneEsclusiSaldo": "Esclude gli articoli in saldo",
   "@couponsRestrizioneEsclusiSaldo": {
     "description": "Exclude sale restriction",
     "placeholders": {}
   },
-  "couponsRestrizioneUsoIndividuale": "Individual use only",
+  "couponsRestrizioneUsoIndividuale": "Solo uso individuale",
   "@couponsRestrizioneUsoIndividuale": {
     "description": "Individual use restriction",
     "placeholders": {}
   },
-  "couponsRestrizioneSpedizioneGratuita": "Free shipping",
+  "couponsRestrizioneSpedizioneGratuita": "Spedizione gratuita",
   "@couponsRestrizioneSpedizioneGratuita": {
     "description": "Free shipping restriction",
     "placeholders": {}
@@ -2940,7 +2940,7 @@
   "@couponsTipoFissoCarrello": {
     "description": "Fixed cart type label"
   },
-  "couponsTipoFissoProdotto": "Fixed product",
+  "couponsTipoFissoProdotto": "Fisso sul prodotto",
   "@couponsTipoFissoProdotto": {
     "description": "Fixed product type label"
   },
@@ -2952,19 +2952,19 @@
   "@couponsStatusBozza": {
     "description": "Draft status label"
   },
-  "couponsSpedizioneGratis": "Free shipping",
+  "couponsSpedizioneGratis": "Spedizione gratuita",
   "@couponsSpedizioneGratis": {
     "description": "Free shipping label"
   },
-  "ordiniCreaNuovoOrdine": "Create New Order",
+  "ordiniCreaNuovoOrdine": "Crea nuovo ordine",
   "@ordiniCreaNuovoOrdine": {
     "description": "Localized string ordiniCreaNuovoOrdine"
   },
-  "ordiniContrassegno": "Cash on delivery",
+  "ordiniContrassegno": "Contrassegno",
   "@ordiniContrassegno": {
     "description": "Payment method: cash on delivery"
   },
-  "ordiniBonificoBancario": "Bank transfer",
+  "ordiniBonificoBancario": "Bonifico bancario",
   "@ordiniBonificoBancario": {
     "description": "Payment method: bank transfer"
   },
@@ -2976,7 +2976,7 @@
   "@ordiniPayPal": {
     "description": "Payment method: PayPal"
   },
-  "ordiniCopiaPerSpedizione": "Copy for shipping",
+  "ordiniCopiaPerSpedizione": "Copia per la spedizione",
   "@ordiniCopiaPerSpedizione": {
     "description": "Localized string ordiniCopiaPerSpedizione"
   },
@@ -2992,7 +2992,7 @@
   "@ordiniRiprova": {
     "description": "Retry button label"
   },
-  "ordiniVediInNegozio": "View in store",
+  "ordiniVediInNegozio": "Vedi nel negozio",
   "@ordiniVediInNegozio": {
     "description": "Localized string ordiniVediInNegozio"
   },
@@ -3000,7 +3000,7 @@
   "@ordiniVediProdotto": {
     "description": "Localized string ordiniVediProdotto"
   },
-  "ordiniCambiaStato": "Change status",
+  "ordiniCambiaStato": "Cambia stato",
   "@ordiniCambiaStato": {
     "description": "Localized string ordiniCambiaStato"
   },
@@ -3008,7 +3008,7 @@
   "@ordiniElimina": {
     "description": "Delete action"
   },
-  "ordiniCambiaStatoOrdine": "Change order status",
+  "ordiniCambiaStatoOrdine": "Cambia stato ordine",
   "@ordiniCambiaStatoOrdine": {
     "description": "Localized string ordiniCambiaStatoOrdine"
   },
@@ -3016,7 +3016,7 @@
   "@ordiniAggiungiNotaTitolo": {
     "description": "Add note dialog title"
   },
-  "ordiniNotaVisibileCliente": "Customer visible note",
+  "ordiniNotaVisibileCliente": "Nota visibile al cliente",
   "@ordiniNotaVisibileCliente": {
     "description": "Customer visible note label"
   },
@@ -5181,7 +5181,7 @@
       "id": {}
     }
   },
-  "dashboardEtichettaStatus": "Status: {status}",
+  "dashboardEtichettaStatus": "Stato: {status}",
   "@dashboardEtichettaStatus": {
     "description": "Localized string dashboardEtichettaStatus",
     "placeholders": {
