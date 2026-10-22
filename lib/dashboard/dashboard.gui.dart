@@ -167,7 +167,10 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isExporting = true);
     try {
       final file = await _exportReport(choice, dashboard);
-      await _exportGateway.shareFile(file, subject: choice.shareSubject);
+      await _exportGateway.shareFile(
+        file,
+        subject: choice.shareSubject(context.l10n),
+      );
       if (!mounted) {
         return;
       }

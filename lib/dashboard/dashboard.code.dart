@@ -26,21 +26,21 @@ class ReportException implements Exception {
   @override
   String toString() => message;
 
-  /// Messaggio utente-friendly
-  String get userMessage {
+  /// Messaggio utente-friendly, nella lingua attiva.
+  String userMessage(AppLocalizations l10n) {
     switch (type) {
       case ReportErrorType.network:
-        return 'Errore di connessione. Verifica la tua connessione internet.';
+        return l10n.dashboardErrorNetwork;
       case ReportErrorType.authentication:
-        return 'Sessione scaduta. Effettua nuovamente il login.';
+        return l10n.dashboardErrorSessionExpired;
       case ReportErrorType.serverError:
-        return 'Il server non è disponibile. Riprova più tardi.';
+        return l10n.dashboardErrorServer;
       case ReportErrorType.timeout:
-        return 'La richiesta ha impiegato troppo tempo. Riprova.';
+        return l10n.dashboardErrorTimeout;
       case ReportErrorType.noData:
-        return 'Nessun dato disponibile per il periodo selezionato.';
+        return l10n.dashboardErrorNoData;
       case ReportErrorType.unknown:
-        return 'Si è verificato un errore imprevisto. Riprova.';
+        return l10n.dashboardErrorUnknown;
     }
   }
 }
@@ -757,7 +757,7 @@ class ReportService implements DashboardReportGateway {
         errorType = ReportErrorType.unknown;
       }
 
-      throw ReportException('Errore caricamento dashboard: $e', errorType, e);
+      throw ReportException('Dashboard load failed: $e', errorType, e);
     }
   }
 
@@ -795,7 +795,7 @@ class ReportService implements DashboardReportGateway {
       final topProdotti = topProductsRaw.map((p) {
         return TopProdotto(
           productId: _parseInt(p['product_id']),
-          titolo: p['title']?.toString() ?? 'Sconosciuto',
+          titolo: p['title']?.toString() ?? '#${_parseInt(p['product_id'])}',
           quantitaVenduta: _parseInt(p['quantity']),
           totaleVendite: _parseDouble(p['total']),
         );

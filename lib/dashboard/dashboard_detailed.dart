@@ -8,6 +8,8 @@
 import 'package:flutter/material.dart';
 import 'dashboard.code.dart';
 import 'dashboard_charts.dart';
+import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
+import '../l10n/localized_text.dart';
 import '../log_viewer/app_logger.dart';
 import '../l10n/extensions.dart';
 
@@ -29,7 +31,7 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
   final ReportService _reportService = ReportService();
   ReportVenditeDettagliato? _reportVendite;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   @override
   void initState() {
@@ -58,7 +60,7 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
       log.e('❌ Errore caricamento report top prodotti', e);
       if (mounted) {
         setState(() {
-          _errorMessage = 'Errore: ${e.toString()}';
+          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
           _isLoading = false;
         });
       }
@@ -99,7 +101,10 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
           children: [
             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _errorMessage!(context.l10n),
+              style: const TextStyle(color: Colors.red),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadReport,
@@ -192,10 +197,10 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Text(
-            'Dettaglio Prodotti',
+            context.l10n.dashboardProductsDetail,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
@@ -256,7 +261,9 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
                     children: [
                       _buildProductMetric(
                         Icons.shopping_cart,
-                        '${product.quantitaVenduta} unità',
+                        context.l10n.dashboardQuantitaUnita(
+                          '${product.quantitaVenduta}',
+                        ),
                         ReportColors.info,
                       ),
                       const SizedBox(width: 16),
@@ -275,8 +282,8 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'Totale',
+                Text(
+                  context.l10n.commonTotal,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 Text(
@@ -333,7 +340,7 @@ class _PerformanceTimelineReportPageState
   final ReportService _reportService = ReportService();
   ReportVenditeDettagliato? _reportVendite;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   @override
   void initState() {
@@ -362,7 +369,7 @@ class _PerformanceTimelineReportPageState
       log.e('❌ Errore caricamento report performance', e);
       if (mounted) {
         setState(() {
-          _errorMessage = 'Errore: ${e.toString()}';
+          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
           _isLoading = false;
         });
       }
@@ -403,7 +410,10 @@ class _PerformanceTimelineReportPageState
           children: [
             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _errorMessage!(context.l10n),
+              style: const TextStyle(color: Colors.red),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadReport,
@@ -493,7 +503,7 @@ class _PerformanceTimelineReportPageState
       children: [
         Expanded(
           child: _buildSummaryCard(
-            'Totale Vendite',
+            context.l10n.dashboardExportTotalSales,
             ReportFormatter.formatCurrency(vendite.totaleVendite),
             Icons.euro,
             ReportColors.primary,
@@ -502,7 +512,7 @@ class _PerformanceTimelineReportPageState
         const SizedBox(width: 12),
         Expanded(
           child: _buildSummaryCard(
-            'Totale Ordini',
+            context.l10n.dashboardExportTotalOrders,
             vendite.numeroOrdini.toString(),
             Icons.shopping_cart,
             ReportColors.info,
@@ -511,7 +521,7 @@ class _PerformanceTimelineReportPageState
         const SizedBox(width: 12),
         Expanded(
           child: _buildSummaryCard(
-            'Ticket Medio',
+            context.l10n.dashboardExportAverageTicket,
             ReportFormatter.formatCurrency(vendite.ticketMedio),
             Icons.receipt,
             ReportColors.success,
@@ -594,28 +604,28 @@ class _PerformanceTimelineReportPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Statistiche Dettagliate',
+            Text(
+              context.l10n.dashboardDetailedStats,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildStatRow(
-              'Media Giornaliera',
+              context.l10n.dashboardDailyAverage,
               ReportFormatter.formatCurrency(mediaGiornaliera),
             ),
             const Divider(),
             _buildStatRow(
-              'Giorno Migliore',
+              context.l10n.dashboardBestDay,
               '${ReportFormatter.formatDateFull(giornoMigliore.data)} - ${ReportFormatter.formatCurrency(giornoMigliore.totale)}',
             ),
             const Divider(),
             _buildStatRow(
-              'Giorno Peggiore',
+              context.l10n.dashboardWorstDay,
               '${ReportFormatter.formatDateFull(giornoPeggiore.data)} - ${ReportFormatter.formatCurrency(giornoPeggiore.totale)}',
             ),
             const Divider(),
             _buildStatRow(
-              'Media Ordini/Giorno',
+              context.l10n.dashboardOrdersPerDay,
               (totaleOrdini / vendite.length).toStringAsFixed(1),
             ),
           ],
@@ -659,7 +669,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
   Map<String, int>? _ordersByStatus;
   Map<String, int>? _reviewStats;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   @override
   void initState() {
@@ -690,7 +700,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
       log.e('❌ Errore caricamento report ordini', e);
       if (mounted) {
         setState(() {
-          _errorMessage = 'Errore: ${e.toString()}';
+          _errorMessage = (l10n) => l10n.dashboardErrorDetail('$e');
           _isLoading = false;
         });
       }
@@ -731,7 +741,10 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
           children: [
             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _errorMessage!(context.l10n),
+              style: const TextStyle(color: Colors.red),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadReport,
@@ -802,8 +815,8 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Recensioni Prodotti',
+            Text(
+              context.l10n.dashboardProductReviews,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -871,12 +884,12 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Dettaglio Stati Ordini',
+                Text(
+                  context.l10n.dashboardOrderStatusDetail,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Totale: $totalOrders',
+                  context.l10n.dashboardTotalValue(totalOrders),
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
@@ -944,18 +957,8 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
     );
   }
 
-  String _getStatusLabel(String status) {
-    const labels = {
-      'pending': 'In Attesa',
-      'processing': 'In Elaborazione',
-      'completed': 'Completati',
-      'on-hold': 'In Sospeso',
-      'cancelled': 'Annullati',
-      'refunded': 'Rimborsati',
-      'failed': 'Falliti',
-    };
-    return labels[status] ?? status;
-  }
+  String _getStatusLabel(String status) =>
+      dashboardOrderStatusLabel(context.l10n, status);
 
   Color _getStatusColor(String status) {
     const colors = {

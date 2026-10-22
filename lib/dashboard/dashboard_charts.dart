@@ -7,6 +7,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'dashboard.code.dart';
 import 'class_report.dart';
+import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
+import '../l10n/extensions.dart';
 
 // =======================================================
 // ==         GRAFICO A LINEE - VENDITE NEL TEMPO       ==
@@ -15,7 +17,7 @@ import 'class_report.dart';
 /// Grafico a linee per mostrare l'andamento delle vendite nel tempo
 class SalesLineChart extends StatefulWidget {
   final List<VenditaGiornaliera> vendite;
-  final String title;
+  final String? title;
   final Color? lineColor;
   final bool showGrid;
   final bool animate;
@@ -25,7 +27,7 @@ class SalesLineChart extends StatefulWidget {
   const SalesLineChart({
     super.key,
     required this.vendite,
-    this.title = 'Andamento Vendite',
+    this.title,
     this.lineColor,
     this.showGrid = true,
     this.animate = true,
@@ -70,11 +72,11 @@ class _SalesLineChartState extends State<SalesLineChart>
   @override
   Widget build(BuildContext context) {
     if (widget.vendite.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Text(
-            'Nessun dato disponibile per il periodo selezionato',
+            context.l10n.dashboardNoDataForPeriod,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -103,7 +105,7 @@ class _SalesLineChartState extends State<SalesLineChart>
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            widget.title,
+            widget.title ?? context.l10n.dashboardAndamentoVendite,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -149,7 +151,8 @@ class _SalesLineChartState extends State<SalesLineChart>
                               ),
                             ),
                             TextSpan(
-                              text: '\n${vendita.ordini} ordini',
+                              text:
+                                  '\n${context.l10n.dashboardOrdersCount(vendita.ordini)}',
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 11,
@@ -382,11 +385,11 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
   @override
   Widget build(BuildContext context) {
     if (widget.topProducts.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Text(
-            'Nessun dato sui prodotti disponibile',
+            context.l10n.dashboardNoProductData,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -401,10 +404,10 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Top Prodotti Venduti',
+                context.l10n.dashboardTopProductsSold,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -451,7 +454,8 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                                 ),
                               ),
                               TextSpan(
-                                text: '\n${product.quantitaVenduta} unità',
+                                text:
+                                    '\n${context.l10n.dashboardQuantitaUnita('${product.quantitaVenduta}')}',
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
@@ -619,16 +623,6 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
   late Animation<double> _animation;
   int _touchedIndex = -1;
 
-  static const _statusLabels = {
-    'pending': 'In Attesa',
-    'processing': 'In Elaborazione',
-    'completed': 'Completati',
-    'on-hold': 'In Sospeso',
-    'cancelled': 'Annullati',
-    'refunded': 'Rimborsati',
-    'failed': 'Falliti',
-  };
-
   static const _statusColors = {
     'pending': 0xFFFF9800,
     'processing': 0xFF00BCD4,
@@ -666,11 +660,11 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
   @override
   Widget build(BuildContext context) {
     if (widget.ordersByStatus.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Text(
-            'Nessun ordine disponibile',
+            context.l10n.dashboardNoOrders,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -691,10 +685,10 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            'Distribuzione Ordini per Stato',
+            context.l10n.dashboardOrdersByStatusDistribution,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -779,7 +773,7 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: widget.ordersByStatus.entries.map((entry) {
         final color = Color(_statusColors[entry.key] ?? ReportColors.primary);
-        final label = _statusLabels[entry.key] ?? entry.key;
+        final label = dashboardOrderStatusLabel(context.l10n, entry.key);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -868,11 +862,11 @@ class _OrdersBarChartState extends State<OrdersBarChart>
   @override
   Widget build(BuildContext context) {
     if (widget.vendite.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Text(
-            'Nessun dato disponibile',
+            context.l10n.dashboardNoData,
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         ),
@@ -885,10 +879,10 @@ class _OrdersBarChartState extends State<OrdersBarChart>
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Numero Ordini nel Tempo',
+                context.l10n.dashboardOrdersOverTime,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -924,7 +918,9 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                             ),
                             children: [
                               TextSpan(
-                                text: '${vendita.ordini} ordini',
+                                text: context.l10n.dashboardOrdersCount(
+                                  vendita.ordini,
+                                ),
                                 style: const TextStyle(
                                   color: Colors.lightBlueAccent,
                                   fontSize: 14,

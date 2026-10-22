@@ -650,7 +650,10 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
             l10n,
           ),
       };
-      await _exporter.shareFile(file, subject: choice.shareSubject);
+      await _exporter.shareFile(
+        file,
+        subject: choice.shareSubject(context.l10n),
+      );
       NotificationService.instance.messageBar(
         'successo',
         'dashboard',
@@ -1048,7 +1051,7 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
 
   String? _errorText(Object? error) {
     if (error == null) return null;
-    if (error is ReportException) return error.userMessage;
+    if (error is ReportException) return error.userMessage(context.l10n);
     return error.toString();
   }
 }

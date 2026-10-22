@@ -12079,5 +12079,365 @@
         "type": "String"
       }
     }
+  },
+  "dashboardExportPeriod": "Period: {from} - {to}",
+  "@dashboardExportPeriod": {
+    "description": "Localized string dashboardExportPeriod",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardExportGeneratedOn": "Generated on: {date}",
+  "@dashboardExportGeneratedOn": {
+    "description": "Localized string dashboardExportGeneratedOn",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardExportFooter": "Generated on {date} - Page {page}/{pages}",
+  "@dashboardExportFooter": {
+    "description": "Localized string dashboardExportFooter",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardExportTotalSales": "Total sales",
+  "@dashboardExportTotalSales": {
+    "description": "Localized string dashboardExportTotalSales"
+  },
+  "dashboardExportOrderCount": "Number of orders",
+  "@dashboardExportOrderCount": {
+    "description": "Localized string dashboardExportOrderCount"
+  },
+  "dashboardExportAverageTicket": "Average ticket",
+  "@dashboardExportAverageTicket": {
+    "description": "Localized string dashboardExportAverageTicket"
+  },
+  "dashboardExportChangeVsPrevious": "Change vs previous",
+  "@dashboardExportChangeVsPrevious": {
+    "description": "Localized string dashboardExportChangeVsPrevious"
+  },
+  "dashboardExportChange": "Change",
+  "@dashboardExportChange": {
+    "description": "Localized string dashboardExportChange"
+  },
+  "dashboardExportTotalProducts": "Total products",
+  "@dashboardExportTotalProducts": {
+    "description": "Localized string dashboardExportTotalProducts"
+  },
+  "dashboardExportInStock": "In stock",
+  "@dashboardExportInStock": {
+    "description": "Localized string dashboardExportInStock"
+  },
+  "dashboardExportOutOfStock": "Out of stock",
+  "@dashboardExportOutOfStock": {
+    "description": "Localized string dashboardExportOutOfStock"
+  },
+  "dashboardExportLowStock": "Low stock",
+  "@dashboardExportLowStock": {
+    "description": "Localized string dashboardExportLowStock"
+  },
+  "dashboardExportInventoryValue": "Inventory value",
+  "@dashboardExportInventoryValue": {
+    "description": "Localized string dashboardExportInventoryValue"
+  },
+  "dashboardExportTotalOrders": "Total orders",
+  "@dashboardExportTotalOrders": {
+    "description": "Localized string dashboardExportTotalOrders"
+  },
+  "dashboardExportCompleted": "Completed",
+  "@dashboardExportCompleted": {
+    "description": "Localized string dashboardExportCompleted"
+  },
+  "dashboardExportProcessing": "Processing",
+  "@dashboardExportProcessing": {
+    "description": "Localized string dashboardExportProcessing"
+  },
+  "dashboardExportPending": "Pending",
+  "@dashboardExportPending": {
+    "description": "Localized string dashboardExportPending"
+  },
+  "dashboardExportCompletionRate": "Completion rate",
+  "@dashboardExportCompletionRate": {
+    "description": "Localized string dashboardExportCompletionRate"
+  },
+  "dashboardExportTotalCustomers": "Total customers",
+  "@dashboardExportTotalCustomers": {
+    "description": "Localized string dashboardExportTotalCustomers"
+  },
+  "dashboardExportNewCustomers": "New customers",
+  "@dashboardExportNewCustomers": {
+    "description": "Localized string dashboardExportNewCustomers"
+  },
+  "dashboardExportActiveCustomers": "Active customers",
+  "@dashboardExportActiveCustomers": {
+    "description": "Localized string dashboardExportActiveCustomers"
+  },
+  "dashboardExportActivePercent": "% active",
+  "@dashboardExportActivePercent": {
+    "description": "Localized string dashboardExportActivePercent"
+  },
+  "dashboardExportSectionSales": "SALES",
+  "@dashboardExportSectionSales": {
+    "description": "Localized string dashboardExportSectionSales"
+  },
+  "dashboardExportSectionProducts": "PRODUCTS",
+  "@dashboardExportSectionProducts": {
+    "description": "Localized string dashboardExportSectionProducts"
+  },
+  "dashboardExportSectionOrders": "ORDERS",
+  "@dashboardExportSectionOrders": {
+    "description": "Localized string dashboardExportSectionOrders"
+  },
+  "dashboardExportSectionOrdersByStatus": "ORDERS BY STATUS",
+  "@dashboardExportSectionOrdersByStatus": {
+    "description": "Localized string dashboardExportSectionOrdersByStatus"
+  },
+  "dashboardExportSectionCustomers": "CUSTOMERS",
+  "@dashboardExportSectionCustomers": {
+    "description": "Localized string dashboardExportSectionCustomers"
+  },
+  "dashboardExportSectionDailyTrend": "DAILY TREND",
+  "@dashboardExportSectionDailyTrend": {
+    "description": "Localized string dashboardExportSectionDailyTrend"
+  },
+  "dashboardExportSectionSummary": "SUMMARY",
+  "@dashboardExportSectionSummary": {
+    "description": "Localized string dashboardExportSectionSummary"
+  },
+  "dashboardExportSectionTopProducts": "TOP PRODUCTS",
+  "@dashboardExportSectionTopProducts": {
+    "description": "Localized string dashboardExportSectionTopProducts"
+  },
+  "dashboardExportSectionSalesByCategory": "SALES BY CATEGORY",
+  "@dashboardExportSectionSalesByCategory": {
+    "description": "Localized string dashboardExportSectionSalesByCategory"
+  },
+  "dashboardExportSectionDailyTrends": "DAILY TRENDS",
+  "@dashboardExportSectionDailyTrends": {
+    "description": "Localized string dashboardExportSectionDailyTrends"
+  },
+  "dashboardExportColDate": "Date",
+  "@dashboardExportColDate": {
+    "description": "Localized string dashboardExportColDate"
+  },
+  "dashboardExportColTotal": "Total",
+  "@dashboardExportColTotal": {
+    "description": "Localized string dashboardExportColTotal"
+  },
+  "dashboardExportColOrders": "Orders",
+  "@dashboardExportColOrders": {
+    "description": "Localized string dashboardExportColOrders"
+  },
+  "dashboardExportColSales": "Sales",
+  "@dashboardExportColSales": {
+    "description": "Localized string dashboardExportColSales"
+  },
+  "dashboardExportColStatus": "Status",
+  "@dashboardExportColStatus": {
+    "description": "Localized string dashboardExportColStatus"
+  },
+  "dashboardExportColQuantity": "Quantity",
+  "@dashboardExportColQuantity": {
+    "description": "Localized string dashboardExportColQuantity"
+  },
+  "dashboardExportColPosition": "Position",
+  "@dashboardExportColPosition": {
+    "description": "Localized string dashboardExportColPosition"
+  },
+  "dashboardExportColProduct": "Product",
+  "@dashboardExportColProduct": {
+    "description": "Localized string dashboardExportColProduct"
+  },
+  "dashboardExportColAveragePrice": "Average price",
+  "@dashboardExportColAveragePrice": {
+    "description": "Localized string dashboardExportColAveragePrice"
+  },
+  "dashboardExportColCategory": "Category",
+  "@dashboardExportColCategory": {
+    "description": "Localized string dashboardExportColCategory"
+  },
+  "dashboardExportColQty": "Qty",
+  "@dashboardExportColQty": {
+    "description": "Localized string dashboardExportColQty"
+  },
+  "dashboardExportColTicket": "Ticket",
+  "@dashboardExportColTicket": {
+    "description": "Localized string dashboardExportColTicket"
+  },
+  "dashboardExportDashboardTitle": "Dashboard report",
+  "@dashboardExportDashboardTitle": {
+    "description": "Localized string dashboardExportDashboardTitle"
+  },
+  "dashboardExportSalesTitle": "Detailed sales report",
+  "@dashboardExportSalesTitle": {
+    "description": "Localized string dashboardExportSalesTitle"
+  },
+  "dashboardExportChoiceDashboardCsv": "Dashboard CSV",
+  "@dashboardExportChoiceDashboardCsv": {
+    "description": "Localized string dashboardExportChoiceDashboardCsv"
+  },
+  "dashboardExportChoiceDashboardPdf": "Dashboard PDF",
+  "@dashboardExportChoiceDashboardPdf": {
+    "description": "Localized string dashboardExportChoiceDashboardPdf"
+  },
+  "dashboardExportChoiceSalesCsv": "Sales CSV",
+  "@dashboardExportChoiceSalesCsv": {
+    "description": "Localized string dashboardExportChoiceSalesCsv"
+  },
+  "dashboardExportChoiceSalesPdf": "Sales PDF",
+  "@dashboardExportChoiceSalesPdf": {
+    "description": "Localized string dashboardExportChoiceSalesPdf"
+  },
+  "dashboardExportChoiceDashboardHint": "Summary of the period and the current dashboard data",
+  "@dashboardExportChoiceDashboardHint": {
+    "description": "Localized string dashboardExportChoiceDashboardHint"
+  },
+  "dashboardExportChoiceSalesHint": "Sales detail, top products and trends of the period",
+  "@dashboardExportChoiceSalesHint": {
+    "description": "Localized string dashboardExportChoiceSalesHint"
+  },
+  "dashboardExportShareSubject": "Report {title}",
+  "@dashboardExportShareSubject": {
+    "description": "Localized string dashboardExportShareSubject",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardExportShared": "Exported report",
+  "@dashboardExportShared": {
+    "description": "Localized string dashboardExportShared"
+  },
+  "dashboardExportDialogHint": "Choose whether to create a report from the current dashboard or from the sales detail of the same period.",
+  "@dashboardExportDialogHint": {
+    "description": "Localized string dashboardExportDialogHint"
+  },
+  "dashboardErrorNetwork": "Connection error. Check your internet connection.",
+  "@dashboardErrorNetwork": {
+    "description": "Localized string dashboardErrorNetwork"
+  },
+  "dashboardErrorSessionExpired": "Session expired. Please log in again.",
+  "@dashboardErrorSessionExpired": {
+    "description": "Localized string dashboardErrorSessionExpired"
+  },
+  "dashboardErrorServer": "The server is not available. Try again later.",
+  "@dashboardErrorServer": {
+    "description": "Localized string dashboardErrorServer"
+  },
+  "dashboardErrorTimeout": "The request took too long. Try again.",
+  "@dashboardErrorTimeout": {
+    "description": "Localized string dashboardErrorTimeout"
+  },
+  "dashboardErrorNoData": "No data available for the selected period.",
+  "@dashboardErrorNoData": {
+    "description": "Localized string dashboardErrorNoData"
+  },
+  "dashboardErrorUnknown": "An unexpected error occurred. Try again.",
+  "@dashboardErrorUnknown": {
+    "description": "Localized string dashboardErrorUnknown"
+  },
+  "dashboardOrdersCount": "{count} orders",
+  "@dashboardOrdersCount": {
+    "description": "Localized string dashboardOrdersCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardErrorDetail": "Error: {error}",
+  "@dashboardErrorDetail": {
+    "description": "Localized string dashboardErrorDetail",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardProductsDetail": "Product detail",
+  "@dashboardProductsDetail": {
+    "description": "Localized string dashboardProductsDetail"
+  },
+  "dashboardDetailedStats": "Detailed statistics",
+  "@dashboardDetailedStats": {
+    "description": "Localized string dashboardDetailedStats"
+  },
+  "dashboardDailyAverage": "Daily average",
+  "@dashboardDailyAverage": {
+    "description": "Localized string dashboardDailyAverage"
+  },
+  "dashboardBestDay": "Best day",
+  "@dashboardBestDay": {
+    "description": "Localized string dashboardBestDay"
+  },
+  "dashboardWorstDay": "Worst day",
+  "@dashboardWorstDay": {
+    "description": "Localized string dashboardWorstDay"
+  },
+  "dashboardOrdersPerDay": "Average orders/day",
+  "@dashboardOrdersPerDay": {
+    "description": "Localized string dashboardOrdersPerDay"
+  },
+  "dashboardProductReviews": "Product reviews",
+  "@dashboardProductReviews": {
+    "description": "Localized string dashboardProductReviews"
+  },
+  "dashboardOrderStatusDetail": "Order status detail",
+  "@dashboardOrderStatusDetail": {
+    "description": "Localized string dashboardOrderStatusDetail"
+  },
+  "dashboardTotalValue": "Total: {total}",
+  "@dashboardTotalValue": {
+    "description": "Localized string dashboardTotalValue",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardNoDataForPeriod": "No data available for the selected period",
+  "@dashboardNoDataForPeriod": {
+    "description": "Localized string dashboardNoDataForPeriod"
+  },
+  "dashboardNoProductData": "No product data available",
+  "@dashboardNoProductData": {
+    "description": "Localized string dashboardNoProductData"
+  },
+  "dashboardTopProductsSold": "Top products sold",
+  "@dashboardTopProductsSold": {
+    "description": "Localized string dashboardTopProductsSold"
+  },
+  "dashboardNoOrders": "No orders available",
+  "@dashboardNoOrders": {
+    "description": "Localized string dashboardNoOrders"
+  },
+  "dashboardOrdersByStatusDistribution": "Order distribution by status",
+  "@dashboardOrdersByStatusDistribution": {
+    "description": "Localized string dashboardOrdersByStatusDistribution"
+  },
+  "dashboardNoData": "No data available",
+  "@dashboardNoData": {
+    "description": "Localized string dashboardNoData"
+  },
+  "dashboardOrdersOverTime": "Number of orders over time",
+  "@dashboardOrdersOverTime": {
+    "description": "Localized string dashboardOrdersOverTime"
   }
 }
