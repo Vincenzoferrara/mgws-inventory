@@ -275,7 +275,7 @@ Recommended values:
   providers are proprietary services. The scanner is ZXing and there are no
   Google libraries.
 - Privacy policy for the stores:
-  <https://github.com/Vincenzoferrara/mgws-inventory/blob/main/PRIVACY.md>.
+  <https://github.com/Vincenzoferrara/mgws-inventory/blob/master/PRIVACY.md>.
 - iOS: `Info.plist` declares camera, NFC, photo library and local network
   usage; `Runner.entitlements` declares the NFC tag formats (`NDEF`,
   `TAG`), which needs the NFC capability on the App ID. The export

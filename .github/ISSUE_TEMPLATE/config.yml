@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Vincenzoferrara/mgws-inventory/security/advisories/new
+    about: Report security problems privately, not in a public issue.
+  - name: Documentation
+    url: https://github.com/Vincenzoferrara/mgws-inventory/blob/master/lib/doc/README.md
+    about: User guide, installation, configuration and troubleshooting.
+  - name: MGWS WordPress plugin
+    url: https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin/issues
+    about: Problems that are clearly in the WordPress plugin.

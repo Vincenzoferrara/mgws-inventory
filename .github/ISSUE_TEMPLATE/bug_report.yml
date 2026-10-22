@@ -1,0 +1,80 @@
+name: Bug report
+description: Something in the app does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Do **not** paste passwords, API keys, tokens or customer data.
+        Security problems go to the [private vulnerability report](https://github.com/Vincenzoferrara/mgws-inventory/security/advisories/new) instead.
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: Settings → About.
+      placeholder: 1.0.58 (build 58)
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Android
+        - Windows
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Installed from
+      options:
+        - GitHub release
+        - Obtainium
+        - F-Droid
+        - Google Play
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: backend
+    attributes:
+      label: WordPress, WooCommerce and MGWS plugin versions
+      description: Write "no MGWS" if the plugin is not installed.
+      placeholder: WordPress 6.8, WooCommerce 10.2, MGWS 2.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: login
+    attributes:
+      label: Login method
+      options:
+        - WordPress Admin
+        - JWT
+        - WooCommerce API keys
+        - Smart card
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Cashier
+        2. Scan a barcode
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected and what happened
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: From "View logs" in the top bar (passwords and keys are removed automatically).
+      render: text
