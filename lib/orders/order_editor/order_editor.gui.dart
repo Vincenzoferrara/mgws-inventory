@@ -109,13 +109,13 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
           NotificationService.instance.messageBar(
             'successo',
             'ordini_crea',
-            'Ordine #${ordine.number} creato con successo',
+            context.l10n.ordersCreated('${ordine.number}'),
           );
         } else {
           NotificationService.instance.messageBar(
             'errore',
             'ordini_crea',
-            'Errore nella creazione dell\'ordine',
+            context.l10n.ordersCreateError,
           );
         }
       }
@@ -176,7 +176,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Informazioni Ordine',
+                      context.l10n.ordersInfoTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -254,7 +254,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Dati Cliente',
+                      context.l10n.ordersCustomerData,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -290,7 +290,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                               prefixIcon: Icon(Icons.person),
                             ),
                             validator: (value) => value?.isEmpty ?? true
-                                ? 'Campo obbligatorio'
+                                ? context.l10n.commonFieldRequired
                                 : null,
                           ),
                         ),
@@ -303,7 +303,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                               border: OutlineInputBorder(),
                             ),
                             validator: (value) => value?.isEmpty ?? true
-                                ? 'Campo obbligatorio'
+                                ? context.l10n.commonFieldRequired
                                 : null,
                           ),
                         ),
@@ -345,7 +345,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Indirizzo di Fatturazione',
+                            context.l10n.ordersBillingAddress,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -368,8 +368,9 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.location_on),
                       ),
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Campo obbligatorio' : null,
+                      validator: (value) => value?.isEmpty ?? true
+                          ? context.l10n.commonFieldRequired
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -392,7 +393,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                               prefixIcon: Icon(Icons.location_city),
                             ),
                             validator: (value) => value?.isEmpty ?? true
-                                ? 'Campo obbligatorio'
+                                ? context.l10n.commonFieldRequired
                                 : null,
                           ),
                         ),
@@ -417,8 +418,9 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                         prefixIcon: Icon(Icons.markunread_mailbox),
                       ),
                       keyboardType: TextInputType.number,
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Campo obbligatorio' : null,
+                      validator: (value) => value?.isEmpty ?? true
+                          ? context.l10n.commonFieldRequired
+                          : null,
                     ),
                   ],
                 ),
@@ -437,7 +439,7 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        'Dopo aver creato l\'ordine, potrai aggiungere i prodotti dalla pagina di gestione.',
+                        context.l10n.ordersAddProductsLaterHint,
                         style: TextStyle(color: theme.primaryColor),
                       ),
                     ),

@@ -1,3 +1,4 @@
+import '../../l10n/localized_text.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
 import '../class_orders.dart';
@@ -8,9 +9,13 @@ class RisultatoVerifica {
     required this.trovato,
     this.prodotto,
     this.codiceScansionato,
+    this.nessunOrdine = false,
   });
 
   final bool trovato;
+
+  /// La verifica non e partita perche non c'e un ordine selezionato.
+  final bool nessunOrdine;
   final ProdottoOrdine? prodotto;
   final String? codiceScansionato;
 }
@@ -23,7 +28,7 @@ class OrdiniInArrivoController {
   List<OrdiniGlobal> _ordini = [];
   OrdiniGlobal? _ordineSelezionato;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   // Filtri
   OrdineStatus? _filtroStatus = OrdineStatus.processing;
@@ -36,7 +41,7 @@ class OrdiniInArrivoController {
   List<OrdiniGlobal> get ordini => _ordiniFiltrati;
   OrdiniGlobal? get ordineSelezionato => _ordineSelezionato;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  LocalizedText? get errorMessage => _errorMessage;
   bool get hasOrdineSelezionato => _ordineSelezionato != null;
   OrdineStatus? get filtroStatus => _filtroStatus;
   String get searchQuery => _searchQuery;
@@ -60,7 +65,7 @@ class OrdiniInArrivoController {
       log.i('Caricati ${_ordini.length} ordini in arrivo');
     } catch (e) {
       log.e('Errore nel caricamento degli ordini in arrivo: $e');
-      _errorMessage = 'Errore nel caricamento degli ordini in arrivo: $e';
+      _errorMessage = (l10n) => l10n.ordersIncomingLoadError('$e');
       _ordini = [];
     } finally {
       _isLoading = false;
@@ -179,10 +184,7 @@ class OrdiniInArrivoController {
     final ordine = _ordineSelezionato;
     if (ordine == null) {
       log.e('Nessun ordine selezionato per verifica prodotto');
-      return const RisultatoVerifica(
-        trovato: false,
-        codiceScansionato: 'Nessun ordine selezionato',
-      );
+      return const RisultatoVerifica(trovato: false, nessunOrdine: true);
     }
 
     final codiceNormalizzato = _normalizzaBarcodeInterno(codice);

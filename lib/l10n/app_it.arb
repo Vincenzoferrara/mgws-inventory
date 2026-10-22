@@ -11778,5 +11778,303 @@
         "type": "String"
       }
     }
+  },
+  "ordersLoadError": "Errore nel caricamento degli ordini: {error}",
+  "@ordersLoadError": {
+    "description": "Localized string ordersLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersIncomingLoadError": "Errore nel caricamento degli ordini in arrivo: {error}",
+  "@ordersIncomingLoadError": {
+    "description": "Localized string ordersIncomingLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersNoOrderSelected": "Nessun ordine selezionato",
+  "@ordersNoOrderSelected": {
+    "description": "Localized string ordersNoOrderSelected"
+  },
+  "ordersProductVerified": "Prodotto verificato: {name}",
+  "@ordersProductVerified": {
+    "description": "Localized string ordersProductVerified",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersProductNotInOrder": "Prodotto non corrispondente all'ordine: {code}",
+  "@ordersProductNotInOrder": {
+    "description": "Localized string ordersProductNotInOrder",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersNotAvailable": "N/D",
+  "@ordersNotAvailable": {
+    "description": "Localized string ordersNotAvailable"
+  },
+  "ordersNoIncomingFound": "Nessun ordine in arrivo trovato",
+  "@ordersNoIncomingFound": {
+    "description": "Localized string ordersNoIncomingFound"
+  },
+  "ordersSelectIncoming": "Seleziona un ordine in arrivo",
+  "@ordersSelectIncoming": {
+    "description": "Localized string ordersSelectIncoming"
+  },
+  "ordersIncomingTitle": "Ordini in arrivo",
+  "@ordersIncomingTitle": {
+    "description": "Localized string ordersIncomingTitle"
+  },
+  "ordersCustomerUnavailable": "Cliente non disponibile",
+  "@ordersCustomerUnavailable": {
+    "description": "Localized string ordersCustomerUnavailable"
+  },
+  "ordersVerifyProducts": "Verifica prodotti",
+  "@ordersVerifyProducts": {
+    "description": "Localized string ordersVerifyProducts"
+  },
+  "ordersOrderedProducts": "Prodotti ordinati",
+  "@ordersOrderedProducts": {
+    "description": "Localized string ordersOrderedProducts"
+  },
+  "ordersCreateError": "Errore nella creazione dell'ordine",
+  "@ordersCreateError": {
+    "description": "Localized string ordersCreateError"
+  },
+  "ordersInfoTitle": "Informazioni ordine",
+  "@ordersInfoTitle": {
+    "description": "Localized string ordersInfoTitle"
+  },
+  "ordersCustomerData": "Dati cliente",
+  "@ordersCustomerData": {
+    "description": "Localized string ordersCustomerData"
+  },
+  "ordersBillingAddress": "Indirizzo di fatturazione",
+  "@ordersBillingAddress": {
+    "description": "Localized string ordersBillingAddress"
+  },
+  "ordersAddProductsLaterHint": "Dopo aver creato l'ordine, potrai aggiungere i prodotti dalla pagina di gestione.",
+  "@ordersAddProductsLaterHint": {
+    "description": "Localized string ordersAddProductsLaterHint"
+  },
+  "ordersAddress": "Indirizzo",
+  "@ordersAddress": {
+    "description": "Localized string ordersAddress"
+  },
+  "ordersCity": "Città",
+  "@ordersCity": {
+    "description": "Localized string ordersCity"
+  },
+  "ordersPostcode": "CAP",
+  "@ordersPostcode": {
+    "description": "Localized string ordersPostcode"
+  },
+  "ordersProducts": "Prodotti",
+  "@ordersProducts": {
+    "description": "Localized string ordersProducts"
+  },
+  "ordersSubtotal": "Subtotale",
+  "@ordersSubtotal": {
+    "description": "Localized string ordersSubtotal"
+  },
+  "ordersShipping": "Spedizione",
+  "@ordersShipping": {
+    "description": "Localized string ordersShipping"
+  },
+  "ordersTaxes": "Tasse",
+  "@ordersTaxes": {
+    "description": "Localized string ordersTaxes"
+  },
+  "ordersCustomer": "Cliente",
+  "@ordersCustomer": {
+    "description": "Localized string ordersCustomer"
+  },
+  "ordersPhone": "Telefono",
+  "@ordersPhone": {
+    "description": "Localized string ordersPhone"
+  },
+  "ordersStatusUpdated": "Stato ordine aggiornato con successo",
+  "@ordersStatusUpdated": {
+    "description": "Localized string ordersStatusUpdated"
+  },
+  "ordersNoteAdded": "Nota aggiunta con successo",
+  "@ordersNoteAdded": {
+    "description": "Localized string ordersNoteAdded"
+  },
+  "ordersDeleted": "Ordine eliminato con successo",
+  "@ordersDeleted": {
+    "description": "Localized string ordersDeleted"
+  },
+  "ordersSelectOrder": "Seleziona un ordine",
+  "@ordersSelectOrder": {
+    "description": "Localized string ordersSelectOrder"
+  },
+  "ordersNoneFound": "Nessun ordine trovato",
+  "@ordersNoneFound": {
+    "description": "Localized string ordersNoneFound"
+  },
+  "ordersCannotOpenInShop": "Impossibile aprire il prodotto in negozio",
+  "@ordersCannotOpenInShop": {
+    "description": "Localized string ordersCannotOpenInShop"
+  },
+  "ordersOrderNumber": "Ordine #{number}",
+  "@ordersOrderNumber": {
+    "description": "Localized string ordersOrderNumber",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersCreatedAt": "Creato: {date}",
+  "@ordersCreatedAt": {
+    "description": "Localized string ordersCreatedAt",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersVerifiedCount": "Verificati {done}/{total}",
+  "@ordersVerifiedCount": {
+    "description": "Localized string ordersVerifiedCount",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ordersLineQuantityBarcode": "Quantità: {quantity} - Barcode interno: {barcode}",
+  "@ordersLineQuantityBarcode": {
+    "description": "Localized string ordersLineQuantityBarcode",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersCreated": "Ordine #{number} creato con successo",
+  "@ordersCreated": {
+    "description": "Localized string ordersCreated",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersProductWithoutBarcode": "Prodotto senza codice a barre: {name}",
+  "@ordersProductWithoutBarcode": {
+    "description": "Localized string ordersProductWithoutBarcode",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersProductMatches": "Prodotto corretto: {name}",
+  "@ordersProductMatches": {
+    "description": "Localized string ordersProductMatches",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersProductMismatch": "Prodotto differente: atteso {expected}, scansionato {scanned}",
+  "@ordersProductMismatch": {
+    "description": "Localized string ordersProductMismatch",
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "scanned": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersDeleteConfirm": "Sei sicuro di voler eliminare l'ordine #{number}?",
+  "@ordersDeleteConfirm": {
+    "description": "Localized string ordersDeleteConfirm",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersProductNotLoaded": "Prodotto non ancora caricato: {name}",
+  "@ordersProductNotLoaded": {
+    "description": "Localized string ordersProductNotLoaded",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersShopLinkUnavailable": "Link negozio non disponibile per {name}",
+  "@ordersShopLinkUnavailable": {
+    "description": "Localized string ordersShopLinkUnavailable",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersQuantityValue": "Quantità: {quantity}",
+  "@ordersQuantityValue": {
+    "description": "Localized string ordersQuantityValue",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersInternalBarcodeValue": "Barcode interno: {barcode}",
+  "@ordersInternalBarcodeValue": {
+    "description": "Localized string ordersInternalBarcodeValue",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersUnitPrice": "Unità: {price} {currency}",
+  "@ordersUnitPrice": {
+    "description": "Localized string ordersUnitPrice",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ordersLineTotal": "Totale: {total} {currency}",
+  "@ordersLineTotal": {
+    "description": "Localized string ordersLineTotal",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
   }
 }

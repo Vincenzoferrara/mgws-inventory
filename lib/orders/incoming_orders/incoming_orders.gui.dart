@@ -114,7 +114,10 @@ class OrdiniInArrivoPageState extends State<OrdiniInArrivoPage> {
               color: context.colors.errorColorStatus,
             ),
             SizedBox(height: context.spacing.l),
-            Text(_controller.errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _controller.errorMessage!(context.l10n),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: context.spacing.l),
             ElevatedButton.icon(
               onPressed: _caricaOrdini,
@@ -138,7 +141,7 @@ class OrdiniInArrivoPageState extends State<OrdiniInArrivoPage> {
             ),
             SizedBox(height: context.spacing.l),
             Text(
-              'Nessun ordine in arrivo trovato',
+              context.l10n.ordersNoIncomingFound,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -193,7 +196,7 @@ class OrdiniInArrivoPageState extends State<OrdiniInArrivoPage> {
           ),
           SizedBox(height: context.spacing.l),
           Text(
-            'Seleziona un ordine in arrivo',
+            context.l10n.ordersSelectIncoming,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
@@ -230,7 +233,7 @@ class _HeaderInArrivoWidget extends StatelessWidget {
           SizedBox(width: context.spacing.m),
           Expanded(
             child: Text(
-              'Ordini in arrivo',
+              context.l10n.ordersIncomingTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -403,7 +406,7 @@ class _OrdineInArrivoListItem extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final dataOrdine = ordine.dateCreated != null
         ? dateFormat.format(ordine.dateCreated!)
-        : 'N/D';
+        : context.l10n.ordersNotAvailable;
 
     return Card(
       margin: EdgeInsets.symmetric(
@@ -436,7 +439,7 @@ class _OrdineInArrivoListItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Ordine #${ordine.number}',
+                          context.l10n.ordersOrderNumber('${ordine.number}'),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: isSelected ? theme.primaryColor : null,
@@ -512,13 +515,21 @@ class _OrdineInArrivoDetailViewState extends State<_OrdineInArrivoDetailView> {
       NotificationService.instance.messageBar(
         'successo',
         'ordini_in_arrivo',
-        'Prodotto verificato: ${risultato.prodotto?.name ?? risultato.prodotto?.barcodeInterno ?? codice}',
+        context.l10n.ordersProductVerified(
+          risultato.prodotto?.name ??
+              risultato.prodotto?.barcodeInterno ??
+              codice,
+        ),
       );
     } else {
       NotificationService.instance.messageBar(
         'errore',
         'ordini_in_arrivo',
-        'Prodotto non corrispondente all\'ordine: ${risultato.codiceScansionato ?? codice}',
+        risultato.nessunOrdine
+            ? context.l10n.ordersNoOrderSelected
+            : context.l10n.ordersProductNotInOrder(
+                risultato.codiceScansionato ?? codice,
+              ),
       );
     }
     setState(() {});
@@ -541,15 +552,21 @@ class _OrdineInArrivoDetailViewState extends State<_OrdineInArrivoDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Ordine #${widget.ordine.number}',
+            context.l10n.ordersOrderNumber('${widget.ordine.number}'),
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: context.spacing.s),
-          Text(cliente.isEmpty ? 'Cliente non disponibile' : cliente),
           Text(
-            'Creato: ${widget.ordine.dateCreated != null ? dateFormat.format(widget.ordine.dateCreated!) : "N/D"}',
+            cliente.isEmpty ? context.l10n.ordersCustomerUnavailable : cliente,
+          ),
+          Text(
+            context.l10n.ordersCreatedAt(
+              widget.ordine.dateCreated != null
+                  ? dateFormat.format(widget.ordine.dateCreated!)
+                  : context.l10n.ordersNotAvailable,
+            ),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.disabledColor,
             ),
@@ -567,7 +584,7 @@ class _OrdineInArrivoDetailViewState extends State<_OrdineInArrivoDetailView> {
                       SizedBox(width: context.spacing.s),
                       Expanded(
                         child: Text(
-                          'Verifica prodotti',
+                          context.l10n.ordersVerifyProducts,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -591,7 +608,10 @@ class _OrdineInArrivoDetailViewState extends State<_OrdineInArrivoDetailView> {
                               : theme.primaryColor,
                         ),
                         label: Text(
-                          'Verificati ${widget.controller.numeroProdottiVerificati}/${widget.controller.numeroProdottiTotali}',
+                          context.l10n.ordersVerifiedCount(
+                            widget.controller.numeroProdottiVerificati,
+                            widget.controller.numeroProdottiTotali,
+                          ),
                         ),
                       ),
                       ElevatedButton.icon(
@@ -607,7 +627,7 @@ class _OrdineInArrivoDetailViewState extends State<_OrdineInArrivoDetailView> {
           ),
           SizedBox(height: context.spacing.l),
           Text(
-            'Prodotti ordinati',
+            context.l10n.ordersOrderedProducts,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -642,9 +662,12 @@ class _ProdottoInArrivoRow extends StatelessWidget {
     final customColors = theme.extension<AppColorExtension>()!;
     return Card(
       child: ListTile(
-        title: Text(prodotto.name ?? 'Prodotto senza nome'),
+        title: Text(prodotto.name ?? context.l10n.productsUnnamed),
         subtitle: Text(
-          'Quantità: ${prodotto.quantity ?? 0} - Barcode interno: ${prodotto.barcodeInterno ?? 'N/D'}',
+          context.l10n.ordersLineQuantityBarcode(
+            '${prodotto.quantity ?? 0}',
+            prodotto.barcodeInterno ?? context.l10n.ordersNotAvailable,
+          ),
         ),
         trailing: Icon(
           isVerified ? Icons.check_circle : Icons.radio_button_unchecked,

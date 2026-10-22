@@ -1,3 +1,4 @@
+import '../../l10n/localized_text.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
 import '../class_orders.dart';
@@ -11,7 +12,7 @@ class OrdiniGestioneController {
   List<OrdiniGlobal> _ordini = [];
   OrdiniGlobal? _ordineSelezionato;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
 
   // Filtri
   OrdineStatus? _filtroStatus;
@@ -21,7 +22,7 @@ class OrdiniGestioneController {
   List<OrdiniGlobal> get ordini => _ordiniFiltrati;
   OrdiniGlobal? get ordineSelezionato => _ordineSelezionato;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  LocalizedText? get errorMessage => _errorMessage;
   bool get hasOrdineSelezionato => _ordineSelezionato != null;
   OrdineStatus? get filtroStatus => _filtroStatus;
   String get searchQuery => _searchQuery;
@@ -43,7 +44,7 @@ class OrdiniGestioneController {
       log.i('Caricati ${_ordini.length} ordini');
     } catch (e) {
       log.e('Errore nel caricamento degli ordini: $e');
-      _errorMessage = 'Errore nel caricamento degli ordini: $e';
+      _errorMessage = (l10n) => l10n.ordersLoadError('$e');
       _ordini = [];
     } finally {
       _isLoading = false;

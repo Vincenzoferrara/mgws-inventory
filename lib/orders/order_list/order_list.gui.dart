@@ -131,7 +131,7 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
           ),
           SizedBox(height: context.spacing.l),
           Text(
-            'Seleziona un ordine',
+            context.l10n.ordersSelectOrder,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
@@ -157,7 +157,10 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
               color: context.colors.errorColorStatus,
             ),
             SizedBox(height: context.spacing.l),
-            Text(_controller.errorMessage!, textAlign: TextAlign.center),
+            Text(
+              _controller.errorMessage!(context.l10n),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: context.spacing.l),
             ElevatedButton.icon(
               onPressed: _caricaOrdini,
@@ -181,7 +184,7 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
             ),
             SizedBox(height: context.spacing.l),
             Text(
-              'Nessun ordine trovato',
+              context.l10n.ordersNoneFound,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -397,7 +400,7 @@ class _OrdineListItem extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final dataOrdine = ordine.dateCreated != null
         ? dateFormat.format(ordine.dateCreated!)
-        : 'N/D';
+        : context.l10n.ordersNotAvailable;
 
     return Card(
       margin: EdgeInsets.symmetric(
@@ -430,7 +433,7 @@ class _OrdineListItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Ordine #${ordine.number}',
+                          context.l10n.ordersOrderNumber('${ordine.number}'),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: isSelected ? theme.primaryColor : null,
@@ -581,7 +584,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
 
   String _nomeProdotto(ProdottoOrdine item) {
     final nome = (item.name ?? '').trim();
-    return nome.isNotEmpty ? nome : 'Prodotto senza nome';
+    return nome.isNotEmpty ? nome : context.l10n.productsUnnamed;
   }
 
   String _formatImporto(double? value) {
@@ -674,7 +677,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
     final prodotto = _prodottoDaItem(item);
     if (prodotto == null) {
       _mostraErroreProdotto(
-        'Prodotto non ancora caricato: ${_nomeProdotto(item)}',
+        context.l10n.ordersProductNotLoaded(_nomeProdotto(item)),
       );
       return;
     }
@@ -682,7 +685,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
     final permalink = (prodotto.permalink ?? '').trim();
     if (permalink.isEmpty) {
       _mostraErroreProdotto(
-        'Link negozio non disponibile per ${_nomeProdotto(item)}',
+        context.l10n.ordersShopLinkUnavailable(_nomeProdotto(item)),
       );
       return;
     }
@@ -693,10 +696,10 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
         mode: LaunchMode.externalApplication,
       );
       if (!launched) {
-        _mostraErroreProdotto('Impossibile aprire il prodotto in negozio');
+        _mostraErroreProdotto(context.l10n.ordersCannotOpenInShop);
       }
     } catch (_) {
-      _mostraErroreProdotto('Impossibile aprire il prodotto in negozio');
+      _mostraErroreProdotto(context.l10n.ordersCannotOpenInShop);
     }
   }
 
@@ -704,7 +707,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
     final prodotto = _prodottoDaItem(item);
     if (prodotto == null) {
       _mostraErroreProdotto(
-        'Prodotto non ancora caricato: ${_nomeProdotto(item)}',
+        context.l10n.ordersProductNotLoaded(_nomeProdotto(item)),
       );
       return;
     }
@@ -855,7 +858,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                         borderRadius: context.shapes.full,
                       ),
                       child: Text(
-                        'Quantità: $quantita',
+                        context.l10n.ordersQuantityValue('$quantita'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.primaryColor,
                           fontWeight: FontWeight.w700,
@@ -864,7 +867,9 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                     ),
                     if (barcodeInterno.isNotEmpty)
                       Text(
-                        'Barcode interno: $barcodeInterno',
+                        context.l10n.ordersInternalBarcodeValue(
+                          '$barcodeInterno',
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -882,11 +887,11 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      'Unità: $prezzoUnitario $currency',
+                      context.l10n.ordersUnitPrice('$prezzoUnitario', currency),
                       style: theme.textTheme.bodySmall,
                     ),
                     Text(
-                      'Totale: $totaleRiga $currency',
+                      context.l10n.ordersLineTotal('$totaleRiga', currency),
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: customColors.successColor,
                         fontWeight: FontWeight.bold,
@@ -919,14 +924,18 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ordine #${widget.ordine.number}',
+                      context.l10n.ordersOrderNumber('${widget.ordine.number}'),
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: context.spacing.s),
                     Text(
-                      'Creato: ${widget.ordine.dateCreated != null ? dateFormat.format(widget.ordine.dateCreated!) : "N/D"}',
+                      context.l10n.ordersCreatedAt(
+                        widget.ordine.dateCreated != null
+                            ? dateFormat.format(widget.ordine.dateCreated!)
+                            : context.l10n.ordersNotAvailable,
+                      ),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: context.colors.subtitleColor,
                       ),
@@ -982,46 +991,53 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
             ],
           ),
           Divider(height: context.spacing.xxl),
-          _buildSezione(context, 'Cliente', Icons.person, [
+          _buildSezione(context, context.l10n.ordersCustomer, Icons.person, [
             _buildInfoRow(
               context,
-              'Nome',
+              context.l10n.commonName,
               '${widget.ordine.billing?.firstName ?? ''} ${widget.ordine.billing?.lastName ?? ''}'
                   .trim(),
             ),
             _buildInfoRow(
               context,
               'Email',
-              widget.ordine.billing?.email ?? 'N/D',
+              widget.ordine.billing?.email ?? context.l10n.ordersNotAvailable,
             ),
             _buildInfoRow(
               context,
-              'Telefono',
-              widget.ordine.billing?.phone ?? 'N/D',
-            ),
-          ]),
-          SizedBox(height: context.spacing.l),
-          _buildSezione(context, 'Indirizzo', Icons.location_on, [
-            _buildInfoRow(
-              context,
-              'Indirizzo',
-              widget.ordine.billing?.address1 ?? 'N/D',
-            ),
-            _buildInfoRow(
-              context,
-              'Città',
-              widget.ordine.billing?.city ?? 'N/D',
-            ),
-            _buildInfoRow(
-              context,
-              'CAP',
-              widget.ordine.billing?.postcode ?? 'N/D',
+              context.l10n.ordersPhone,
+              widget.ordine.billing?.phone ?? context.l10n.ordersNotAvailable,
             ),
           ]),
           SizedBox(height: context.spacing.l),
           _buildSezione(
             context,
-            'Prodotti',
+            context.l10n.ordersAddress,
+            Icons.location_on,
+            [
+              _buildInfoRow(
+                context,
+                context.l10n.ordersAddress,
+                widget.ordine.billing?.address1 ??
+                    context.l10n.ordersNotAvailable,
+              ),
+              _buildInfoRow(
+                context,
+                context.l10n.ordersCity,
+                widget.ordine.billing?.city ?? context.l10n.ordersNotAvailable,
+              ),
+              _buildInfoRow(
+                context,
+                context.l10n.ordersPostcode,
+                widget.ordine.billing?.postcode ??
+                    context.l10n.ordersNotAvailable,
+              ),
+            ],
+          ),
+          SizedBox(height: context.spacing.l),
+          _buildSezione(
+            context,
+            context.l10n.ordersProducts,
             Icons.shopping_bag,
             widget.ordine.lineItems
                     ?.map((item) => _buildProdottoRow(context, item))
@@ -1036,7 +1052,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                 children: [
                   _buildTotaleRow(
                     context,
-                    'Subtotale',
+                    context.l10n.ordersSubtotal,
                     (widget.ordine.total ??
                             0 -
                                 (widget.ordine.shippingTotal ?? 0) -
@@ -1046,20 +1062,20 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   ),
                   _buildTotaleRow(
                     context,
-                    'Spedizione',
+                    context.l10n.ordersShipping,
                     widget.ordine.shippingTotal?.toString() ?? '0',
                     widget.ordine.currency,
                   ),
                   _buildTotaleRow(
                     context,
-                    'Tasse',
+                    context.l10n.ordersTaxes,
                     widget.ordine.totalTax?.toString() ?? '0',
                     widget.ordine.currency,
                   ),
                   const Divider(),
                   _buildTotaleRow(
                     context,
-                    'Totale',
+                    context.l10n.commonTotal,
                     widget.ordine.total?.toString() ?? '0',
                     widget.ordine.currency,
                     isBold: true,
@@ -1104,7 +1120,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
       NotificationService.instance.messageBar(
         'errore',
         'ordini',
-        'Prodotto senza codice a barre: ${item.name}',
+        context.l10n.ordersProductWithoutBarcode('${item.name}'),
       );
       return;
     }
@@ -1120,8 +1136,11 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
       corrisponde ? 'successo' : 'errore',
       'ordini',
       corrisponde
-          ? 'Prodotto corretto: ${item.name}'
-          : 'Prodotto differente: atteso ${item.barcodeInterno}, scansionato $scannedCode',
+          ? context.l10n.ordersProductMatches('${item.name}')
+          : context.l10n.ordersProductMismatch(
+              '${item.barcodeInterno}',
+              scannedCode,
+            ),
     );
   }
 
@@ -1146,7 +1165,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
         NotificationService.instance.messageBar(
           'successo',
           'ordini_gestisci',
-          'Stato ordine aggiornato con successo',
+          context.l10n.ordersStatusUpdated,
         );
         // Aggiorna la UI del parent
         context.findAncestorStateOfType<OrdiniGestisciPageState>()?.setState(
@@ -1171,7 +1190,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
         NotificationService.instance.messageBar(
           'successo',
           'ordini_gestisci',
-          'Nota aggiunta con successo',
+          context.l10n.ordersNoteAdded,
         );
       }
     }
@@ -1186,7 +1205,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
       builder: (context) => AlertDialog(
         title: Text(context.l10n.ordiniConfermaEliminazione),
         content: Text(
-          'Sei sicuro di voler eliminare l\'ordine #${widget.ordine.number}?',
+          context.l10n.ordersDeleteConfirm('${widget.ordine.number}'),
         ),
         actions: [
           TextButton(
@@ -1213,7 +1232,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
         NotificationService.instance.messageBar(
           'successo',
           'ordini_gestisci',
-          'Ordine eliminato con successo',
+          context.l10n.ordersDeleted,
         );
         // Aggiorna la UI del parent e deseleziona
         final parentState = context
