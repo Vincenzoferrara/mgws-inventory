@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/extensions.dart';
 import '../theme/theme.dart';
 
 final GlobalKey<ScaffoldMessengerState> notificationMessengerKey =
@@ -18,6 +19,7 @@ class NotificationService {
 
     final style = _resolveStyle(context, type);
     final cleanMessage = _cleanMessage(message);
+    final title = _sectionTitle(context, nameTab);
 
     messenger
       ..hideCurrentSnackBar()
@@ -37,7 +39,7 @@ class NotificationService {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: nameTab,
+                            text: title,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -57,7 +59,7 @@ class NotificationService {
             ],
           ),
           action: SnackBarAction(
-            label: 'Copia',
+            label: context.l10n.sharedCopia,
             textColor: Colors.white,
             onPressed: () {
               Clipboard.setData(ClipboardData(text: cleanMessage));
@@ -75,6 +77,48 @@ class NotificationService {
           persist: false,
         ),
       );
+  }
+
+  /// Il titolo del messaggio: `nameTab` e un tag interno della sezione
+  /// (es. 'cassa', 'prodotti_crea'), qui diventa il nome tradotto.
+  String _sectionTitle(BuildContext context, String nameTab) {
+    final l10n = context.l10n;
+    switch (nameTab) {
+      case 'cassa':
+        return l10n.homeTitoloCassa;
+      case 'prodotti_crea':
+        return l10n.homeTitoloNuovoProdotto;
+      case 'prodotti':
+      case 'prodotti_gestisci':
+      case 'woocommerce_custom_fields':
+        return l10n.homeTitoloProdotti;
+      case 'media_selector_dialog':
+        return l10n.notificationSourceMedia;
+      case 'dashboard':
+      case 'ads_comment_dialog':
+        return l10n.homeTitoloDashboard;
+      case 'log_viewer':
+        return l10n.notificationSourceLogs;
+      case 'carta_fedelta':
+        return l10n.homeTitoloCarteFedelta;
+      case 'coupon_gestisci':
+        return l10n.homeTitoloCoupon;
+      case 'rfid_settings':
+        return l10n.settingsRfidTitle;
+      case 'ai_settings':
+        return l10n.settingsAiTitle;
+      case 'ordini':
+      case 'ordini_gestisci':
+      case 'ordini_crea':
+      case 'ordini_in_arrivo':
+        return l10n.homeTitoloOrdini;
+      case 'home':
+        return l10n.homeTitoloHome;
+      case 'report':
+        return l10n.homeTitoloReport;
+      default:
+        return nameTab;
+    }
   }
 
   _MessageBarStyle _resolveStyle(BuildContext context, String type) {

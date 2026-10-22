@@ -4337,7 +4337,7 @@
   "@settingsShortcutsReset": {
     "description": "Localized string settingsShortcutsReset"
   },
-  "settingsShortcutsTitle": "Shortcut prodotti_gestisci",
+  "settingsShortcutsTitle": "Scorciatoie elenco prodotti",
   "@settingsShortcutsTitle": {
     "description": "Localized string settingsShortcutsTitle"
   },
@@ -8186,5 +8186,13 @@
         "type": "String"
       }
     }
+  },
+  "notificationSourceMedia": "Libreria media",
+  "@notificationSourceMedia": {
+    "description": "Title of message bars raised by the media picker"
+  },
+  "notificationSourceLogs": "Log",
+  "@notificationSourceLogs": {
+    "description": "Title of message bars raised by the log viewer"
   }
 }

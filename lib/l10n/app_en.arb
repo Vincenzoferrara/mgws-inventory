@@ -4340,7 +4340,7 @@
   "@settingsShortcutsReset": {
     "description": "Localized string settingsShortcutsReset"
   },
-  "settingsShortcutsTitle": "prodotti_gestisci shortcuts",
+  "settingsShortcutsTitle": "Product list shortcuts",
   "@settingsShortcutsTitle": {
     "description": "Localized string settingsShortcutsTitle"
   },
@@ -8189,5 +8189,13 @@
         "type": "String"
       }
     }
+  },
+  "notificationSourceMedia": "Media library",
+  "@notificationSourceMedia": {
+    "description": "Title of message bars raised by the media picker"
+  },
+  "notificationSourceLogs": "Logs",
+  "@notificationSourceLogs": {
+    "description": "Title of message bars raised by the log viewer"
   }
 }
