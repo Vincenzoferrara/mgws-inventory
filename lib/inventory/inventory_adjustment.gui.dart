@@ -289,7 +289,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryBarcodeNonRiconosciuto,
+          message: (l10n) => l10n.inventoryBarcodeNonRiconosciuto,
         ),
       );
       return null;
@@ -299,7 +299,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryProdottoGiaInLista(
+          message: (l10n) => l10n.inventoryProdottoGiaInLista(
             match?.label ??
                 context.l10n.inventoryProdottoNumero(productId.toString()),
           ),
@@ -352,7 +352,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
           if (seed.key == row.key) seed.snapshot = _controller.lastSnapshot;
         }
       } else {
-        row.loadError = feedback.message;
+        row.loadError = feedback.message(context.l10n);
       }
       _feedback = feedback.success ? null : feedback;
     });
@@ -888,14 +888,17 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );
@@ -937,8 +940,8 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
               : const Icon(Icons.check_circle_outline),
           label: Text(
             _controller.isSubmitting
-                ? 'Rettifica in corso'
-                : 'Applica rettifica',
+                ? context.l10n.inventoryAdjustmentRunning
+                : context.l10n.inventoryApplyAdjustment,
           ),
         ),
       ],

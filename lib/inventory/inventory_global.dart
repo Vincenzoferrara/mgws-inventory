@@ -153,7 +153,7 @@ class InventoryGlobal {
       final mgwsAvailable = await _mgwsInventory.isInventoryServiceAvailable();
       if (!mgwsAvailable) {
         log.w('MGWS inventory non disponibile sul sito: $siteUrl');
-        throw Exception('MGWS inventory non disponibile');
+        throw Exception('MGWS inventory not available');
       }
 
       log.i('✅ Inventory Global initialized successfully');
@@ -509,7 +509,7 @@ class InventoryGlobal {
         syncedProducts: scanResult.resolved.length,
         errors: errors,
         message:
-            'RFID resolve-only: ${scanResult.resolved.length}/${tagIds.length} tags risolti, ${scanResult.unresolved.length} non risolti. Nessuna quantita aggiornata.',
+            'RFID resolve-only: ${scanResult.resolved.length}/${tagIds.length} tags resolved, ${scanResult.unresolved.length} unresolved. No quantity updated.',
         details: {
           'resolved': scanResult.resolved
               .map(

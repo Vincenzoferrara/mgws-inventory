@@ -85,13 +85,16 @@ class InventoryAddProductsPlan {
 
   InventoryFormParse<InventoryAddProductsCommand> parse() {
     final siteId = InventoryInputParser.parsePositiveInt(siteIdText);
-    if (siteId == null) return const InventoryFormInvalid('Sede richiesta');
+    if (siteId == null)
+      return InventoryFormInvalid((l10n) => l10n.inventorySiteRequired);
     if (isOrder) {
       if (supplier == null) {
-        return const InventoryFormInvalid('Seleziona il fornitore');
+        return InventoryFormInvalid((l10n) => l10n.inventorySelectSupplier);
       }
       if (documentNumberText.trim().isEmpty) {
-        return const InventoryFormInvalid('numero documento richiesto');
+        return InventoryFormInvalid(
+          (l10n) => l10n.inventoryDocumentNumberRequired,
+        );
       }
     }
     // Il piano di carico resta il cuore del flusso: in modalita' ordine
@@ -166,8 +169,13 @@ class InventoryAddProductsController with InventoryFeedbackController {
   List<InventoryQuickLoadLineDraft> get retryableLines =>
       quickLoadController.retryableLines;
 
-  Future<InventoryActionFeedback> submit(InventoryAddProductsPlan plan) async {
-    if (isSubmitting) return invalid('Aggiunta prodotti gia in corso');
+  /// [l10n] scrive le note salvate su MGWS e i passi mostrati all'operatore.
+  Future<InventoryActionFeedback> submit(
+    AppLocalizations l10n,
+    InventoryAddProductsPlan plan,
+  ) async {
+    if (isSubmitting)
+      return invalid((l10n) => l10n.inventoryAddProductsInProgress);
     final parsed = plan.parse();
     switch (parsed) {
       case InventoryFormInvalid(:final message):
@@ -181,20 +189,18 @@ class InventoryAddProductsController with InventoryFeedbackController {
         final orderLines = <MgwsPurchaseOrderLine>[];
         try {
           if (command.supplierId != null) {
-            final draft = await _createOrder(command, plan);
+            final draft = await _createOrder(l10n, command, plan);
             order = purchaseOrderController.lastPurchaseOrder;
             if (!draft.success) {
               // Nessun carico eseguito: l'ordine non e nato, quindi si
               // lascia lo stock intatto invece di registrare pezzi senza
               // documento.
-              return _feedback(
-                false,
-                'Aggiunta interrotta: nessun carico eseguito',
-                [draft.message, ...draft.details],
-                steps: steps,
-              );
+              return _feedback(false, l10n.inventoryAddInterrupted, [
+                draft.message(l10n),
+                for (final detail in draft.details) detail(l10n),
+              ], steps: steps);
             }
-            steps.add('Bozza ordine ${command.documentNumber} creata');
+            steps.add(l10n.inventoryAddDraftCreated(command.documentNumber));
 
             for (final line in command.quickLoadPlan.lines) {
               final saved = await purchaseOrderController.saveLine(
@@ -212,14 +218,21 @@ class InventoryAddProductsController with InventoryFeedbackController {
               final savedLine = purchaseOrderController.lastPurchaseOrderLine;
               if (!saved.success || savedLine == null) {
                 orderOk = false;
-                details.add('Riga ordine "${line.label}": ${saved.message}');
+                details.add(
+                  l10n.inventoryAddOrderLineFailed(
+                    line.label,
+                    saved.message(l10n),
+                  ),
+                );
               } else {
                 orderLines.add(savedLine);
               }
             }
             steps.add(
-              'Righe ordine registrate: ${orderLines.length}'
-              '/${command.quickLoadPlan.lines.length}',
+              l10n.inventoryAddOrderLinesSaved(
+                orderLines.length,
+                command.quickLoadPlan.lines.length,
+              ),
             );
           }
 
@@ -232,12 +245,15 @@ class InventoryAddProductsController with InventoryFeedbackController {
               ),
             );
             if (pending.success) {
-              steps.add('Ordine ${order.id} messo in attesa verifica');
+              steps.add(l10n.inventoryAddOrderPending(order.id));
             } else {
               orderOk = false;
-              details.add('Stato pending ordine: ${pending.message}');
+              details.add(
+                l10n.inventoryAddOrderPendingFailed(pending.message(l10n)),
+              );
             }
             final received = await _creaRicezioneInVerifica(
+              l10n,
               command,
               order,
               orderLines,
@@ -248,13 +264,15 @@ class InventoryAddProductsController with InventoryFeedbackController {
                 details.add(received.message);
               case _ValidationOutcome.failed:
                 orderOk = false;
-                details.add('Ricezione in verifica: ${received.message}');
+                details.add(
+                  l10n.inventoryAddReceiptVerificationFailed(received.message),
+                );
               case _ValidationOutcome.done:
                 steps.add(received.message);
             }
             load = InventoryActionFeedback(
               success: orderOk,
-              message: 'Stock in attesa approvazione manager',
+              message: (l10n) => l10n.inventoryAddAwaitingManager,
               details: const [],
             );
           } else {
@@ -262,18 +280,22 @@ class InventoryAddProductsController with InventoryFeedbackController {
             load = await quickLoadController.submitPlan(command.quickLoadPlan);
             if (load.success) {
               steps.add(
-                'Carico eseguito: ${command.quickLoadPlan.lines.length} righe, '
-                '${command.quickLoadPlan.totalQuantity} pezzi',
+                l10n.inventoryAddLoadDone(
+                  command.quickLoadPlan.lines.length,
+                  command.quickLoadPlan.totalQuantity,
+                ),
               );
             }
           }
 
           if (order != null) lastOrder = order;
           final success = load.success && orderOk;
-          return _feedback(success, _summary(plan, success, load.message), [
-            ...details,
-            ...load.details,
-          ], steps: steps);
+          return _feedback(
+            success,
+            _summary(l10n, plan, success, load.message(l10n)),
+            [...details, for (final detail in load.details) detail(l10n)],
+            steps: steps,
+          );
         } finally {
           isSubmitting = false;
         }
@@ -283,14 +305,15 @@ class InventoryAddProductsController with InventoryFeedbackController {
   /// Registra la ricezione della merce sull'ordine e la lascia in verifica.
   /// Non muove stock: il carico reale avviene solo con approvazione manager.
   Future<_ValidationResult> _creaRicezioneInVerifica(
+    AppLocalizations l10n,
     InventoryAddProductsCommand command,
     MgwsPurchaseOrder order,
     List<MgwsPurchaseOrderLine> orderLines,
   ) async {
     if (orderLines.length != command.quickLoadPlan.lines.length) {
-      return const _ValidationResult(
+      return _ValidationResult(
         _ValidationOutcome.skipped,
-        'Convalida saltata: ordine incompleto',
+        l10n.inventoryAddValidationSkipped,
       );
     }
     final form = InventoryReceiptForm(
@@ -300,7 +323,7 @@ class InventoryAddProductsController with InventoryFeedbackController {
       // Chiave stabile: un invio ripetuto dopo un errore di rete non crea una
       // seconda ricezione per lo stesso ordine.
       idempotencyKeyText: 'add-products-${order.id}',
-      notesText: 'Ricezione generata da aggiunta prodotti, in attesa verifica.',
+      notesText: l10n.inventoryAddReceiptNote,
       statusText: 'pending_verification',
       lines: [
         for (final line in orderLines)
@@ -319,17 +342,20 @@ class InventoryAddProductsController with InventoryFeedbackController {
       lastReceipt = receipt;
       return _ValidationResult(
         _ValidationOutcome.done,
-        'Ricezione ${receipt?.id ?? ''} '
-        '${inventoryReceiptNumber(command.documentNumber)} in attesa verifica',
+        l10n.inventoryAddReceiptPending(
+          '${receipt?.id ?? ''}',
+          inventoryReceiptNumber(command.documentNumber),
+        ),
       );
     }
     // La ricezione puo essere stata creata senza pero essere convalidata:
     // in quel caso resta su MGWS e serve conoscerne l'id.
     lastReceipt = receipt;
-    return _ValidationResult(_ValidationOutcome.failed, result.message);
+    return _ValidationResult(_ValidationOutcome.failed, result.message(l10n));
   }
 
   Future<InventoryActionFeedback> _createOrder(
+    AppLocalizations l10n,
     InventoryAddProductsCommand command,
     InventoryAddProductsPlan plan,
   ) {
@@ -339,31 +365,37 @@ class InventoryAddProductsController with InventoryFeedbackController {
         supplierIdText: command.supplierId!.toString(),
         documentNumberText: command.documentNumber,
         warehouseIdText: (plan.warehouseId ?? 0).toString(),
-        notesText: _orderNotes(plan),
+        notesText: _orderNotes(l10n, plan),
       ),
     );
   }
 
-  String _orderNotes(InventoryAddProductsPlan plan) {
-    final base =
-        'Aggiunta prodotti: ${plan.enteredQuantity} pezzi '
-        'su ${plan.lineCount} righe.';
+  String _orderNotes(AppLocalizations l10n, InventoryAddProductsPlan plan) {
+    final base = l10n.inventoryAddOrderNote(
+      plan.enteredQuantity,
+      plan.lineCount,
+    );
     return plan.validated
-        ? '$base Ordine convalidato.'
-        : '$base Ordine in bozza, da convalidare.';
+        ? '$base ${l10n.inventoryAddOrderNoteValidated}'
+        : '$base ${l10n.inventoryAddOrderNoteDraft}';
   }
 
-  String _summary(InventoryAddProductsPlan plan, bool success, String load) {
+  String _summary(
+    AppLocalizations l10n,
+    InventoryAddProductsPlan plan,
+    bool success,
+    String load,
+  ) {
     if (!plan.isOrder) return load;
     final supplier = plan.supplierLabel;
     if (!success) {
       return plan.validated
-          ? '$load; ordine $supplier da controllare'
-          : '$load; ordine $supplier salvato in bozza';
+          ? l10n.inventoryAddSummaryToCheck(load, supplier)
+          : l10n.inventoryAddSummaryDraft(load, supplier);
     }
     return plan.validated
-        ? '$load; ordine $supplier convalidato'
-        : '$load; ordine $supplier salvato in bozza';
+        ? l10n.inventoryAddSummaryValidated(load, supplier)
+        : l10n.inventoryAddSummaryDraft(load, supplier);
   }
 
   InventoryActionFeedback _feedback(
@@ -376,8 +408,8 @@ class InventoryAddProductsController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: success,
-        message: message,
-        details: details,
+        message: literalText(message),
+        details: literalTexts(details),
       ),
     );
   }

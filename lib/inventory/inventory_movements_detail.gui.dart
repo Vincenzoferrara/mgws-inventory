@@ -109,7 +109,9 @@ class _InventoryMovementDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.inventoryTitoloMovimento(group.kindLabel),
+                  context.l10n.inventoryTitoloMovimento(
+                    group.kindLabel(context.l10n),
+                  ),
                   key: const ValueKey('inventory-movement-dialog-title'),
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
@@ -394,14 +396,14 @@ class _InventoryMovementDialog extends StatelessWidget {
           // posto da dover cercare.
           if (!canReopen)
             Text(
-              group.resumeBlockMessage,
+              group.resumeBlockMessage(context.l10n),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colors.warningColor,
               ),
             ),
           if (!canRevert)
             Text(
-              group.revertBlockMessage,
+              group.revertBlockMessage(context.l10n),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colors.warningColor,
               ),
@@ -470,14 +472,14 @@ class InventoryMovementFeedback extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: theme.textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: theme.textTheme.bodySmall),
+            Text(detail(context.l10n), style: theme.textTheme.bodySmall),
         ],
       ),
     );

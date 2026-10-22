@@ -98,7 +98,7 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
       builder: (context) => AlertDialog(
         title: Text(context.l10n.inventoryDisattivaFornitore),
         content: Text(
-          'Disattivare ${supplier.name}? Lo storico degli ordini resta collegato.',
+          context.l10n.inventoryDeactivateSupplierConfirm(supplier.name),
         ),
         actions: [
           TextButton(
@@ -230,11 +230,14 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
   Widget _list() {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_feedback != null && !_feedback!.success) {
-      return _ErrorState(message: _feedback!.message, onRetry: _load);
+      return _ErrorState(
+        message: _feedback!.message(context.l10n),
+        onRetry: _load,
+      );
     }
     final suppliers = _filteredSuppliers;
     if (suppliers.isEmpty) {
-      return const _EmptyState(message: 'Nessun fornitore trovato');
+      return _EmptyState(message: context.l10n.inventoryNoSupplierFound);
     }
     return ListView.builder(
       padding: const EdgeInsets.all(8),
@@ -284,7 +287,9 @@ class _SupplierListItem extends StatelessWidget {
           ),
         ),
         title: Text(
-          supplier.name.isEmpty ? 'Fornitore #${supplier.id}' : supplier.name,
+          supplier.name.isEmpty
+              ? context.l10n.inventorySupplierRef(supplier.id)
+              : supplier.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
           overflow: TextOverflow.ellipsis,
         ),
@@ -296,7 +301,11 @@ class _SupplierListItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: Chip(
-          label: Text(supplier.active ? 'Attivo' : 'Inattivo'),
+          label: Text(
+            supplier.active
+                ? context.l10n.inventoryAttivo
+                : context.l10n.inventoryInactive,
+          ),
           side: BorderSide(
             color: supplier.active ? colors.successColor : colors.warningColor,
           ),
@@ -351,7 +360,7 @@ class _SupplierDetail extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Registro fornitore #${supplier.id}',
+                      context.l10n.inventorySupplierRecord(supplier.id),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colors.subtitleColor,
                       ),
@@ -366,27 +375,36 @@ class _SupplierDetail extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _InfoChip(label: 'P.IVA', value: supplier.taxId),
-              _InfoChip(label: 'Email', value: supplier.email),
-              _InfoChip(label: 'Telefono', value: supplier.phone),
               _InfoChip(
-                label: 'Pagamento',
+                label: context.l10n.inventoryVatNumber,
+                value: supplier.taxId,
+              ),
+              _InfoChip(label: 'Email', value: supplier.email),
+              _InfoChip(
+                label: context.l10n.inventoryPhone,
+                value: supplier.phone,
+              ),
+              _InfoChip(
+                label: context.l10n.inventoryPayment,
                 value: supplier.paymentTermsDays == 0
                     ? ''
-                    : '${supplier.paymentTermsDays} gg',
+                    : context.l10n.inventoryDaysValue(
+                        supplier.paymentTermsDays,
+                      ),
               ),
               _InfoChip(
                 label: 'Lead time',
                 value: supplier.leadTimeDays == 0
                     ? ''
-                    : '${supplier.leadTimeDays} gg',
+                    : context.l10n.inventoryDaysValue(supplier.leadTimeDays),
               ),
             ],
           ),
           if (supplier.iban.isNotEmpty || supplier.notes.isNotEmpty) ...[
             const SizedBox(height: 20),
             if (supplier.iban.isNotEmpty) _detailLine('IBAN', supplier.iban),
-            if (supplier.notes.isNotEmpty) _detailLine('Note', supplier.notes),
+            if (supplier.notes.isNotEmpty)
+              _detailLine(context.l10n.inventoryNotes, supplier.notes),
           ],
           const SizedBox(height: 20),
           Wrap(
@@ -533,7 +551,11 @@ class _SupplierFormDialogState extends State<_SupplierFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_editing ? 'Modifica fornitore' : 'Aggiungi fornitore'),
+      title: Text(
+        _editing
+            ? context.l10n.inventoryEditSupplier
+            : context.l10n.inventoryAggiungiFornitore,
+      ),
       content: SizedBox(
         width: 720,
         child: SingleChildScrollView(
@@ -541,14 +563,25 @@ class _SupplierFormDialogState extends State<_SupplierFormDialog> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              _field(_nameController, 'Ragione sociale / nome *'),
-              _field(_taxController, 'P.IVA / Tax'),
+              _field(
+                _nameController,
+                context.l10n.inventorySupplierNameRequiredLabel,
+              ),
+              _field(_taxController, context.l10n.inventoryVatTax),
               _field(_emailController, 'Email'),
-              _field(_phoneController, 'Telefono'),
-              _field(_paymentTermsController, 'Pagamento gg'),
+              _field(_phoneController, context.l10n.inventoryPhone),
+              _field(
+                _paymentTermsController,
+                context.l10n.inventoryPaymentDays,
+              ),
               _field(_ibanController, 'IBAN', width: 452),
-              _field(_leadTimeController, 'Lead time gg'),
-              _field(_notesController, 'Note', width: 452, maxLines: 3),
+              _field(_leadTimeController, context.l10n.inventoryLeadTimeDays),
+              _field(
+                _notesController,
+                context.l10n.inventoryNotes,
+                width: 452,
+                maxLines: 3,
+              ),
               SizedBox(
                 width: 220,
                 child: SwitchListTile(
@@ -577,7 +610,11 @@ class _SupplierFormDialogState extends State<_SupplierFormDialog> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.save_outlined),
-          label: Text(_editing ? 'Salva' : 'Crea fornitore'),
+          label: Text(
+            _editing
+                ? context.l10n.commonSave
+                : context.l10n.inventoryCreateSupplier,
+          ),
         ),
       ],
     );
@@ -681,7 +718,7 @@ class _Feedback extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: tone,
@@ -690,7 +727,7 @@ class _Feedback extends StatelessWidget {
           for (final detail in feedback.details)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(detail),
+              child: Text(detail(context.l10n)),
             ),
         ],
       ),

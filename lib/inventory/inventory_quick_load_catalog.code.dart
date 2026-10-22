@@ -163,7 +163,7 @@ String inventoryVariationLabel(VarianteProductGlobal variant) {
       .join(' / ');
   if (attributes.isNotEmpty) return attributes;
   if (variant.nome.trim().isNotEmpty) return variant.nome.trim();
-  return 'Variante #${variant.id}';
+  return '#${variant.id}';
 }
 
 /// Prodotto o variante identificata tramite un barcode.
@@ -188,9 +188,7 @@ class InventoryQuickLoadMatch {
 
   String get productLabel {
     final name = product.nome?.trim();
-    return name != null && name.isNotEmpty
-        ? name
-        : 'Prodotto #${product.id ?? 0}';
+    return name != null && name.isNotEmpty ? name : '#${product.id ?? 0}';
   }
 
   String get label {

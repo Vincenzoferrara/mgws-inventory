@@ -9038,5 +9038,1469 @@
   "cassaOpenShiftBeforeClosing": "Nessun turno aperto. Apri un turno prima di chiudere.",
   "@cassaOpenShiftBeforeClosing": {
     "description": "Localized string cassaOpenShiftBeforeClosing"
+  },
+  "inventoryInvalidField": "{field} non valido",
+  "@inventoryInvalidField": {
+    "description": "Localized string inventoryInvalidField",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryRequiredField": "{field} richiesto",
+  "@inventoryRequiredField": {
+    "description": "Localized string inventoryRequiredField",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMgwsAvailable": "Backend MGWS disponibile",
+  "@inventoryMgwsAvailable": {
+    "description": "Localized string inventoryMgwsAvailable"
+  },
+  "inventoryMgwsRequired": "Backend MGWS richiesto: accedi o configura il backend MGWS",
+  "@inventoryMgwsRequired": {
+    "description": "Localized string inventoryMgwsRequired"
+  },
+  "inventoryMgwsUnavailable": "Backend MGWS non disponibile",
+  "@inventoryMgwsUnavailable": {
+    "description": "Localized string inventoryMgwsUnavailable"
+  },
+  "inventoryNoStockRows": "Nessuna riga stock disponibile",
+  "@inventoryNoStockRows": {
+    "description": "Localized string inventoryNoStockRows"
+  },
+  "inventoryStockLoaded": "Stock caricato: {count} righe",
+  "@inventoryStockLoaded": {
+    "description": "Localized string inventoryStockLoaded",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStockLoadError": "Errore caricamento stock MGWS: {error}",
+  "@inventoryStockLoadError": {
+    "description": "Localized string inventoryStockLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventorySyncError": "Errore sync MGWS: {error}",
+  "@inventorySyncError": {
+    "description": "Localized string inventorySyncError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryReconcileError": "Errore reconcile MGWS: {error}",
+  "@inventoryReconcileError": {
+    "description": "Localized string inventoryReconcileError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryInvalidSourceSite": "Sede di partenza non valida",
+  "@inventoryInvalidSourceSite": {
+    "description": "Localized string inventoryInvalidSourceSite"
+  },
+  "inventoryInvalidDestinationSite": "Sede di destinazione non valida",
+  "@inventoryInvalidDestinationSite": {
+    "description": "Localized string inventoryInvalidDestinationSite"
+  },
+  "inventoryInvalidMoveQuantity": "Quantità da spostare non valida",
+  "@inventoryInvalidMoveQuantity": {
+    "description": "Localized string inventoryInvalidMoveQuantity"
+  },
+  "inventoryReasonRequired": "Motivo richiesto",
+  "@inventoryReasonRequired": {
+    "description": "Localized string inventoryReasonRequired"
+  },
+  "inventorySameSourceAndDestination": "Origine e destinazione sono la stessa",
+  "@inventorySameSourceAndDestination": {
+    "description": "Localized string inventorySameSourceAndDestination"
+  },
+  "inventoryMoveError": "Errore spostamento MGWS: {error}",
+  "@inventoryMoveError": {
+    "description": "Localized string inventoryMoveError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryEnterRfidTag": "Inserisci almeno un tag RFID",
+  "@inventoryEnterRfidTag": {
+    "description": "Localized string inventoryEnterRfidTag"
+  },
+  "inventoryRfidResolveSummary": "RFID resolve-only: {resolved} risolti, {unresolved} non risolti.",
+  "@inventoryRfidResolveSummary": {
+    "description": "Localized string inventoryRfidResolveSummary",
+    "placeholders": {
+      "resolved": {
+        "type": "int"
+      },
+      "unresolved": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRfidNoQuantityUpdated": "Nessuna quantità aggiornata.",
+  "@inventoryRfidNoQuantityUpdated": {
+    "description": "Localized string inventoryRfidNoQuantityUpdated"
+  },
+  "inventoryRfidError": "Errore RFID MGWS: {error}",
+  "@inventoryRfidError": {
+    "description": "Localized string inventoryRfidError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryStockActionResult": "{action}: {message}",
+  "@inventoryStockActionResult": {
+    "description": "Localized string inventoryStockActionResult",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryStockActionResultDelta": "{action}: {message} (delta {delta})",
+  "@inventoryStockActionResultDelta": {
+    "description": "Localized string inventoryStockActionResultDelta",
+    "placeholders": {
+      "action": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryDocumentNumberRequired": "Numero documento richiesto",
+  "@inventoryDocumentNumberRequired": {
+    "description": "Localized string inventoryDocumentNumberRequired"
+  },
+  "inventorySiteRequired": "Sede richiesta",
+  "@inventorySiteRequired": {
+    "description": "Localized string inventorySiteRequired"
+  },
+  "inventoryInvalidExpectedDate": "Data prevista non valida",
+  "@inventoryInvalidExpectedDate": {
+    "description": "Localized string inventoryInvalidExpectedDate"
+  },
+  "inventoryInvalidCurrency": "Valuta non valida",
+  "@inventoryInvalidCurrency": {
+    "description": "Localized string inventoryInvalidCurrency"
+  },
+  "inventoryCountSessionAlreadyPosted": "Sessione di conteggio già registrata",
+  "@inventoryCountSessionAlreadyPosted": {
+    "description": "Localized string inventoryCountSessionAlreadyPosted"
+  },
+  "inventoryReceiptInProgress": "Ricevimento già in corso",
+  "@inventoryReceiptInProgress": {
+    "description": "Localized string inventoryReceiptInProgress"
+  },
+  "inventorySupplierNameRequired": "Nome fornitore richiesto",
+  "@inventorySupplierNameRequired": {
+    "description": "Localized string inventorySupplierNameRequired"
+  },
+  "inventoryQuickLoadInProgress": "Carico rapido già in corso",
+  "@inventoryQuickLoadInProgress": {
+    "description": "Localized string inventoryQuickLoadInProgress"
+  },
+  "inventoryStockLoadInProgress": "Caricamento stock già in corso",
+  "@inventoryStockLoadInProgress": {
+    "description": "Localized string inventoryStockLoadInProgress"
+  },
+  "inventorySuggestionMissingSupplier": "supplier_id mancante per il suggerimento",
+  "@inventorySuggestionMissingSupplier": {
+    "description": "Localized string inventorySuggestionMissingSupplier"
+  },
+  "inventoryOrderStatusRequired": "Stato ordine richiesto",
+  "@inventoryOrderStatusRequired": {
+    "description": "Localized string inventoryOrderStatusRequired"
+  },
+  "inventoryMoveInProgress": "Spostamento già in corso",
+  "@inventoryMoveInProgress": {
+    "description": "Localized string inventoryMoveInProgress"
+  },
+  "inventorySelectSupplier": "Seleziona il fornitore",
+  "@inventorySelectSupplier": {
+    "description": "Localized string inventorySelectSupplier"
+  },
+  "inventorySelectAtLeastOneProduct": "Seleziona almeno un prodotto",
+  "@inventorySelectAtLeastOneProduct": {
+    "description": "Localized string inventorySelectAtLeastOneProduct"
+  },
+  "inventoryInvalidRowsPerPage": "Righe per pagina non valide",
+  "@inventoryInvalidRowsPerPage": {
+    "description": "Localized string inventoryInvalidRowsPerPage"
+  },
+  "inventoryInvalidOrderLine": "Riga ordine non valida",
+  "@inventoryInvalidOrderLine": {
+    "description": "Localized string inventoryInvalidOrderLine"
+  },
+  "inventoryAdjustmentInProgress": "Rettifica già in corso",
+  "@inventoryAdjustmentInProgress": {
+    "description": "Localized string inventoryAdjustmentInProgress"
+  },
+  "inventoryInvalidReceiptQuantities": "Quantità ricevimento non valide",
+  "@inventoryInvalidReceiptQuantities": {
+    "description": "Localized string inventoryInvalidReceiptQuantities"
+  },
+  "inventoryInconsistentReceiptQuantities": "Quantità ricevimento non coerenti",
+  "@inventoryInconsistentReceiptQuantities": {
+    "description": "Localized string inventoryInconsistentReceiptQuantities"
+  },
+  "inventoryInvalidOrderedQuantity": "Quantità ordinata non valida",
+  "@inventoryInvalidOrderedQuantity": {
+    "description": "Localized string inventoryInvalidOrderedQuantity"
+  },
+  "inventoryInvalidQuantityFor": "Quantità non valida per {label}",
+  "@inventoryInvalidQuantityFor": {
+    "description": "Localized string inventoryInvalidQuantityFor",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryInvalidQuantity": "Quantità non valida",
+  "@inventoryInvalidQuantity": {
+    "description": "Localized string inventoryInvalidQuantity"
+  },
+  "inventoryInvalidPhysicalQuantity": "Quantità fisica non valida",
+  "@inventoryInvalidPhysicalQuantity": {
+    "description": "Localized string inventoryInvalidPhysicalQuantity"
+  },
+  "inventoryProductBarcodeOrTagRequired": "Prodotto, barcode o tag richiesto",
+  "@inventoryProductBarcodeOrTagRequired": {
+    "description": "Localized string inventoryProductBarcodeOrTagRequired"
+  },
+  "inventoryInvalidPage": "Pagina non valida",
+  "@inventoryInvalidPage": {
+    "description": "Localized string inventoryInvalidPage"
+  },
+  "inventoryOperationInProgress": "Operazione già in corso",
+  "@inventoryOperationInProgress": {
+    "description": "Localized string inventoryOperationInProgress"
+  },
+  "inventoryInvalidOperator": "Operatore non valido",
+  "@inventoryInvalidOperator": {
+    "description": "Localized string inventoryInvalidOperator"
+  },
+  "inventoryNothingToCancel": "Niente da annullare",
+  "@inventoryNothingToCancel": {
+    "description": "Localized string inventoryNothingToCancel"
+  },
+  "inventoryDiscardReasonRequired": "Motivo scarto/backorder richiesto",
+  "@inventoryDiscardReasonRequired": {
+    "description": "Localized string inventoryDiscardReasonRequired"
+  },
+  "inventoryQcReasonRequired": "Motivo QC richiesto",
+  "@inventoryQcReasonRequired": {
+    "description": "Localized string inventoryQcReasonRequired"
+  },
+  "inventoryInvalidDateRange": "Intervallo date non valido",
+  "@inventoryInvalidDateRange": {
+    "description": "Localized string inventoryInvalidDateRange"
+  },
+  "inventoryInvalidEmail": "Email non valida",
+  "@inventoryInvalidEmail": {
+    "description": "Localized string inventoryInvalidEmail"
+  },
+  "inventoryInvalidCost": "Costo non valido",
+  "@inventoryInvalidCost": {
+    "description": "Localized string inventoryInvalidCost"
+  },
+  "inventoryReceiptValidationInProgress": "Convalida ricevimento già in corso",
+  "@inventoryReceiptValidationInProgress": {
+    "description": "Localized string inventoryReceiptValidationInProgress"
+  },
+  "inventoryCountApprovalInProgress": "Approvazione inventario già in corso",
+  "@inventoryCountApprovalInProgress": {
+    "description": "Localized string inventoryCountApprovalInProgress"
+  },
+  "inventoryCancellationInProgress": "Annullamento già in corso",
+  "@inventoryCancellationInProgress": {
+    "description": "Localized string inventoryCancellationInProgress"
+  },
+  "inventoryAtLeastOneLineRequired": "Almeno una riga richiesta",
+  "@inventoryAtLeastOneLineRequired": {
+    "description": "Localized string inventoryAtLeastOneLineRequired"
+  },
+  "inventoryAddProductsInProgress": "Aggiunta prodotti già in corso",
+  "@inventoryAddProductsInProgress": {
+    "description": "Localized string inventoryAddProductsInProgress"
+  },
+  "inventoryLocationRoom": "Stanza {room}",
+  "@inventoryLocationRoom": {
+    "description": "Localized string inventoryLocationRoom",
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryLocationRack": "Scaffale {rack}",
+  "@inventoryLocationRack": {
+    "description": "Localized string inventoryLocationRack",
+    "placeholders": {
+      "rack": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryLocationShelf": "Ripiano {shelf}",
+  "@inventoryLocationShelf": {
+    "description": "Localized string inventoryLocationShelf",
+    "placeholders": {
+      "shelf": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryNoLocation": "Nessuna ubicazione",
+  "@inventoryNoLocation": {
+    "description": "Localized string inventoryNoLocation"
+  },
+  "inventoryNoStockForProduct": "MGWS non ha restituito stock per il prodotto {productId}",
+  "@inventoryNoStockForProduct": {
+    "description": "Localized string inventoryNoStockForProduct",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStockOfProduct": "Stock {label}: {count} pezzi",
+  "@inventoryStockOfProduct": {
+    "description": "Localized string inventoryStockOfProduct",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStepStockChanged": "Prodotto {productId}: stock {before} -> {after}",
+  "@inventoryStepStockChanged": {
+    "description": "Localized string inventoryStepStockChanged",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      },
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStepFailed": "Prodotto {productId}: {message}",
+  "@inventoryStepFailed": {
+    "description": "Localized string inventoryStepFailed",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAdjustmentApplied": "Rettifica applicata a {count} prodotti",
+  "@inventoryAdjustmentApplied": {
+    "description": "Localized string inventoryAdjustmentApplied",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryAdjustmentPartial": "Rettifica parziale: {done} su {total} prodotti",
+  "@inventoryAdjustmentPartial": {
+    "description": "Localized string inventoryAdjustmentPartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryMoveChooseSource": "Scegli il magazzino di partenza per {label}",
+  "@inventoryMoveChooseSource": {
+    "description": "Localized string inventoryMoveChooseSource",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMoveInvalidDestination": "Sede di destinazione non valida per {label}",
+  "@inventoryMoveInvalidDestination": {
+    "description": "Localized string inventoryMoveInvalidDestination",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMoveSameLocation": "Origine e destinazione sono la stessa per {label}",
+  "@inventoryMoveSameLocation": {
+    "description": "Localized string inventoryMoveSameLocation",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMoveInvalidQuantity": "Quantità da spostare non valida per {label}",
+  "@inventoryMoveInvalidQuantity": {
+    "description": "Localized string inventoryMoveInvalidQuantity",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMoveNotEnoughStock": "Per {label} nel magazzino di partenza ci sono solo {available} pezzi",
+  "@inventoryMoveNotEnoughStock": {
+    "description": "Localized string inventoryMoveNotEnoughStock",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMoveReason": "Sposta {quantity} pezzi: sede {siteA} magazzino {warehouseA} -> sede {siteB} magazzino {warehouseB}.",
+  "@inventoryMoveReason": {
+    "description": "Localized string inventoryMoveReason",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "siteA": {
+        "type": "int"
+      },
+      "warehouseA": {
+        "type": "int"
+      },
+      "siteB": {
+        "type": "int"
+      },
+      "warehouseB": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStepMoved": "Prodotto {productId}: {quantity} pezzi da sede {fromSite} a sede {toSite}",
+  "@inventoryStepMoved": {
+    "description": "Localized string inventoryStepMoved",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "fromSite": {
+        "type": "int"
+      },
+      "toSite": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryMoveCompleted": "Spostati {quantity} pezzi su {count} prodotti",
+  "@inventoryMoveCompleted": {
+    "description": "Localized string inventoryMoveCompleted",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryMovePartial": "Spostamento parziale: {done} su {total} prodotti",
+  "@inventoryMovePartial": {
+    "description": "Localized string inventoryMovePartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryMgwsNoData": "Risposta MGWS senza dati",
+  "@inventoryMgwsNoData": {
+    "description": "Localized string inventoryMgwsNoData"
+  },
+  "inventoryQuickLoadDone": "Completati {done}/{total} carichi",
+  "@inventoryQuickLoadDone": {
+    "description": "Localized string inventoryQuickLoadDone",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryQuickLoadPartial": "Completati {done}/{total} carichi; {failed} da riprovare",
+  "@inventoryQuickLoadPartial": {
+    "description": "Localized string inventoryQuickLoadPartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "inventorySelectProductOrVariant": "Seleziona almeno un prodotto o variante",
+  "@inventorySelectProductOrVariant": {
+    "description": "Localized string inventorySelectProductOrVariant"
+  },
+  "inventoryOverReceiptNotAllowed": "Over-ricezione non consentita senza approvazione MGWS",
+  "@inventoryOverReceiptNotAllowed": {
+    "description": "Localized string inventoryOverReceiptNotAllowed"
+  },
+  "inventoryInvalidStartDate": "Data iniziale non valida",
+  "@inventoryInvalidStartDate": {
+    "description": "Localized string inventoryInvalidStartDate"
+  },
+  "inventoryInvalidEndDate": "Data finale non valida",
+  "@inventoryInvalidEndDate": {
+    "description": "Localized string inventoryInvalidEndDate"
+  },
+  "inventoryLabelledDetail": "{label}: {detail}",
+  "@inventoryLabelledDetail": {
+    "description": "Localized string inventoryLabelledDetail",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddInterrupted": "Aggiunta interrotta: nessun carico eseguito",
+  "@inventoryAddInterrupted": {
+    "description": "Localized string inventoryAddInterrupted"
+  },
+  "inventoryAddDraftCreated": "Bozza ordine {document} creata",
+  "@inventoryAddDraftCreated": {
+    "description": "Localized string inventoryAddDraftCreated",
+    "placeholders": {
+      "document": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddOrderLineFailed": "Riga ordine \"{label}\": {message}",
+  "@inventoryAddOrderLineFailed": {
+    "description": "Localized string inventoryAddOrderLineFailed",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddOrderLinesSaved": "Righe ordine registrate: {saved}/{total}",
+  "@inventoryAddOrderLinesSaved": {
+    "description": "Localized string inventoryAddOrderLinesSaved",
+    "placeholders": {
+      "saved": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryAddOrderPending": "Ordine {orderId} messo in attesa verifica",
+  "@inventoryAddOrderPending": {
+    "description": "Localized string inventoryAddOrderPending",
+    "placeholders": {
+      "orderId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryAddOrderPendingFailed": "Stato pending ordine: {message}",
+  "@inventoryAddOrderPendingFailed": {
+    "description": "Localized string inventoryAddOrderPendingFailed",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddReceiptVerificationFailed": "Ricezione in verifica: {message}",
+  "@inventoryAddReceiptVerificationFailed": {
+    "description": "Localized string inventoryAddReceiptVerificationFailed",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddAwaitingManager": "Stock in attesa approvazione manager",
+  "@inventoryAddAwaitingManager": {
+    "description": "Localized string inventoryAddAwaitingManager"
+  },
+  "inventoryAddLoadDone": "Carico eseguito: {lines} righe, {quantity} pezzi",
+  "@inventoryAddLoadDone": {
+    "description": "Localized string inventoryAddLoadDone",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryAddValidationSkipped": "Convalida saltata: ordine incompleto",
+  "@inventoryAddValidationSkipped": {
+    "description": "Localized string inventoryAddValidationSkipped"
+  },
+  "inventoryAddReceiptNote": "Ricezione generata da aggiunta prodotti, in attesa verifica.",
+  "@inventoryAddReceiptNote": {
+    "description": "Localized string inventoryAddReceiptNote"
+  },
+  "inventoryAddReceiptPending": "Ricezione {receiptId} {document} in attesa verifica",
+  "@inventoryAddReceiptPending": {
+    "description": "Localized string inventoryAddReceiptPending",
+    "placeholders": {
+      "receiptId": {
+        "type": "String"
+      },
+      "document": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddOrderNote": "Aggiunta prodotti: {quantity} pezzi su {lines} righe.",
+  "@inventoryAddOrderNote": {
+    "description": "Localized string inventoryAddOrderNote",
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryAddOrderNoteValidated": "Ordine convalidato.",
+  "@inventoryAddOrderNoteValidated": {
+    "description": "Localized string inventoryAddOrderNoteValidated"
+  },
+  "inventoryAddOrderNoteDraft": "Ordine in bozza, da convalidare.",
+  "@inventoryAddOrderNoteDraft": {
+    "description": "Localized string inventoryAddOrderNoteDraft"
+  },
+  "inventoryAddSummaryToCheck": "{load}; ordine {supplier} da controllare",
+  "@inventoryAddSummaryToCheck": {
+    "description": "Localized string inventoryAddSummaryToCheck",
+    "placeholders": {
+      "load": {
+        "type": "String"
+      },
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddSummaryDraft": "{load}; ordine {supplier} salvato in bozza",
+  "@inventoryAddSummaryDraft": {
+    "description": "Localized string inventoryAddSummaryDraft",
+    "placeholders": {
+      "load": {
+        "type": "String"
+      },
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddSummaryValidated": "{load}; ordine {supplier} convalidato",
+  "@inventoryAddSummaryValidated": {
+    "description": "Localized string inventoryAddSummaryValidated",
+    "placeholders": {
+      "load": {
+        "type": "String"
+      },
+      "supplier": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryKindAdd": "Aggiungi",
+  "@inventoryKindAdd": {
+    "description": "Localized string inventoryKindAdd"
+  },
+  "inventoryKindAdjustment": "Rettifica",
+  "@inventoryKindAdjustment": {
+    "description": "Localized string inventoryKindAdjustment"
+  },
+  "inventoryKindMove": "Sposta",
+  "@inventoryKindMove": {
+    "description": "Localized string inventoryKindMove"
+  },
+  "inventoryKindCount": "Conteggio",
+  "@inventoryKindCount": {
+    "description": "Localized string inventoryKindCount"
+  },
+  "inventoryKindReceipt": "Ricezione",
+  "@inventoryKindReceipt": {
+    "description": "Localized string inventoryKindReceipt"
+  },
+  "inventoryKindOther": "Altro",
+  "@inventoryKindOther": {
+    "description": "Localized string inventoryKindOther"
+  },
+  "inventoryResumeBlockMove": "Uno spostamento si rifà dalla rotta dei pezzi, e questa operazione non la espone: le sue righe non hanno i magazzini di partenza e arrivo, quindi non si può sapere da dove rimetterli.",
+  "@inventoryResumeBlockMove": {
+    "description": "Localized string inventoryResumeBlockMove"
+  },
+  "inventoryResumeBlockAdd": "Il carico è l'unica rotta del gruppo e sa solo aumentare lo stock: un carico corretto in meno è una diminuzione, che da lì non si può scrivere.",
+  "@inventoryResumeBlockAdd": {
+    "description": "Localized string inventoryResumeBlockAdd"
+  },
+  "inventoryResumeBlockCount": "Un conteggio fisico è registrato da MGWS e non da un pannello: riaprirlo qui produrrebbe una correzione, non un conteggio.",
+  "@inventoryResumeBlockCount": {
+    "description": "Localized string inventoryResumeBlockCount"
+  },
+  "inventoryResumeBlockReceipt": "Una ricezione viene da un ordine fornitore: si corregge dall'ordine, non dal pannello carico.",
+  "@inventoryResumeBlockReceipt": {
+    "description": "Localized string inventoryResumeBlockReceipt"
+  },
+  "inventoryResumeBlockOther": "MGWS ha registrato il movimento come \"{type}\", e l'app non sa di che modulo si tratta.",
+  "@inventoryResumeBlockOther": {
+    "description": "Localized string inventoryResumeBlockOther",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMovementNoType": "senza tipo",
+  "@inventoryMovementNoType": {
+    "description": "Localized string inventoryMovementNoType"
+  },
+  "inventoryRevertBlockNoProducts": "Il movimento non ha prodotti da riportare indietro",
+  "@inventoryRevertBlockNoProducts": {
+    "description": "Localized string inventoryRevertBlockNoProducts"
+  },
+  "inventoryRevertBlockNoRoute": "Nessun prodotto di questo spostamento ha la rotta registrata: senza sapere da quale magazzino erano partiti i pezzi non si può decidere dove rimetterli",
+  "@inventoryRevertBlockNoRoute": {
+    "description": "Localized string inventoryRevertBlockNoRoute"
+  },
+  "inventoryItemsCount": "{count} pezzi",
+  "@inventoryItemsCount": {
+    "description": "Localized string inventoryItemsCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertReasonMove": "Annullamento movimento #{movementId}: riporto {quantity} pezzi da S{siteTo} W{warehouseTo} a S{siteFrom} W{warehouseFrom} (spostamento al contrario)",
+  "@inventoryRevertReasonMove": {
+    "description": "Localized string inventoryRevertReasonMove",
+    "placeholders": {
+      "movementId": {
+        "type": "int"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "siteTo": {
+        "type": "int"
+      },
+      "warehouseTo": {
+        "type": "int"
+      },
+      "siteFrom": {
+        "type": "int"
+      },
+      "warehouseFrom": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertReasonStock": "Annullamento movimento #{movementId}: riporto stock da {after} a {before} ({kind})",
+  "@inventoryRevertReasonStock": {
+    "description": "Localized string inventoryRevertReasonStock",
+    "placeholders": {
+      "movementId": {
+        "type": "int"
+      },
+      "after": {
+        "type": "String"
+      },
+      "before": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryRevertProductLabel": "Prodotto #{productId}",
+  "@inventoryRevertProductLabel": {
+    "description": "Localized string inventoryRevertProductLabel",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertProductVariantLabel": "Prodotto #{productId} variante {variationId}",
+  "@inventoryRevertProductVariantLabel": {
+    "description": "Localized string inventoryRevertProductVariantLabel",
+    "placeholders": {
+      "productId": {
+        "type": "int"
+      },
+      "variationId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertBlockStockChanged": "lo stock è ora {current} in sede {siteId}, non {expected}: un movimento successivo ha già toccato questo prodotto",
+  "@inventoryRevertBlockStockChanged": {
+    "description": "Localized string inventoryRevertBlockStockChanged",
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "siteId": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryRevertBlockMissingSite": "le righe del movimento non dicono in che sede era il prodotto, quindi non si sa quale totale riportare indietro",
+  "@inventoryRevertBlockMissingSite": {
+    "description": "Localized string inventoryRevertBlockMissingSite"
+  },
+  "inventoryRevertBlockShopTotal": "il totale registrato è di tutto il negozio e il prodotto ha pezzi anche in un'altra sede: riportarlo in una sola azzererebbe pezzi che stanno lì",
+  "@inventoryRevertBlockShopTotal": {
+    "description": "Localized string inventoryRevertBlockShopTotal"
+  },
+  "inventoryRevertBlockMissingRoute": "le righe dello spostamento non dicono da quale magazzino erano partiti i pezzi, quindi non si può sapere dove rimetterli",
+  "@inventoryRevertBlockMissingRoute": {
+    "description": "Localized string inventoryRevertBlockMissingRoute"
+  },
+  "inventoryRevertBlockItemsMissing": "nel magazzino di arrivo ci sono {available} pezzi e ne servivano {needed}: qualcuno li ha già spostati o venduti",
+  "@inventoryRevertBlockItemsMissing": {
+    "description": "Localized string inventoryRevertBlockItemsMissing",
+    "placeholders": {
+      "available": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertBlockReadFailed": "non si è riusciti a leggere lo stock attuale: {error}",
+  "@inventoryRevertBlockReadFailed": {
+    "description": "Localized string inventoryRevertBlockReadFailed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMgwsNoAnswer": "MGWS non ha risposto",
+  "@inventoryMgwsNoAnswer": {
+    "description": "Localized string inventoryMgwsNoAnswer"
+  },
+  "inventoryMgwsNoSiteStock": "MGWS non ha restituito lo stock della sede",
+  "@inventoryMgwsNoSiteStock": {
+    "description": "Localized string inventoryMgwsNoSiteStock"
+  },
+  "inventoryRevertPrepared": "{count} prodotti riportabili indietro",
+  "@inventoryRevertPrepared": {
+    "description": "Localized string inventoryRevertPrepared",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertNothing": "Nessun prodotto riportabile: controlla i dettagli",
+  "@inventoryRevertNothing": {
+    "description": "Localized string inventoryRevertNothing"
+  },
+  "inventoryRevertStepMoved": "· {product}: {quantity} pezzi riportati a S{siteFrom} W{warehouseFrom}",
+  "@inventoryRevertStepMoved": {
+    "description": "Localized string inventoryRevertStepMoved",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "siteFrom": {
+        "type": "int"
+      },
+      "warehouseFrom": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertStepRestored": "· {product}: tornato a {stock}",
+  "@inventoryRevertStepRestored": {
+    "description": "Localized string inventoryRevertStepRestored",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "stock": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertStepSkipped": "Saltato {product}: {reason}",
+  "@inventoryRevertStepSkipped": {
+    "description": "Localized string inventoryRevertStepSkipped",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryRevertDone": "Annullati {count} prodotti: lo stock è tornato a prima",
+  "@inventoryRevertDone": {
+    "description": "Localized string inventoryRevertDone",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRevertPartial": "Annullamento parziale: {done} su {total} prodotti riportati indietro",
+  "@inventoryRevertPartial": {
+    "description": "Localized string inventoryRevertPartial",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryOrderLineResolvedByScan": "Riga ordine risolta da scan",
+  "@inventoryOrderLineResolvedByScan": {
+    "description": "Localized string inventoryOrderLineResolvedByScan"
+  },
+  "inventoryOrderLineRef": "Riga ordine #{lineId}",
+  "@inventoryOrderLineRef": {
+    "description": "Localized string inventoryOrderLineRef",
+    "placeholders": {
+      "lineId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventorySelectOrderBeforeScan": "Seleziona un ordine fornitore prima dello scan",
+  "@inventorySelectOrderBeforeScan": {
+    "description": "Localized string inventorySelectOrderBeforeScan"
+  },
+  "inventoryScanNotResolved": "Scan non risolto sulle righe ordine selezionate",
+  "@inventoryScanNotResolved": {
+    "description": "Localized string inventoryScanNotResolved"
+  },
+  "inventoryEnterScanCode": "Inserisci barcode, barcode interno o ID riga da risolvere",
+  "@inventoryEnterScanCode": {
+    "description": "Localized string inventoryEnterScanCode"
+  },
+  "inventoryAdjustmentRunning": "Rettifica in corso",
+  "@inventoryAdjustmentRunning": {
+    "description": "Localized string inventoryAdjustmentRunning"
+  },
+  "inventoryApplyAdjustment": "Applica rettifica",
+  "@inventoryApplyAdjustment": {
+    "description": "Localized string inventoryApplyAdjustment"
+  },
+  "inventoryCountsTitle": "Inventario fisico MGWS",
+  "@inventoryCountsTitle": {
+    "description": "Localized string inventoryCountsTitle"
+  },
+  "inventoryCountsSubtitle": "Conta fisica stock-neutral fino ad approvazione: barcode e tag sono risolti da MGWS.",
+  "@inventoryCountsSubtitle": {
+    "description": "Localized string inventoryCountsSubtitle"
+  },
+  "inventoryDocumentRequiredLabel": "Documento *",
+  "@inventoryDocumentRequiredLabel": {
+    "description": "Localized string inventoryDocumentRequiredLabel"
+  },
+  "inventoryNotes": "Note",
+  "@inventoryNotes": {
+    "description": "Localized string inventoryNotes"
+  },
+  "inventorySession": "Sessione",
+  "@inventorySession": {
+    "description": "Localized string inventorySession"
+  },
+  "inventoryRfidTag": "Tag RFID",
+  "@inventoryRfidTag": {
+    "description": "Localized string inventoryRfidTag"
+  },
+  "inventoryPhysicalQuantityRequired": "Quantità fisica *",
+  "@inventoryPhysicalQuantityRequired": {
+    "description": "Localized string inventoryPhysicalQuantityRequired"
+  },
+  "inventoryColDocument": "Documento",
+  "@inventoryColDocument": {
+    "description": "Localized string inventoryColDocument"
+  },
+  "inventoryColStatus": "Stato",
+  "@inventoryColStatus": {
+    "description": "Localized string inventoryColStatus"
+  },
+  "inventoryColSite": "Sito",
+  "@inventoryColSite": {
+    "description": "Localized string inventoryColSite"
+  },
+  "inventoryColWarehouse": "Magazzino",
+  "@inventoryColWarehouse": {
+    "description": "Localized string inventoryColWarehouse"
+  },
+  "inventoryColLines": "Righe",
+  "@inventoryColLines": {
+    "description": "Localized string inventoryColLines"
+  },
+  "inventoryColProductVariant": "Prodotto/Variante",
+  "@inventoryColProductVariant": {
+    "description": "Localized string inventoryColProductVariant"
+  },
+  "inventoryColLocation": "Ubicazione",
+  "@inventoryColLocation": {
+    "description": "Localized string inventoryColLocation"
+  },
+  "inventoryColBook": "Libro",
+  "@inventoryColBook": {
+    "description": "Localized string inventoryColBook"
+  },
+  "inventoryColPhysical": "Fisico",
+  "@inventoryColPhysical": {
+    "description": "Localized string inventoryColPhysical"
+  },
+  "inventoryColMovement": "Movimento",
+  "@inventoryColMovement": {
+    "description": "Localized string inventoryColMovement"
+  },
+  "inventoryNotPosted": "non postato",
+  "@inventoryNotPosted": {
+    "description": "Localized string inventoryNotPosted"
+  },
+  "inventoryPurchaseOrdersTitle": "Ordini fornitore",
+  "@inventoryPurchaseOrdersTitle": {
+    "description": "Localized string inventoryPurchaseOrdersTitle"
+  },
+  "inventoryPurchaseOrdersSubtitle": "Bozze, righe varianti e stati ordine MGWS; la ricezione resta nel workflow dedicato.",
+  "@inventoryPurchaseOrdersSubtitle": {
+    "description": "Localized string inventoryPurchaseOrdersSubtitle"
+  },
+  "inventoryColSupplier": "Fornitore",
+  "@inventoryColSupplier": {
+    "description": "Localized string inventoryColSupplier"
+  },
+  "inventoryColExpected": "Previsto",
+  "@inventoryColExpected": {
+    "description": "Localized string inventoryColExpected"
+  },
+  "inventoryExpectedDate": "Data prevista",
+  "@inventoryExpectedDate": {
+    "description": "Localized string inventoryExpectedDate"
+  },
+  "inventoryCurrency": "Valuta",
+  "@inventoryCurrency": {
+    "description": "Localized string inventoryCurrency"
+  },
+  "inventoryWarehouseId": "Magazzino ID",
+  "@inventoryWarehouseId": {
+    "description": "Localized string inventoryWarehouseId"
+  },
+  "inventoryColLine": "Riga",
+  "@inventoryColLine": {
+    "description": "Localized string inventoryColLine"
+  },
+  "inventoryColQty": "Qtà",
+  "@inventoryColQty": {
+    "description": "Localized string inventoryColQty"
+  },
+  "inventoryColReceived": "Ricevuto",
+  "@inventoryColReceived": {
+    "description": "Localized string inventoryColReceived"
+  },
+  "inventoryColCost": "Costo",
+  "@inventoryColCost": {
+    "description": "Localized string inventoryColCost"
+  },
+  "inventoryColStockEffect": "Effetto stock",
+  "@inventoryColStockEffect": {
+    "description": "Localized string inventoryColStockEffect"
+  },
+  "inventoryQuantityRequired": "Quantità *",
+  "@inventoryQuantityRequired": {
+    "description": "Localized string inventoryQuantityRequired"
+  },
+  "inventoryCostRequired": "Costo *",
+  "@inventoryCostRequired": {
+    "description": "Localized string inventoryCostRequired"
+  },
+  "inventorySelectProducts": "Seleziona prodotti",
+  "@inventorySelectProducts": {
+    "description": "Localized string inventorySelectProducts"
+  },
+  "inventoryEditSelection": "Modifica selezione",
+  "@inventoryEditSelection": {
+    "description": "Localized string inventoryEditSelection"
+  },
+  "inventoryOpenCatalogHint": "Apri il catalogo per scegliere prodotti semplici o varianti.",
+  "@inventoryOpenCatalogHint": {
+    "description": "Localized string inventoryOpenCatalogHint"
+  },
+  "inventorySelectProductsAndVariants": "Seleziona prodotti e varianti",
+  "@inventorySelectProductsAndVariants": {
+    "description": "Localized string inventorySelectProductsAndVariants"
+  },
+  "inventoryReceiptsTitle": "Ricezione / Convalida",
+  "@inventoryReceiptsTitle": {
+    "description": "Localized string inventoryReceiptsTitle"
+  },
+  "inventoryReceiptsSubtitle": "Ricevi DDT su ordine fornitore e applica stock solo con convalida MGWS finale.",
+  "@inventoryReceiptsSubtitle": {
+    "description": "Localized string inventoryReceiptsSubtitle"
+  },
+  "inventoryNoOrderForReceipt": "Nessun ordine fornitore disponibile per ricezione.",
+  "@inventoryNoOrderForReceipt": {
+    "description": "Localized string inventoryNoOrderForReceipt"
+  },
+  "inventorySelectOrderForLines": "Seleziona un ordine per vedere le righe ricevibili.",
+  "@inventorySelectOrderForLines": {
+    "description": "Localized string inventorySelectOrderForLines"
+  },
+  "inventoryNoReceiptFound": "Nessuna ricezione MGWS trovata.",
+  "@inventoryNoReceiptFound": {
+    "description": "Localized string inventoryNoReceiptFound"
+  },
+  "inventoryColOrder": "Ordine",
+  "@inventoryColOrder": {
+    "description": "Localized string inventoryColOrder"
+  },
+  "inventoryColOrdered": "Ordinata",
+  "@inventoryColOrdered": {
+    "description": "Localized string inventoryColOrdered"
+  },
+  "inventoryColAlreadyReceived": "Già ricevuta",
+  "@inventoryColAlreadyReceived": {
+    "description": "Localized string inventoryColAlreadyReceived"
+  },
+  "inventoryColReceipt": "Ricezione",
+  "@inventoryColReceipt": {
+    "description": "Localized string inventoryColReceipt"
+  },
+  "inventoryDeliveryNoteRequired": "DDT / documento *",
+  "@inventoryDeliveryNoteRequired": {
+    "description": "Localized string inventoryDeliveryNoteRequired"
+  },
+  "inventoryReceiptNotes": "Note ricezione",
+  "@inventoryReceiptNotes": {
+    "description": "Localized string inventoryReceiptNotes"
+  },
+  "inventoryScanHint": "Scan barcode, barcode interno o ID riga",
+  "@inventoryScanHint": {
+    "description": "Localized string inventoryScanHint"
+  },
+  "inventoryOrderLineIdRequired": "Riga ordine ID *",
+  "@inventoryOrderLineIdRequired": {
+    "description": "Localized string inventoryOrderLineIdRequired"
+  },
+  "inventoryOrderedQuantityRequired": "Quantità ordinata *",
+  "@inventoryOrderedQuantityRequired": {
+    "description": "Localized string inventoryOrderedQuantityRequired"
+  },
+  "inventoryReceivedQuantityRequired": "Quantità ricevuta *",
+  "@inventoryReceivedQuantityRequired": {
+    "description": "Localized string inventoryReceivedQuantityRequired"
+  },
+  "inventoryRejectedQuantity": "Quantità scartata",
+  "@inventoryRejectedQuantity": {
+    "description": "Localized string inventoryRejectedQuantity"
+  },
+  "inventoryBackorderQuantity": "Quantità backorder",
+  "@inventoryBackorderQuantity": {
+    "description": "Localized string inventoryBackorderQuantity"
+  },
+  "inventoryQcReason": "Motivo QC/scarto/backorder",
+  "@inventoryQcReason": {
+    "description": "Localized string inventoryQcReason"
+  },
+  "inventoryReceiptSummaryNone": "Convalida/post summary: nessuna ricezione selezionata o creata.",
+  "@inventoryReceiptSummaryNone": {
+    "description": "Localized string inventoryReceiptSummaryNone"
+  },
+  "inventoryReorderTitle": "Riordino",
+  "@inventoryReorderTitle": {
+    "description": "Localized string inventoryReorderTitle"
+  },
+  "inventoryReorderSubtitle": "Suggerimenti MGWS da soglie stock basse: genera bozze ordine senza mutare giacenze.",
+  "@inventoryReorderSubtitle": {
+    "description": "Localized string inventoryReorderSubtitle"
+  },
+  "inventoryColToOrder": "Da ordinare",
+  "@inventoryColToOrder": {
+    "description": "Localized string inventoryColToOrder"
+  },
+  "inventoryNoSupplierFound": "Nessun fornitore trovato",
+  "@inventoryNoSupplierFound": {
+    "description": "Localized string inventoryNoSupplierFound"
+  },
+  "inventoryInactive": "Inattivo",
+  "@inventoryInactive": {
+    "description": "Localized string inventoryInactive"
+  },
+  "inventoryVatNumber": "P.IVA",
+  "@inventoryVatNumber": {
+    "description": "Localized string inventoryVatNumber"
+  },
+  "inventoryPhone": "Telefono",
+  "@inventoryPhone": {
+    "description": "Localized string inventoryPhone"
+  },
+  "inventoryPayment": "Pagamento",
+  "@inventoryPayment": {
+    "description": "Localized string inventoryPayment"
+  },
+  "inventoryEditSupplier": "Modifica fornitore",
+  "@inventoryEditSupplier": {
+    "description": "Localized string inventoryEditSupplier"
+  },
+  "inventorySupplierNameRequiredLabel": "Ragione sociale / nome *",
+  "@inventorySupplierNameRequiredLabel": {
+    "description": "Localized string inventorySupplierNameRequiredLabel"
+  },
+  "inventoryVatTax": "P.IVA / Tax",
+  "@inventoryVatTax": {
+    "description": "Localized string inventoryVatTax"
+  },
+  "inventoryPaymentDays": "Pagamento gg",
+  "@inventoryPaymentDays": {
+    "description": "Localized string inventoryPaymentDays"
+  },
+  "inventoryLeadTimeDays": "Lead time gg",
+  "@inventoryLeadTimeDays": {
+    "description": "Localized string inventoryLeadTimeDays"
+  },
+  "inventoryCreateSupplier": "Crea fornitore",
+  "@inventoryCreateSupplier": {
+    "description": "Localized string inventoryCreateSupplier"
+  },
+  "inventoryProductRef": "Prodotto #{id}",
+  "@inventoryProductRef": {
+    "description": "Localized string inventoryProductRef",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryProductVariantRef": "Prodotto #{id} / Variante {variationId}",
+  "@inventoryProductVariantRef": {
+    "description": "Localized string inventoryProductVariantRef",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      },
+      "variationId": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryLinesAndItems": "{lines} righe · {items} pezzi",
+  "@inventoryLinesAndItems": {
+    "description": "Localized string inventoryLinesAndItems",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "items": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRetryLines": "Riprova {count} righe",
+  "@inventoryRetryLines": {
+    "description": "Localized string inventoryRetryLines",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryInternalBarcodeValue": "Barcode interno {barcode}",
+  "@inventoryInternalBarcodeValue": {
+    "description": "Localized string inventoryInternalBarcodeValue",
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryInternalBarcodeMissing": "Barcode interno non disponibile",
+  "@inventoryInternalBarcodeMissing": {
+    "description": "Localized string inventoryInternalBarcodeMissing"
+  },
+  "inventoryProductsLoadedSoFar": "{count} prodotti caricati finora",
+  "@inventoryProductsLoadedSoFar": {
+    "description": "Localized string inventoryProductsLoadedSoFar",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryProductsAvailable": "{count} prodotti disponibili",
+  "@inventoryProductsAvailable": {
+    "description": "Localized string inventoryProductsAvailable",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryChooseVariant": "Seleziona una variante",
+  "@inventoryChooseVariant": {
+    "description": "Localized string inventoryChooseVariant"
+  },
+  "inventoryProductFallback": "prodotto",
+  "@inventoryProductFallback": {
+    "description": "Localized string inventoryProductFallback"
+  },
+  "inventoryReceiptSummary": "Convalida/post summary: ricezione #{receiptId} {status}, {lines} righe, stock applicato solo dopo convalida MGWS.",
+  "@inventoryReceiptSummary": {
+    "description": "Localized string inventoryReceiptSummary",
+    "placeholders": {
+      "receiptId": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryLeadTimeSafety": "{lead}g + safety {safety}g",
+  "@inventoryLeadTimeSafety": {
+    "description": "Localized string inventoryLeadTimeSafety",
+    "placeholders": {
+      "lead": {
+        "type": "int"
+      },
+      "safety": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryDeactivateSupplierConfirm": "Disattivare {name}? Lo storico degli ordini resta collegato.",
+  "@inventoryDeactivateSupplierConfirm": {
+    "description": "Localized string inventoryDeactivateSupplierConfirm",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inventorySupplierRef": "Fornitore #{id}",
+  "@inventorySupplierRef": {
+    "description": "Localized string inventorySupplierRef",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "inventorySupplierRecord": "Registro fornitore #{id}",
+  "@inventorySupplierRecord": {
+    "description": "Localized string inventorySupplierRecord",
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryDaysValue": "{days} gg",
+  "@inventoryDaysValue": {
+    "description": "Localized string inventoryDaysValue",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStockInReason": "Carico merce",
+  "@inventoryStockInReason": {
+    "description": "Reason shown for a stock-in; MGWS stores the fixed value kInventoryCaricoReason"
+  },
+  "inventoryReorderDraftNote": "Bozza generata da suggerimento riordino MGWS",
+  "@inventoryReorderDraftNote": {
+    "description": "Localized string inventoryReorderDraftNote"
   }
 }

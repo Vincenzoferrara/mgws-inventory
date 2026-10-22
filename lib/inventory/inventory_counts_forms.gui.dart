@@ -84,12 +84,12 @@ class InventoryCountSessionFields extends StatelessWidget {
       ),
       inventoryCountField(
         documentController,
-        'Documento *',
+        context.l10n.inventoryDocumentRequiredLabel,
         'inventory-count-document-field',
       ),
       inventoryCountField(
         notesController,
-        'Note',
+        context.l10n.inventoryNotes,
         'inventory-count-notes-field',
       ),
       ElevatedButton.icon(
@@ -140,7 +140,7 @@ class InventoryCountLineFields extends StatelessWidget {
     children: [
       inventoryCountField(
         sessionController,
-        'Sessione',
+        context.l10n.inventorySession,
         'inventory-count-session-field',
       ),
       inventoryCountField(
@@ -160,12 +160,12 @@ class InventoryCountLineFields extends StatelessWidget {
       ),
       inventoryCountField(
         tagController,
-        'Tag RFID',
+        context.l10n.inventoryRfidTag,
         'inventory-count-tag-field',
       ),
       inventoryCountField(
         quantityController,
-        'Quantita fisica *',
+        context.l10n.inventoryPhysicalQuantityRequired,
         'inventory-count-quantity-field',
       ),
       inventoryCountField(

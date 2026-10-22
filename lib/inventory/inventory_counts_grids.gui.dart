@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
+import '../l10n/extensions.dart';
 import '../theme/theme.dart';
 import 'inventory.code.dart';
 
@@ -21,19 +22,32 @@ class InventoryCountSessionsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataGridView<MgwsCountSession>(
-      columns: const [
-        DataGridViewColumn(id: 'doc', label: 'Documento', width: 150),
-        DataGridViewColumn(id: 'status', label: 'Stato', width: 110),
-        DataGridViewColumn(id: 'site', label: 'Sito', width: 80, numeric: true),
+      columns: [
+        DataGridViewColumn(
+          id: 'doc',
+          label: context.l10n.inventoryColDocument,
+          width: 150,
+        ),
+        DataGridViewColumn(
+          id: 'status',
+          label: context.l10n.inventoryColStatus,
+          width: 110,
+        ),
+        DataGridViewColumn(
+          id: 'site',
+          label: context.l10n.inventoryColSite,
+          width: 80,
+          numeric: true,
+        ),
         DataGridViewColumn(
           id: 'warehouse',
-          label: 'Magazzino',
+          label: context.l10n.inventoryColWarehouse,
           width: 110,
           numeric: true,
         ),
         DataGridViewColumn(
           id: 'lines',
-          label: 'Righe',
+          label: context.l10n.inventoryColLines,
           width: 90,
           numeric: true,
         ),
@@ -54,22 +68,26 @@ class InventoryCountLinesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataGridView<MgwsCountLine>(
-      columns: const [
+      columns: [
         DataGridViewColumn(
           id: 'product',
-          label: 'Prodotto/Variante',
+          label: context.l10n.inventoryColProductVariant,
           width: 190,
         ),
-        DataGridViewColumn(id: 'place', label: 'Ubicazione', width: 160),
+        DataGridViewColumn(
+          id: 'place',
+          label: context.l10n.inventoryColLocation,
+          width: 160,
+        ),
         DataGridViewColumn(
           id: 'book',
-          label: 'Libro',
+          label: context.l10n.inventoryColBook,
           width: 80,
           numeric: true,
         ),
         DataGridViewColumn(
           id: 'physical',
-          label: 'Fisico',
+          label: context.l10n.inventoryColPhysical,
           width: 90,
           numeric: true,
         ),
@@ -79,7 +97,11 @@ class InventoryCountLinesGrid extends StatelessWidget {
           width: 80,
           numeric: true,
         ),
-        DataGridViewColumn(id: 'move', label: 'Movimento', width: 110),
+        DataGridViewColumn(
+          id: 'move',
+          label: context.l10n.inventoryColMovement,
+          width: 110,
+        ),
       ],
       rows: [for (final line in lines) _lineRow(context, line)],
     );
@@ -108,7 +130,7 @@ class InventoryCountFeedbackPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: tone,
               fontWeight: FontWeight.w700,
@@ -117,7 +139,7 @@ class InventoryCountFeedbackPanel extends StatelessWidget {
           for (final detail in feedback.details)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(detail),
+              child: Text(detail(context.l10n)),
             ),
         ],
       ),
@@ -163,14 +185,19 @@ DataGridViewRowData<MgwsCountLine> _lineRow(
     foregroundColor: tone,
     cells: {
       'product': Text(
-        'Prodotto #${line.productId} / Variante ${line.variationId}',
+        context.l10n.inventoryProductVariantRef(
+          line.productId,
+          line.variationId,
+        ),
       ),
       'place': Text('${line.room}-${line.rack}-${line.shelf}'),
       'book': Text('${line.bookQuantity}'),
       'physical': Text('${line.physicalQuantity}'),
       'diff': Text('${line.discrepancyQuantity}'),
       'move': Text(
-        line.stockMoveId == 0 ? 'non postato' : '#${line.stockMoveId}',
+        line.stockMoveId == 0
+            ? context.l10n.inventoryNotPosted
+            : '#${line.stockMoveId}',
       ),
     },
   );

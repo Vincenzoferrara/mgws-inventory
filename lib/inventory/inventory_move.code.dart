@@ -11,6 +11,7 @@
 // per quel prodotto ([InventoryStockLevel]): non si inventano sedi.
 
 import '../login/mgws/query/query_mgws_inventory.dart';
+import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 
 /// Una riga di spostamento: un prodotto, da dove parte, dove arriva e quanti
@@ -92,18 +93,20 @@ class InventoryMoveLine {
 
   /// Motivo passato a MGWS per la riga: origine, destinazione e pezzi devono
   /// restare leggibili nel ledger anche senza aprire l'app.
-  String reasonTextFor(String reason) {
+  String reasonTextFor(String reason, AppLocalizations l10n) {
     final from = source;
     final destination = destinationSiteId;
     if (from == null || destination == null) return reason.trim();
-    final head =
-        'Sposta $quantity pezzi: sede $destination '
-        'magazzino $destinationWarehouseId -> sede ${from.siteId} '
-        'magazzino ${from.warehouseId}.';
-    final room = from.locationLabel.trim();
-    final tail = room.isEmpty || room == 'Nessuna ubicazione'
-        ? reason.trim()
-        : '${reason.trim()} [$room]';
+    final head = l10n.inventoryMoveReason(
+      quantity,
+      destination,
+      destinationWarehouseId,
+      from.siteId,
+      from.warehouseId,
+    );
+    final tail = from.hasLocation
+        ? '${reason.trim()} [${from.locationLabel(l10n)}]'
+        : reason.trim();
     return '$head $tail';
   }
 
@@ -158,39 +161,46 @@ class InventoryMovePlan {
   ///
   /// Va passata identica su tutte: uno spostamento di quattro prodotti e' un
   /// movimento solo, anche se il backend ne scrive otto righe, due per prodotto.
-  InventoryFormParse<List<InventoryMoveCommand>> parse({String? movementKey}) {
+  InventoryFormParse<List<InventoryMoveCommand>> parse({
+    String? movementKey,
+    required AppLocalizations l10n,
+  }) {
     if (lines.isEmpty) {
-      return const InventoryFormInvalid('Seleziona almeno un prodotto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventorySelectAtLeastOneProduct,
+      );
     }
     final commands = <InventoryMoveCommand>[];
     for (final line in lines) {
       if (line.productId <= 0) {
-        return const InventoryFormInvalid('product_id non valido');
+        return InventoryFormInvalid(invalidFieldText('product_id'));
       }
       if (line.source == null) {
         return InventoryFormInvalid(
-          'Scegli il magazzino di partenza per ${line.label}',
+          (l10n) => l10n.inventoryMoveChooseSource(line.label),
         );
       }
       if (line.destinationSiteId == null) {
         return InventoryFormInvalid(
-          'Sede di destinazione non valida per ${line.label}',
+          (l10n) => l10n.inventoryMoveInvalidDestination(line.label),
         );
       }
       if (line.isSameLocation) {
         return InventoryFormInvalid(
-          'Origine e destinazione sono la stessa per ${line.label}',
+          (l10n) => l10n.inventoryMoveSameLocation(line.label),
         );
       }
       if (line.quantity <= 0) {
         return InventoryFormInvalid(
-          'Quantita da spostare non valida per ${line.label}',
+          (l10n) => l10n.inventoryMoveInvalidQuantity(line.label),
         );
       }
       if (line.quantity > line.availableInSource) {
         return InventoryFormInvalid(
-          'Per ${line.label} nel magazzino di partenza ci sono solo '
-          '${line.availableInSource} pezzi',
+          (l10n) => l10n.inventoryMoveNotEnoughStock(
+            line.availableInSource,
+            line.label,
+          ),
         );
       }
       commands.add(
@@ -201,7 +211,7 @@ class InventoryMovePlan {
           toSiteId: line.destinationSiteId!,
           toWarehouseId: line.destinationWarehouseId,
           quantity: line.quantity,
-          reason: line.reasonTextFor(details),
+          reason: line.reasonTextFor(details, l10n),
           movementKey: movementKey,
         ),
       );
@@ -258,9 +268,9 @@ class InventoryMoveController with InventoryFeedbackController {
   /// Carica lo stock MGWS del prodotto indicato: da li' l'operatore sceglie il
   /// magazzino di partenza fra le ubicazioni che hanno pezzi.
   Future<InventoryActionFeedback> loadStock(String productIdText) async {
-    if (isLoading) return invalid('Caricamento stock gia in corso');
+    if (isLoading) return invalid((l10n) => l10n.inventoryStockLoadInProgress);
     final productId = InventoryInputParser.parseProductId(productIdText);
-    if (productId == null) return invalid('product_id non valido');
+    if (productId == null) return invalid(invalidFieldText('product_id'));
 
     isLoading = true;
     try {
@@ -270,15 +280,16 @@ class InventoryMoveController with InventoryFeedbackController {
         inventory.stockRows.isEmpty ? null : inventory.stockRows.first,
       );
       if (snapshot == null) {
-        return invalid(
-          'MGWS non ha restituito stock per il prodotto $productId',
-        );
+        return invalid((l10n) => l10n.inventoryNoStockForProduct(productId));
       }
       lastSnapshot = snapshot;
       return remember(
         InventoryActionFeedback(
           success: true,
-          message: 'Stock ${snapshot.label}: ${snapshot.currentStock} pezzi',
+          message: (l10n) => l10n.inventoryStockOfProduct(
+            snapshot.label,
+            snapshot.currentStock,
+          ),
         ),
       );
     } finally {
@@ -297,19 +308,25 @@ class InventoryMoveController with InventoryFeedbackController {
   /// Le righe vanno in sequenza e non si fermano al primo errore: ogni
   /// prodotto e' indipendente, quindi un fallimento non invalida gli altri e
   /// l'operatore riceve l'elenco di cosa e' passato e cosa no.
-  Future<InventoryActionFeedback> submit(InventoryMovePlan plan) async {
-    if (isSubmitting) return invalid('Spostamento gia in corso');
+  Future<InventoryActionFeedback> submit(
+    AppLocalizations l10n,
+    InventoryMovePlan plan,
+  ) async {
+    if (isSubmitting) return invalid((l10n) => l10n.inventoryMoveInProgress);
     // Una chiave per invio: quattro prodotti spostati insieme sono un movimento
     // solo, anche se il backend ne scrive otto righe.
-    final parsed = plan.parse(movementKey: newInventoryMovementKey());
+    final parsed = plan.parse(
+      movementKey: newInventoryMovementKey(),
+      l10n: l10n,
+    );
     switch (parsed) {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(value: final commands):
         isSubmitting = true;
         final results = <MgwsMoveResult>[];
-        final steps = <String>[];
-        final details = <String>[];
+        final steps = <LocalizedText>[];
+        final details = <LocalizedText>[];
         var failed = 0;
         try {
           for (final command in commands) {
@@ -331,12 +348,21 @@ class InventoryMoveController with InventoryFeedbackController {
             if (result != null) results.add(result);
             if (feedback.success) {
               steps.add(
-                'Prodotto ${command.productId}: ${command.quantity} pezzi da '
-                'sede ${command.fromSiteId} a sede ${command.toSiteId}',
+                (l10n) => l10n.inventoryStepMoved(
+                  command.productId,
+                  command.quantity,
+                  command.fromSiteId,
+                  command.toSiteId,
+                ),
               );
             } else {
               failed++;
-              details.add('Prodotto ${command.productId}: ${feedback.message}');
+              details.add(
+                (l10n) => l10n.inventoryStepFailed(
+                  command.productId,
+                  feedback.message(l10n),
+                ),
+              );
             }
           }
           lastResults = List<MgwsMoveResult>.unmodifiable(results);
@@ -346,11 +372,18 @@ class InventoryMoveController with InventoryFeedbackController {
             InventoryActionFeedback(
               success: failed == 0,
               message: failed == 0
-                  ? 'Spostati ${plan.totalQuantity} pezzi su '
-                        '${commands.length} prodotti'
-                  : 'Spostamento parziale: ${commands.length - failed} su '
-                        '${commands.length} prodotti',
-              details: [for (final step in steps) '· $step', ...details],
+                  ? (l10n) => l10n.inventoryMoveCompleted(
+                      plan.totalQuantity,
+                      commands.length,
+                    )
+                  : (l10n) => l10n.inventoryMovePartial(
+                      commands.length - failed,
+                      commands.length,
+                    ),
+              details: [
+                for (final step in steps) (l10n) => '· ${step(l10n)}',
+                ...details,
+              ],
             ),
           );
         } finally {

@@ -38,36 +38,43 @@ class InventoryMovementFilterForm {
   InventoryFormParse<MgwsMovementFilter> parse() {
     final productId = _optionalPositiveInt(productIdText);
     if (productIdText.trim().isNotEmpty && productId == null) {
-      return const InventoryFormInvalid('product_id non valido');
+      return InventoryFormInvalid(invalidFieldText('product_id'));
     }
     final variationId = _optionalNonNegativeInt(variationIdText);
     if (variationIdText.trim().isNotEmpty && variationId == null) {
-      return const InventoryFormInvalid('variation_id non valido');
+      return InventoryFormInvalid(invalidFieldText('variation_id'));
     }
-    final dateFrom = _parseDate(dateFromText, 'data iniziale non valida');
+    final dateFrom = _parseDate(
+      dateFromText,
+      (l10n) => l10n.inventoryInvalidStartDate,
+    );
     if (dateFrom is InventoryFormInvalid<String?>) {
       return InventoryFormInvalid(dateFrom.message);
     }
-    final dateTo = _parseDate(dateToText, 'data finale non valida');
+    final dateTo = _parseDate(
+      dateToText,
+      (l10n) => l10n.inventoryInvalidEndDate,
+    );
     if (dateTo is InventoryFormInvalid<String?>) {
       return InventoryFormInvalid(dateTo.message);
     }
     final page = InventoryInputParser.parsePositiveInt(pageText);
-    if (page == null) return const InventoryFormInvalid('pagina non valida');
+    if (page == null)
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidPage);
     final perPage = InventoryInputParser.parsePositiveInt(perPageText);
     if (perPage == null || perPage > 100) {
-      return const InventoryFormInvalid('righe per pagina non valide');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidRowsPerPage);
     }
     final from = (dateFrom as InventoryFormValid<String?>).value;
     final to = (dateTo as InventoryFormValid<String?>).value;
     if (from != null &&
         to != null &&
         DateTime.parse(from).isAfter(DateTime.parse(to))) {
-      return const InventoryFormInvalid('intervallo date non valido');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidDateRange);
     }
     final operatorUserId = _optionalPositiveInt(operatorUserIdText);
     if (operatorUserIdText.trim().isNotEmpty && operatorUserId == null) {
-      return const InventoryFormInvalid('operatore non valido');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidOperator);
     }
     return InventoryFormValid(
       MgwsMovementFilter(
@@ -113,8 +120,8 @@ class InventoryMovementController with InventoryFeedbackController {
           return remember(
             InventoryActionFeedback(
               success: result.success,
-              message: result.message,
-              details: result.details,
+              message: literalText(result.message),
+              details: literalTexts(result.details),
             ),
           );
         } finally {
@@ -124,7 +131,7 @@ class InventoryMovementController with InventoryFeedbackController {
   }
 }
 
-InventoryFormParse<String?> _parseDate(String value, String message) {
+InventoryFormParse<String?> _parseDate(String value, LocalizedText message) {
   final trimmed = value.trim();
   if (trimmed.isEmpty) return const InventoryFormValid(null);
   final parsed = DateTime.tryParse(trimmed);

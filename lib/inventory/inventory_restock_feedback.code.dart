@@ -1,3 +1,7 @@
+import '../l10n/localized_text.dart';
+
+export '../l10n/localized_text.dart';
+
 class InventoryActionFeedback {
   const InventoryActionFeedback({
     required this.success,
@@ -6,8 +10,12 @@ class InventoryActionFeedback {
   });
 
   final bool success;
-  final String message;
-  final List<String> details;
+
+  /// Esito da mostrare: la GUI lo traduce con `message(context.l10n)`.
+  final LocalizedText message;
+
+  /// Righe di dettaglio, tradotte come [message].
+  final List<LocalizedText> details;
 }
 
 sealed class InventoryFormParse<T> {
@@ -23,7 +31,7 @@ class InventoryFormValid<T> extends InventoryFormParse<T> {
 class InventoryFormInvalid<T> extends InventoryFormParse<T> {
   const InventoryFormInvalid(this.message);
 
-  final String message;
+  final LocalizedText message;
 }
 
 class InventoryInputParser {
@@ -63,13 +71,15 @@ class InventoryInputParser {
 class InventoryIdentifierForm {
   const InventoryIdentifierForm(this.idText, {this.label = 'id'});
 
+  /// Nome tecnico del campo (es. `purchase_order_id`), mostrato cosi com'e.
+
   final String idText;
   final String label;
 
   InventoryFormParse<int> parse() {
     final id = InventoryInputParser.parsePositiveInt(idText);
     return id == null
-        ? InventoryFormInvalid('$label non valido')
+        ? InventoryFormInvalid((l10n) => l10n.inventoryInvalidField(label))
         : InventoryFormValid(id);
   }
 }
@@ -82,7 +92,11 @@ mixin InventoryFeedbackController {
     return feedback;
   }
 
-  InventoryActionFeedback invalid(String message) {
+  InventoryActionFeedback invalid(LocalizedText message) {
     return remember(InventoryActionFeedback(success: false, message: message));
   }
 }
+
+/// "<campo> non valido": il nome tecnico del campo resta invariato.
+LocalizedText invalidFieldText(String field) =>
+    (l10n) => l10n.inventoryInvalidField(field);

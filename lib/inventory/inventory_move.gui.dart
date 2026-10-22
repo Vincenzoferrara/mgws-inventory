@@ -298,7 +298,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryBarcodeNonRiconosciuto,
+          message: (l10n) => l10n.inventoryBarcodeNonRiconosciuto,
         ),
       );
       return null;
@@ -307,7 +307,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryProdottoGiaInLista(
+          message: (l10n) => l10n.inventoryProdottoGiaInLista(
             match?.label ??
                 context.l10n.inventoryProdottoNumero(productId.toString()),
           ),
@@ -346,7 +346,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
         row.loadError = null;
         row.resetRoute();
       } else {
-        row.loadError = feedback.message;
+        row.loadError = feedback.message(context.l10n);
         row.sourceIndex = null;
       }
       _feedback = feedback.success ? null : feedback;
@@ -449,7 +449,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
 
   Future<void> _submit() async {
     final plan = _plan();
-    final parsed = plan.parse();
+    final parsed = plan.parse(l10n: context.l10n);
     if (parsed case InventoryFormInvalid(:final message)) {
       _showFeedback(InventoryActionFeedback(success: false, message: message));
       return;
@@ -459,7 +459,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       plan: plan,
     );
     if (confirmed != true || !mounted) return;
-    final feedback = await _controller.submit(plan);
+    final feedback = await _controller.submit(context.l10n, plan);
     if (!mounted) return;
     if (feedback.success) {
       setState(() {
@@ -824,11 +824,11 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       rows: [
         for (final level in levels)
           DataGridViewRowData(
-            id: '${level.siteId}-${level.warehouseId}-${level.locationLabel}',
+            id: '${level.siteId}-${level.warehouseId}-${level.locationKey}',
             value: level,
             cells: {
               'location': Text(
-                level.locationLabel,
+                level.locationLabel(context.l10n),
                 style: source != null && level == source
                     ? const TextStyle(fontWeight: FontWeight.w800)
                     : null,
@@ -859,14 +859,17 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );

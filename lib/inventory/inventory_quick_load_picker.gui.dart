@@ -98,7 +98,7 @@ class _InventoryQuickLoadPickerDialogState
       variationId: 0,
       label: product.nome?.trim().isNotEmpty == true
           ? product.nome!.trim()
-          : 'Prodotto #${product.id ?? 0}',
+          : context.l10n.inventoryProductRef(product.id ?? 0),
       barcodeInterno: product.barcodeInterno,
       barcode: _barcode(product.metadatiCustom),
       imageUrl: product.immagineUrl,
@@ -113,7 +113,7 @@ class _InventoryQuickLoadPickerDialogState
   ) {
     final productLabel = product.nome?.trim().isNotEmpty == true
         ? product.nome!.trim()
-        : 'Prodotto #${product.id ?? 0}';
+        : context.l10n.inventoryProductRef(product.id ?? 0);
     return InventoryQuickLoadLineDraft(
       productId: product.id ?? 0,
       variationId: variant.id,
@@ -186,7 +186,7 @@ class _InventoryQuickLoadPickerDialogState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Seleziona prodotti e varianti',
+                  context.l10n.inventorySelectProductsAndVariants,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -194,8 +194,12 @@ class _InventoryQuickLoadPickerDialogState
                 const SizedBox(height: 2),
                 Text(
                   _controller.isLoading
-                      ? '${_controller.loadedProducts} prodotti caricati finora'
-                      : '${_controller.products.length} prodotti disponibili',
+                      ? context.l10n.inventoryProductsLoadedSoFar(
+                          _controller.loadedProducts,
+                        )
+                      : context.l10n.inventoryProductsAvailable(
+                          _controller.products.length,
+                        ),
                 ),
               ],
             ),
@@ -265,7 +269,9 @@ class _InventoryQuickLoadPickerDialogState
             DataGridViewImagePreview(
               key: ValueKey('quick-load-product-image-${product.id}'),
               imageUrl: product.immagineUrl,
-              semanticLabel: 'Copertina ${baseLine.label}',
+              semanticLabel: context.l10n.inventorySemanticaCopertina(
+                baseLine.label,
+              ),
               size: 48,
             ),
             if (selectedLine != null) ...[
@@ -293,12 +299,16 @@ class _InventoryQuickLoadPickerDialogState
         leading: DataGridViewImagePreview(
           key: ValueKey('quick-load-product-image-$productId'),
           imageUrl: product.immagineUrl,
-          semanticLabel: 'Copertina ${product.nome ?? 'prodotto'}',
+          semanticLabel: context.l10n.inventorySemanticaCopertina(
+            product.nome ?? context.l10n.inventoryProductFallback,
+          ),
           size: 48,
         ),
-        title: Text(product.nome ?? 'Prodotto #$productId'),
+        title: Text(
+          product.nome ?? context.l10n.inventoryProductRef(productId),
+        ),
         subtitle: Text(
-          '${_subtitle(product.barcodeInterno, product.quantitaTotaleVarianti)} · Seleziona una variante',
+          '${_subtitle(product.barcodeInterno, product.quantitaTotaleVarianti)} · ${context.l10n.inventoryChooseVariant}',
         ),
         onExpansionChanged: (expanded) {
           if (expanded) _loadVariants(product);
@@ -340,7 +350,9 @@ class _InventoryQuickLoadPickerDialogState
           DataGridViewImagePreview(
             key: ValueKey('quick-load-variant-image-${variant.id}'),
             imageUrl: variant.immagineUrl ?? product.immagineUrl,
-            semanticLabel: 'Copertina ${inventoryVariationLabel(variant)}',
+            semanticLabel: context.l10n.inventorySemanticaCopertina(
+              inventoryVariationLabel(variant),
+            ),
             size: 42,
           ),
           if (selectedLine != null) ...[
@@ -372,7 +384,10 @@ class _InventoryQuickLoadPickerDialogState
           children: [
             Expanded(
               child: Text(
-                '$selectedCount righe · $totalQuantity pezzi',
+                context.l10n.inventoryLinesAndItems(
+                  selectedCount,
+                  totalQuantity,
+                ),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
@@ -401,7 +416,10 @@ class _InventoryQuickLoadPickerDialogState
 
   String _subtitle(String? barcodeInterno, int? stock) {
     final barcodeNormalizzato = barcodeInterno?.trim();
-    return '${barcodeNormalizzato?.isNotEmpty == true ? 'Barcode interno $barcodeNormalizzato' : 'Barcode interno non disponibile'} · Stock ${stock ?? 0}';
+    final barcode = barcodeNormalizzato?.isNotEmpty == true
+        ? context.l10n.inventoryInternalBarcodeValue(barcodeNormalizzato!)
+        : context.l10n.inventoryInternalBarcodeMissing;
+    return '$barcode · Stock ${stock ?? 0}';
   }
 }
 

@@ -27,18 +27,21 @@ class InventorySupplierForm {
   InventoryFormParse<MgwsSupplierInput> parseCreate() {
     final paymentTermsDays = _optionalNonNegativeInt(
       paymentTermsDaysText,
-      'termini pagamento',
+      'payment_terms_days',
     );
     if (paymentTermsDays case InventoryFormInvalid(:final message)) {
       return InventoryFormInvalid(message);
     }
-    final leadTimeDays = _optionalNonNegativeInt(leadTimeDaysText, 'lead time');
+    final leadTimeDays = _optionalNonNegativeInt(
+      leadTimeDaysText,
+      'lead_time_days',
+    );
     if (leadTimeDays case InventoryFormInvalid(:final message)) {
       return InventoryFormInvalid(message);
     }
     final name = nameText.trim();
     if (name.isEmpty)
-      return const InventoryFormInvalid('nome fornitore richiesto');
+      return InventoryFormInvalid((l10n) => l10n.inventorySupplierNameRequired);
     final email = _optionalEmail(emailText);
     if (email case InventoryFormInvalid(:final message)) {
       return InventoryFormInvalid(message);
@@ -61,15 +64,18 @@ class InventorySupplierForm {
   InventoryFormParse<MgwsSupplierPatch> parsePatch() {
     final name = nameText.trim();
     if (name.isEmpty)
-      return const InventoryFormInvalid('nome fornitore richiesto');
+      return InventoryFormInvalid((l10n) => l10n.inventorySupplierNameRequired);
     final paymentTermsDays = _optionalNonNegativeInt(
       paymentTermsDaysText,
-      'termini pagamento',
+      'payment_terms_days',
     );
     if (paymentTermsDays case InventoryFormInvalid(:final message)) {
       return InventoryFormInvalid(message);
     }
-    final leadTimeDays = _optionalNonNegativeInt(leadTimeDaysText, 'lead time');
+    final leadTimeDays = _optionalNonNegativeInt(
+      leadTimeDaysText,
+      'lead_time_days',
+    );
     if (leadTimeDays case InventoryFormInvalid(:final message)) {
       return InventoryFormInvalid(message);
     }
@@ -96,7 +102,7 @@ class InventorySupplierForm {
 InventoryFormParse<int?> _optionalNonNegativeInt(String value, String label) {
   if (value.trim().isEmpty) return const InventoryFormValid(null);
   final parsed = InventoryInputParser.parseNonNegativeInt(value);
-  if (parsed == null) return InventoryFormInvalid('$label non valido');
+  if (parsed == null) return InventoryFormInvalid(invalidFieldText(label));
   return InventoryFormValid(parsed);
 }
 
@@ -109,7 +115,7 @@ InventoryFormParse<String?> _optionalEmail(String value) {
   final email = value.trim();
   if (email.isEmpty) return const InventoryFormValid(null);
   if (!_emailShape.hasMatch(email)) {
-    return const InventoryFormInvalid('email non valida');
+    return InventoryFormInvalid((l10n) => l10n.inventoryInvalidEmail);
   }
   return InventoryFormValid(email);
 }
@@ -209,8 +215,8 @@ class InventorySupplierController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: result.success,
-        message: result.message,
-        details: result.details,
+        message: literalText(result.message),
+        details: literalTexts(result.details),
       ),
     );
   }

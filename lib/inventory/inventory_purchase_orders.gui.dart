@@ -250,13 +250,13 @@ class _InventoryPurchaseOrderPanelState
                   color: theme.colorScheme.primary,
                 ),
                 title: Text(
-                  'Ordini fornitore',
+                  context.l10n.inventoryPurchaseOrdersTitle,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 subtitle: Text(
-                  'Bozze, righe varianti e stati ordine MGWS; la ricezione resta nel workflow dedicato.',
+                  context.l10n.inventoryPurchaseOrdersSubtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.subtitleColor,
                   ),
@@ -323,12 +323,33 @@ class _InventoryPurchaseOrderPanelState
   );
 
   Widget _orderGrid() => DataGridView<MgwsPurchaseOrder>(
-    columns: const [
-      DataGridViewColumn(id: 'doc', label: 'Documento', width: 150),
-      DataGridViewColumn(id: 'supplier', label: 'Fornitore', width: 120),
-      DataGridViewColumn(id: 'status', label: 'Stato', width: 110),
-      DataGridViewColumn(id: 'expected', label: 'Previsto', width: 190),
-      DataGridViewColumn(id: 'lines', label: 'Righe', width: 80, numeric: true),
+    columns: [
+      DataGridViewColumn(
+        id: 'doc',
+        label: context.l10n.inventoryColDocument,
+        width: 150,
+      ),
+      DataGridViewColumn(
+        id: 'supplier',
+        label: context.l10n.inventoryColSupplier,
+        width: 120,
+      ),
+      DataGridViewColumn(
+        id: 'status',
+        label: context.l10n.inventoryColStatus,
+        width: 110,
+      ),
+      DataGridViewColumn(
+        id: 'expected',
+        label: context.l10n.inventoryColExpected,
+        width: 190,
+      ),
+      DataGridViewColumn(
+        id: 'lines',
+        label: context.l10n.inventoryColLines,
+        width: 80,
+        numeric: true,
+      ),
     ],
     rows: [
       for (final order in widget.controller.purchaseOrders) _orderRow(order),
@@ -371,22 +392,38 @@ class _InventoryPurchaseOrderPanelState
         'Supplier ID *',
         'inventory-po-supplier-field',
       ),
-      _field(_documentController, 'Documento *', 'inventory-po-document-field'),
+      _field(
+        _documentController,
+        context.l10n.inventoryDocumentRequiredLabel,
+        'inventory-po-document-field',
+      ),
       _warehouseField(),
       _field(
         _expectedController,
-        'Data prevista',
+        context.l10n.inventoryExpectedDate,
         'inventory-po-expected-field',
       ),
-      _field(_currencyController, 'Valuta', 'inventory-po-currency-field'),
-      _field(_notesController, 'Note', 'inventory-po-notes-field'),
+      _field(
+        _currencyController,
+        context.l10n.inventoryCurrency,
+        'inventory-po-currency-field',
+      ),
+      _field(
+        _notesController,
+        context.l10n.inventoryNotes,
+        'inventory-po-notes-field',
+      ),
     ],
   );
 
   Widget _siteField() {
     final current = int.tryParse(_siteController.text.trim());
     if (_sites.isEmpty) {
-      return _field(_siteController, 'Sede *', 'inventory-po-site-field');
+      return _field(
+        _siteController,
+        context.l10n.inventoryEtichettaSedeObbligatoria,
+        'inventory-po-site-field',
+      );
     }
     return SizedBox(
       width: 210,
@@ -422,7 +459,7 @@ class _InventoryPurchaseOrderPanelState
     if (_warehouses.isEmpty) {
       return _field(
         _warehouseController,
-        'Magazzino ID',
+        context.l10n.inventoryWarehouseId,
         'inventory-po-warehouse-field',
       );
     }
@@ -449,18 +486,41 @@ class _InventoryPurchaseOrderPanelState
   }
 
   Widget _lineGrid() => DataGridView<MgwsPurchaseOrderLine>(
-    columns: const [
-      DataGridViewColumn(id: 'line', label: 'Riga', width: 80, numeric: true),
-      DataGridViewColumn(id: 'product', label: 'Prodotto/Variante', width: 220),
-      DataGridViewColumn(id: 'qty', label: 'Qta', width: 90, numeric: true),
+    columns: [
+      DataGridViewColumn(
+        id: 'line',
+        label: context.l10n.inventoryColLine,
+        width: 80,
+        numeric: true,
+      ),
+      DataGridViewColumn(
+        id: 'product',
+        label: context.l10n.inventoryColProductVariant,
+        width: 220,
+      ),
+      DataGridViewColumn(
+        id: 'qty',
+        label: context.l10n.inventoryColQty,
+        width: 90,
+        numeric: true,
+      ),
       DataGridViewColumn(
         id: 'received',
-        label: 'Ricevuto',
+        label: context.l10n.inventoryColReceived,
         width: 100,
         numeric: true,
       ),
-      DataGridViewColumn(id: 'cost', label: 'Costo', width: 100, numeric: true),
-      DataGridViewColumn(id: 'effect', label: 'Effetto stock', width: 160),
+      DataGridViewColumn(
+        id: 'cost',
+        label: context.l10n.inventoryColCost,
+        width: 100,
+        numeric: true,
+      ),
+      DataGridViewColumn(
+        id: 'effect',
+        label: context.l10n.inventoryColStockEffect,
+        width: 160,
+      ),
     ],
     rows: [for (final line in _selected?.lines ?? const []) _lineRow(line)],
     selectedRowId: _selectedLine?.id.toString(),
@@ -479,7 +539,10 @@ class _InventoryPurchaseOrderPanelState
       cells: {
         'line': Text('${line.lineNumber}'),
         'product': Text(
-          'Prodotto #${line.productId} / Variante ${line.variationId}',
+          context.l10n.inventoryProductVariantRef(
+            line.productId,
+            line.variationId,
+          ),
         ),
         'qty': Text('${line.orderedQuantity}'),
         'received': Text('${line.receivedQuantity}'),
@@ -506,10 +569,14 @@ class _InventoryPurchaseOrderPanelState
       ),
       _field(
         _lineQuantityController,
-        'Quantita *',
+        context.l10n.inventoryQuantityRequired,
         'inventory-po-line-quantity-field',
       ),
-      _field(_lineCostController, 'Costo *', 'inventory-po-line-cost-field'),
+      _field(
+        _lineCostController,
+        context.l10n.inventoryCostRequired,
+        'inventory-po-line-cost-field',
+      ),
       ElevatedButton.icon(
         key: const ValueKey('inventory-po-line-save'),
         onPressed: _selected == null || _busy ? null : _saveLine,
@@ -560,14 +627,17 @@ class _PoFeedback extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );

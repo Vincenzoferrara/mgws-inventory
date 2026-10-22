@@ -71,8 +71,8 @@ class InventoryController {
         InventoryActionFeedback(
           success: available,
           message: available
-              ? 'Backend MGWS disponibile'
-              : 'Backend MGWS richiesto: accedi o configura il backend MGWS',
+              ? (l10n) => l10n.inventoryMgwsAvailable
+              : (l10n) => l10n.inventoryMgwsRequired,
         ),
       );
     } finally {
@@ -92,15 +92,15 @@ class InventoryController {
         InventoryActionFeedback(
           success: true,
           message: stockRows.isEmpty
-              ? 'Nessuna riga stock disponibile'
-              : 'Stock caricato: ${stockRows.length} righe',
+              ? (l10n) => l10n.inventoryNoStockRows
+              : (l10n) => l10n.inventoryStockLoaded(stockRows.length),
         ),
       );
     } catch (e) {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: 'Errore caricamento stock MGWS: $e',
+          message: (l10n) => l10n.inventoryStockLoadError('$e'),
         ),
       );
     } finally {
@@ -113,9 +113,9 @@ class InventoryController {
     required String wooStockText,
   }) async {
     final productId = InventoryInputParser.parseProductId(productIdText);
-    if (productId == null) return _validationError('product_id non valido');
+    if (productId == null) return _validationError(_invalidField('product_id'));
     final wooStock = InventoryInputParser.parseStock(wooStockText);
-    if (wooStock == null) return _validationError('woo_stock non valido');
+    if (wooStock == null) return _validationError(_invalidField('woo_stock'));
     if (!await _availability.ensureConnected()) return _mgwsUnavailable();
 
     isSyncing = true;
@@ -134,14 +134,14 @@ class InventoryController {
             result.message,
             result.delta,
           ),
-          details: result.errors,
+          details: literalTexts(result.errors),
         ),
       );
     } catch (e) {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: 'Errore sync MGWS: $e',
+          message: (l10n) => l10n.inventorySyncError('$e'),
         ),
       );
     } finally {
@@ -160,17 +160,18 @@ class InventoryController {
     String? movementKey,
   }) async {
     final productId = InventoryInputParser.parseProductId(productIdText);
-    if (productId == null) return _validationError('product_id non valido');
+    if (productId == null) return _validationError(_invalidField('product_id'));
     final correctStock = InventoryInputParser.parseStock(correctStockText);
     if (correctStock == null)
-      return _validationError('correct_stock non valido');
+      return _validationError(_invalidField('correct_stock'));
     // La sede non si deduce dal prodotto ne' dal magazzino: e' il perimetro
     // dentro cui il totale viene riscritto, e senza il perimetro il numero
     // correggerebbe un posto diverso da quello che l'operatore sta guardando.
     final siteId = InventoryInputParser.parseOptionalPositiveInt(siteIdText);
-    if (siteId == null) return _validationError('site_id non valido');
+    if (siteId == null) return _validationError(_invalidField('site_id'));
     final reason = reasonText.trim();
-    if (reason.isEmpty) return _validationError('reason richiesto');
+    if (reason.isEmpty)
+      return _validationError((l10n) => l10n.inventoryRequiredField('reason'));
     if (!await _availability.ensureConnected()) return _mgwsUnavailable();
 
     isReconciling = true;
@@ -191,14 +192,14 @@ class InventoryController {
             result.message,
             result.delta,
           ),
-          details: result.errors,
+          details: literalTexts(result.errors),
         ),
       );
     } catch (e) {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: 'Errore reconcile MGWS: $e',
+          message: (l10n) => l10n.inventoryReconcileError('$e'),
         ),
       );
     } finally {
@@ -223,10 +224,10 @@ class InventoryController {
     String? movementKey,
   }) async {
     final productId = InventoryInputParser.parseProductId(productIdText);
-    if (productId == null) return _validationError('product_id non valido');
+    if (productId == null) return _validationError(_invalidField('product_id'));
     final fromSiteId = InventoryInputParser.parsePositiveInt(fromSiteIdText);
     if (fromSiteId == null)
-      return _validationError('Sede di partenza non valida');
+      return _validationError((l10n) => l10n.inventoryInvalidSourceSite);
     // Il magazzino puo' non essere specificato: vuol dire "quello di default
     // della sede", quindi il campo vuoto vale 0 e non un errore.
     final fromWarehouseId =
@@ -234,17 +235,18 @@ class InventoryController {
         0;
     final toSiteId = InventoryInputParser.parsePositiveInt(toSiteIdText);
     if (toSiteId == null)
-      return _validationError('Sede di destinazione non valida');
+      return _validationError((l10n) => l10n.inventoryInvalidDestinationSite);
     final toWarehouseId =
         InventoryInputParser.parseOptionalNonNegativeInt(toWarehouseIdText) ??
         0;
     final quantity = InventoryInputParser.parsePositiveInt(quantityText);
     if (quantity == null)
-      return _validationError('Quantita da spostare non valida');
+      return _validationError((l10n) => l10n.inventoryInvalidMoveQuantity);
     final reason = reasonText.trim();
-    if (reason.isEmpty) return _validationError('motivo richiesto');
+    if (reason.isEmpty)
+      return _validationError((l10n) => l10n.inventoryReasonRequired);
     if (fromSiteId == toSiteId && fromWarehouseId == toWarehouseId) {
-      return _validationError('Origine e destinazione sono la stessa');
+      return _validationError((l10n) => l10n.inventorySameSourceAndDestination);
     }
     if (!await _availability.ensureConnected()) return _mgwsUnavailable();
 
@@ -265,15 +267,15 @@ class InventoryController {
       return _remember(
         InventoryActionFeedback(
           success: result.success,
-          message: result.message,
-          details: result.errors,
+          message: literalText(result.message),
+          details: literalTexts(result.errors),
         ),
       );
     } catch (e) {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: 'Errore spostamento MGWS: $e',
+          message: (l10n) => l10n.inventoryMoveError('$e'),
         ),
       );
     } finally {
@@ -283,28 +285,34 @@ class InventoryController {
 
   Future<InventoryActionFeedback> resolveRfidScan(String rawTags) async {
     final tags = InventoryInputParser.parseTags(rawTags);
-    if (tags.isEmpty) return _validationError('Inserisci almeno un tag RFID');
+    if (tags.isEmpty)
+      return _validationError((l10n) => l10n.inventoryEnterRfidTag);
     if (!await _availability.ensureConnected()) return _mgwsUnavailable();
 
     isResolvingRfid = true;
     try {
       final result = await gateway.resolveRfidScan(tagIds: tags);
       lastRfidResult = result;
-      final suffix = result.isResolveOnly ? 'Nessuna quantita aggiornata.' : '';
       return _remember(
         InventoryActionFeedback(
           success: result.success,
-          message:
-              'RFID resolve-only: ${result.resolved.length} risolti, '
-              '${result.unresolved.length} non risolti. $suffix',
-          details: [...result.errors, ...result.unresolved],
+          message: (l10n) {
+            final summary = l10n.inventoryRfidResolveSummary(
+              result.resolved.length,
+              result.unresolved.length,
+            );
+            return result.isResolveOnly
+                ? '$summary ${l10n.inventoryRfidNoQuantityUpdated}'
+                : summary;
+          },
+          details: literalTexts([...result.errors, ...result.unresolved]),
         ),
       );
     } catch (e) {
       return _remember(
         InventoryActionFeedback(
           success: false,
-          message: 'Errore RFID MGWS: $e',
+          message: (l10n) => l10n.inventoryRfidError('$e'),
         ),
       );
     } finally {
@@ -317,15 +325,18 @@ class InventoryController {
     return InventoryInputParser.parseProductId(value);
   }
 
-  InventoryActionFeedback _validationError(String message) {
+  static LocalizedText _invalidField(String field) =>
+      (l10n) => l10n.inventoryInvalidField(field);
+
+  InventoryActionFeedback _validationError(LocalizedText message) {
     return _remember(InventoryActionFeedback(success: false, message: message));
   }
 
   InventoryActionFeedback _mgwsUnavailable() {
     return _remember(
-      const InventoryActionFeedback(
+      InventoryActionFeedback(
         success: false,
-        message: 'Backend MGWS non disponibile',
+        message: (l10n) => l10n.inventoryMgwsUnavailable,
       ),
     );
   }
@@ -335,9 +346,12 @@ class InventoryController {
     return feedback;
   }
 
-  String _stockMessage(String action, String message, int? delta) {
-    if (delta == null) return '$action: $message';
+  LocalizedText _stockMessage(String action, String message, int? delta) {
+    if (delta == null) {
+      return (l10n) => l10n.inventoryStockActionResult(action, message);
+    }
     final sign = delta > 0 ? '+' : '';
-    return '$action: $message (delta $sign$delta)';
+    return (l10n) =>
+        l10n.inventoryStockActionResultDelta(action, message, '$sign$delta');
   }
 }

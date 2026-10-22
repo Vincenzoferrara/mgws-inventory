@@ -163,13 +163,11 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
     final order = _selectedOrder;
     final scan = _scanController.text.trim().toLowerCase();
     if (order == null) {
-      _setLocalFeedback('Seleziona un ordine fornitore prima dello scan');
+      _setLocalFeedback((l10n) => l10n.inventorySelectOrderBeforeScan);
       return;
     }
     if (scan.isEmpty) {
-      _setLocalFeedback(
-        'Inserisci barcode, barcode interno o ID riga da risolvere',
-      );
+      _setLocalFeedback((l10n) => l10n.inventoryEnterScanCode);
       return;
     }
     for (final line in order.lines) {
@@ -186,17 +184,20 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
           _fillLine(line);
           _feedback = InventoryActionFeedback(
             success: true,
-            message: 'Riga ordine risolta da scan',
-            details: ['Prodotto #${line.productId}', 'Riga ordine #${line.id}'],
+            message: (l10n) => l10n.inventoryOrderLineResolvedByScan,
+            details: [
+              (l10n) => l10n.inventoryRevertProductLabel(line.productId),
+              (l10n) => l10n.inventoryOrderLineRef(line.id),
+            ],
           );
         });
         return;
       }
     }
-    _setLocalFeedback('Scan non risolto sulle righe ordine selezionate');
+    _setLocalFeedback((l10n) => l10n.inventoryScanNotResolved);
   }
 
-  void _setLocalFeedback(String message) {
+  void _setLocalFeedback(LocalizedText message) {
     setState(() {
       _feedback = InventoryActionFeedback(success: false, message: message);
     });
@@ -265,13 +266,13 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
                   color: theme.colorScheme.primary,
                 ),
                 title: Text(
-                  'Ricezione / Convalida',
+                  context.l10n.inventoryReceiptsTitle,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 subtitle: Text(
-                  'Ricevi DDT su ordine fornitore e applica stock solo con convalida MGWS finale.',
+                  context.l10n.inventoryReceiptsSubtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.subtitleColor,
                   ),
@@ -339,19 +340,19 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
         if (_loadingOrders)
           const Center(child: CircularProgressIndicator())
         else if (orders.isEmpty)
-          _empty(colors, 'Nessun ordine fornitore disponibile per ricezione.')
+          _empty(colors, context.l10n.inventoryNoOrderForReceipt)
         else
           SizedBox(height: 170, child: _orderGrid()),
         const SizedBox(height: 12),
         if (_selectedOrder != null)
           SizedBox(height: 160, child: _lineGrid())
         else
-          _empty(colors, 'Seleziona un ordine per vedere le righe ricevivili.'),
+          _empty(colors, context.l10n.inventorySelectOrderForLines),
         const SizedBox(height: 12),
         if (_loadingReceipts)
           const Center(child: LinearProgressIndicator())
         else if (widget.controller.receipts.isEmpty)
-          _empty(colors, 'Nessuna ricezione MGWS trovata.')
+          _empty(colors, context.l10n.inventoryNoReceiptFound)
         else
           SizedBox(height: 150, child: _receiptGrid()),
       ],
@@ -359,11 +360,28 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
   }
 
   Widget _orderGrid() => DataGridView<MgwsPurchaseOrder>(
-    columns: const [
-      DataGridViewColumn(id: 'doc', label: 'Ordine', width: 150),
-      DataGridViewColumn(id: 'supplier', label: 'Fornitore', width: 120),
-      DataGridViewColumn(id: 'status', label: 'Stato', width: 110),
-      DataGridViewColumn(id: 'lines', label: 'Righe', width: 80, numeric: true),
+    columns: [
+      DataGridViewColumn(
+        id: 'doc',
+        label: context.l10n.inventoryColOrder,
+        width: 150,
+      ),
+      DataGridViewColumn(
+        id: 'supplier',
+        label: context.l10n.inventoryColSupplier,
+        width: 120,
+      ),
+      DataGridViewColumn(
+        id: 'status',
+        label: context.l10n.inventoryColStatus,
+        width: 110,
+      ),
+      DataGridViewColumn(
+        id: 'lines',
+        label: context.l10n.inventoryColLines,
+        width: 80,
+        numeric: true,
+      ),
     ],
     rows: [
       for (final order in widget.purchaseOrderController.purchaseOrders)
@@ -388,18 +406,23 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
   }
 
   Widget _lineGrid() => DataGridView<MgwsPurchaseOrderLine>(
-    columns: const [
-      DataGridViewColumn(id: 'line', label: 'Riga', width: 70, numeric: true),
+    columns: [
+      DataGridViewColumn(
+        id: 'line',
+        label: context.l10n.inventoryColLine,
+        width: 70,
+        numeric: true,
+      ),
       DataGridViewColumn(id: 'scan', label: 'Scan', width: 170),
       DataGridViewColumn(
         id: 'ordered',
-        label: 'Ordinata',
+        label: context.l10n.inventoryColOrdered,
         width: 100,
         numeric: true,
       ),
       DataGridViewColumn(
         id: 'received',
-        label: 'Gia ricevuta',
+        label: context.l10n.inventoryColAlreadyReceived,
         width: 120,
         numeric: true,
       ),
@@ -432,16 +455,29 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
   }
 
   Widget _receiptGrid() => DataGridView<MgwsReceipt>(
-    columns: const [
+    columns: [
       DataGridViewColumn(
         id: 'id',
-        label: 'Ricezione',
+        label: context.l10n.inventoryColReceipt,
         width: 110,
         numeric: true,
       ),
-      DataGridViewColumn(id: 'doc', label: 'Documento', width: 150),
-      DataGridViewColumn(id: 'status', label: 'Stato', width: 120),
-      DataGridViewColumn(id: 'lines', label: 'Righe', width: 80, numeric: true),
+      DataGridViewColumn(
+        id: 'doc',
+        label: context.l10n.inventoryColDocument,
+        width: 150,
+      ),
+      DataGridViewColumn(
+        id: 'status',
+        label: context.l10n.inventoryColStatus,
+        width: 120,
+      ),
+      DataGridViewColumn(
+        id: 'lines',
+        label: context.l10n.inventoryColLines,
+        width: 80,
+        numeric: true,
+      ),
     ],
     rows: [
       for (final receipt in widget.controller.receipts) _receiptRow(receipt),
@@ -479,7 +515,7 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
       _field(_receiptController, 'Receipt ID', 'inventory-receipt-id-field'),
       _field(
         _documentController,
-        'DDT / documento *',
+        context.l10n.inventoryDeliveryNoteRequired,
         'inventory-receipt-document-field',
       ),
       _field(
@@ -489,12 +525,12 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
       ),
       _field(
         _notesController,
-        'Note ricezione',
+        context.l10n.inventoryReceiptNotes,
         'inventory-receipt-notes-field',
       ),
       _field(
         _scanController,
-        'Scan barcode, barcode interno o ID riga',
+        context.l10n.inventoryScanHint,
         'inventory-receipt-scan-field',
       ),
       SizedBox(
@@ -516,7 +552,11 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
   Widget _siteField() {
     final current = int.tryParse(_siteController.text.trim());
     if (_sites.isEmpty) {
-      return _field(_siteController, 'Sede *', 'inventory-receipt-site-field');
+      return _field(
+        _siteController,
+        context.l10n.inventoryEtichettaSedeObbligatoria,
+        'inventory-receipt-site-field',
+      );
     }
     return SizedBox(
       width: 210,
@@ -553,27 +593,27 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
     children: [
       _field(
         _lineController,
-        'Riga ordine ID *',
+        context.l10n.inventoryOrderLineIdRequired,
         'inventory-receipt-line-id-field',
       ),
       _field(
         _orderedController,
-        'Quantita ordinata *',
+        context.l10n.inventoryOrderedQuantityRequired,
         'inventory-receipt-ordered-field',
       ),
       _field(
         _receivedController,
-        'Quantita ricevuta *',
+        context.l10n.inventoryReceivedQuantityRequired,
         'inventory-receipt-received-field',
       ),
       _field(
         _rejectedController,
-        'Quantita scartata',
+        context.l10n.inventoryRejectedQuantity,
         'inventory-receipt-rejected-field',
       ),
       _field(
         _backorderController,
-        'Quantita backorder',
+        context.l10n.inventoryBackorderQuantity,
         'inventory-receipt-backorder-field',
       ),
       SizedBox(
@@ -589,7 +629,7 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
       ),
       _field(
         _reasonController,
-        'Motivo QC/scarto/backorder',
+        context.l10n.inventoryQcReason,
         'inventory-receipt-reason-field',
       ),
     ],
@@ -598,10 +638,7 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
   Widget _summary(AppColorExtension colors) {
     final receipt = widget.controller.lastReceipt ?? _selectedReceipt;
     if (receipt == null) {
-      return _empty(
-        colors,
-        'Convalida/post summary: nessuna ricezione selezionata o creata.',
-      );
+      return _empty(colors, context.l10n.inventoryReceiptSummaryNone);
     }
     return Container(
       padding: const EdgeInsets.all(12),
@@ -610,8 +647,11 @@ class _InventoryReceiptPanelState extends State<InventoryReceiptPanel> {
         borderRadius: BorderRadius.circular(14),
       ),
       child: Text(
-        'Convalida/post summary: ricezione #${receipt.id} ${receipt.status}, '
-        '${receipt.lines.length} righe, stock applicato solo dopo convalida MGWS.',
+        context.l10n.inventoryReceiptSummary(
+          receipt.id,
+          receipt.status,
+          receipt.lines.length,
+        ),
       ),
     );
   }
@@ -669,14 +709,17 @@ class _ReceiptFeedback extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );

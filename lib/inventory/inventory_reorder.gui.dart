@@ -60,6 +60,7 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
     setState(() => _creating = true);
     final feedback = await widget.controller.createDraftFromSuggestion(
       selected,
+      notes: context.l10n.inventoryReorderDraftNote,
     );
     if (!mounted) return;
     setState(() {
@@ -89,13 +90,13 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
                   color: theme.colorScheme.primary,
                 ),
                 title: Text(
-                  'Riordino',
+                  context.l10n.inventoryReorderTitle,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 subtitle: Text(
-                  'Suggerimenti MGWS da soglie stock basse: genera bozze ordine senza mutare giacenze.',
+                  context.l10n.inventoryReorderSubtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.subtitleColor,
                   ),
@@ -155,9 +156,17 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
 
   Widget _grid() {
     return DataGridView<MgwsReorderSuggestion>(
-      columns: const [
-        DataGridViewColumn(id: 'product', label: 'Prodotto', width: 170),
-        DataGridViewColumn(id: 'supplier', label: 'Fornitore', width: 120),
+      columns: [
+        DataGridViewColumn(
+          id: 'product',
+          label: context.l10n.inventoryEtichettaProdotto,
+          width: 170,
+        ),
+        DataGridViewColumn(
+          id: 'supplier',
+          label: context.l10n.inventoryColSupplier,
+          width: 120,
+        ),
         DataGridViewColumn(
           id: 'stock',
           label: 'Stock',
@@ -172,7 +181,7 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
         ),
         DataGridViewColumn(
           id: 'qty',
-          label: 'Da ordinare',
+          label: context.l10n.inventoryColToOrder,
           width: 130,
           numeric: true,
         ),
@@ -201,8 +210,11 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
       cells: {
         'product': Text(
           suggestion.variationId > 0
-              ? 'Prodotto #${suggestion.productId} / Variante ${suggestion.variationId}'
-              : 'Prodotto #${suggestion.productId}',
+              ? context.l10n.inventoryProductVariantRef(
+                  suggestion.productId,
+                  suggestion.variationId,
+                )
+              : context.l10n.inventoryProductRef(suggestion.productId),
         ),
         'supplier': Text('#${suggestion.supplierId}'),
         'stock': Text(
@@ -211,7 +223,10 @@ class _InventoryReorderPanelState extends State<InventoryReorderPanel> {
         'target': Text('${suggestion.targetStock}'),
         'qty': Chip(label: Text('${suggestion.suggestedQuantity}')),
         'lead': Text(
-          '${suggestion.leadTimeDays}g + safety ${suggestion.safetyDays}g',
+          context.l10n.inventoryLeadTimeSafety(
+            suggestion.leadTimeDays,
+            suggestion.safetyDays,
+          ),
         ),
       },
     );
@@ -301,14 +316,17 @@ class _ReorderFeedback extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );

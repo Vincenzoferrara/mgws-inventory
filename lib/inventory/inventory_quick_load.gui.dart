@@ -153,7 +153,8 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
         shelf: locationLine.shelf,
       );
     }
-    if (mounted) _snack(feedback.message, success: feedback.success);
+    if (mounted)
+      _snack(feedback.message(context.l10n), success: feedback.success);
   }
 
   void _removeLine(String key) {
@@ -195,7 +196,7 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
 
   void _showFeedback(InventoryActionFeedback feedback) {
     setState(() => _feedback = feedback);
-    _snack(feedback.message, success: feedback.success);
+    _snack(feedback.message(context.l10n), success: feedback.success);
   }
 
   void _snack(String message, {required bool success}) {
@@ -345,7 +346,9 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
         ),
         icon: const Icon(Icons.add),
         label: Text(
-          _lines.isEmpty ? 'Seleziona prodotti' : 'Modifica selezione',
+          _lines.isEmpty
+              ? context.l10n.inventorySelectProducts
+              : context.l10n.inventoryEditSelection,
         ),
       ),
       child: _lines.isEmpty
@@ -374,7 +377,9 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
                   'inventory-quick-load-selected-image-${line.key}',
                 ),
                 imageUrl: line.imageUrl,
-                semanticLabel: 'Copertina ${line.label}',
+                semanticLabel: context.l10n.inventorySemanticaCopertina(
+                  line.label,
+                ),
                 size: 48,
               ),
               const SizedBox(width: 10),
@@ -389,7 +394,9 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
                     ),
                     if (line.barcodeInterno?.trim().isNotEmpty == true)
                       Text(
-                        'Barcode interno ${line.barcodeInterno}',
+                        context.l10n.inventoryInternalBarcodeValue(
+                          '${line.barcodeInterno}',
+                        ),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                   ],
@@ -493,7 +500,7 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
       children: [
         if (_lines.isNotEmpty)
           Text(
-            '${_lines.length} righe · $totalQuantity pezzi',
+            context.l10n.inventoryLinesAndItems(_lines.length, totalQuantity),
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ElevatedButton.icon(
@@ -508,11 +515,11 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
               : const Icon(Icons.playlist_add_check),
           label: Text(
             _submitting
-                ? 'Invio in corso'
+                ? context.l10n.inventoryInvioInCorso
                 : widget.controller.retryableLines.isNotEmpty &&
                       _lines.isNotEmpty
-                ? 'Riprova ${_lines.length} righe'
-                : 'Controlla e carica',
+                ? context.l10n.inventoryRetryLines(_lines.length)
+                : context.l10n.inventoryControllaECarica,
           ),
         ),
       ],
@@ -604,7 +611,7 @@ class _EmptySelection extends StatelessWidget {
           Text(context.l10n.inventoryNessunProdottoSelezionato),
           SizedBox(height: 4),
           Text(
-            'Apri il catalogo per scegliere prodotti semplici o varianti.',
+            context.l10n.inventoryOpenCatalogHint,
             textAlign: TextAlign.center,
           ),
         ],

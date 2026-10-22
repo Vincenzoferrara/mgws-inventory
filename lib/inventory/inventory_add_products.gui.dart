@@ -338,7 +338,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryBarcodeNonTrovatoCatalogo(code),
+          message: (l10n) => l10n.inventoryBarcodeNonTrovatoCatalogo(code),
         ),
       );
       return false;
@@ -347,7 +347,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: context.l10n.inventoryProdottoSenzaIdValido(match.label),
+          message: (l10n) => l10n.inventoryProdottoSenzaIdValido(match.label),
         ),
       );
       return false;
@@ -412,7 +412,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       plan: plan,
     );
     if (confirmed != true || !mounted) return;
-    final feedback = await _controller.submit(plan);
+    final feedback = await _controller.submit(context.l10n, plan);
     if (!mounted) return;
     final retryable = _controller.retryableLines;
     setState(() {
@@ -425,7 +425,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
         _documentController.text = inventoryAddProductsDocumentNumber();
       }
     });
-    _snack(feedback.message, success: feedback.success);
+    _snack(feedback.message(context.l10n), success: feedback.success);
   }
 
   void _showFeedback(InventoryActionFeedback feedback) {
@@ -567,7 +567,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
           Text(
             failed
                 ? context.l10n.inventoryFornitoriLetturaFallita(
-                    _suppliersFeedback!.message,
+                    _suppliersFeedback!.message(context.l10n),
                   )
                 : context.l10n.inventoryFornitoriNessunoRegistrato,
             style: Theme.of(context).textTheme.bodySmall,
@@ -830,7 +830,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
@@ -839,7 +839,10 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
           for (final step in _controller.lastSteps)
             Text('· $step', style: Theme.of(context).textTheme.bodySmall),
           for (final detail in feedback.details)
-            Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              detail(context.l10n),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
         ],
       ),
     );
@@ -1117,7 +1120,7 @@ Future<bool?> showInventoryAddProductsConfirmDialog({
             ),
             const SizedBox(height: 4),
             Text(
-              '${context.l10n.inventoryEtichettaMotivo} $kInventoryCaricoReason',
+              '${context.l10n.inventoryEtichettaMotivo} ${context.l10n.inventoryStockInReason}',
             ),
             if (plan.warehouseId != null || (plan.room ?? '').isNotEmpty)
               Text(

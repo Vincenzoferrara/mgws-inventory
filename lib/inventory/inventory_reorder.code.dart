@@ -31,12 +31,14 @@ class InventoryReorderController with InventoryFeedbackController {
     return _feedback(result);
   }
 
+  /// [notes] e la nota salvata sull'ordine, nella lingua dell'operatore.
   Future<InventoryActionFeedback> createDraftFromSuggestion(
-    MgwsReorderSuggestion suggestion,
-  ) async {
+    MgwsReorderSuggestion suggestion, {
+    required String notes,
+  }) async {
     lastSuggestion = suggestion;
     if (suggestion.supplierId <= 0) {
-      return invalid('supplier_id mancante per il suggerimento');
+      return invalid((l10n) => l10n.inventorySuggestionMissingSupplier);
     }
     final orderResult = await gateway.createPurchaseOrder(
       MgwsPurchaseOrderInput(
@@ -44,7 +46,7 @@ class InventoryReorderController with InventoryFeedbackController {
         supplierId: suggestion.supplierId,
         documentNumber: 'RIORD-${suggestion.ruleId}-${suggestion.productId}',
         warehouseId: suggestion.warehouseId,
-        notes: 'Bozza generata da suggerimento riordino MGWS',
+        notes: notes,
       ),
     );
     lastPurchaseOrder = orderResult.data;
@@ -68,8 +70,8 @@ class InventoryReorderController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: result.success,
-        message: result.message,
-        details: result.details,
+        message: literalText(result.message),
+        details: literalTexts(result.details),
       ),
     );
   }
@@ -78,6 +80,6 @@ class InventoryReorderController with InventoryFeedbackController {
 InventoryFormParse<int?> _optionalPositive(String value, String label) {
   if (value.trim().isEmpty) return const InventoryFormValid(null);
   final parsed = InventoryInputParser.parsePositiveInt(value);
-  if (parsed == null) return InventoryFormInvalid('$label non valido');
+  if (parsed == null) return InventoryFormInvalid(invalidFieldText(label));
   return InventoryFormValid(parsed);
 }

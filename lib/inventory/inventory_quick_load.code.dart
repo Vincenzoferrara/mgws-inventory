@@ -9,6 +9,9 @@ import 'inventory_restock_feedback.code.dart';
 /// e il rischio non e' che l'operatore sbagli la voce, e' che non capisca
 /// cosa sta scrivendo. Chi voleva registrare qualcos'altro (un reso, una
 /// rettifica) usa il modulo dedicato, che chiede il proprio motivo.
+///
+/// E il valore salvato su MGWS, quindi non si traduce: la GUI mostra
+/// `inventoryStockInReason`.
 const kInventoryCaricoReason = 'Carico merce';
 
 class InventoryQuickLoadLineDraft {
@@ -85,25 +88,27 @@ class InventoryQuickLoadSubmissionPlan {
   /// lo storico mostrerebbe trenta carichi da un pezzo.
   InventoryFormParse<List<MgwsQuickLoadRequest>> parse({String? movementKey}) {
     if (lines.isEmpty) {
-      return const InventoryFormInvalid(
-        'Seleziona almeno un prodotto o variante',
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventorySelectProductOrVariant,
       );
     }
     if (siteId <= 0) {
-      return const InventoryFormInvalid('Sede richiesta');
+      return InventoryFormInvalid((l10n) => l10n.inventorySiteRequired);
     }
     if (warehouseId != null && warehouseId! <= 0) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     for (final line in lines) {
       if (line.productId <= 0) {
-        return const InventoryFormInvalid('product_id non valido');
+        return InventoryFormInvalid(invalidFieldText('product_id'));
       }
       if (line.variationId < 0) {
-        return const InventoryFormInvalid('variation_id non valido');
+        return InventoryFormInvalid(invalidFieldText('variation_id'));
       }
       if (line.quantity <= 0) {
-        return InventoryFormInvalid('Quantità non valida per ${line.label}');
+        return InventoryFormInvalid(
+          (l10n) => l10n.inventoryInvalidQuantityFor(line.label),
+        );
       }
     }
     return InventoryFormValid(
@@ -141,7 +146,7 @@ class InventoryQuickLoadLineResult {
 
   final InventoryQuickLoadLineDraft line;
   final bool success;
-  final String message;
+  final LocalizedText message;
   final List<String> details;
   final MgwsQuickLoad? data;
 }
@@ -176,23 +181,24 @@ class InventoryQuickLoadForm {
   InventoryFormParse<MgwsQuickLoadRequest> parse() {
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null)
-      return const InventoryFormInvalid('product_id non valido');
+      return InventoryFormInvalid(invalidFieldText('product_id'));
     final quantity = InventoryInputParser.parsePositiveInt(quantityText);
     if (quantity == null)
-      return const InventoryFormInvalid('quantità non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidQuantity);
     final siteId = InventoryInputParser.parsePositiveInt(siteIdText);
-    if (siteId == null) return const InventoryFormInvalid('Sede richiesta');
+    if (siteId == null)
+      return InventoryFormInvalid((l10n) => l10n.inventorySiteRequired);
     final variationId = InventoryInputParser.parseOptionalNonNegativeInt(
       variationIdText,
     );
     if (variationId == null) {
-      return const InventoryFormInvalid('variation_id non valido');
+      return InventoryFormInvalid(invalidFieldText('variation_id'));
     }
     final warehouseId = warehouseIdText.trim().isEmpty
         ? null
         : InventoryInputParser.parsePositiveInt(warehouseIdText);
     if (warehouseIdText.trim().isNotEmpty && warehouseId == null) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     return InventoryFormValid(
       MgwsQuickLoadRequest(
@@ -233,7 +239,8 @@ class InventoryQuickLoadController with InventoryFeedbackController {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(:final value):
-        if (isSubmitting) return invalid('Carico rapido gia in corso');
+        if (isSubmitting)
+          return invalid((l10n) => l10n.inventoryQuickLoadInProgress);
         isSubmitting = true;
         try {
           final result = await gateway.quickLoad(value);
@@ -241,8 +248,8 @@ class InventoryQuickLoadController with InventoryFeedbackController {
           return remember(
             InventoryActionFeedback(
               success: result.success,
-              message: result.message,
-              details: result.details,
+              message: literalText(result.message),
+              details: literalTexts(result.details),
             ),
           );
         } finally {
@@ -263,7 +270,8 @@ class InventoryQuickLoadController with InventoryFeedbackController {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(:final value):
-        if (isSubmitting) return invalid('Carico rapido gia in corso');
+        if (isSubmitting)
+          return invalid((l10n) => l10n.inventoryQuickLoadInProgress);
         isSubmitting = true;
         final results = <InventoryQuickLoadLineResult>[];
         try {
@@ -278,11 +286,9 @@ class InventoryQuickLoadController with InventoryFeedbackController {
                 InventoryQuickLoadLineResult(
                   line: line,
                   success: success,
-                  message: success
-                      ? result.message
-                      : result.success
-                      ? 'Risposta MGWS senza dati'
-                      : result.message,
+                  message: success || !result.success
+                      ? literalText(result.message)
+                      : (l10n) => l10n.inventoryMgwsNoData,
                   details: result.details,
                   data: result.data,
                 ),
@@ -292,7 +298,7 @@ class InventoryQuickLoadController with InventoryFeedbackController {
                 InventoryQuickLoadLineResult(
                   line: line,
                   success: false,
-                  message: error.toString(),
+                  message: literalText(error.toString()),
                 ),
               );
             }
@@ -305,14 +311,19 @@ class InventoryQuickLoadController with InventoryFeedbackController {
             InventoryActionFeedback(
               success: failed == 0,
               message: failed == 0
-                  ? 'Completati $succeeded/${results.length} carichi'
-                  : 'Completati $succeeded/${results.length} carichi; $failed da riprovare',
+                  ? (l10n) =>
+                        l10n.inventoryQuickLoadDone(succeeded, results.length)
+                  : (l10n) => l10n.inventoryQuickLoadPartial(
+                      succeeded,
+                      results.length,
+                      failed,
+                    ),
               details: [
                 for (final result in results.where((item) => !item.success))
-                  '${result.line.label}: ${result.message}',
+                  (l10n) => '${result.line.label}: ${result.message(l10n)}',
                 for (final result in results.where((item) => !item.success))
                   for (final detail in result.details)
-                    '${result.line.label}: $detail',
+                    literalText('${result.line.label}: $detail'),
               ],
             ),
           );

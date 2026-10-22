@@ -22,27 +22,30 @@ class InventoryPurchaseOrderForm {
 
   InventoryFormParse<MgwsPurchaseOrderInput> parse() {
     final siteId = InventoryInputParser.parsePositiveInt(siteIdText);
-    if (siteId == null) return const InventoryFormInvalid('site_id non valido');
+    if (siteId == null)
+      return InventoryFormInvalid(invalidFieldText('site_id'));
     final supplierId = InventoryInputParser.parsePositiveInt(supplierIdText);
     if (supplierId == null)
-      return const InventoryFormInvalid('supplier_id non valido');
+      return InventoryFormInvalid(invalidFieldText('supplier_id'));
     final documentNumber = documentNumberText.trim();
     if (documentNumber.isEmpty) {
-      return const InventoryFormInvalid('numero documento richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryDocumentNumberRequired,
+      );
     }
     final warehouseId = InventoryInputParser.parseOptionalNonNegativeInt(
       warehouseIdText,
     );
     if (warehouseId == null) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     final expectedAtGmt = _optional(expectedAtGmtText);
     if (expectedAtGmt != null && DateTime.tryParse(expectedAtGmt) == null) {
-      return const InventoryFormInvalid('data prevista non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidExpectedDate);
     }
     final currency = currencyText.trim().toUpperCase();
     if (currency.length != 3)
-      return const InventoryFormInvalid('valuta non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidCurrency);
     return InventoryFormValid(
       MgwsPurchaseOrderInput(
         siteId: siteId,
@@ -59,24 +62,26 @@ class InventoryPurchaseOrderForm {
   InventoryFormParse<MgwsPurchaseOrderPatch> parsePatch() {
     final supplierId = InventoryInputParser.parsePositiveInt(supplierIdText);
     if (supplierId == null)
-      return const InventoryFormInvalid('supplier_id non valido');
+      return InventoryFormInvalid(invalidFieldText('supplier_id'));
     final documentNumber = documentNumberText.trim();
     if (documentNumber.isEmpty) {
-      return const InventoryFormInvalid('numero documento richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryDocumentNumberRequired,
+      );
     }
     final warehouseId = InventoryInputParser.parseOptionalNonNegativeInt(
       warehouseIdText,
     );
     if (warehouseId == null) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     final expectedAtGmt = _optional(expectedAtGmtText);
     if (expectedAtGmt != null && DateTime.tryParse(expectedAtGmt) == null) {
-      return const InventoryFormInvalid('data prevista non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidExpectedDate);
     }
     final currency = currencyText.trim().toUpperCase();
     if (currency.length != 3)
-      return const InventoryFormInvalid('valuta non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidCurrency);
     return InventoryFormValid(
       MgwsPurchaseOrderPatch(
         supplierId: supplierId,
@@ -158,26 +163,28 @@ class InventoryPurchaseOrderLineForm {
       purchaseOrderIdText,
     );
     if (purchaseOrderId == null) {
-      return const InventoryFormInvalid('purchase_order_id non valido');
+      return InventoryFormInvalid(invalidFieldText('purchase_order_id'));
     }
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null)
-      return const InventoryFormInvalid('product_id non valido');
+      return InventoryFormInvalid(invalidFieldText('product_id'));
     final quantity = InventoryInputParser.parsePositiveInt(orderedQuantityText);
     if (quantity == null)
-      return const InventoryFormInvalid('quantita ordinata non valida');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryInvalidOrderedQuantity,
+      );
     final cost = double.tryParse(unitCostText.trim());
     if (cost == null || cost < 0)
-      return const InventoryFormInvalid('costo non valido');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidCost);
     final variationId = InventoryInputParser.parseOptionalNonNegativeInt(
       variationIdText,
     );
     if (variationId == null) {
-      return const InventoryFormInvalid('variation_id non valido');
+      return InventoryFormInvalid(invalidFieldText('variation_id'));
     }
     final expectedAtGmt = _optional(expectedAtGmtText);
     if (expectedAtGmt != null && DateTime.tryParse(expectedAtGmt) == null) {
-      return const InventoryFormInvalid('data prevista non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidExpectedDate);
     }
     return InventoryFormValid(
       InventoryPurchaseOrderLineCommand(
@@ -220,11 +227,11 @@ class InventoryPurchaseOrderStatusForm {
       purchaseOrderIdText,
     );
     if (purchaseOrderId == null) {
-      return const InventoryFormInvalid('purchase_order_id non valido');
+      return InventoryFormInvalid(invalidFieldText('purchase_order_id'));
     }
     final status = statusText.trim();
     if (status.isEmpty)
-      return const InventoryFormInvalid('stato ordine richiesto');
+      return InventoryFormInvalid((l10n) => l10n.inventoryOrderStatusRequired);
     return InventoryFormValid(
       InventoryPurchaseOrderStatusCommand(
         purchaseOrderId: purchaseOrderId,
@@ -390,8 +397,8 @@ class InventoryPurchaseOrderController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: result.success,
-        message: result.message,
-        details: result.details,
+        message: literalText(result.message),
+        details: literalTexts(result.details),
       ),
     );
   }
@@ -405,6 +412,6 @@ String? _optional(String value) {
 InventoryFormParse<int?> _optionalPositive(String value, String label) {
   if (value.trim().isEmpty) return const InventoryFormValid(null);
   final parsed = InventoryInputParser.parsePositiveInt(value);
-  if (parsed == null) return InventoryFormInvalid('$label non valido');
+  if (parsed == null) return InventoryFormInvalid(invalidFieldText(label));
   return InventoryFormValid(parsed);
 }

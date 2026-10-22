@@ -117,9 +117,9 @@ class _InventoryCountPanelState extends State<InventoryCountPanel> {
   Future<void> _saveLine() async {
     if (_posted) {
       setState(() {
-        _feedback = const InventoryActionFeedback(
+        _feedback = InventoryActionFeedback(
           success: false,
-          message: 'Sessione di conteggio gia registrata',
+          message: (l10n) => l10n.inventoryCountSessionAlreadyPosted,
         );
       });
       return;
@@ -186,13 +186,13 @@ class _InventoryCountPanelState extends State<InventoryCountPanel> {
                   color: theme.colorScheme.primary,
                 ),
                 title: Text(
-                  'Inventario fisico MGWS',
+                  context.l10n.inventoryCountsTitle,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 subtitle: Text(
-                  'Conta fisica stock-neutral fino ad approvazione: barcode e tag sono risolti da MGWS.',
+                  context.l10n.inventoryCountsSubtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.subtitleColor,
                   ),

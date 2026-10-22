@@ -25,7 +25,7 @@ class InventoryReceiptLineForm {
       purchaseOrderLineIdText,
     );
     if (purchaseOrderLineId == null) {
-      return const InventoryFormInvalid('riga ordine non valida');
+      return InventoryFormInvalid((l10n) => l10n.inventoryInvalidOrderLine);
     }
     final expected = InventoryInputParser.parsePositiveInt(
       expectedQuantityText,
@@ -43,22 +43,28 @@ class InventoryReceiptLineForm {
         received == null ||
         rejected == null ||
         backorder == null) {
-      return const InventoryFormInvalid('quantita ricevimento non valide');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryInvalidReceiptQuantities,
+      );
     }
     if (received > expected) {
-      return const InventoryFormInvalid(
-        'over-ricezione non consentita senza approvazione MGWS',
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryOverReceiptNotAllowed,
       );
     }
     final reason = reasonCodeText.trim();
     if (qcHold && reason.isEmpty) {
-      return const InventoryFormInvalid('motivo QC richiesto');
+      return InventoryFormInvalid((l10n) => l10n.inventoryQcReasonRequired);
     }
     if ((rejected > 0 || backorder > 0) && reason.isEmpty) {
-      return const InventoryFormInvalid('motivo scarto/backorder richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryDiscardReasonRequired,
+      );
     }
     if (received + rejected + backorder != expected) {
-      return const InventoryFormInvalid('quantita ricevimento non coerenti');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryInconsistentReceiptQuantities,
+      );
     }
     return InventoryFormValid(
       MgwsReceiptLineInput(
@@ -139,19 +145,24 @@ class InventoryReceiptForm {
 
   InventoryFormParse<MgwsReceiptInput> parse() {
     final siteId = InventoryInputParser.parsePositiveInt(siteIdText);
-    if (siteId == null) return const InventoryFormInvalid('site_id non valido');
+    if (siteId == null)
+      return InventoryFormInvalid(invalidFieldText('site_id'));
     final purchaseOrderId = InventoryInputParser.parsePositiveInt(
       purchaseOrderIdText,
     );
     if (purchaseOrderId == null) {
-      return const InventoryFormInvalid('purchase_order_id non valido');
+      return InventoryFormInvalid(invalidFieldText('purchase_order_id'));
     }
     final documentNumber = documentNumberText.trim();
     if (documentNumber.isEmpty) {
-      return const InventoryFormInvalid('numero documento richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryDocumentNumberRequired,
+      );
     }
     if (lines.isEmpty)
-      return const InventoryFormInvalid('almeno una riga richiesta');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryAtLeastOneLineRequired,
+      );
     final parsedLines = <MgwsReceiptLineInput>[];
     for (final line in lines) {
       switch (line.parse()) {
@@ -222,7 +233,8 @@ class InventoryReceiptController with InventoryFeedbackController {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(:final value):
-        if (isSubmitting) return invalid('Ricevimento gia in corso');
+        if (isSubmitting)
+          return invalid((l10n) => l10n.inventoryReceiptInProgress);
         isSubmitting = true;
         try {
           final result = await gateway.createReceipt(value);
@@ -243,7 +255,8 @@ class InventoryReceiptController with InventoryFeedbackController {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(:final value):
-        if (isValidating) return invalid('Convalida ricevimento gia in corso');
+        if (isValidating)
+          return invalid((l10n) => l10n.inventoryReceiptValidationInProgress);
         isValidating = true;
         try {
           final result = await gateway.convalidaReceipt(value);
@@ -270,7 +283,8 @@ class InventoryReceiptController with InventoryFeedbackController {
       case InventoryFormInvalid(:final message):
         return invalid(message);
       case InventoryFormValid(:final value):
-        if (isSubmitting) return invalid('Ricevimento gia in corso');
+        if (isSubmitting)
+          return invalid((l10n) => l10n.inventoryReceiptInProgress);
         isSubmitting = true;
         try {
           final created = await gateway.createReceipt(value);
@@ -283,8 +297,11 @@ class InventoryReceiptController with InventoryFeedbackController {
             return remember(
               InventoryActionFeedback(
                 success: created.success && validated.success,
-                message: validated.message,
-                details: [...created.details, ...validated.details],
+                message: literalText(validated.message),
+                details: literalTexts([
+                  ...created.details,
+                  ...validated.details,
+                ]),
               ),
             );
           } finally {
@@ -300,8 +317,8 @@ class InventoryReceiptController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: result.success,
-        message: result.message,
-        details: result.details,
+        message: literalText(result.message),
+        details: literalTexts(result.details),
       ),
     );
   }
@@ -315,6 +332,6 @@ String? _optional(String value) {
 InventoryFormParse<int?> _optionalPositive(String value, String label) {
   if (value.trim().isEmpty) return const InventoryFormValid(null);
   final parsed = InventoryInputParser.parsePositiveInt(value);
-  if (parsed == null) return InventoryFormInvalid('$label non valido');
+  if (parsed == null) return InventoryFormInvalid(invalidFieldText(label));
   return InventoryFormValid(parsed);
 }

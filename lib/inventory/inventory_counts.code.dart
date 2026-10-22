@@ -16,14 +16,17 @@ class InventoryCountSessionForm {
 
   InventoryFormParse<MgwsCountSessionInput> parse() {
     final siteId = InventoryInputParser.parsePositiveInt(siteIdText);
-    if (siteId == null) return const InventoryFormInvalid('site_id non valido');
+    if (siteId == null)
+      return InventoryFormInvalid(invalidFieldText('site_id'));
     final warehouseId = InventoryInputParser.parsePositiveInt(warehouseIdText);
     if (warehouseId == null) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     final documentNumber = documentNumberText.trim();
     if (documentNumber.isEmpty) {
-      return const InventoryFormInvalid('numero documento richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryDocumentNumberRequired,
+      );
     }
     return InventoryFormValid(
       MgwsCountSessionInput(
@@ -66,30 +69,34 @@ class InventoryCountLineForm {
   InventoryFormParse<InventoryCountLineCommand> parse() {
     final sessionId = InventoryInputParser.parsePositiveInt(sessionIdText);
     if (sessionId == null) {
-      return const InventoryFormInvalid('count_session_id non valido');
+      return InventoryFormInvalid(invalidFieldText('count_session_id'));
     }
     final physicalQuantity = InventoryInputParser.parseNonNegativeInt(
       physicalQuantityText,
     );
     if (physicalQuantity == null) {
-      return const InventoryFormInvalid('quantita fisica non valida');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryInvalidPhysicalQuantity,
+      );
     }
     final productId = _optionalPositiveInt(productIdText);
     if (productIdText.trim().isNotEmpty && productId == null) {
-      return const InventoryFormInvalid('product_id non valido');
+      return InventoryFormInvalid(invalidFieldText('product_id'));
     }
     final barcode = _optional(barcodeText);
     final tag = _optional(tagText);
     if (productId == null && barcode == null && tag == null) {
-      return const InventoryFormInvalid('prodotto, barcode o tag richiesto');
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventoryProductBarcodeOrTagRequired,
+      );
     }
     final variationId = _optionalNonNegativeInt(variationIdText);
     if (variationIdText.trim().isNotEmpty && variationId == null) {
-      return const InventoryFormInvalid('variation_id non valido');
+      return InventoryFormInvalid(invalidFieldText('variation_id'));
     }
     final warehouseId = _optionalPositiveInt(warehouseIdText);
     if (warehouseIdText.trim().isNotEmpty && warehouseId == null) {
-      return const InventoryFormInvalid('warehouse_id non valido');
+      return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
     return InventoryFormValid(
       InventoryCountLineCommand(
@@ -137,11 +144,11 @@ class InventoryCountSessionController with InventoryFeedbackController {
   }) async {
     final siteId = _optionalPositiveInt(siteIdText);
     if (siteIdText.trim().isNotEmpty && siteId == null) {
-      return invalid('site_id non valido');
+      return invalid(invalidFieldText('site_id'));
     }
     final warehouseId = _optionalPositiveInt(warehouseIdText);
     if (warehouseIdText.trim().isNotEmpty && warehouseId == null) {
-      return invalid('warehouse_id non valido');
+      return invalid(invalidFieldText('warehouse_id'));
     }
     final result = await gateway.listCountSessions(
       siteId: siteId,
@@ -185,7 +192,7 @@ class InventoryCountSessionController with InventoryFeedbackController {
         return invalid(message);
       case InventoryFormValid(:final value):
         if (_isPosted(value.sessionId)) {
-          return invalid('Sessione di conteggio gia registrata');
+          return invalid((l10n) => l10n.inventoryCountSessionAlreadyPosted);
         }
         final result = await gateway.saveCountLine(
           value.sessionId,
@@ -206,8 +213,9 @@ class InventoryCountSessionController with InventoryFeedbackController {
         return invalid(message);
       case InventoryFormValid(:final value):
         if (_isPosted(value))
-          return invalid('Sessione di conteggio gia registrata');
-        if (isApproving) return invalid('Approvazione inventario gia in corso');
+          return invalid((l10n) => l10n.inventoryCountSessionAlreadyPosted);
+        if (isApproving)
+          return invalid((l10n) => l10n.inventoryCountApprovalInProgress);
         isApproving = true;
         try {
           final result = await gateway.approveCountSession(value);
@@ -228,8 +236,8 @@ class InventoryCountSessionController with InventoryFeedbackController {
     return remember(
       InventoryActionFeedback(
         success: result.success,
-        message: result.message,
-        details: result.details,
+        message: literalText(result.message),
+        details: literalTexts(result.details),
       ),
     );
   }

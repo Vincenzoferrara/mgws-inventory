@@ -169,7 +169,7 @@ class _InventoryMovementLedgerPanelState
     }
     final confirmed = await _confirmRevert(plan);
     if (!mounted || confirmed != true) return;
-    final feedback = await _revert.execute(plan);
+    final feedback = await _revert.execute(context.l10n, plan);
     if (!mounted) return;
     setState(() => _feedback = feedback);
     // Il ledger e' cambiato: senza ricaricare la lista mostrerebbe uno stock
@@ -185,15 +185,15 @@ class _InventoryMovementLedgerPanelState
     final lines = <String>[
       for (final line in plan.revertable)
         if (line.isReverseMove)
-          '${line.productLabel}: ${line.quantity} '
+          '${line.productLabel(context.l10n)}: ${line.quantity} '
               '${context.l10n.inventoryParolaPezzi}, ${line.routeText}'
         else
-          '${line.productLabel}: '
+          '${line.productLabel(context.l10n)}: '
               '${context.l10n.inventoryParolaDa(line.currentStock ?? '?')} '
               '${context.l10n.inventoryParolaA(line.restoreTo)}',
       for (final line in plan.blocked)
-        '${line.productLabel}: '
-            '${context.l10n.inventoryMovimentiRigaSaltata(line.blockMessage)}',
+        '${line.productLabel(context.l10n)}: '
+            '${context.l10n.inventoryMovimentiRigaSaltata(line.blockMessage(context.l10n))}',
     ];
     return showDialog<bool>(
       context: context,
@@ -451,8 +451,8 @@ class _InventoryMovementLedgerPanelState
         //-etichetta indovinata.
         'kind': Text(
           group.kind == InventoryMovementKind.altro
-              ? '${group.kindLabel} (${group.rawType})'
-              : group.kindLabel,
+              ? '${group.kindLabel(context.l10n)} (${group.rawType})'
+              : group.kindLabel(context.l10n),
         ),
         'operator': Text('#${group.operatorUserId}'),
         'delta': deltaCell,

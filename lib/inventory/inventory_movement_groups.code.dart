@@ -16,6 +16,7 @@
 
 import 'package:intl/intl.dart';
 
+import '../l10n/extensions.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import 'inventory.code.dart';
 import 'inventory_module.code.dart';
@@ -37,13 +38,16 @@ enum InventoryMovementKind {
   altro,
 }
 
-const _kindLabels = {
-  InventoryMovementKind.carico: 'Aggiungi',
-  InventoryMovementKind.rettifica: 'Rettifica',
-  InventoryMovementKind.sposta: 'Sposta',
-  InventoryMovementKind.conteggio: 'Conteggio',
-  InventoryMovementKind.ricezione: 'Ricezione',
-  InventoryMovementKind.altro: 'Altro',
+String inventoryMovementKindLabel(
+  AppLocalizations l10n,
+  InventoryMovementKind kind,
+) => switch (kind) {
+  InventoryMovementKind.carico => l10n.inventoryKindAdd,
+  InventoryMovementKind.rettifica => l10n.inventoryKindAdjustment,
+  InventoryMovementKind.sposta => l10n.inventoryKindMove,
+  InventoryMovementKind.conteggio => l10n.inventoryKindCount,
+  InventoryMovementKind.ricezione => l10n.inventoryKindReceipt,
+  InventoryMovementKind.altro => l10n.inventoryKindOther,
 };
 
 /// Numeri di movimento formattati per la lista e per il dettaglio.
@@ -125,7 +129,8 @@ class InventoryMovementGroup {
   int get movedQuantity =>
       products.fold<int>(0, (sum, item) => sum + item.quantity);
 
-  String get kindLabel => _kindLabels[kind]!;
+  String kindLabel(AppLocalizations l10n) =>
+      inventoryMovementKindLabel(l10n, kind);
 
   /// Motivo e dettagli sono due campi distinti su MGWS e non vanno mescolati:
   /// il motivo spiega perche', il dettaglio aggiunge contesto. Qui vengono
@@ -168,25 +173,14 @@ class InventoryMovementGroup {
   }
 
   /// Perche' il gruppo non si puo' riaprire, quando non si puo'.
-  String get resumeBlockMessage => switch (kind) {
-    InventoryMovementKind.sposta =>
-      'Uno spostamento si rifa dalla rotta dei pezzi, e questa operazione non '
-          'la espone: le sue righe non hanno i magazzini di partenza e arrivo, '
-          'quindi non si puo\' sapere da dove rimetterli.',
-    InventoryMovementKind.carico =>
-      'Il carico e\' l\'unica rotta del gruppo e sa solo aumentare lo stock: '
-          'un carico corretto in meno e\' una diminuzione, che da li\' non si '
-          'puo\' scrivere.',
-    InventoryMovementKind.conteggio =>
-      'Un conteggio fisico e\' registrato da MGWS e non da un pannello: '
-          'riaprirlo qui produrrebbe una correzione, non un conteggio.',
-    InventoryMovementKind.ricezione =>
-      'Una ricezione viene da un ordine fornitore: si corregge dall\'ordine, '
-          'non dal pannello carico.',
-    InventoryMovementKind.altro =>
-      'MGWS ha registrato il movimento come '
-          '"${rawType.isEmpty ? 'senza tipo' : rawType}", e l\'app non sa di '
-          'che modulo si tratta.',
+  String resumeBlockMessage(AppLocalizations l10n) => switch (kind) {
+    InventoryMovementKind.sposta => l10n.inventoryResumeBlockMove,
+    InventoryMovementKind.carico => l10n.inventoryResumeBlockAdd,
+    InventoryMovementKind.conteggio => l10n.inventoryResumeBlockCount,
+    InventoryMovementKind.ricezione => l10n.inventoryResumeBlockReceipt,
+    InventoryMovementKind.altro => l10n.inventoryResumeBlockOther(
+      rawType.isEmpty ? l10n.inventoryMovementNoType : rawType,
+    ),
     InventoryMovementKind.rettifica => '',
   };
 
@@ -218,20 +212,18 @@ class InventoryMovementGroup {
   /// Vuota quando l'operazione e' annullabile per intero. Altrimenti spiega in
   /// una riga il motivo, perche' l'elenco dei prodotti bloccati arriva dopo,
   /// nella schermata di conferma.
-  String get revertBlockMessage {
+  String revertBlockMessage(AppLocalizations l10n) {
     if (canRevert) return '';
-    if (!isMove) return 'Il movimento non ha prodotti da riportare indietro';
-    return 'Nessun prodotto di questo spostamento ha la rotta registrata: '
-        'senza sapere da quale magazzino erano partiti i pezzi non si puo\' '
-        'decidere dove rimetterli';
+    if (!isMove) return l10n.inventoryRevertBlockNoProducts;
+    return l10n.inventoryRevertBlockNoRoute;
   }
 
   /// Elenco sintetico dei prodotti, per il dettaglio.
-  List<String> get productLines => [
+  List<String> productLines(AppLocalizations l10n) => [
     for (final item in products)
       '#${item.productId}'
           '${item.variationId > 0 ? '/${item.variationId}' : ''} '
-          '${isMove ? '${item.quantity} pezzi' : movementSigned(item.quantityDelta)}'
+          '${isMove ? l10n.inventoryItemsCount(item.quantity) : movementSigned(item.quantityDelta)}'
           '${isMove && item.routeText.isNotEmpty ? ' · ${item.routeText}' : ''}',
   ];
 }
@@ -410,20 +402,27 @@ InventoryMovementProduct _toProduct(List<MgwsMovement> rows) {
 /// il motivo nomina la rotta originale: chi legge vede che quel magazzino si
 /// e' svuotato perche' un movimento #N era andato nel senso opposto.
 String inventoryRevertReason(
+  AppLocalizations l10n,
   InventoryMovementGroup group,
   InventoryMovementProduct product,
 ) {
   final origin = product.movements.first;
   if (group.isMove) {
-    return 'Annullamento movimento #${origin.id}: riporto ${product.quantity} '
-        'pezzi da S${product.siteTo} W${product.warehouseTo} a '
-        'S${product.siteFrom} W${product.warehouseFrom} '
-        '(spostamento al contrario)';
+    return l10n.inventoryRevertReasonMove(
+      origin.id,
+      product.quantity,
+      product.siteTo,
+      product.warehouseTo,
+      product.siteFrom,
+      product.warehouseFrom,
+    );
   }
-  return 'Annullamento movimento #${origin.id}: riporto stock da '
-      '${movementStock(product.stockAfter)} a '
-      '${movementStock(product.stockBefore)} '
-      '(${group.kindLabel.toLowerCase()})';
+  return l10n.inventoryRevertReasonStock(
+    origin.id,
+    movementStock(product.stockAfter),
+    movementStock(product.stockBefore),
+    group.kindLabel(l10n).toLowerCase(),
+  );
 }
 
 /// Perche' un movimento non si puo' annullare.
@@ -501,7 +500,7 @@ class InventoryMovementRevertLine {
   /// Cosa ha risposto MGWS quando si e' andati a leggere lo stock, se la lettura
   /// e' fallita. Va detto all'operatore: "non si puo' controllare" e "qualcun
   /// altro ha mosso il prodotto" sono fatti diversi e dicono cosa fare.
-  final String? readError;
+  final LocalizedText? readError;
 
   final InventoryRevertBlock? block;
 
@@ -529,34 +528,28 @@ class InventoryMovementRevertLine {
             'S${product.siteFrom} W${product.warehouseFrom}'
       : '';
 
-  String get productLabel =>
-      'Prodotto #$productId'
-      '${product.variationId > 0 ? ' variante ${product.variationId}' : ''}';
+  String productLabel(AppLocalizations l10n) => product.variationId > 0
+      ? l10n.inventoryRevertProductVariantLabel(productId, product.variationId)
+      : l10n.inventoryRevertProductLabel(productId);
 
-  String get blockMessage => switch (block) {
+  String blockMessage(AppLocalizations l10n) => switch (block) {
     InventoryRevertBlock.senzaStockPrecedente =>
-      'MGWS non ha registrato lo stock precedente, non c\'e\' nulla da '
-          'ripristinare',
-    InventoryRevertBlock.stockCambiato =>
-      'lo stock e\' ora ${currentStock ?? '?'} in sede $siteId, non '
-          '${movementStock(product.stockAfter)}: un movimento successivo ha '
-          'gia\' toccato questo prodotto',
-    InventoryRevertBlock.sedeMancante =>
-      'le righe del movimento non dicono in che sede era il prodotto, quindi non '
-          'si sa quale totale riportare indietro',
-    InventoryRevertBlock.totaleDiNegozio =>
-      'il totale registrato e\' di tutto il negozio e il prodotto ha pezzi anche '
-          'in un\'altra sede: riportarlo in una sola azzererebbe pezzi che stanno '
-          'li\'',
-    InventoryRevertBlock.rottaMancante =>
-      'le righe dello spostamento non dicono da quale magazzino erano partiti '
-          'i pezzi, quindi non si puo\' sapere dove rimetterli',
-    InventoryRevertBlock.pezziAssenti =>
-      'nel magazzino di arrivo ci sono ${availableAtDestination ?? 0} pezzi e '
-          'ne servivano ${product.quantity}: qualcuno li ha gia\' spostati o '
-          'venduti',
-    InventoryRevertBlock.letturaFallita =>
-      'non si e\' riusciti a leggere lo stock attuale: ${readError ?? 'MGWS non ha risposto'}',
+      l10n.inventoryRettificaBlockMissingBefore,
+    InventoryRevertBlock.stockCambiato => l10n.inventoryRevertBlockStockChanged(
+      '${currentStock ?? '?'}',
+      siteId,
+      movementStock(product.stockAfter),
+    ),
+    InventoryRevertBlock.sedeMancante => l10n.inventoryRevertBlockMissingSite,
+    InventoryRevertBlock.totaleDiNegozio => l10n.inventoryRevertBlockShopTotal,
+    InventoryRevertBlock.rottaMancante => l10n.inventoryRevertBlockMissingRoute,
+    InventoryRevertBlock.pezziAssenti => l10n.inventoryRevertBlockItemsMissing(
+      availableAtDestination ?? 0,
+      product.quantity,
+    ),
+    InventoryRevertBlock.letturaFallita => l10n.inventoryRevertBlockReadFailed(
+      readError?.call(l10n) ?? l10n.inventoryMgwsNoAnswer,
+    ),
     null => '',
   };
 }
@@ -615,7 +608,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
   /// attuale di ogni prodotto.
   Future<InventoryActionFeedback> prepare(InventoryMovementGroup group) async {
     if (isPreparing || isReverting) {
-      return invalid('Operazione gia in corso');
+      return invalid((l10n) => l10n.inventoryOperationInProgress);
     }
     isPreparing = true;
     try {
@@ -636,11 +629,12 @@ class InventoryMovementRevertController with InventoryFeedbackController {
         InventoryActionFeedback(
           success: plan.canRevert,
           message: plan.canRevert
-              ? '${plan.revertable.length} prodotti riportabili indietro'
-              : 'Nessun prodotto riportabile: controlla i dettagli',
+              ? (l10n) => l10n.inventoryRevertPrepared(plan.revertable.length)
+              : (l10n) => l10n.inventoryRevertNothing,
           details: [
             for (final line in plan.blocked)
-              '${line.productLabel}: ${line.blockMessage}',
+              (l10n) =>
+                  '${line.productLabel(l10n)}: ${line.blockMessage(l10n)}',
           ],
         ),
       );
@@ -703,7 +697,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
       return InventoryMovementRevertLine(
         product: product,
         reverseMove: false,
-        readError: 'MGWS non ha restituito lo stock della sede',
+        readError: (l10n) => l10n.inventoryMgwsNoSiteStock,
         block: InventoryRevertBlock.letturaFallita,
       );
     }
@@ -785,11 +779,15 @@ class InventoryMovementRevertController with InventoryFeedbackController {
   /// Non si ferma al primo errore come nel resto del modulo: ogni prodotto e'
   /// indipendente, e fermarsi a meta' lascerebbe l'operazione annullata a
   /// meta' con l'operatore senza un elenco di cosa e' passato e cosa no.
+  /// [l10n] scrive il motivo dei contromovimenti salvato su MGWS.
   Future<InventoryActionFeedback> execute(
+    AppLocalizations l10n,
     InventoryMovementRevertPlan plan,
   ) async {
-    if (isReverting) return invalid('Annullamento gia in corso');
-    if (!plan.canRevert) return invalid('Niente da annullare');
+    if (isReverting)
+      return invalid((l10n) => l10n.inventoryCancellationInProgress);
+    if (!plan.canRevert)
+      return invalid((l10n) => l10n.inventoryNothingToCancel);
     isReverting = true;
     // Una sola chiave per l'annullamento intero: se ogni prodotto ne avesse una
     // sua, lo storico mostrerebbe cinque annullamenti dove l'operatore ne ha
@@ -799,34 +797,48 @@ class InventoryMovementRevertController with InventoryFeedbackController {
     try {
       var done = 0;
       var failed = 0;
-      final details = <String>[];
+      final details = <LocalizedText>[];
       for (final line in plan.revertable) {
         final feedback = line.isReverseMove
-            ? await _reverseMove(plan.group, line, movementKey)
-            : await _counterMovement(plan.group, line, movementKey);
+            ? await _reverseMove(l10n, plan.group, line, movementKey)
+            : await _counterMovement(l10n, plan.group, line, movementKey);
         if (feedback.success) {
           done++;
           details.add(
             line.isReverseMove
-                ? '· ${line.productLabel}: ${line.quantity} pezzi riportati a '
-                      'S${line.product.siteFrom} W${line.product.warehouseFrom}'
-                : '· ${line.productLabel}: tornato a ${line.restoreTo}',
+                ? (l10n) => l10n.inventoryRevertStepMoved(
+                    line.productLabel(l10n),
+                    line.quantity,
+                    line.product.siteFrom,
+                    line.product.warehouseFrom,
+                  )
+                : (l10n) => l10n.inventoryRevertStepRestored(
+                    line.productLabel(l10n),
+                    line.restoreTo,
+                  ),
           );
         } else {
           failed++;
-          details.add('${line.productLabel}: ${feedback.message}');
+          details.add(
+            (l10n) => '${line.productLabel(l10n)}: ${feedback.message(l10n)}',
+          );
         }
       }
       for (final line in plan.blocked) {
-        details.add('Saltato ${line.productLabel}: ${line.blockMessage}');
+        details.add(
+          (l10n) => l10n.inventoryRevertStepSkipped(
+            line.productLabel(l10n),
+            line.blockMessage(l10n),
+          ),
+        );
       }
+      final total = plan.revertable.length;
       return remember(
         InventoryActionFeedback(
           success: failed == 0,
           message: failed == 0
-              ? 'Annullati $done prodotti: lo stock e\' tornato a prima'
-              : 'Annullamento parziale: $done su '
-                    '${plan.revertable.length} prodotti riportati indietro',
+              ? (l10n) => l10n.inventoryRevertDone(done)
+              : (l10n) => l10n.inventoryRevertPartial(done, total),
           details: details,
         ),
       );
@@ -842,6 +854,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
   /// significare il totale del prodotto su tutte le sedi, che e' un'altra
   /// operazione.
   Future<InventoryActionFeedback> _counterMovement(
+    AppLocalizations l10n,
     InventoryMovementGroup group,
     InventoryMovementRevertLine line,
     String movementKey,
@@ -850,7 +863,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
       productIdText: '${line.productId}',
       correctStockText: '${line.restoreTo}',
       siteIdText: '${line.siteId}',
-      reasonText: inventoryRevertReason(group, line.product),
+      reasonText: inventoryRevertReason(l10n, group, line.product),
       movementKey: movementKey,
     );
   }
@@ -863,6 +876,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
   /// vuole la stanza esatta la indica nel pannello Sposta con un secondo
   /// spostamento.
   Future<InventoryActionFeedback> _reverseMove(
+    AppLocalizations l10n,
     InventoryMovementGroup group,
     InventoryMovementRevertLine line,
     String movementKey,
@@ -875,7 +889,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
       toSiteIdText: '${product.siteFrom}',
       toWarehouseIdText: '${product.warehouseFrom}',
       quantityText: '${product.quantity}',
-      reasonText: inventoryRevertReason(group, product),
+      reasonText: inventoryRevertReason(l10n, group, product),
       movementKey: movementKey,
     );
   }

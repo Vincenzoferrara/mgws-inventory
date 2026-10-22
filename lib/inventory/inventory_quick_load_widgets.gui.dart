@@ -88,7 +88,7 @@ Future<bool?> showInventoryQuickLoadBatchConfirmDialog({
             ),
             const SizedBox(height: 4),
             Text(
-              '${context.l10n.inventoryEtichettaMotivo} $kInventoryCaricoReason',
+              '${context.l10n.inventoryEtichettaMotivo} ${context.l10n.inventoryStockInReason}',
             ),
             if (plan.warehouseId != null || plan.room != null)
               Text(
@@ -381,14 +381,14 @@ class InventoryQuickLoadFeedbackPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            feedback.message,
+            feedback.message(context.l10n),
             style: theme.textTheme.titleSmall?.copyWith(
               color: tone,
               fontWeight: FontWeight.w800,
             ),
           ),
           for (final detail in feedback.details)
-            Text(detail, style: theme.textTheme.bodySmall),
+            Text(detail(context.l10n), style: theme.textTheme.bodySmall),
           if (feedback.success && result != null) ...[
             const SizedBox(height: 8),
             // Solo l'operazione interessa all'operatore. Il numero della riga
