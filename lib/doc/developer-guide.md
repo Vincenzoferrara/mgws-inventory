@@ -269,8 +269,8 @@ Recommended values:
   issues).
 - String changes: also the localization checks above.
 - Documentation changes: check the links and search for stale names.
-- Tests are in `test/`: run `flutter test` for the areas you change. Tests
-  named `woo_*` talk to a live WooCommerce server and can be flaky.
+- There is no automated test suite: verify changes with `flutter analyze` and
+  by running the app.
 
 ## Documentation
 
