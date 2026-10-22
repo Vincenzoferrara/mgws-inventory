@@ -43,11 +43,19 @@ class UpdaterService {
     return Platform.isWindows || Platform.isLinux;
   }
 
+  /// Le build per F-Droid e per gli store si compilano con
+  /// `--dart-define=UPDATE_CHECK=false`: lì gli aggiornamenti li porta lo
+  /// store, e Google Play non accetta avvisi che rimandano a download esterni.
+  static const bool _updateCheckEnabled = bool.fromEnvironment(
+    'UPDATE_CHECK',
+    defaultValue: true,
+  );
+
   /// Android riceve gli aggiornamenti da F-Droid, Obtainium o dallo store:
   /// l'app non scarica ne installa nulla, avvisa soltanto che esiste una
   /// versione piu recente.
   static bool get isNotifyOnlyPlatform {
-    if (kIsWeb) return false;
+    if (kIsWeb || !_updateCheckEnabled) return false;
     return Platform.isAndroid;
   }
 

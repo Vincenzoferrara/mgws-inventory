@@ -8,6 +8,7 @@ import '../../settings/app_settings.dart';
 import '../../settings/prodotti_image_settings.dart';
 import '../class_media.dart';
 import '../../ai/ai_service.dart';
+import '../../ai/ai_consent.dart';
 import '../../log_viewer/app_logger.dart';
 import '../../notification/notification_service.dart';
 import '../../reuse_class/gui/searchable_checkbox_dialog.dart';
@@ -4400,6 +4401,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     try {
       final settings = AppSettings();
       await settings.init();
+      if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
       final description = await aiService.generateProductDescription(
@@ -4436,6 +4438,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     try {
       final settings = AppSettings();
       await settings.init();
+      if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
       final description = await aiService.generateProductDescription(
@@ -4472,6 +4475,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     try {
       final settings = AppSettings();
       await settings.init();
+      if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
       final categories = await aiService.suggestCategories(
@@ -4525,6 +4529,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     try {
       final settings = AppSettings();
       await settings.init();
+      if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
       final suggestedTags = await aiService.suggestTags(

@@ -1,0 +1,3 @@
+- First public release
+- About page with license, source code and open source licenses
+- Consent before sending product data to a cloud AI service

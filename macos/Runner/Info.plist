@@ -15,7 +15,7 @@
 	<key>CFBundleName</key>
 	<string>mgws_inventory</string>
 	<key>CFBundleDisplayName</key>
-	<string>mgws_inventory</string>
+	<string>MGWS Inventory</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

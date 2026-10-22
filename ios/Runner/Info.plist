@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>mgws_inventory</string>
+	<string>MGWS Inventory</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -41,6 +41,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera scans product barcodes and QR codes.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>NFC reads and writes the staff login cards.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photos are used to choose product images.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>The app connects to your WordPress shop, which can be on your local network.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

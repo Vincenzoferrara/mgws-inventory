@@ -393,14 +393,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.3"
-  enough_icalendar:
-    dependency: "direct main"
-    description:
-      name: enough_icalendar
-      sha256: d35e64b5499c5e7154fa2ff9b29a16ebe269400f8b23e7f9f1981c4787fc319a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.17.0"
   equatable:
     dependency: transitive
     description:
@@ -1320,10 +1312,12 @@ packages:
   report_flutter:
     dependency: "direct main"
     description:
-      path: "../../report"
-      relative: true
-    source: path
-    version: "1.0.0+1"
+      path: "."
+      ref: "0447e5403eb589aa27aa8b386eeddaad92620104"
+      resolved-ref: "0447e5403eb589aa27aa8b386eeddaad92620104"
+      url: "https://github.com/Vincenzoferrara/report_flutter.git"
+    source: git
+    version: "1.0.0"
   scroll_to_index:
     dependency: transitive
     description:

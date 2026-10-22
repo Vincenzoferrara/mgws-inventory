@@ -1,80 +1,139 @@
 # Troubleshooting
 
-## Login fallito
+[Documentation index](README.md)
 
-- Verifica che l'URL sia corretto
-- Prova JWT o WooCommerce API in base al backend
-- Controlla che il sito risponda e che il plugin atteso sia attivo
+The first half is for shop staff; [Technical notes](#technical-notes) is for
+whoever runs the site or develops the app. When you ask for help, attach
+the log from `View logs` (it never contains passwords or keys).
 
-## Nessun prodotto visibile
+## Login fails
 
-- Controlla che WooCommerce abbia prodotti pubblicati
-- Verifica eventuali filtri salvati
-- Controlla la connessione al backend
+- Check the site address, including `https://`.
+- Try the other login method: JWT needs a JWT plugin on the site, while
+  WordPress Admin and WooCommerce API do not.
+- If the site is local (`localhost`, `192.168.x.x`, `10.x.x.x`), tick the
+  local development option.
+- Check that the site answers in a browser and that WooCommerce is active.
 
-## Inventario MGWS non disponibile
+## "MGWS backend not available"
 
-- MGWS deve essere raggiungibile e autenticato
-- Le letture inventario dipendono dalle tabelle MGWS e dalle capability di lettura stock
-- Le operazioni di magazzino (carico, rettifica, spostamento) richiedono capability MGWS coerenti con la rotta
-- Il carico rifiuta quantita non positive, motivo vuoto, prodotto mancante o capability insufficiente; non chiedere fornitore, ordine, fattura o DDT per risolvere questi errori
-- Lo spostamento usa una rotta (`stock/move`) diversa dalla rettifica (`stock/reconcile`). Se compaiono errori di capability solo sullo spostamento, non e' un problema della rettifica
-- Se una ricezione non aggiorna stock, controlla che sia stata eseguita `Convalida`: la bozza di ricezione e stock-neutral
-- Se un conteggio fisico non aggiorna stock, controlla che la sessione sia stata approvata: righe e bozze sono stock-neutral
-- Il ledger di `Movimenti` non si modifica: l'app non ha una rotta che lo faccia e non deve costruirne una. Se un movimento e' sbagliato, l'unica correzione e' l'annullamento, che registra un movimento nuovo: contromovimento con `stock/reconcile` quando cambia il totale, spostamento al contrario con `stock/move` quando la merce cambia solo magazzino
-- `Annulla` su un movimento resta spento per gli spostamenti e si blocca per prodotto se lo stock attuale non coincide piu' con lo `stock_after` del movimento: in entrambi i casi la schermata spiega il motivo accanto al pulsante, non in un errore generico. Non e' un bug, e' il controllo che impedisce di azzerare un movimento successivo
-- Se una riga di `Movimenti` mostra un solo pezzo di un'operazione con molti prodotti, il backend ha tagliato la risposta: MGWS pagina e non filtra per documento, quindi stringi i filtri per data o prodotto. Il pannello avvisa quando la risposta e' incompleta
-- Se la scheda di un movimento non ha una data "ultima modifica" distinta dalla data del movimento, e' normale: il ledger non si modifica, quindi l'ultima modifica e' per definizione il movimento piu' recente del gruppo ed e' ricavata da lì
-- La colonna operatore mostra un identificativo numerico (`operator_user_id`): MGWS non manda il nome e non c'e' una rotta `users/{id}` collegata, quindi l'app non lo indovina
-- `POST /inventory/stock/sync` e `PUT /inventory/stock/reconcile` sono operative e richiedono payload validi, utente autenticato e capability adeguate
-- `InventoryGlobal.reconcileInventory(fixDiscrepancies)` produce proposte e non corregge stock in automatico
-- `POST /inventory/rfid/scan` e resolve-only: risolve tag o barcode e non crea movimenti o incrementi stock impliciti
-- Se una lettura stock prodotto restituisce `404 mgws_product_not_found`, verifica che il prodotto WooCommerce esista
-- Se una lettura o mutazione restituisce `403`, verifica le capability WordPress dell'utente usato dall'app
+The cashier, the inventory, suppliers, loyalty cards, employees and
+templates need the MGWS plugin. If they say it is not available:
 
-## Backend MGWS non disponibile
+- Check that the MGWS plugin is installed and active on the site.
+- Log in with **WordPress Admin** or **JWT**. WooCommerce API keys work only
+  for WooCommerce: MGWS needs a WordPress user and answers `401` to them.
+- Check that your WordPress user has the MGWS capabilities for that section
+  (a `403` in the log means a missing permission).
+- If the plugin is active but the sections stay closed, the MGWS tables may
+  not be installed: the status routes then answer with the service
+  switched off.
 
-- **Sintomo tipico**: `Crea turno` in Cassa, checkout, dipendenti, inventario o loyalty restituiscono tutti "Backend MGWS non disponibile" anche se il login è riuscito e i prodotti WooCommerce si caricano.
-- **Diagnosi veloce**: se nel log del container WordPress non compare alcuna richiesta a `/wp-json/mgws/*`, il problema è lato app: la richiesta non parte, quindi non è un problema di plugin, capability o rete. Con una riga per rotta nel log del container si distingue subito "non parte" da "parte e viene respinta".
-- **Causa**: i client MGWS devono prendere base URL e credenziali da `WooConnect`, l'unico owner dei connettori. Se un client MGWS istanzia un connettore proprio, la richiesta viaggia con credenziali diverse da quelle della sessione attiva e non raggiunge mai il plugin.
-- La disponibilità si ricalcola dopo ogni connessione riuscita, in tutte le modalità e dopo l'auto-connessione. Se un modulo MGWS resta chiuso, verificare che `refreshMgwsAvailability()` venga invocato anche dal ramo di login usato.
-- In modalità Consumer Key/Secret le chiavi WooCommerce autenticano solo le rotte `wc/`: MGWS risponde 401 e l'app lo degrada correttamente come non disponibile. Per usare MGWS serve un login JWT o WordPress.
-- Se il log riporta 200 ma il modulo resta chiuso, il servizio è spento lato server: le rotte rispondono 200 anche con `enabled: false`. Controllare che le tabelle MGWS siano installate e che l'utente abbia le capability di lettura stock.
+## No products
 
-## Checkout cassa fallito
+- Check that WooCommerce has published products.
+- Clear the filters (`Clear all`) and show out-of-stock items.
+- Check the connection: the first page appears as soon as it arrives.
 
-- Verifica che MGWS sia raggiungibile e autenticato
-- Controlla che il payload POS sia valido
-- Usa una `idempotency_key` stabile per ogni scontrino locale; in alternativa MGWS usa il meta `_id_scontrino_locale` come fallback
-- `409 mgws_idempotency_conflict` indica stessa chiave con payload diverso: non ritentare cambiando dati senza generare una nuova chiave operativa
-- `409 mgws_idempotency_in_progress` indica una richiesta identica gia in corso: attendi il completamento e ripeti lo stesso payload
-- Se MGWS restituisce una failure salvata dopo prenotazione idempotente, la stessa chiave ripete quella failure e richiede intervento operativo lato MGWS
+## Cashier
 
-## Cassa: ricerca prodotti ON-DEMAND (niente catalogo al avvio)
+- **A search finds nothing**: the cashier searches the shop only when you
+  scan or type; if nothing matches the list stays empty until you change
+  the text.
+- **The sale was sent twice**: it is safe. Each receipt has its own key and
+  MGWS returns the saved answer instead of creating a second order.
+- **You cannot add products**: with `Cash register shift mandatory` on, open
+  a shift first.
+- **A return is refused**: you cannot return more than what is left on that
+  line, counting the returns made on every device.
 
-- Dal 2026-09-23 la cassa NON carica piu il catalogo completo (prodotti + varianti) all'avvio: l'eager-load veniva eseguito per pagine intere e rallentava il modulo e disturbava la race di connessione MGWS.
-- La cassa popola la lista solo su richiesta:
-  - **Scanner/barra di ricerca**: `ricercaPerBarcode()` interroga WooCommerce on-demand (`findProductByBarcodeInternoExact`, fallback `searchProducts`) e materializza solo la variante (o il prodotto semplice) che corrisponde.
-  - **Digitazione**: `setFiltroRicerca()` con debounce 400 ms lancia `_ricercaOnDemand()` (barcode esatto + `searchProducts`, con `getAllVariations` solo per i prodotti candidati variabili).
-  - **"Aggiungi esistente"**: il picker passa le varianti selezionate (o i prodotti semplici) e la cassa li recupera per ID (`getVariationById` / `getProductById`) senza passare dal catalogo.
-- Se una ricerca non trova nulla, la lista resta vuota finche il filtro non cambia: non e un bug, e il comportamento a richiesta.
-- `getAllVariations` viene chiamato solo quando serve (1-2 prodotti), non per tutto il catalogo.
+## Inventory
 
-## Cassa: errore pagination disposed dopo aggiunta prodotto
+- **A stock-in is refused**: quantities must be positive, a product must be
+  chosen and your user must be allowed to book stock. A supplier, an order,
+  an invoice or a delivery note is never required.
+- **Errors only on transfers**: transfers use a different permission from
+  adjustments; ask for the stock-move capability.
+- **A delivery did not change the stock**: a delivery draft changes nothing
+  until it is validated, and one waiting for checking needs a manager's
+  approval.
+- **A physical count did not change the stock**: rows and drafts change
+  nothing until the count session is approved.
+- **`Cancel movement` is off for a product**: that product changed after the
+  movement, so undoing it would also cancel the later operation. The
+  reason is shown next to the button.
+- **A movement shows only part of the products**: very large operations can
+  be split across pages. Narrow the filters by date or product; the panel
+  warns you when the list is incomplete.
+- **The operator is a number**: it is the WordPress user ID; MGWS does not
+  send the name.
+- **Movements cannot be edited or deleted**: by design. A wrong movement is
+  fixed with `Cancel movement`, which records a new one.
 
-- **Sintomo**: dopo aver aggiunto un prodotto dalla selezione prodotti in Cassa compare `A GlobalPaginationController<ProdottoGlobal> was used after being disposed`.
-- **Causa**: la pagina `Gestisci prodotti` in modalita cassa puo essere chiusa mentre il caricamento progressivo dei prodotti o il prefetch varianti e ancora in corso; i callback tardivi non devono piu toccare il controller di paginazione gia disposto.
-- **Fix applicata**: `ProdottiGestisciPageState` usa un flag `_disposed` e guardie `_alive` su caricamento prodotti, callback `onProgress`, prefetch finestra, scroll infinito, cambio pagina e cambio dimensione pagina.
+## Loyalty cards
 
-## Loyalty MGWS
+- **Customer or card not found**: the customer has no loyalty account, or
+  the card number does not exist.
+- **Not enough points**: you cannot remove more points than the balance.
+- **Service unavailable**: the MGWS loyalty tables are not ready.
 
-- `404 mgws_loyalty_customer_not_found` indica cliente WordPress/Woo assente o senza conto loyalty quando richiesto dalla rotta
-- `404 mgws_loyalty_card_not_found` su cancellazione carta significa che non c'e una carta da rimuovere; la cancellazione non e idempotente
-- La cancellazione carta conserva conto cliente e storico punti, quindi lo storico resta la fonte per audit
-- `400 mgws_insufficient_points` indica sottrazione punti superiore al saldo disponibile
-- `503` sulle rotte loyalty indica storage MGWS non disponibile o tabelle non pronte
+## Images
 
-## Problemi con immagini
+- Use an image format WordPress accepts.
+- The "over the limit" badge is only information; the limits are in
+  `Settings > Products`.
 
-- Verifica che il file originale sia un'immagine supportata da WordPress
-- Se compare il badge oltre soglia, controlla le dimensioni configurate in `Impostazioni > Prodotti`
+## AI help
+
+- **"Provider not configured"**: enter the API key (or the Ollama address)
+  in `Settings > AI` and choose the active provider.
+- **Nothing happens after the consent dialog**: you pressed `Cancel`; the
+  question comes back the next time.
+
+## Technical notes
+
+### MGWS requests never reach the site
+
+If the web server log shows no request to `/wp-json/mgws/*`, the problem is
+in the app, not in the plugin or the network. Every MGWS client must take
+the site address and credentials from `WooConnect`; a client that creates
+its own connector sends requests with credentials that do not match the
+session. See [Architecture](architecture.md#login-and-the-mgws-chain).
+
+### MGWS answers 200 but the section stays closed
+
+The status routes answer `200` also when the service is off, with `enabled`
+or `ok` set to `false`. Check that the MGWS tables are installed and that
+the user can read stock. The app reads the body of the answer, not only
+the HTTP status.
+
+### Checkout errors
+
+| Answer | Meaning |
+|--------|---------|
+| `409 mgws_idempotency_conflict` | Same key, different content. Do not resend changed data with the old key. |
+| `409 mgws_idempotency_in_progress` | The same request is still running. Wait and resend the same content. |
+| `409` on a return | More than the returnable remainder. |
+| `409` without an open shift | The shop requires a shift and none is open on the server. |
+
+When MGWS saved a failure for a key, the same key repeats that failure: it
+needs a fix on the site.
+
+Without an `idempotency_key`, MGWS uses the `_id_scontrino_locale` meta of
+the receipt; a request with neither is accepted but is not protected from
+duplicates.
+
+### Inventory and loyalty answers
+
+| Answer | Meaning |
+|--------|---------|
+| `404 mgws_product_not_found` | The WooCommerce product does not exist. |
+| `404 mgws_loyalty_customer_not_found` | No WordPress/WooCommerce customer, or no loyalty account. |
+| `404 mgws_loyalty_card_not_found` | No card to remove: removing a card is not idempotent. |
+| `400 mgws_insufficient_points` | More points removed than the balance. |
+| `403` | The WordPress user lacks the capability of that route. |
+| `503` | MGWS storage or tables not ready. |
+
+`POST /inventory/rfid/scan` only resolves a tag or barcode and never
+changes stock. `InventoryGlobal.reconcileInventory(fixDiscrepancies)`
+proposes corrections and never applies them by itself.

@@ -1,42 +1,102 @@
-# mgws_inventory
+# MGWS Inventory
 
-App Flutter gestionale per negozi di abbigliamento: punto cassa, catalogo prodotti, operazioni di magazzino, ordini, clienti, carte fedelta, report e integrazione WordPress/WooCommerce tramite MGWS.
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Vincenzoferrara/mgws-inventory)](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/vinc0101)
 
-L'app e pensata per negozi che vogliono un backend self-hosted e un frontend orientato alla privacy. La parte WordPress e gestita da WooCommerce e dal plugin MG Warehouse Stock; l'app Flutter comunica solo con WooCommerce e MGWS per le funzioni collegate a WordPress.
+A free and open source app to run a clothing store on top of your own
+online shop: point of sale, products, stock, labels, orders, customers and
+loyalty cards.
 
-- gestione ordini.
-- gestione prodotti e vasrianti e creazione
-- gestione cupon
-- scenner barcode (tramite fotocamera su andorid).
-- autenticazione tramite credezioli wordpress, apikey woocomerce,jwt, appliacation password
-- gestione degli utenti e funzioanlita
-- gestione dei clinti (woocomerce)
+**Platforms:** for now the app works with **WordPress + WooCommerce**.
+Support for other e-commerce platforms, such as Shopify, is planned.
 
+Your data stays on your server. No account, no ads, no tracking. English
+and Italian.
+
+## Features
+
+The features come in two tiers: what the app does on its own with your
+WooCommerce shop, and what it unlocks when you also install the free
+**MGWS plugin** on your WordPress site:
+<https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>.
+
+### With the app only (WooCommerce)
+
+- **Products**: create and edit products and variants, images, barcodes,
+  prices and WooCommerce stock.
+- **Barcode and QR scanner** with the camera.
+- **Orders, customers and coupons.**
+- **Dashboard** with sales, products and orders figures, PDF and CSV
+  exports.
+- **Calendars and contacts** on your CalDAV server.
+- **Optional AI help** for product descriptions, categories and tags,
+  with your own API key (OpenAI, Anthropic, Google, Mistral) or a local
+  Ollama server.
+- **Login** with WordPress credentials, WooCommerce API keys, JWT or
+  application passwords.
+
+### With the MGWS plugin installed
+
+- **Point of sale**: sales, returns and exchanges, receipts, cash shifts
+  and closings, with sales that are never recorded twice.
+- **Inventory**: stock in (with or without a supplier order), adjustments
+  and transfers between warehouses, with a movement ledger whose
+  operations can be undone.
+- **Labels, signs and reports**: drag-and-drop designer, adhesive A4
+  sheets and label rolls, PDF printing, built on
+  [report_flutter](https://github.com/Vincenzoferrara/report_flutter);
+  templates are shared by every device of the shop.
+- **Loyalty cards** with points and history.
+- **Employees and suppliers**, with permissions and credential
+  revocation.
+- **Custom sales reports** and dashboards shared with the team.
+- **Settings synced** across your devices.
+
+Like most plugins, MGWS adds its own tables to the WordPress database.
 
 ## Download
 
-windows installre: (inserisci link del release)
-windows partable: (inserisci link del release)
-linux appimage: (inserisci link del release)
-linux flatpack: (inserisci link del release)
-linux aur: (inserisci link del release)
+| Platform | Download |
+|----------|----------|
+| Windows | [Installer](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory-win-Setup.exe) · [Portable](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory-win-Portable.zip) |
+| Linux | [AppImage](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.AppImage) |
+| Android | [APK](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.apk) · [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Vincenzoferrara/mgws-inventory) · F-Droid and Google Play coming soon |
 
-## Android
-[![Google Play](https://img.shields.io/badge/Google%20Play-Coming%20soon-414141?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=it.mgws.mgws_inventory)
-[![F-Droid](https://img.shields.io/badge/F--Droid-Coming%20soon-1976d2?style=for-the-badge&logo=fdroid&logoColor=white)](https://f-droid.org/packages/it.mgws.mgws_inventory/)
-[![Obtainium](https://img.shields.io/badge/Obtainium-Install-2563eb?style=for-the-badge&logo=obtainium&logoColor=white)](obtainium://add?url=https%3A%2F%2Fgithub.com%2FVincenzoferrara%2Fmgws-inventory)
+All releases: <https://github.com/Vincenzoferrara/mgws-inventory/releases>.
+The desktop versions update themselves.
 
-## WordPress plugin
-per sbloccare le complete funzionalita, bisogno installare il plguin, questo plguin creare alunce tabella perosolizate nel db (come tutti i plguin), 
+## Documentation
 
-# Funzionalita sbloccate con il plugin
-- cassa: scarico/reso/cambio e lo creazione dello scontrino.
-- invetario: carico quantita associato un ordine o non assicato, rettifica dui magaziono, con storico che permette unnultato del operazioni.
-- gestione carta fedelta.
-- gestione dipendeti
-- gstione fornitori
+The guides are in [`lib/doc`](lib/doc/README.md):
+[user guide](lib/doc/user-guide.md) ·
+[installation](lib/doc/installation.md) ·
+[configuration](lib/doc/configuration.md) ·
+[troubleshooting](lib/doc/troubleshooting.md) ·
+[developer guide](lib/doc/developer-guide.md).
 
-- GitHub: <https://github.com/Vincenzoferrara/mg-warehouse-stock>
-- Su wordpress.org
-## Licenza
-mgws_inventory è software libero, distribuito sotto la licenza GNU General Public License v3.0 (GPL-3.0). Il testo completo è nel file [LICENSE](LICENSE).
+## Privacy
+
+The developer receives no data from the app. See the
+[privacy policy](PRIVACY.md) for what is stored on the device, on your
+site and, only if you enable them, sent to AI services.
+
+## Contributing
+
+Bug reports, translations and pull requests are welcome: see
+[CONTRIBUTING.md](CONTRIBUTING.md). Report security problems privately, as
+described in [SECURITY.md](SECURITY.md).
+
+## Support the project
+
+MGWS Inventory is free. If it helps your shop, you can support its
+development on [Ko-fi](https://ko-fi.com/vinc0101).
+
+## License
+
+Copyright © 2025-2026 Vincenzo Ferrara.
+
+MGWS Inventory is free software: you can redistribute it and/or modify it
+under the terms of the [GNU General Public License v3.0](LICENSE). It comes
+with no warranty. The licenses of the libraries it uses are listed in the
+app, under Settings → About → Open source licenses.

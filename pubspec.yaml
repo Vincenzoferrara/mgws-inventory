@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.26+26
+version: 1.0.58+58
 
 environment:
   sdk: '>=3.12.0 <4.0.0'
@@ -68,8 +68,7 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.3.5
   url_launcher: ^6.3.1             # Apertura link esterni (es. prodotto in negozio)
-  # WooCommerce REST API — versione hosted da pub.dev (il fork locale in
-  # packages/woocommerce_flutter_api non entra più nella build).
+  # WooCommerce REST API — versione hosted da pub.dev.
   woocommerce_flutter_api: ^2.0.1
   http_parser: ^4.0.2              # Parser HTTP per upload media
   logger: ^2.6.2
@@ -89,8 +88,13 @@ dependencies:
   share_plus: ^13.3.0              # Condivisione file
 
   # Report Flutter - Sistema report/etichette con drag-and-drop
+  # Stessa licenza GPL-3.0, sorgente: https://github.com/Vincenzoferrara/report_flutter
+  # Fino alla pubblicazione su pub.dev resta fissata a un commit su GitHub;
+  # per lo sviluppo locale pubspec_overrides.yaml punta alla cartella ../../report.
   report_flutter:
-    path: ../../report
+    git:
+      url: https://github.com/Vincenzoferrara/report_flutter.git
+      ref: 0447e5403eb589aa27aa8b386eeddaad92620104
 
   # ADS_CONNECTOR_DISABLED_FOR_FDROID: escluso temporaneamente dalla build F-Droid.
   # ads_connector:
@@ -105,7 +109,6 @@ dependencies:
   flutter_cohere: ^0.0.2          # Cohere
   ollama_dart: ^4.0.0             # Ollama (locale)
   wordpress_client: ^9.3.0
-  enough_icalendar: ^0.17.0
 
    # WordPress packages
 
@@ -148,16 +151,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # Font Noto (SIL OFL, vedi assets/fonts/OFL.txt) ridotti all'alfabeto latino:
-  # usati dai PDF di etichette, cartelli e report, perche' i font PDF standard
-  # non contengono il simbolo dell'euro.
+  # Icona dell'app in piccolo, mostrata nella scheda Info delle impostazioni.
   assets:
-    - assets/fonts/
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+    - assets/images/app_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

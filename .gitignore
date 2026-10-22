@@ -94,3 +94,6 @@ lib/traduzioni/non_tradotte.json
 .zshrc
 *.bak
 *.backup
+
+# Override locale delle dipendenze (report_flutter da ../../report)
+pubspec_overrides.yaml

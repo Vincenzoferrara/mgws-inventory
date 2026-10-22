@@ -1,0 +1,1 @@
+Gestionale per negozi di abbigliamento con WooCommerce: cassa e magazzino

@@ -13,6 +13,7 @@ import 'prodotti_image_settings.dart';
 import 'general_settings.gui.dart';
 import 'inventory_quick_load_settings.dart';
 import 'inventory_settings.gui.dart';
+import 'about_settings.gui.dart';
 import '../traduzioni/estensioni.dart';
 
 /// Pagina principale delle impostazioni con TabView
@@ -72,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage>
         ),
       ],
       child: DefaultTabController(
-        length: 8,
+        length: 9,
         child: Scaffold(
           appBar: AppBar(
             title: Text(context.l10n.settingsTitle),
@@ -111,10 +112,13 @@ class _SettingsPageState extends State<SettingsPage>
                   icon: const Icon(Icons.keyboard),
                   text: context.l10n.settingsTabShortcut,
                 ),
-                // Futuro: Network, Logs, About...
+                Tab(
+                  icon: const Icon(Icons.info_outline),
+                  text: context.l10n.settingsTabInfo,
+                ),
+                // Futuro: Network, Logs...
                 // Tab(icon: Icon(Icons.wifi), text: 'Network'),
                 // Tab(icon: Icon(Icons.bug_report), text: 'Logs'),
-                // Tab(icon: Icon(Icons.info), text: 'About'),
               ],
             ),
           ),
@@ -128,10 +132,10 @@ class _SettingsPageState extends State<SettingsPage>
               AISettingsTab(),
               RFIDSettingsTab(),
               ShortcutsSettingsTab(),
+              AboutSettingsTab(),
               // Futuro: altre tab
               // NetworkSettingsTab(),
               // LogsSettingsTab(),
-              // AboutTab(),
             ],
           ),
         ),

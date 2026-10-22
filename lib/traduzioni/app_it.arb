@@ -1,6 +1,6 @@
 {
   "@@locale": "it",
-  "appTitle": "mgws_inventory",
+  "appTitle": "MGWS Inventory",
   "@appTitle": {
     "description": "Nome dell'applicazione mostrato nel titolo della finestra e nel selettore delle finestre del desktop"
   },
@@ -1186,15 +1186,15 @@
   "@homeAutenticazioneRichiesta": {
     "description": "Titolo della schermata di login mostrata quando una sezione richiede le credenziali"
   },
-  "homeTitoloDesktop": "mgws_inventory",
+  "homeTitoloDesktop": "MGWS Inventory",
   "@homeTitoloDesktop": {
     "description": "Titolo della barra in alto della home quando tutta la home e visibile"
   },
-  "homeTitoloMobileBack": "mgws_inventory",
+  "homeTitoloMobileBack": "MGWS Inventory",
   "@homeTitoloMobileBack": {
     "description": "Titolo di riserva della barra in alto su mobile quando la sezione aperta non ha un titolo"
   },
-  "homeTitoloDrawer": "mgws_inventory",
+  "homeTitoloDrawer": "MGWS Inventory",
   "@homeTitoloDrawer": {
     "description": "Nome breve dell'app mostrato nell'intestazione del menu laterale"
   },
@@ -7940,6 +7940,107 @@
         "type": "int"
       }
     }
+  },
+  "settingsTabInfo": "Info",
+  "@settingsTabInfo": {
+    "description": "Localized string settingsTabInfo"
+  },
+  "aboutVersion": "Versione {version} (build {build})",
+  "@aboutVersion": {
+    "description": "Localized string aboutVersion",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutCopyright": "Copyright © 2025-2026 Vincenzo Ferrara",
+  "@aboutCopyright": {
+    "description": "Localized string aboutCopyright"
+  },
+  "aboutLicenseTitle": "Licenza",
+  "@aboutLicenseTitle": {
+    "description": "Localized string aboutLicenseTitle"
+  },
+  "aboutLicenseBody": "Questa app è software libero: puoi redistribuirla e/o modificarla secondo i termini della GNU General Public License versione 3, pubblicata dalla Free Software Foundation.",
+  "@aboutLicenseBody": {
+    "description": "Localized string aboutLicenseBody"
+  },
+  "aboutNoWarranty": "È distribuita nella speranza che sia utile, ma SENZA ALCUNA GARANZIA; senza neppure la garanzia implicita di COMMERCIABILITÀ o IDONEITÀ PER UN PARTICOLARE SCOPO. Per i dettagli vedi la GNU General Public License.",
+  "@aboutNoWarranty": {
+    "description": "Localized string aboutNoWarranty"
+  },
+  "aboutSourceCode": "Codice sorgente",
+  "@aboutSourceCode": {
+    "description": "Localized string aboutSourceCode"
+  },
+  "aboutLicenseText": "Testo completo della GNU GPL v3",
+  "@aboutLicenseText": {
+    "description": "Localized string aboutLicenseText"
+  },
+  "aboutWordpressPlugin": "Plugin WordPress (MGWS)",
+  "@aboutWordpressPlugin": {
+    "description": "Localized string aboutWordpressPlugin"
+  },
+  "aboutReportIssue": "Segnala un problema o proponi un'idea",
+  "@aboutReportIssue": {
+    "description": "Localized string aboutReportIssue"
+  },
+  "aboutOpenSourceLicenses": "Licenze open source",
+  "@aboutOpenSourceLicenses": {
+    "description": "Localized string aboutOpenSourceLicenses"
+  },
+  "aboutOpenSourceLicensesHelp": "Licenze delle librerie usate dall'app",
+  "@aboutOpenSourceLicensesHelp": {
+    "description": "Localized string aboutOpenSourceLicensesHelp"
+  },
+  "aboutDonate": "Sostieni il progetto",
+  "@aboutDonate": {
+    "description": "Localized string aboutDonate"
+  },
+  "aboutDonateHelp": "L'app è gratuita e senza pubblicità. Le donazioni finanziano lo sviluppo.",
+  "@aboutDonateHelp": {
+    "description": "Localized string aboutDonateHelp"
+  },
+  "aboutDonateButton": "Dona su Ko-fi",
+  "@aboutDonateButton": {
+    "description": "Localized string aboutDonateButton"
+  },
+  "aboutLinkError": "Impossibile aprire il link",
+  "@aboutLinkError": {
+    "description": "Localized string aboutLinkError"
+  },
+  "aiConsentTitle": "Inviare i dati del prodotto a un servizio IA?",
+  "@aiConsentTitle": {
+    "description": "Localized string aiConsentTitle"
+  },
+  "aiConsentBody": "Per scrivere le descrizioni e proporre categorie e tag, l'app invia nome, categoria, prezzo, barcode interno e descrizione del prodotto a {provider}, con la tua chiave API. {provider} li tratta secondo i suoi termini e la sua informativa privacy. L'app non invia dati dei clienti. Te lo chiediamo una volta per ogni provider.",
+  "@aiConsentBody": {
+    "description": "Localized string aiConsentBody",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiConsentAccept": "Invia",
+  "@aiConsentAccept": {
+    "description": "Localized string aiConsentAccept"
+  },
+  "aiConsentDecline": "Annulla",
+  "@aiConsentDecline": {
+    "description": "Localized string aiConsentDecline"
+  },
+  "settingsAiPrivacyTitle": "Privacy",
+  "@settingsAiPrivacyTitle": {
+    "description": "Localized string settingsAiPrivacyTitle"
+  },
+  "settingsAiPrivacyBody": "OpenAI, Anthropic, Google e Mistral sono servizi esterni: quando li usi, i dati del prodotto che stai modificando vengono inviati a loro con la tua chiave API, e la prima volta l'app ti chiede il consenso. Ollama gira sul tuo computer o server e non invia nulla all'esterno.",
+  "@settingsAiPrivacyBody": {
+    "description": "Localized string settingsAiPrivacyBody"
   },
   "logLinesCopied": "{count, plural, =1{1 riga copiata negli appunti} other{{count} righe copiate negli appunti}}",
   "@logLinesCopied": {

@@ -1,0 +1,26 @@
+<p>MGWS Inventory runs the daily work of a clothing store on top of your own online shop. For now it works with WordPress and WooCommerce; other platforms, such as Shopify, are planned. Your data stays on your server.</p>
+
+<p><b>With the app only (WooCommerce)</b></p>
+<ul>
+<li>Products and variants: create, edit, images, barcodes, prices and stock</li>
+<li>Barcode and QR scanner with the camera</li>
+<li>Orders, customers and coupons</li>
+<li>Dashboard with sales, products and orders, PDF and CSV exports</li>
+<li>CalDAV calendars and contacts</li>
+<li>Optional AI help for product descriptions, with your own API key or a local Ollama server</li>
+</ul>
+
+<p><b>With the free MGWS plugin installed on your site</b></p>
+<ul>
+<li>Point of sale: sales, returns, exchanges, receipts and cash shifts</li>
+<li>Inventory: stock in, adjustments and transfers, with a movement ledger that can be undone</li>
+<li>Labels, shop signs and reports: drag-and-drop designer, A4 adhesive sheets and label rolls, PDF printing</li>
+<li>Loyalty cards with points</li>
+<li>Employees and suppliers, with permissions</li>
+<li>Custom sales reports and shared dashboards</li>
+</ul>
+<p>MGWS plugin: https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin</p>
+
+<p>Login with WordPress credentials, WooCommerce API keys, JWT or application passwords. English and Italian.</p>
+
+<p>MGWS Inventory is free software under the GNU GPL v3. It has no ads and no tracking. Source code: https://github.com/Vincenzoferrara/mgws-inventory</p>

@@ -211,6 +211,16 @@ class _AISettingsTabState extends State<AISettingsTab> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Avviso privacy: i provider cloud ricevono i dati dei prodotti
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(context.l10n.settingsAiPrivacyTitle),
+                subtitle: Text(context.l10n.settingsAiPrivacyBody),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Selezione provider attivo

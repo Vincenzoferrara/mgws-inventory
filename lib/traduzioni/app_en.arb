@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "mgws_inventory",
+  "appTitle": "MGWS Inventory",
   "@appTitle": {
     "description": "Application name shown in the window title and in the desktop task switcher"
   },
@@ -306,7 +306,7 @@
       }
     }
   },
-  "homeTitoloCassa": "Cassa",
+  "homeTitoloCassa": "Cashier",
   "@homeTitoloCassa": {
     "description": "Title of the till section on the home page"
   },
@@ -1186,15 +1186,15 @@
   "@homeAutenticazioneRichiesta": {
     "description": "Title of the login screen shown when a section needs credentials"
   },
-  "homeTitoloDesktop": "mgws_inventory",
+  "homeTitoloDesktop": "MGWS Inventory",
   "@homeTitoloDesktop": {
     "description": "App bar title of the home screen when the whole home is visible"
   },
-  "homeTitoloMobileBack": "mgws_inventory",
+  "homeTitoloMobileBack": "MGWS Inventory",
   "@homeTitoloMobileBack": {
     "description": "Fallback app bar title on mobile when the open section has no title"
   },
-  "homeTitoloDrawer": "mgws_inventory",
+  "homeTitoloDrawer": "MGWS Inventory",
   "@homeTitoloDrawer": {
     "description": "Short app name shown in the navigation drawer header"
   },
@@ -1202,7 +1202,7 @@
   "@homeBenvenutoTitolo": {
     "description": "Hero title at the top of the home landing page"
   },
-  "homeBenvenutoSottotitolo": "mgws_inventory",
+  "homeBenvenutoSottotitolo": "MGWS Inventory",
   "@homeBenvenutoSottotitolo": {
     "description": "Hero subtitle under the welcome title on the home landing page"
   },
@@ -7943,6 +7943,107 @@
         "type": "int"
       }
     }
+  },
+  "settingsTabInfo": "About",
+  "@settingsTabInfo": {
+    "description": "Localized string settingsTabInfo"
+  },
+  "aboutVersion": "Version {version} (build {build})",
+  "@aboutVersion": {
+    "description": "Localized string aboutVersion",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutCopyright": "Copyright © 2025-2026 Vincenzo Ferrara",
+  "@aboutCopyright": {
+    "description": "Localized string aboutCopyright"
+  },
+  "aboutLicenseTitle": "License",
+  "@aboutLicenseTitle": {
+    "description": "Localized string aboutLicenseTitle"
+  },
+  "aboutLicenseBody": "This app is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3, as published by the Free Software Foundation.",
+  "@aboutLicenseBody": {
+    "description": "Localized string aboutLicenseBody"
+  },
+  "aboutNoWarranty": "It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.",
+  "@aboutNoWarranty": {
+    "description": "Localized string aboutNoWarranty"
+  },
+  "aboutSourceCode": "Source code",
+  "@aboutSourceCode": {
+    "description": "Localized string aboutSourceCode"
+  },
+  "aboutLicenseText": "Full text of the GNU GPL v3",
+  "@aboutLicenseText": {
+    "description": "Localized string aboutLicenseText"
+  },
+  "aboutWordpressPlugin": "WordPress plugin (MGWS)",
+  "@aboutWordpressPlugin": {
+    "description": "Localized string aboutWordpressPlugin"
+  },
+  "aboutReportIssue": "Report a problem or suggest an idea",
+  "@aboutReportIssue": {
+    "description": "Localized string aboutReportIssue"
+  },
+  "aboutOpenSourceLicenses": "Open source licenses",
+  "@aboutOpenSourceLicenses": {
+    "description": "Localized string aboutOpenSourceLicenses"
+  },
+  "aboutOpenSourceLicensesHelp": "Licenses of the libraries used by the app",
+  "@aboutOpenSourceLicensesHelp": {
+    "description": "Localized string aboutOpenSourceLicensesHelp"
+  },
+  "aboutDonate": "Support the project",
+  "@aboutDonate": {
+    "description": "Localized string aboutDonate"
+  },
+  "aboutDonateHelp": "The app is free and has no ads. Donations pay for its development.",
+  "@aboutDonateHelp": {
+    "description": "Localized string aboutDonateHelp"
+  },
+  "aboutDonateButton": "Donate on Ko-fi",
+  "@aboutDonateButton": {
+    "description": "Localized string aboutDonateButton"
+  },
+  "aboutLinkError": "Could not open the link",
+  "@aboutLinkError": {
+    "description": "Localized string aboutLinkError"
+  },
+  "aiConsentTitle": "Send product data to an AI service?",
+  "@aiConsentTitle": {
+    "description": "Localized string aiConsentTitle"
+  },
+  "aiConsentBody": "To write descriptions and suggest categories and tags, the app sends the product name, category, price, internal barcode and description to {provider}, with your API key. {provider} handles them under its own terms and privacy policy. The app sends no customer data. You are asked once for each provider.",
+  "@aiConsentBody": {
+    "description": "Localized string aiConsentBody",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiConsentAccept": "Send",
+  "@aiConsentAccept": {
+    "description": "Localized string aiConsentAccept"
+  },
+  "aiConsentDecline": "Cancel",
+  "@aiConsentDecline": {
+    "description": "Localized string aiConsentDecline"
+  },
+  "settingsAiPrivacyTitle": "Privacy",
+  "@settingsAiPrivacyTitle": {
+    "description": "Localized string settingsAiPrivacyTitle"
+  },
+  "settingsAiPrivacyBody": "OpenAI, Anthropic, Google and Mistral are external services: when you use them, the product data you are editing is sent to them with your API key, and the app asks for your consent the first time. Ollama runs on your own computer or server and sends nothing outside.",
+  "@settingsAiPrivacyBody": {
+    "description": "Localized string settingsAiPrivacyBody"
   },
   "logLinesCopied": "{count, plural, =1{1 line copied to the clipboard} other{{count} lines copied to the clipboard}}",
   "@logLinesCopied": {
