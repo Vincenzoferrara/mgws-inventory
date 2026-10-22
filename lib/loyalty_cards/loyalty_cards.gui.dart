@@ -894,6 +894,8 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
     // contesto della pagina, perche il contesto del dialog viene smontato.
     final puntiOk = context.l10n.loyaltyPointsAdded;
     final puntiKo = context.l10n.loyaltyPointsRemoved;
+    final notaAggiunta = context.l10n.loyaltyNoteAddedManually;
+    final notaSottratta = context.l10n.loyaltyNoteRemovedManually;
 
     await showDialog(
       context: context,
@@ -946,14 +948,14 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
                       punti: punti,
                       note: noteController.text.trim().isNotEmpty
                           ? noteController.text.trim()
-                          : null,
+                          : notaAggiunta,
                     )
                   : await _controller.sottraiPunti(
                       customerId: carta['customer_id'],
                       punti: punti,
                       note: noteController.text.trim().isNotEmpty
                           ? noteController.text.trim()
-                          : null,
+                          : notaSottratta,
                     );
 
               if (success && mounted) {

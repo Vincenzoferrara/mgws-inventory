@@ -50,7 +50,7 @@ class _DipendentiGuiState extends State<DipendentiGui> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: MaterialBanner(
-                      content: Text(service.errore!),
+                      content: Text(service.errore!(context.l10n)),
                       leading: const Icon(Icons.warning_amber),
                       actions: [
                         TextButton(
@@ -617,7 +617,8 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.service.errore ?? context.l10n.employeesOperationFailed,
+              widget.service.errore?.call(context.l10n) ??
+                  context.l10n.employeesOperationFailed,
             ),
           ),
         );
@@ -844,7 +845,9 @@ class DipendenteDetailScreen extends StatelessWidget {
                           context,
                           Icons.factory,
                           context.l10n.employeesTotalProductionTitle,
-                          '${dipendente.produzioneTotale} unità',
+                          context.l10n.employeesProductionUnits(
+                            '${dipendente.produzioneTotale}',
+                          ),
                         ),
                     ],
                   ),

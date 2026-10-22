@@ -1,3 +1,4 @@
+import '../l10n/localized_text.dart';
 import '../customers/customer_list.code.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../log_viewer/app_logger.dart';
@@ -16,7 +17,7 @@ class CartaFedeltaController {
   Map<String, dynamic>? _cartaSelezionata;
   Map<String, dynamic>? _statistiche;
   bool _isLoading = false;
-  String? _errorMessage;
+  LocalizedText? _errorMessage;
   String _searchQuery = '';
 
   // Getters
@@ -24,7 +25,7 @@ class CartaFedeltaController {
   Map<String, dynamic>? get cartaSelezionata => _cartaSelezionata;
   Map<String, dynamic>? get statistiche => _statistiche;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  LocalizedText? get errorMessage => _errorMessage;
   bool get hasCartaSelezionata => _cartaSelezionata != null;
   String get searchQuery => _searchQuery;
 
@@ -91,7 +92,7 @@ class CartaFedeltaController {
       log.i('Caricati ${_clientiConCarta.length} clienti');
     } catch (e) {
       log.e('Errore nel caricamento clienti con carta: $e');
-      _errorMessage = 'Errore nel caricamento: $e';
+      _errorMessage = (l10n) => l10n.loyaltyLoadError('$e');
       // Non azzero la lista: se i clienti erano arrivati, restano visibili.
       // L'errore è informativo, non bloccante.
     } finally {
@@ -187,7 +188,7 @@ class CartaFedeltaController {
         customerId: customerId,
         points: punti,
         reference: 'manual_add',
-        note: note ?? 'Punti aggiunti manualmente',
+        note: note ?? 'Points added manually',
       );
 
       if (success) {
@@ -225,7 +226,7 @@ class CartaFedeltaController {
         customerId: customerId,
         points: punti,
         reference: 'manual_deduct',
-        note: note ?? 'Punti sottratti manualmente',
+        note: note ?? 'Points removed manually',
       );
 
       if (success) {
@@ -262,7 +263,7 @@ class CartaFedeltaController {
       // Verifica che il numero carta non sia già usato
       final cartaEsistente = await cercaCartaPerNumero(numeroCarta);
       if (cartaEsistente != null) {
-        _errorMessage = 'Numero carta già in uso';
+        _errorMessage = (l10n) => l10n.loyaltyCardNumberInUse;
         log.w('Numero carta $numeroCarta già in uso');
         return false;
       }
@@ -281,7 +282,7 @@ class CartaFedeltaController {
       return success;
     } catch (e) {
       log.e('Errore nella creazione carta: $e');
-      _errorMessage = 'Errore nella creazione: $e';
+      _errorMessage = (l10n) => l10n.loyaltyCreateError('$e');
       return false;
     }
   }

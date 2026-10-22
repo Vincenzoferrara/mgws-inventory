@@ -18,14 +18,17 @@ class NotificationRecapDialog {
   }) {
     final labels = items.map(itemLabel).toList(growable: false);
     final isBulk = labels.length > 1;
+    final l10n = context.l10n;
     return _show(
       context,
-      title: isBulk ? 'Recap eliminazione' : 'Eliminazione',
+      title: isBulk
+          ? l10n.sharedRecapDeleteBulkTitle
+          : l10n.sharedRecapDeleteTitle,
       summary: isBulk
-          ? 'Stai per eliminare ${labels.length} elementi.'
-          : 'Stai per eliminare questo elemento.',
+          ? l10n.sharedRecapDeleteBulkSummary(labels.length)
+          : l10n.sharedRecapDeleteSummary,
       changes: labels,
-      confirmLabel: 'Elimina',
+      confirmLabel: l10n.commonDelete,
       isDestructive: isDestructive,
     );
   }
@@ -39,16 +42,19 @@ class NotificationRecapDialog {
     bool isDestructive = false,
   }) {
     final isBulk = affectedItemsCount > 1;
+    final l10n = context.l10n;
     return _show(
       context,
-      title: isBulk ? 'Recap modifica in massa' : 'Recap modifica',
+      title: isBulk ? l10n.sharedRecapEditBulkTitle : l10n.sharedRecapEditTitle,
       summary: isBulk
-          ? 'Stai per applicare le modifiche a $affectedItemsCount elementi.'
-          : 'Stai per applicare le modifiche a questo elemento.',
+          ? l10n.sharedRecapEditBulkSummary(affectedItemsCount)
+          : l10n.sharedRecapEditSummary,
       changes: changes.toList(growable: false),
       missingFields: missingFields.toList(growable: false),
       blockingMissingFields: blockingMissingFields.toList(growable: false),
-      confirmLabel: isBulk ? 'Applica modifiche' : 'Applica modifica',
+      confirmLabel: isBulk
+          ? l10n.sharedRecapApplyMany
+          : l10n.sharedRecapApplyOne,
       isDestructive: isDestructive,
     );
   }
@@ -65,6 +71,7 @@ class NotificationRecapDialog {
   }) async {
     final hasBlocking = blockingMissingFields.isNotEmpty;
     final recapText = _buildRecapText(
+      context.l10n,
       title: title,
       summary: summary,
       changes: changes,
@@ -90,7 +97,7 @@ class NotificationRecapDialog {
                     children: [
                       if (changes.isNotEmpty) ...[
                         Text(
-                          'Nuovi valori modificati',
+                          dialogContext.l10n.sharedRecapNewValues,
                           style: Theme.of(dialogContext).textTheme.titleSmall,
                         ),
                         const SizedBox(height: 6),
@@ -194,7 +201,8 @@ class NotificationRecapDialog {
     return confirmed == true;
   }
 
-  static String _buildRecapText({
+  static String _buildRecapText(
+    AppLocalizations l10n, {
     required String title,
     required String summary,
     required List<String> changes,
@@ -205,21 +213,21 @@ class NotificationRecapDialog {
     if (changes.isNotEmpty) {
       lines
         ..add('')
-        ..add('Nuovi valori modificati')
+        ..add(l10n.sharedRecapNewValues)
         ..addAll(changes.map((change) => '- $change'));
     }
     if (blockingMissingFields.isNotEmpty || missingFields.isNotEmpty) {
       lines
         ..add('')
-        ..add('Campi mancanti');
+        ..add(l10n.sharedCampiMancanti);
       if (blockingMissingFields.isNotEmpty) {
         lines
-          ..add('Da correggere prima del salvataggio')
+          ..add(l10n.sharedDaCorreggerePrima)
           ..addAll(blockingMissingFields.map((field) => '- $field'));
       }
       if (missingFields.isNotEmpty) {
         lines
-          ..add('Avvisi')
+          ..add(l10n.sharedAvvisi)
           ..addAll(missingFields.map((field) => '- $field'));
       }
     }
@@ -228,7 +236,7 @@ class NotificationRecapDialog {
         blockingMissingFields.isEmpty) {
       lines
         ..add('')
-        ..add('Nessuna modifica rilevata.');
+        ..add(l10n.sharedRecapNoChange);
     }
     return lines.join('\n');
   }

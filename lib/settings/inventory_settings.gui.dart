@@ -179,17 +179,17 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                           _OptionsField(
                             controller: _roomController,
                             label: context.l10n.settingsInventoryRooms,
-                            hint: 'A, B, Retro',
+                            hint: context.l10n.settingsInventoryRoomsHint,
                           ),
                           _OptionsField(
                             controller: _rackController,
                             label: context.l10n.settingsInventoryRacks,
-                            hint: '1, 2, Parete nord',
+                            hint: context.l10n.settingsInventoryRacksHint,
                           ),
                           _OptionsField(
                             controller: _shelfController,
                             label: context.l10n.settingsInventoryShelves,
-                            hint: '1, 2, Alto',
+                            hint: context.l10n.settingsInventoryShelvesHint,
                           ),
                           const SizedBox(height: 8),
                           Align(

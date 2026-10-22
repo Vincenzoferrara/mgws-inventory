@@ -1,3 +1,5 @@
+import '../l10n/error_text.dart';
+import '../l10n/localized_text.dart';
 import 'package:flutter/foundation.dart';
 
 import '../login/jwt_api/adapter/platform_manager.dart';
@@ -160,11 +162,11 @@ class Dipendente {
 class DipendentiService extends ChangeNotifier {
   List<Dipendente> _dipendenti = [];
   bool _isLoading = false;
-  String? _errore;
+  LocalizedText? _errore;
 
   List<Dipendente> get dipendenti => _dipendenti;
   bool get isLoading => _isLoading;
-  String? get errore => _errore;
+  LocalizedText? get errore => _errore;
 
   Future<void> loadDipendenti() async {
     _isLoading = true;
@@ -174,7 +176,8 @@ class DipendentiService extends ChangeNotifier {
       final rows = await PlatformManager.dipendenti.listEmployees();
       _dipendenti = rows.map(Dipendente.fromJson).toList(growable: false);
     } catch (error) {
-      _errore = 'Impossibile caricare i dipendenti da MGWS: $error';
+      _errore = (l10n) =>
+          l10n.employeesLoadError(localizedErrorText(l10n, error));
       _dipendenti = const <Dipendente>[];
     } finally {
       _isLoading = false;
@@ -193,7 +196,8 @@ class DipendentiService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
-      _errore = 'Impossibile creare il dipendente: $error';
+      _errore = (l10n) =>
+          l10n.employeesCreateError(localizedErrorText(l10n, error));
       notifyListeners();
       return false;
     }
@@ -216,7 +220,8 @@ class DipendentiService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
-      _errore = 'Impossibile aggiornare il dipendente: $error';
+      _errore = (l10n) =>
+          l10n.employeesUpdateError(localizedErrorText(l10n, error));
       notifyListeners();
       return false;
     }
@@ -232,7 +237,8 @@ class DipendentiService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
-      _errore = 'Impossibile disattivare il dipendente: $error';
+      _errore = (l10n) =>
+          l10n.employeesDeactivateError(localizedErrorText(l10n, error));
       notifyListeners();
       return false;
     }

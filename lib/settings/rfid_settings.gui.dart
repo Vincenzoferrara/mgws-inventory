@@ -121,8 +121,14 @@ class _RFIDSettingsTabState extends State<RFIDSettingsTab> {
             ),
             items: ['Nessuno', 'Zebra FX7500', 'Chainway C72', 'Altro']
                 .map(
-                  (device) =>
-                      DropdownMenuItem(value: device, child: Text(device)),
+                  (device) => DropdownMenuItem(
+                    value: device,
+                    child: Text(switch (device) {
+                      'Nessuno' => context.l10n.settingsRfidDeviceNone,
+                      'Altro' => context.l10n.settingsRfidDeviceOther,
+                      _ => device,
+                    }),
+                  ),
                 )
                 .toList(),
             onChanged: (value) {

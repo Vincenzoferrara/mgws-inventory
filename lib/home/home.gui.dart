@@ -634,7 +634,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: context.spacing.iL,
             child: Text(
-              _homeLogic.appVersionLabel,
+              _homeLogic.appVersionLabel(context.l10n),
               style: context.text.bodySmall?.copyWith(
                 color: context.colors.subtitleColor,
               ),

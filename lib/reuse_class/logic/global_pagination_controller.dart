@@ -100,10 +100,6 @@ class GlobalPaginationController<T> extends ChangeNotifier {
   String get pageSizeText =>
       isInfinite ? GlobalPaginationOptions.infiniteLabel : _pageSize.toString();
 
-  /// Didascalia del primo livello dell'indicatore: "Pag." in paginazione,
-  /// "Caricati" in scorrimento infinito.
-  String get progressCaption => isInfinite ? 'Caricati' : 'Pag.';
-
   /// Valore del secondo livello: "1/12" in paginazione, "250 di 1200" in
   /// infinito.
   ///

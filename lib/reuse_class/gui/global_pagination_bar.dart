@@ -230,7 +230,9 @@ class _GlobalPaginationBarState extends State<GlobalPaginationBar> {
         child: showLoading
             ? const _LoadingHint()
             : _PageIndicator(
-                caption: controller.progressCaption,
+                caption: controller.isInfinite
+                    ? context.l10n.paginationLoaded
+                    : context.l10n.paginationPage,
                 value: controller.progressValue,
               ),
       ),
@@ -396,7 +398,7 @@ class _LoadingHint extends StatelessWidget {
         const SizedBox(width: 6),
         Flexible(
           child: Text(
-            'Caricamento…',
+            context.l10n.paginationLoading,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
@@ -428,12 +430,16 @@ class _RowStats extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _StatPill(
-          label: 'Tot:',
+          label: context.l10n.paginationTotal,
           value: totalRows?.toString() ?? '-',
           style: style,
         ),
         const SizedBox(width: 8),
-        _StatPill(label: 'Sel:', value: selectedRows.toString(), style: style),
+        _StatPill(
+          label: context.l10n.paginationSelected,
+          value: selectedRows.toString(),
+          style: style,
+        ),
       ],
     );
   }

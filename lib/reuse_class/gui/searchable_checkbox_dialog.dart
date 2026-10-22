@@ -161,7 +161,11 @@ class _SearchableCheckboxDialogState extends State<SearchableCheckboxDialog> {
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: _filter.trim().isEmpty ? null : _addCustomValue,
-                  child: Text(hasExactMatch ? 'Seleziona' : 'Aggiungi'),
+                  child: Text(
+                    hasExactMatch
+                        ? context.l10n.sharedSelect
+                        : context.l10n.sharedAdd,
+                  ),
                 ),
               ],
             ),

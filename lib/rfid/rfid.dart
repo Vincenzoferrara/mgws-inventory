@@ -67,7 +67,7 @@ class RFIDManager {
   /// Legge tag RFID e chiede a MGWS di risolverli senza aggiornare stock
   Future<List<String>> readTags() async {
     if (!_isConnected) {
-      throw Exception('Dispositivo RFID non connesso');
+      throw Exception('RFID device not connected');
     }
 
     List<String> tags = [];
@@ -98,7 +98,7 @@ class RFIDManager {
   /// Scrive dati su tag RFID (placeholder - implementare metodi reali)
   Future<bool> writeTag(String tagId, String data) async {
     if (!_isConnected) {
-      throw Exception('Dispositivo RFID non connesso');
+      throw Exception('RFID device not connected');
     }
 
     try {

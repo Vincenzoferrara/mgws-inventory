@@ -2297,8 +2297,9 @@ class ProdottoDisplayInfo {
       prezzo: pricing.prezzoCompletoLabel(l10n),
       sconto: pricing.scontoLabel(l10n),
       status: ProdottoUtils.getStatusLabel(l10n, prodotto.status),
-      disponibilita: ClassFormtter.getDisponibilitaText(prodotto.inStock),
+      disponibilita: ClassFormtter.getDisponibilitaText(l10n, prodotto.inStock),
       variantiCount: ClassFormtter.getVariantiCountText(
+        l10n,
         prodotto.varianti?.length ?? 0,
       ),
       inStock: prodotto.inStock,

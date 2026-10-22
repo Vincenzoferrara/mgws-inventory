@@ -15,7 +15,6 @@ class ProdottoPricingInfo {
   final String _prezzo;
   final String _sconto;
   final String _percentualeSconto;
-  final String _prezzoCompleto;
   final bool hasSconto;
   final bool prezzoVariabile;
   final bool scontoVariabile;
@@ -25,15 +24,13 @@ class ProdottoPricingInfo {
     required String prezzo,
     required String sconto,
     required String percentualeSconto,
-    required String prezzoCompleto,
     required this.hasSconto,
     required this.prezzoVariabile,
     required this.scontoVariabile,
     this.percentualeVariabile = false,
   }) : _prezzo = prezzo,
        _sconto = sconto,
-       _percentualeSconto = percentualeSconto,
-       _prezzoCompleto = prezzoCompleto;
+       _percentualeSconto = percentualeSconto;
 
   String prezzoLabel(AppLocalizations l10n) =>
       prezzoVariabile ? l10n.productsVariablePrices : _prezzo;
@@ -48,7 +45,9 @@ class ProdottoPricingInfo {
   String prezzoCompletoLabel(AppLocalizations l10n) =>
       prezzoVariabile || (hasSconto && scontoVariabile)
       ? l10n.productsVariablePrices
-      : _prezzoCompleto;
+      : hasSconto
+      ? l10n.productsSalePriceWas(_sconto, _prezzo)
+      : _prezzo;
 }
 
 class DataGridViewCache {
@@ -311,10 +310,6 @@ class DataGridViewCache {
         prezzo: prezzoLabel,
         sconto: scontoLabel,
         percentualeSconto: percentualeScontoLabel,
-        prezzoCompleto: ClassFormtter.formatPrezzoConSconto(
-          prodotto.prezzoNormale ?? 0,
-          prodotto.prezzoScontato,
-        ),
         hasSconto: prodotto.prezzoScontato != null,
         prezzoVariabile: false,
         scontoVariabile: false,
@@ -349,20 +344,10 @@ class DataGridViewCache {
         ? ''
         : ClassFormtter.formatPrezzo(saleValues.first!);
 
-    final prezzoCompletoLabel = hasSconto
-        ? prezzoVariabile || scontoVariabile
-              ? ''
-              : ClassFormtter.formatPrezzoConSconto(
-                  regularPrices.first,
-                  saleValues.first,
-                )
-        : prezzoLabel;
-
     return ProdottoPricingInfo(
       prezzo: prezzoLabel,
       sconto: scontoLabel,
       percentualeSconto: percentualeScontoLabel,
-      prezzoCompleto: prezzoCompletoLabel,
       hasSconto: hasSconto,
       prezzoVariabile: prezzoVariabile,
       scontoVariabile: scontoVariabile,

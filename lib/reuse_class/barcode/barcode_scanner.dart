@@ -53,18 +53,14 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
   String _scannerErrorMessage(Object error) {
     final errorCode = _readErrorCodeName(error);
     return switch (errorCode) {
-      'CameraAccessDenied' =>
-        'Permesso fotocamera negato. Abilita la camera o inserisci il codice manualmente.',
-      'permissionDenied' =>
-        'Permesso fotocamera negato. Abilita la camera o inserisci il codice manualmente.',
-      'unsupported' =>
-        'Scanner non supportato su questo dispositivo. Inserisci il codice manualmente.',
-      'controllerInitializing' => 'Inizializzazione fotocamera in corso…',
-      'controllerNotAttached' =>
-        'Fotocamera non ancora pronta. Riprova tra poco.',
-      'controllerDisposed' => 'Scanner non più disponibile. Chiudi e riapri.',
-      'controllerUninitialized' => 'Fotocamera non inizializzata. Riprova.',
-      _ => 'Fotocamera non disponibile. Inserisci il codice manualmente.',
+      'CameraAccessDenied' => context.l10n.scannerPermissionDenied,
+      'permissionDenied' => context.l10n.scannerPermissionDenied,
+      'unsupported' => context.l10n.scannerUnsupported,
+      'controllerInitializing' => context.l10n.scannerInitializing,
+      'controllerNotAttached' => context.l10n.scannerNotReady,
+      'controllerDisposed' => context.l10n.scannerDisposed,
+      'controllerUninitialized' => context.l10n.scannerUninitialized,
+      _ => context.l10n.scannerUnavailable,
     };
   }
 
@@ -168,7 +164,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Scansiona Barcode/QR',
+                      context.l10n.scannerTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -224,7 +220,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                         if (!_isScanning)
                           Container(
                             color: Colors.black.withValues(alpha: 0.7),
-                            child: const Center(
+                            child: Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -235,7 +231,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                                   ),
                                   SizedBox(height: 16),
                                   Text(
-                                    'Codice rilevato!',
+                                    context.l10n.scannerCodeDetected,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -254,12 +250,12 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               color: Colors.grey.shade900,
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Text(
-                      'Inquadra il barcode o QR code del prodotto. Usa il pulsante torcia se disponibile.',
+                      context.l10n.scannerHint,
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),

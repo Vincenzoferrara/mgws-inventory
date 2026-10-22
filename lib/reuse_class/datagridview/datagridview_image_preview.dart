@@ -2,11 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/extensions.dart';
 import '../image_url_resolver.dart';
 
 class DataGridViewImagePreview extends StatefulWidget {
   final String? imageUrl;
-  final String semanticLabel;
+
+  /// `null` usa il testo tradotto "Anteprima immagine".
+  final String? semanticLabel;
   final double size;
   final bool muted;
   final double hoverPreviewSize;
@@ -14,7 +17,7 @@ class DataGridViewImagePreview extends StatefulWidget {
   const DataGridViewImagePreview({
     super.key,
     required this.imageUrl,
-    this.semanticLabel = 'Anteprima immagine',
+    this.semanticLabel,
     this.size = 48,
     this.muted = false,
     this.hoverPreviewSize = 260,
@@ -127,7 +130,9 @@ class _DataGridViewImagePreviewState extends State<DataGridViewImagePreview> {
                             url,
                             fit: BoxFit.contain,
                             alignment: Alignment.center,
-                            semanticLabel: widget.semanticLabel,
+                            semanticLabel:
+                                widget.semanticLabel ??
+                                context.l10n.sharedImagePreview,
                             filterQuality: FilterQuality.high,
                             errorBuilder: (_, __, ___) => _placeholder(theme),
                           ),
@@ -203,7 +208,8 @@ class _DataGridViewImagePreviewState extends State<DataGridViewImagePreview> {
                   url,
                   fit: BoxFit.contain,
                   alignment: Alignment.center,
-                  semanticLabel: widget.semanticLabel,
+                  semanticLabel:
+                      widget.semanticLabel ?? context.l10n.sharedImagePreview,
                   filterQuality: FilterQuality.medium,
                   errorBuilder: (_, __, ___) => _placeholder(theme),
                 ),

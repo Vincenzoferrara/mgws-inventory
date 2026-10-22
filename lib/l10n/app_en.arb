@@ -156,7 +156,7 @@
   "@settingsLanguageDescription": {
     "description": "Explanatory text below the language selector"
   },
-  "inventoryModuleModulo": "Modulo",
+  "inventoryModuleModulo": "Module",
   "@inventoryModuleModulo": {
     "description": "Label for the active module display"
   },
@@ -2533,7 +2533,7 @@
   "@couponCodiceCoupon": {
     "description": "Field"
   },
-  "couponHintCodiceCoupon": "es. SCONTO20",
+  "couponHintCodiceCoupon": "e.g. SAVE20",
   "@couponHintCodiceCoupon": {
     "description": "Hint"
   },
@@ -2569,11 +2569,11 @@
   "@couponEscludiProdottiInSaldo": {
     "description": "Checkbox"
   },
-  "couponsStatAttivi": "Attivi",
+  "couponsStatAttivi": "Active",
   "@couponsStatAttivi": {
     "description": "Active coupons label"
   },
-  "couponsStatUtilizzi": "Utilizzi",
+  "couponsStatUtilizzi": "Uses",
   "@couponsStatUtilizzi": {
     "description": "Usages label"
   },
@@ -13220,5 +13220,300 @@
   "smartcardSaveFailed": "Error while saving",
   "@smartcardSaveFailed": {
     "description": "Localized string smartcardSaveFailed"
+  },
+  "productsSalePriceWas": "{sale} (was {regular})",
+  "@productsSalePriceWas": {
+    "description": "Localized string productsSalePriceWas",
+    "placeholders": {
+      "sale": {
+        "type": "String"
+      },
+      "regular": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantCount": "{count, plural, =1{1 variant} other{{count} variants}}",
+  "@productsVariantCount": {
+    "description": "Localized string productsVariantCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapDeleteBulkTitle": "Deletion recap",
+  "@sharedRecapDeleteBulkTitle": {
+    "description": "Localized string sharedRecapDeleteBulkTitle"
+  },
+  "sharedRecapDeleteTitle": "Deletion",
+  "@sharedRecapDeleteTitle": {
+    "description": "Localized string sharedRecapDeleteTitle"
+  },
+  "sharedRecapDeleteBulkSummary": "You are about to delete {count} items.",
+  "@sharedRecapDeleteBulkSummary": {
+    "description": "Localized string sharedRecapDeleteBulkSummary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapDeleteSummary": "You are about to delete this item.",
+  "@sharedRecapDeleteSummary": {
+    "description": "Localized string sharedRecapDeleteSummary"
+  },
+  "sharedRecapEditBulkTitle": "Bulk edit recap",
+  "@sharedRecapEditBulkTitle": {
+    "description": "Localized string sharedRecapEditBulkTitle"
+  },
+  "sharedRecapEditTitle": "Edit recap",
+  "@sharedRecapEditTitle": {
+    "description": "Localized string sharedRecapEditTitle"
+  },
+  "sharedRecapEditBulkSummary": "You are about to apply the changes to {count} items.",
+  "@sharedRecapEditBulkSummary": {
+    "description": "Localized string sharedRecapEditBulkSummary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapEditSummary": "You are about to apply the changes to this item.",
+  "@sharedRecapEditSummary": {
+    "description": "Localized string sharedRecapEditSummary"
+  },
+  "sharedRecapApplyMany": "Apply changes",
+  "@sharedRecapApplyMany": {
+    "description": "Localized string sharedRecapApplyMany"
+  },
+  "sharedRecapApplyOne": "Apply change",
+  "@sharedRecapApplyOne": {
+    "description": "Localized string sharedRecapApplyOne"
+  },
+  "sharedRecapNewValues": "New values",
+  "@sharedRecapNewValues": {
+    "description": "Localized string sharedRecapNewValues"
+  },
+  "sharedRecapNoChange": "No change detected.",
+  "@sharedRecapNoChange": {
+    "description": "Localized string sharedRecapNoChange"
+  },
+  "sharedSelect": "Select",
+  "@sharedSelect": {
+    "description": "Localized string sharedSelect"
+  },
+  "sharedAdd": "Add",
+  "@sharedAdd": {
+    "description": "Localized string sharedAdd"
+  },
+  "sharedImagePreview": "Image preview",
+  "@sharedImagePreview": {
+    "description": "Localized string sharedImagePreview"
+  },
+  "paginationLoading": "Loading…",
+  "@paginationLoading": {
+    "description": "Localized string paginationLoading"
+  },
+  "paginationTotal": "Tot:",
+  "@paginationTotal": {
+    "description": "Localized string paginationTotal"
+  },
+  "paginationSelected": "Sel:",
+  "@paginationSelected": {
+    "description": "Localized string paginationSelected"
+  },
+  "paginationLoaded": "Loaded",
+  "@paginationLoaded": {
+    "description": "Localized string paginationLoaded"
+  },
+  "paginationPage": "Page",
+  "@paginationPage": {
+    "description": "Localized string paginationPage"
+  },
+  "scannerPermissionDenied": "Camera permission denied. Enable the camera or enter the code manually.",
+  "@scannerPermissionDenied": {
+    "description": "Localized string scannerPermissionDenied"
+  },
+  "scannerUnsupported": "Scanner not supported on this device. Enter the code manually.",
+  "@scannerUnsupported": {
+    "description": "Localized string scannerUnsupported"
+  },
+  "scannerInitializing": "Starting the camera…",
+  "@scannerInitializing": {
+    "description": "Localized string scannerInitializing"
+  },
+  "scannerNotReady": "Camera not ready yet. Try again shortly.",
+  "@scannerNotReady": {
+    "description": "Localized string scannerNotReady"
+  },
+  "scannerDisposed": "Scanner no longer available. Close and reopen it.",
+  "@scannerDisposed": {
+    "description": "Localized string scannerDisposed"
+  },
+  "scannerUninitialized": "Camera not initialised. Try again.",
+  "@scannerUninitialized": {
+    "description": "Localized string scannerUninitialized"
+  },
+  "scannerUnavailable": "Camera not available. Enter the code manually.",
+  "@scannerUnavailable": {
+    "description": "Localized string scannerUnavailable"
+  },
+  "scannerTitle": "Scan barcode/QR",
+  "@scannerTitle": {
+    "description": "Localized string scannerTitle"
+  },
+  "scannerCodeDetected": "Code detected!",
+  "@scannerCodeDetected": {
+    "description": "Localized string scannerCodeDetected"
+  },
+  "scannerHint": "Frame the product barcode or QR code. Use the torch button if available.",
+  "@scannerHint": {
+    "description": "Localized string scannerHint"
+  },
+  "homeVersionUnavailable": "Version not available",
+  "@homeVersionUnavailable": {
+    "description": "Localized string homeVersionUnavailable"
+  },
+  "homeVersionValue": "Version {version}",
+  "@homeVersionValue": {
+    "description": "Localized string homeVersionValue",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsInventoryRoomsHint": "A, B, Back",
+  "@settingsInventoryRoomsHint": {
+    "description": "Localized string settingsInventoryRoomsHint"
+  },
+  "settingsInventoryRacksHint": "1, 2, North wall",
+  "@settingsInventoryRacksHint": {
+    "description": "Localized string settingsInventoryRacksHint"
+  },
+  "settingsInventoryShelvesHint": "1, 2, Top",
+  "@settingsInventoryShelvesHint": {
+    "description": "Localized string settingsInventoryShelvesHint"
+  },
+  "settingsRfidDeviceNone": "None",
+  "@settingsRfidDeviceNone": {
+    "description": "Localized string settingsRfidDeviceNone"
+  },
+  "settingsRfidDeviceOther": "Other",
+  "@settingsRfidDeviceOther": {
+    "description": "Localized string settingsRfidDeviceOther"
+  },
+  "caldavTabCalendar": "Calendar",
+  "@caldavTabCalendar": {
+    "description": "Localized string caldavTabCalendar"
+  },
+  "caldavTabContacts": "Contacts",
+  "@caldavTabContacts": {
+    "description": "Localized string caldavTabContacts"
+  },
+  "caldavTabTodo": "To-do",
+  "@caldavTabTodo": {
+    "description": "Localized string caldavTabTodo"
+  },
+  "caldavCalendars": "Calendars",
+  "@caldavCalendars": {
+    "description": "Localized string caldavCalendars"
+  },
+  "caldavUnnamed": "Unnamed",
+  "@caldavUnnamed": {
+    "description": "Localized string caldavUnnamed"
+  },
+  "caldavNoHref": "No href",
+  "@caldavNoHref": {
+    "description": "Localized string caldavNoHref"
+  },
+  "caldavEventsPending": "Events (iCal parsing not implemented yet)",
+  "@caldavEventsPending": {
+    "description": "Localized string caldavEventsPending"
+  },
+  "caldavContactsPending": "Contacts (CardDAV not implemented yet)",
+  "@caldavContactsPending": {
+    "description": "Localized string caldavContactsPending"
+  },
+  "caldavTasks": "Tasks",
+  "@caldavTasks": {
+    "description": "Localized string caldavTasks"
+  },
+  "loyaltyNoteAddedManually": "Points added manually",
+  "@loyaltyNoteAddedManually": {
+    "description": "Localized string loyaltyNoteAddedManually"
+  },
+  "loyaltyNoteRemovedManually": "Points removed manually",
+  "@loyaltyNoteRemovedManually": {
+    "description": "Localized string loyaltyNoteRemovedManually"
+  },
+  "loyaltyLoadError": "Loading error: {error}",
+  "@loyaltyLoadError": {
+    "description": "Localized string loyaltyLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loyaltyCardNumberInUse": "Card number already in use",
+  "@loyaltyCardNumberInUse": {
+    "description": "Localized string loyaltyCardNumberInUse"
+  },
+  "loyaltyCreateError": "Error while creating: {error}",
+  "@loyaltyCreateError": {
+    "description": "Localized string loyaltyCreateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesLoadError": "Could not load the employees from MGWS: {error}",
+  "@employeesLoadError": {
+    "description": "Localized string employeesLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesCreateError": "Could not create the employee: {error}",
+  "@employeesCreateError": {
+    "description": "Localized string employeesCreateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesUpdateError": "Could not update the employee: {error}",
+  "@employeesUpdateError": {
+    "description": "Localized string employeesUpdateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesDeactivateError": "Could not deactivate the employee: {error}",
+  "@employeesDeactivateError": {
+    "description": "Localized string employeesDeactivateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesProductionUnits": "{count} units",
+  "@employeesProductionUnits": {
+    "description": "Localized string employeesProductionUnits",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

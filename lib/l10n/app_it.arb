@@ -13217,5 +13217,300 @@
   "smartcardSaveFailed": "Errore durante il salvataggio",
   "@smartcardSaveFailed": {
     "description": "Localized string smartcardSaveFailed"
+  },
+  "productsSalePriceWas": "{sale} (era {regular})",
+  "@productsSalePriceWas": {
+    "description": "Localized string productsSalePriceWas",
+    "placeholders": {
+      "sale": {
+        "type": "String"
+      },
+      "regular": {
+        "type": "String"
+      }
+    }
+  },
+  "productsVariantCount": "{count, plural, =1{1 variante} other{{count} varianti}}",
+  "@productsVariantCount": {
+    "description": "Localized string productsVariantCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapDeleteBulkTitle": "Recap eliminazione",
+  "@sharedRecapDeleteBulkTitle": {
+    "description": "Localized string sharedRecapDeleteBulkTitle"
+  },
+  "sharedRecapDeleteTitle": "Eliminazione",
+  "@sharedRecapDeleteTitle": {
+    "description": "Localized string sharedRecapDeleteTitle"
+  },
+  "sharedRecapDeleteBulkSummary": "Stai per eliminare {count} elementi.",
+  "@sharedRecapDeleteBulkSummary": {
+    "description": "Localized string sharedRecapDeleteBulkSummary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapDeleteSummary": "Stai per eliminare questo elemento.",
+  "@sharedRecapDeleteSummary": {
+    "description": "Localized string sharedRecapDeleteSummary"
+  },
+  "sharedRecapEditBulkTitle": "Recap modifica in massa",
+  "@sharedRecapEditBulkTitle": {
+    "description": "Localized string sharedRecapEditBulkTitle"
+  },
+  "sharedRecapEditTitle": "Recap modifica",
+  "@sharedRecapEditTitle": {
+    "description": "Localized string sharedRecapEditTitle"
+  },
+  "sharedRecapEditBulkSummary": "Stai per applicare le modifiche a {count} elementi.",
+  "@sharedRecapEditBulkSummary": {
+    "description": "Localized string sharedRecapEditBulkSummary",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedRecapEditSummary": "Stai per applicare le modifiche a questo elemento.",
+  "@sharedRecapEditSummary": {
+    "description": "Localized string sharedRecapEditSummary"
+  },
+  "sharedRecapApplyMany": "Applica modifiche",
+  "@sharedRecapApplyMany": {
+    "description": "Localized string sharedRecapApplyMany"
+  },
+  "sharedRecapApplyOne": "Applica modifica",
+  "@sharedRecapApplyOne": {
+    "description": "Localized string sharedRecapApplyOne"
+  },
+  "sharedRecapNewValues": "Nuovi valori modificati",
+  "@sharedRecapNewValues": {
+    "description": "Localized string sharedRecapNewValues"
+  },
+  "sharedRecapNoChange": "Nessuna modifica rilevata.",
+  "@sharedRecapNoChange": {
+    "description": "Localized string sharedRecapNoChange"
+  },
+  "sharedSelect": "Seleziona",
+  "@sharedSelect": {
+    "description": "Localized string sharedSelect"
+  },
+  "sharedAdd": "Aggiungi",
+  "@sharedAdd": {
+    "description": "Localized string sharedAdd"
+  },
+  "sharedImagePreview": "Anteprima immagine",
+  "@sharedImagePreview": {
+    "description": "Localized string sharedImagePreview"
+  },
+  "paginationLoading": "Caricamento…",
+  "@paginationLoading": {
+    "description": "Localized string paginationLoading"
+  },
+  "paginationTotal": "Tot:",
+  "@paginationTotal": {
+    "description": "Localized string paginationTotal"
+  },
+  "paginationSelected": "Sel:",
+  "@paginationSelected": {
+    "description": "Localized string paginationSelected"
+  },
+  "paginationLoaded": "Caricati",
+  "@paginationLoaded": {
+    "description": "Localized string paginationLoaded"
+  },
+  "paginationPage": "Pag.",
+  "@paginationPage": {
+    "description": "Localized string paginationPage"
+  },
+  "scannerPermissionDenied": "Permesso fotocamera negato. Abilita la camera o inserisci il codice manualmente.",
+  "@scannerPermissionDenied": {
+    "description": "Localized string scannerPermissionDenied"
+  },
+  "scannerUnsupported": "Scanner non supportato su questo dispositivo. Inserisci il codice manualmente.",
+  "@scannerUnsupported": {
+    "description": "Localized string scannerUnsupported"
+  },
+  "scannerInitializing": "Inizializzazione fotocamera in corso…",
+  "@scannerInitializing": {
+    "description": "Localized string scannerInitializing"
+  },
+  "scannerNotReady": "Fotocamera non ancora pronta. Riprova tra poco.",
+  "@scannerNotReady": {
+    "description": "Localized string scannerNotReady"
+  },
+  "scannerDisposed": "Scanner non più disponibile. Chiudi e riapri.",
+  "@scannerDisposed": {
+    "description": "Localized string scannerDisposed"
+  },
+  "scannerUninitialized": "Fotocamera non inizializzata. Riprova.",
+  "@scannerUninitialized": {
+    "description": "Localized string scannerUninitialized"
+  },
+  "scannerUnavailable": "Fotocamera non disponibile. Inserisci il codice manualmente.",
+  "@scannerUnavailable": {
+    "description": "Localized string scannerUnavailable"
+  },
+  "scannerTitle": "Scansiona barcode/QR",
+  "@scannerTitle": {
+    "description": "Localized string scannerTitle"
+  },
+  "scannerCodeDetected": "Codice rilevato!",
+  "@scannerCodeDetected": {
+    "description": "Localized string scannerCodeDetected"
+  },
+  "scannerHint": "Inquadra il barcode o QR code del prodotto. Usa il pulsante torcia se disponibile.",
+  "@scannerHint": {
+    "description": "Localized string scannerHint"
+  },
+  "homeVersionUnavailable": "Versione non disponibile",
+  "@homeVersionUnavailable": {
+    "description": "Localized string homeVersionUnavailable"
+  },
+  "homeVersionValue": "Versione {version}",
+  "@homeVersionValue": {
+    "description": "Localized string homeVersionValue",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsInventoryRoomsHint": "A, B, Retro",
+  "@settingsInventoryRoomsHint": {
+    "description": "Localized string settingsInventoryRoomsHint"
+  },
+  "settingsInventoryRacksHint": "1, 2, Parete nord",
+  "@settingsInventoryRacksHint": {
+    "description": "Localized string settingsInventoryRacksHint"
+  },
+  "settingsInventoryShelvesHint": "1, 2, Alto",
+  "@settingsInventoryShelvesHint": {
+    "description": "Localized string settingsInventoryShelvesHint"
+  },
+  "settingsRfidDeviceNone": "Nessuno",
+  "@settingsRfidDeviceNone": {
+    "description": "Localized string settingsRfidDeviceNone"
+  },
+  "settingsRfidDeviceOther": "Altro",
+  "@settingsRfidDeviceOther": {
+    "description": "Localized string settingsRfidDeviceOther"
+  },
+  "caldavTabCalendar": "Calendario",
+  "@caldavTabCalendar": {
+    "description": "Localized string caldavTabCalendar"
+  },
+  "caldavTabContacts": "Rubrica",
+  "@caldavTabContacts": {
+    "description": "Localized string caldavTabContacts"
+  },
+  "caldavTabTodo": "Todo",
+  "@caldavTabTodo": {
+    "description": "Localized string caldavTabTodo"
+  },
+  "caldavCalendars": "Calendari",
+  "@caldavCalendars": {
+    "description": "Localized string caldavCalendars"
+  },
+  "caldavUnnamed": "Senza nome",
+  "@caldavUnnamed": {
+    "description": "Localized string caldavUnnamed"
+  },
+  "caldavNoHref": "Senza href",
+  "@caldavNoHref": {
+    "description": "Localized string caldavNoHref"
+  },
+  "caldavEventsPending": "Eventi (parsing iCal da implementare)",
+  "@caldavEventsPending": {
+    "description": "Localized string caldavEventsPending"
+  },
+  "caldavContactsPending": "Contatti (CardDAV - Da implementare)",
+  "@caldavContactsPending": {
+    "description": "Localized string caldavContactsPending"
+  },
+  "caldavTasks": "Task",
+  "@caldavTasks": {
+    "description": "Localized string caldavTasks"
+  },
+  "loyaltyNoteAddedManually": "Punti aggiunti manualmente",
+  "@loyaltyNoteAddedManually": {
+    "description": "Localized string loyaltyNoteAddedManually"
+  },
+  "loyaltyNoteRemovedManually": "Punti sottratti manualmente",
+  "@loyaltyNoteRemovedManually": {
+    "description": "Localized string loyaltyNoteRemovedManually"
+  },
+  "loyaltyLoadError": "Errore nel caricamento: {error}",
+  "@loyaltyLoadError": {
+    "description": "Localized string loyaltyLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loyaltyCardNumberInUse": "Numero carta già in uso",
+  "@loyaltyCardNumberInUse": {
+    "description": "Localized string loyaltyCardNumberInUse"
+  },
+  "loyaltyCreateError": "Errore nella creazione: {error}",
+  "@loyaltyCreateError": {
+    "description": "Localized string loyaltyCreateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesLoadError": "Impossibile caricare i dipendenti da MGWS: {error}",
+  "@employeesLoadError": {
+    "description": "Localized string employeesLoadError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesCreateError": "Impossibile creare il dipendente: {error}",
+  "@employeesCreateError": {
+    "description": "Localized string employeesCreateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesUpdateError": "Impossibile aggiornare il dipendente: {error}",
+  "@employeesUpdateError": {
+    "description": "Localized string employeesUpdateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesDeactivateError": "Impossibile disattivare il dipendente: {error}",
+  "@employeesDeactivateError": {
+    "description": "Localized string employeesDeactivateError",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "employeesProductionUnits": "{count} unità",
+  "@employeesProductionUnits": {
+    "description": "Localized string employeesProductionUnits",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

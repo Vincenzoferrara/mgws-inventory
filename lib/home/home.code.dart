@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../l10n/extensions.dart';
 import '../login/gui/login.code.dart';
 import '../login/mgws/connection/mgws_auth.dart';
 import '../log_viewer/app_logger.dart';
@@ -90,9 +91,19 @@ class HomeLogic extends ChangeNotifier {
 
   String? get currentSiteUrl => loginCode.cachedSiteUrl;
 
-  String _appVersionLabel = 'Versione non disponibile';
+  /// Versione letta dal pacchetto, `null` se non disponibile.
+  String? _appVersion;
 
-  String get appVersionLabel => _appVersionLabel;
+  /// Etichetta della versione nella lingua attiva.
+  String appVersionLabel(AppLocalizations l10n) {
+    final version = _appVersion;
+    if (version == null) return l10n.homeVersionUnavailable;
+    final label = l10n.homeVersionValue(version);
+    if (kDebugMode && _debugBuildNr.isNotEmpty) {
+      return '$label (debug #$_debugBuildNr)';
+    }
+    return label;
+  }
 
   /// Etichetta build solo-debug (`(debug #N)`), null in release o senza define.
   /// Usata dalla Home per mostrare il badge visibile solo nelle prove locali.
@@ -144,12 +155,9 @@ class HomeLogic extends ChangeNotifier {
   Future<void> loadAppVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      _appVersionLabel = 'Versione ${info.version}';
-      if (kDebugMode && _debugBuildNr.isNotEmpty) {
-        _appVersionLabel = '$_appVersionLabel (debug #$_debugBuildNr)';
-      }
+      _appVersion = info.version;
     } catch (_) {
-      _appVersionLabel = 'Versione non disponibile';
+      _appVersion = null;
     }
   }
 

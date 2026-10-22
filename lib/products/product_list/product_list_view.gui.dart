@@ -1144,6 +1144,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
                         ),
                         _StatusPill(
                           label: ClassFormtter.getDisponibilitaText(
+                            context.l10n,
                             widget.prodotto.inStock,
                           ),
                           color: widget.prodotto.inStock
@@ -1617,7 +1618,10 @@ class _ReadonlyInfoCard extends StatelessWidget {
               Expanded(
                 child: _InlineInfoField(
                   label: context.l10n.productsAvailability,
-                  value: ClassFormtter.getDisponibilitaText(prodotto.inStock),
+                  value: ClassFormtter.getDisponibilitaText(
+                    context.l10n,
+                    prodotto.inStock,
+                  ),
                 ),
               ),
             ],

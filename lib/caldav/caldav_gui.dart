@@ -95,10 +95,16 @@ class _CalDavGuiState extends State<CalDavGui>
         title: Text(context.l10n.caldavTitolo),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.calendar_today), text: 'Calendario'),
-            Tab(icon: Icon(Icons.contacts), text: 'Rubrica'),
-            Tab(icon: Icon(Icons.checklist), text: 'Todo'),
+          tabs: [
+            Tab(
+              icon: Icon(Icons.calendar_today),
+              text: context.l10n.caldavTabCalendar,
+            ),
+            Tab(
+              icon: Icon(Icons.contacts),
+              text: context.l10n.caldavTabContacts,
+            ),
+            Tab(icon: Icon(Icons.checklist), text: context.l10n.caldavTabTodo),
           ],
         ),
       ),
@@ -118,16 +124,16 @@ class _CalDavGuiState extends State<CalDavGui>
   Widget _buildCalendarioTab() {
     return ListView(
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            'Calendari',
+            context.l10n.caldavCalendars,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         ..._calendars.map(
           (cal) => ListTile(
-            title: Text(cal['displayName'] ?? 'Senza nome'),
+            title: Text(cal['displayName'] ?? context.l10n.caldavUnnamed),
             subtitle: Text(cal['href']),
             onTap: () {
               setState(() {
@@ -138,16 +144,16 @@ class _CalDavGuiState extends State<CalDavGui>
           ),
         ),
         if (_selectedCalendarHref != null) ...[
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Eventi (parsing iCal da implementare)',
+              context.l10n.caldavEventsPending,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           ..._events.map(
             (event) => ListTile(
-              title: Text(event['href'] ?? 'Senza href'),
+              title: Text(event['href'] ?? context.l10n.caldavNoHref),
               subtitle: Text(event['etag'] ?? ''),
             ),
           ),
@@ -159,10 +165,10 @@ class _CalDavGuiState extends State<CalDavGui>
   Widget _buildRubricaTab() {
     return ListView(
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            'Contatti (CardDAV - Da implementare)',
+            context.l10n.caldavContactsPending,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
@@ -175,16 +181,16 @@ class _CalDavGuiState extends State<CalDavGui>
   Widget _buildTodoTab() {
     return ListView(
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            'Task',
+            context.l10n.caldavTasks,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         ..._calendars.map(
           (cal) => ListTile(
-            title: Text(cal['displayName'] ?? 'Senza nome'),
+            title: Text(cal['displayName'] ?? context.l10n.caldavUnnamed),
             subtitle: Text(cal['href']),
             onTap: () {
               setState(() {
@@ -197,7 +203,7 @@ class _CalDavGuiState extends State<CalDavGui>
         if (_selectedCalendarHref != null) ...[
           ..._tasks.map(
             (task) => ListTile(
-              title: Text(task['href'] ?? 'Senza href'),
+              title: Text(task['href'] ?? context.l10n.caldavNoHref),
               subtitle: Text(task['etag'] ?? ''),
             ),
           ),

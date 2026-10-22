@@ -107,7 +107,9 @@ class UserGlobal {
   }
 
   /// Metodo per visualizzare i dati principali
-  String get displayName => name ?? username ?? 'Utente Sconosciuto';
+  /// `null` se l'utente non ha ne nome ne username: la GUI usa un testo
+  /// tradotto.
+  String? get displayName => name ?? username;
 
   /// Metodo per ottenere l'avatar URL (se disponibile)
   String? get avatarUrl => avatarUrls?['96']; // 96x96
@@ -118,7 +120,7 @@ class UserGlobal {
   }
 
   /// Metodo per ottenere ruoli come stringa
-  String get rolesString => roles?.join(', ') ?? 'Nessun ruolo';
+  String get rolesString => roles?.join(', ') ?? '';
 
   /// Metodo per copiare con modifiche (immutable)
   UserGlobal copyWith({
@@ -177,8 +179,7 @@ class UserGlobal {
   }
 
   /// Metodo per ottenere capabilities formattate
-  String get capabilitiesString =>
-      capabilities?.keys.join(', ') ?? 'Nessuna capability';
+  String get capabilitiesString => capabilities?.keys.join(', ') ?? '';
 
   /// Metodo per aggiornare meta
   UserGlobal updateMeta(String key, dynamic value) {
