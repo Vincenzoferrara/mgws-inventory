@@ -14,6 +14,56 @@ import '../login/mgws/query/query_mgws_inventory.dart';
 import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 
+/// Una sede o un magazzino con il suo nome. Per i magazzini [siteId] dice a
+/// quale sede appartengono; per le sedi resta zero.
+class InventoryPlace {
+  const InventoryPlace({required this.id, required this.name, this.siteId = 0});
+
+  final int id;
+  final String name;
+  final int siteId;
+}
+
+/// Nomi di sedi e magazzini del negozio.
+///
+/// Lo stock MGWS porta solo gli id: senza questo elenco l'operatore leggerebbe
+/// "Sede 63 · Magazzino 64" invece del nome che ha dato lui al negozio. L'id
+/// resta come ripiego quando un nome non c'e' davvero (lettura fallita, sede
+/// fuori dal perimetro dell'utente).
+class InventoryLocationDirectory {
+  const InventoryLocationDirectory({
+    this.sites = const [],
+    this.warehouses = const [],
+  });
+
+  static const empty = InventoryLocationDirectory();
+
+  final List<InventoryPlace> sites;
+  final List<InventoryPlace> warehouses;
+
+  String? siteName(int id) => _nameOf(sites, id);
+
+  String? warehouseName(int id) => _nameOf(warehouses, id);
+
+  List<InventoryPlace> warehousesOf(int siteId) => [
+    for (final warehouse in warehouses)
+      if (warehouse.siteId == siteId) warehouse,
+  ];
+
+  String siteLabel(AppLocalizations l10n, int id) =>
+      siteName(id) ?? '${l10n.inventoryEtichettaSedeBreve} $id';
+
+  String warehouseLabel(AppLocalizations l10n, int id) =>
+      warehouseName(id) ?? '${l10n.inventoryEtichettaMagazzino} $id';
+
+  static String? _nameOf(List<InventoryPlace> places, int id) {
+    for (final place in places) {
+      if (place.id == id && place.name.isNotEmpty) return place.name;
+    }
+    return null;
+  }
+}
+
 /// Una riga di spostamento: un prodotto, da dove parte, dove arriva e quanti
 /// pezzi si muovono.
 ///
@@ -85,6 +135,9 @@ class InventoryMoveLine {
     if (productId <= 0) return false;
     if (source == null) return false;
     if (destinationSiteId == null) return false;
+    // MGWS sposta fra magazzini, non fra sedi: senza magazzino di arrivo la
+    // rotta /inventory/stock/move rifiuta la richiesta.
+    if (destinationWarehouseId <= 0) return false;
     if (isSameLocation) return false;
     if (quantity <= 0) return false;
     if (quantity > availableInSource) return false;
@@ -180,7 +233,7 @@ class InventoryMovePlan {
           (l10n) => l10n.inventoryMoveChooseSource(line.label),
         );
       }
-      if (line.destinationSiteId == null) {
+      if (line.destinationSiteId == null || line.destinationWarehouseId <= 0) {
         return InventoryFormInvalid(
           (l10n) => l10n.inventoryMoveInvalidDestination(line.label),
         );
@@ -251,10 +304,41 @@ class InventoryMoveCommand {
 }
 
 class InventoryMoveController with InventoryFeedbackController {
-  InventoryMoveController({InventoryController? inventory})
-    : inventory = inventory ?? InventoryController();
+  InventoryMoveController({
+    InventoryController? inventory,
+    MgwsRestockGateway? places,
+  }) : inventory = inventory ?? InventoryController(),
+       _places = places;
 
   final InventoryController inventory;
+  final MgwsRestockGateway? _places;
+
+  /// Legge sedi e magazzini del negozio per dare un nome agli id dello stock.
+  ///
+  /// Un errore non blocca lo spostamento: si torna un elenco vuoto e il
+  /// pannello mostra gli id come prima.
+  Future<InventoryLocationDirectory> loadLocations() async {
+    final gateway = _places ?? QueryMgwsInventory();
+    final sites = await gateway.listSites();
+    final warehouses = await gateway.listWarehouses();
+    return InventoryLocationDirectory(
+      sites: [
+        if (sites.success)
+          for (final site in sites.data ?? const <MgwsInventorySite>[])
+            InventoryPlace(id: site.id, name: site.name.trim()),
+      ],
+      warehouses: [
+        if (warehouses.success)
+          for (final warehouse
+              in warehouses.data ?? const <MgwsInventoryWarehouse>[])
+            InventoryPlace(
+              id: warehouse.id,
+              name: warehouse.name.trim(),
+              siteId: warehouse.siteId,
+            ),
+      ],
+    );
+  }
 
   /// Foto dello stock appena letta. In un piano multi-prodotto vale per
   /// l'ultimo prodotto caricato: ogni riga del pannello porta con se' la

@@ -155,6 +155,10 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
 
   final _rows = <_MoveRow>[];
 
+  /// Nomi di sedi e magazzini: vuoto finche' MGWS non risponde, e in quel
+  /// caso il pannello mostra gli id.
+  InventoryLocationDirectory _places = InventoryLocationDirectory.empty;
+
   bool _autoAdd = true;
   bool _ready = false;
   int? _appliedSeedStamp;
@@ -177,6 +181,44 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
     }
     _ready = true;
     _applySeed(widget.seed);
+    _loadPlaces();
+  }
+
+  Future<void> _loadPlaces() async {
+    final places = await _controller.loadLocations();
+    if (!mounted) return;
+    setState(() {
+      _places = places;
+      for (final row in _rows) {
+        _prefillDestination(row);
+      }
+    });
+  }
+
+  /// Compila l'arrivo quando la scelta e' una sola.
+  ///
+  /// MGWS sposta merce solo dentro la sede in uso, quindi l'elenco delle sedi
+  /// di solito ne ha una: farla scegliere sarebbe un passaggio vuoto. Il
+  /// magazzino si compila solo se ne resta uno diverso da quello di partenza.
+  void _prefillDestination(_MoveRow row) {
+    if (row.toSiteController.text.trim().isEmpty && _places.sites.length == 1) {
+      row.toSiteController.text = '${_places.sites.first.id}';
+    }
+    final siteId = int.tryParse(row.toSiteController.text.trim());
+    if (siteId == null || row.toWarehouseController.text.trim().isNotEmpty) {
+      return;
+    }
+    final source = row.source;
+    final others = [
+      for (final warehouse in _places.warehousesOf(siteId))
+        if (source == null ||
+            source.siteId != siteId ||
+            source.warehouseId != warehouse.id)
+          warehouse,
+    ];
+    if (others.length == 1) {
+      row.toWarehouseController.text = '${others.first.id}';
+    }
   }
 
   @override
@@ -349,6 +391,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
         row.snapshot = _controller.lastSnapshot;
         row.loadError = null;
         row.resetRoute();
+        _prefillDestination(row);
       } else {
         row.loadError = feedback.message(context.l10n);
         row.sourceIndex = null;
@@ -461,6 +504,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
     final confirmed = await showInventoryMoveConfirmDialog(
       context: context,
       plan: plan,
+      places: _places,
     );
     if (confirmed != true || !mounted) return;
     final feedback = await _controller.submit(context.l10n, plan);
@@ -610,10 +654,8 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
               DropdownMenuItem<int>(
                 value: i,
                 child: Text(
-                  '${context.l10n.inventoryEtichettaSedeBreve} '
-                  '${levels[i].siteId} · '
-                  '${context.l10n.inventoryEtichettaMagazzino} '
-                  '${levels[i].warehouseId} · '
+                  '${_places.siteLabel(context.l10n, levels[i].siteId)} · '
+                  '${_places.warehouseLabel(context.l10n, levels[i].warehouseId)} · '
                   '${levels[i].qty} ${context.l10n.inventoryParolaPezzi}',
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -634,34 +676,8 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                SizedBox(
-                  width: width,
-                  child: TextField(
-                    key: ValueKey('inventory-move-to-site-${row.key}'),
-                    controller: row.toSiteController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.inventoryEtichettaSedeArrivo,
-                      isDense: true,
-                    ),
-                    onChanged: (_) => setState(() => _feedback = null),
-                  ),
-                ),
-                SizedBox(
-                  width: width,
-                  child: TextField(
-                    key: ValueKey('inventory-move-to-warehouse-${row.key}'),
-                    controller: row.toWarehouseController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: context
-                          .l10n
-                          .inventoryEtichettaMagazzinoArrivoObbligatorio,
-                      isDense: true,
-                    ),
-                    onChanged: (_) => setState(() => _feedback = null),
-                  ),
-                ),
+                SizedBox(width: width, child: _buildDestinationSite(row)),
+                SizedBox(width: width, child: _buildDestinationWarehouse(row)),
               ],
             );
           },
@@ -731,6 +747,117 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
     );
   }
 
+  /// Sede di arrivo scelta fra le sedi del negozio.
+  ///
+  /// Se MGWS non ha dato l'elenco resta il campo numerico di prima: meglio
+  /// scrivere un id che non poter spostare affatto.
+  Widget _buildDestinationSite(_MoveRow row) {
+    final label = context.l10n.inventoryEtichettaSedeArrivo;
+    final sites = _places.sites;
+    if (sites.isEmpty) {
+      return _idField(
+        key: ValueKey('inventory-move-to-site-${row.key}'),
+        controller: row.toSiteController,
+        label: label,
+      );
+    }
+    final current = int.tryParse(row.toSiteController.text.trim());
+    return DropdownButtonFormField<int>(
+      key: ValueKey('inventory-move-to-site-${row.key}'),
+      initialValue: current,
+      isExpanded: true,
+      decoration: InputDecoration(labelText: label, isDense: true),
+      items: [
+        for (final site in sites)
+          DropdownMenuItem<int>(
+            value: site.id,
+            child: Text(site.name, overflow: TextOverflow.ellipsis),
+          ),
+        // Una sede riaperta dal ledger che l'elenco non conosce resta
+        // scelta: altrimenti il menu non avrebbe un valore da mostrare.
+        if (current != null && !sites.any((site) => site.id == current))
+          DropdownMenuItem<int>(
+            value: current,
+            child: Text(_places.siteLabel(context.l10n, current)),
+          ),
+      ],
+      onChanged: _controller.isSubmitting
+          ? null
+          : (siteId) => setState(() {
+              row.toSiteController.text = siteId == null ? '' : '$siteId';
+              // Un magazzino della sede di prima non vale per la nuova; se la
+              // sede ne ha uno solo, e' per forza quello.
+              final warehouses = siteId == null
+                  ? const <InventoryPlace>[]
+                  : _places.warehousesOf(siteId);
+              row.toWarehouseController.text = warehouses.length == 1
+                  ? '${warehouses.first.id}'
+                  : '';
+              _feedback = null;
+            }),
+    );
+  }
+
+  /// Magazzino di arrivo, fra quelli della sede scelta.
+  Widget _buildDestinationWarehouse(_MoveRow row) {
+    final label = context.l10n.inventoryEtichettaMagazzinoArrivoObbligatorio;
+    final siteId = int.tryParse(row.toSiteController.text.trim());
+    final warehouses = siteId == null
+        ? const <InventoryPlace>[]
+        : _places.warehousesOf(siteId);
+    if (_places.sites.isEmpty || (siteId != null && warehouses.isEmpty)) {
+      return _idField(
+        key: ValueKey('inventory-move-to-warehouse-${row.key}'),
+        controller: row.toWarehouseController,
+        label: label,
+      );
+    }
+    final current = int.tryParse(row.toWarehouseController.text.trim());
+    return DropdownButtonFormField<int>(
+      // La chiave cambia con la sede: il menu riparte dal magazzino che la
+      // nuova sede ha messo nel campo, non da quello della sede di prima.
+      key: ValueKey('inventory-move-to-warehouse-${row.key}-${siteId ?? 0}'),
+      initialValue: current,
+      isExpanded: true,
+      decoration: InputDecoration(labelText: label, isDense: true),
+      items: [
+        for (final warehouse in warehouses)
+          DropdownMenuItem<int>(
+            value: warehouse.id,
+            child: Text(warehouse.name, overflow: TextOverflow.ellipsis),
+          ),
+        if (current != null &&
+            !warehouses.any((warehouse) => warehouse.id == current))
+          DropdownMenuItem<int>(
+            value: current,
+            child: Text(_places.warehouseLabel(context.l10n, current)),
+          ),
+      ],
+      onChanged: _controller.isSubmitting || siteId == null
+          ? null
+          : (warehouseId) => setState(() {
+              row.toWarehouseController.text = warehouseId == null
+                  ? ''
+                  : '$warehouseId';
+              _feedback = null;
+            }),
+    );
+  }
+
+  Widget _idField({
+    required Key key,
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextField(
+      key: key,
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(labelText: label, isDense: true),
+      onChanged: (_) => setState(() => _feedback = null),
+    );
+  }
+
   /// Riepilogo della riga: dice dove vanno e da dove vengono i pezzi, e
   /// ricorda che il totale non cambia. E la riga che evita il doppio
   /// spostamento involontario.
@@ -746,17 +873,20 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
     final source = line.source;
     final destination = line.destinationSiteId;
     final String summary;
-    if (source == null || destination == null) {
+    if (source == null ||
+        destination == null ||
+        line.destinationWarehouseId <= 0) {
       summary = context.l10n.inventorySpostaScegliPartenzaEArrivo;
     } else {
       final total = line.snapshot?.currentStock ?? 0;
+      final l10n = context.l10n;
       summary =
-          '${context.l10n.inventoryEtichettaSedeBreve} ${source.siteId}/'
-          '${context.l10n.inventoryAbbreviazioneMagazzino} ${source.warehouseId} '
+          '${_places.siteLabel(l10n, source.siteId)} / '
+          '${_places.warehouseLabel(l10n, source.warehouseId)} '
           '${source.qty} -> ${line.remainingInSource}  ·  '
-          '${context.l10n.inventoryEtichettaSedeBreve} $destination/'
-          '${context.l10n.inventoryAbbreviazioneMagazzino} '
-          '${line.destinationWarehouseId} +${line.quantity}  ·  '
+          '${_places.siteLabel(l10n, destination)} / '
+          '${_places.warehouseLabel(l10n, line.destinationWarehouseId)} '
+          '+${line.quantity}  ·  '
           '${context.l10n.inventoryTotaleInvariato(total)}';
     }
     return Container(
@@ -809,14 +939,12 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
         DataGridViewColumn(
           id: 'warehouse',
           label: context.l10n.inventoryEtichettaMagazzino,
-          width: 110,
-          numeric: true,
+          width: 180,
         ),
         DataGridViewColumn(
           id: 'site',
           label: context.l10n.inventoryEtichettaSedeBreve,
-          width: 90,
-          numeric: true,
+          width: 160,
         ),
         DataGridViewColumn(
           id: 'qty',
@@ -837,8 +965,14 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
                     ? const TextStyle(fontWeight: FontWeight.w800)
                     : null,
               ),
-              'warehouse': Text('${level.warehouseId}'),
-              'site': Text('${level.siteId}'),
+              'warehouse': Text(
+                _places.warehouseLabel(context.l10n, level.warehouseId),
+                overflow: TextOverflow.ellipsis,
+              ),
+              'site': Text(
+                _places.siteLabel(context.l10n, level.siteId),
+                overflow: TextOverflow.ellipsis,
+              ),
               'qty': Text('${level.qty}'),
             },
           ),
@@ -924,7 +1058,9 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
 Future<bool?> showInventoryMoveConfirmDialog({
   required BuildContext context,
   required InventoryMovePlan plan,
+  InventoryLocationDirectory places = InventoryLocationDirectory.empty,
 }) {
+  final l10n = context.l10n;
   return showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -947,15 +1083,15 @@ Future<bool?> showInventoryMoveConfirmDialog({
                 ),
                 if (line.source != null)
                   Text(
-                    '${context.l10n.inventoryEtichettaPartenza}: '
-                    '${context.l10n.inventoryEtichettaSedeBreve} ${line.source!.siteId} '
-                    '${context.l10n.inventoryEtichettaMagazzino} ${line.source!.warehouseId} '
+                    '${l10n.inventoryEtichettaPartenza}: '
+                    '${places.siteLabel(l10n, line.source!.siteId)} · '
+                    '${places.warehouseLabel(l10n, line.source!.warehouseId)} '
                     '(${line.source!.qty} ${context.l10n.inventoryParolaPezzi})',
                   ),
                 Text(
-                  '${context.l10n.inventoryEtichettaArrivo}: '
-                  '${context.l10n.inventoryEtichettaSedeBreve} ${line.destinationSiteId} '
-                  '${context.l10n.inventoryEtichettaMagazzino} ${line.destinationWarehouseId}',
+                  '${l10n.inventoryEtichettaArrivo}: '
+                  '${line.destinationSiteId == null ? '' : places.siteLabel(l10n, line.destinationSiteId!)} · '
+                  '${places.warehouseLabel(l10n, line.destinationWarehouseId)}',
                 ),
                 Text(
                   '${context.l10n.inventoryEtichettaPezziSpostati} ${line.quantity} · '

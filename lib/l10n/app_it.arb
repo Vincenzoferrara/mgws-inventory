@@ -3309,7 +3309,7 @@
   "@inventoryEtichettaSedeArrivo": {
     "description": "Localized string inventoryEtichettaSedeArrivo"
   },
-  "inventoryEtichettaSedeBreve": "Site",
+  "inventoryEtichettaSedeBreve": "Sede",
   "@inventoryEtichettaSedeBreve": {
     "description": "Localized string inventoryEtichettaSedeBreve"
   },
