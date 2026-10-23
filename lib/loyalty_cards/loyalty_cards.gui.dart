@@ -156,7 +156,7 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '${_controller.statistiche!['total_customers_with_card'] ?? 0}',
+                        '${_controller.statistiche!.cards}',
                         style: TextStyle(
                           color: theme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -260,7 +260,6 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
   /// Statistiche rapide
   Widget _buildStatisticheRapide() {
     final stats = _controller.statistiche!;
-    final tierDist = stats['tier_distribution'] as Map<String, dynamic>;
     final colors = context.colors;
 
     return Row(
@@ -268,7 +267,7 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
         Expanded(
           child: _buildStatChip(
             label: context.l10n.loyaltyTotalPoints,
-            value: '${stats['total_points_issued'] ?? 0}',
+            value: '${stats.pointsIssued ?? stats.pointsBalance}',
             icon: Icons.stars,
             color: colors.tierGold,
           ),
@@ -277,7 +276,7 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
         Expanded(
           child: _buildStatChip(
             label: context.l10n.loyaltyGold,
-            value: '${tierDist['gold'] ?? 0}',
+            value: '${stats.tierCount('gold')}',
             icon: Icons.workspace_premium,
             color: colors.tierGold,
           ),
@@ -286,7 +285,7 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
         Expanded(
           child: _buildStatChip(
             label: context.l10n.loyaltySilver,
-            value: '${tierDist['silver'] ?? 0}',
+            value: '${stats.tierCount('silver')}',
             icon: Icons.workspace_premium,
             color: colors.tierSilver,
           ),

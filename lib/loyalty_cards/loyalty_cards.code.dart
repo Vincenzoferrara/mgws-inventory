@@ -2,6 +2,7 @@ import '../l10n/localized_text.dart';
 import '../customers/customer_list.code.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../log_viewer/app_logger.dart';
+import 'loyalty_stats.dart';
 
 /// Controller per la gestione delle carte fedeltà
 class CartaFedeltaController {
@@ -15,7 +16,7 @@ class CartaFedeltaController {
   // Stato
   List<Map<String, dynamic>> _clientiConCarta = [];
   Map<String, dynamic>? _cartaSelezionata;
-  Map<String, dynamic>? _statistiche;
+  LoyaltyStats? _statistiche;
   bool _isLoading = false;
   LocalizedText? _errorMessage;
   String _searchQuery = '';
@@ -23,7 +24,7 @@ class CartaFedeltaController {
   // Getters
   List<Map<String, dynamic>> get clientiConCarta => _clientiFiltrati;
   Map<String, dynamic>? get cartaSelezionata => _cartaSelezionata;
-  Map<String, dynamic>? get statistiche => _statistiche;
+  LoyaltyStats? get statistiche => _statistiche;
   bool get isLoading => _isLoading;
   LocalizedText? get errorMessage => _errorMessage;
   bool get hasCartaSelezionata => _cartaSelezionata != null;

@@ -1,3 +1,4 @@
+import '../../../loyalty_cards/loyalty_stats.dart';
 import 'query_mgws_base.dart';
 
 class QueryMgwsLoyalty {
@@ -129,11 +130,30 @@ class QueryMgwsLoyalty {
         .toList();
   }
 
-  Future<Map<String, dynamic>> getLoyaltyStats() async {
+  Future<LoyaltyStats> getLoyaltyStats() async {
     final response = await _base.get('/wp-json/mgws/v1/loyalty/stats');
-    if (response.data is! Map<String, dynamic>) {
-      return <String, dynamic>{};
-    }
-    return response.data as Map<String, dynamic>;
+    return loyaltyStatsFromResponse(response.data);
+  }
+
+  /// Legge /loyalty/stats. `total_points_issued` e `tier_distribution` sono
+  /// arrivati dopo: con un plugin più vecchio restano null.
+  static LoyaltyStats loyaltyStatsFromResponse(Object? response) {
+    if (response is! Map) return LoyaltyStats.empty;
+    int? asInt(Object? value) =>
+        value is num ? value.toInt() : int.tryParse(value?.toString() ?? '');
+
+    final tiers = response['tier_distribution'];
+    return LoyaltyStats(
+      customers: asInt(response['customers']) ?? 0,
+      cards: asInt(response['cards']) ?? 0,
+      pointsBalance: asInt(response['points']) ?? 0,
+      pointsIssued: asInt(response['total_points_issued']),
+      tierCounts: tiers is Map
+          ? {
+              for (final entry in tiers.entries)
+                entry.key.toString(): asInt(entry.value) ?? 0,
+            }
+          : null,
+    );
   }
 }

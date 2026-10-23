@@ -1,3 +1,4 @@
+import '../../../loyalty_cards/loyalty_stats.dart';
 import '../../mgws/query/query_mgws_loyalty.dart';
 import '../../mgws/connection/mgws_connection.dart';
 
@@ -88,9 +89,8 @@ class LoyaltyGateway {
     return _mgws.getPointsHistory(customerId, page: page, perPage: perPage);
   }
 
-  Future<Map<String, dynamic>> getLoyaltyStats() async {
-    if (!await _availability.ensureConnected())
-      return const <String, dynamic>{};
+  Future<LoyaltyStats> getLoyaltyStats() async {
+    if (!await _availability.ensureConnected()) return LoyaltyStats.empty;
     return _mgws.getLoyaltyStats();
   }
 
