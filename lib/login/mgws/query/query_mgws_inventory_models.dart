@@ -66,6 +66,9 @@ abstract class MgwsInventoryGateway {
 
     /// Stessa chiave su tutte le righe di uno spostamento multi-prodotto.
     String? movementKey,
+
+    /// Variant of a variable product being moved; 0 for simple products.
+    int variationId = 0,
   });
 }
 

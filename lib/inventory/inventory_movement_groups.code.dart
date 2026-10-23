@@ -680,6 +680,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
     }
     final feedback = await inventory.loadStock(
       productIdText: '${product.productId}',
+      variationId: product.variationId,
     );
     if (!feedback.success) {
       return InventoryMovementRevertLine(
@@ -742,6 +743,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
     }
     final feedback = await inventory.loadStock(
       productIdText: '${product.productId}',
+      variationId: product.variationId,
     );
     if (!feedback.success) {
       return InventoryMovementRevertLine(
@@ -865,6 +867,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
       siteIdText: '${line.siteId}',
       reasonText: inventoryRevertReason(l10n, group, line.product),
       movementKey: movementKey,
+      variationId: line.product.variationId,
     );
   }
 
@@ -891,6 +894,7 @@ class InventoryMovementRevertController with InventoryFeedbackController {
       quantityText: '${product.quantity}',
       reasonText: inventoryRevertReason(l10n, group, product),
       movementKey: movementKey,
+      variationId: product.variationId,
     );
   }
 }

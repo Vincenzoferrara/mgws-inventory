@@ -236,6 +236,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
     required String reason,
     String? note,
     String? movementKey,
+    int variationId = 0,
   }) async {
     if (!await _availability.ensureConnected()) {
       return const MgwsMoveResult(
@@ -257,6 +258,7 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       '$_inventoryPath/stock/move',
       data: _query({
         'product_id': productId,
+        'variation_id': variationId > 0 ? variationId : null,
         'from_site_id': fromSiteId,
         'from_warehouse_id': fromWarehouseId,
         'to_site_id': toSiteId,

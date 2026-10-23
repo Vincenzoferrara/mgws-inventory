@@ -81,14 +81,24 @@ class InventoryController {
     }
   }
 
-  Future<InventoryActionFeedback> loadStock({String? productIdText}) async {
+  /// [variationId] legge una sola variante: MGWS tiene lo stock per variante,
+  /// quindi il padre di un prodotto variabile non ha pezzi suoi.
+  Future<InventoryActionFeedback> loadStock({
+    String? productIdText,
+    int variationId = 0,
+  }) async {
     if (!await _availability.ensureConnected()) return _mgwsUnavailable();
     isLoadingStock = true;
     try {
       final productId = _optionalProductId(productIdText ?? '');
       stockRows = productId == null
           ? await gateway.getAllStock()
-          : [await gateway.getProductStock(productId)];
+          : [
+              await gateway.getProductStock(
+                productId,
+                variationId: variationId,
+              ),
+            ];
       return _remember(
         InventoryActionFeedback(
           success: true,
@@ -161,6 +171,7 @@ class InventoryController {
     /// Stessa chiave su tutte le righe di una rettifica: e' cio' che tiene
     /// insieme i prodotti corretti nella stessa operazione.
     String? movementKey,
+    int variationId = 0,
   }) async {
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null) return _validationError(_invalidField('product_id'));
@@ -185,6 +196,7 @@ class InventoryController {
         siteId: siteId,
         reason: reason,
         movementKey: movementKey,
+        variationId: variationId,
       );
       lastReconcileResult = result;
       return _remember(
@@ -226,6 +238,7 @@ class InventoryController {
     required String reasonText,
     String note = '',
     String? movementKey,
+    int variationId = 0,
   }) async {
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null) return _validationError(_invalidField('product_id'));
@@ -266,6 +279,7 @@ class InventoryController {
         reason: reason,
         note: note,
         movementKey: movementKey,
+        variationId: variationId,
       );
       lastMoveResult = result;
       return _remember(

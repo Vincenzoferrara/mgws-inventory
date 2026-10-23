@@ -453,6 +453,7 @@ class InventoryRettificaPlan {
       commands.add(
         InventoryRettificaCommand(
           productId: line.productId,
+          variationId: line.variationId,
           correctStock: line.targetStock,
           reason: reasonTextFor(line, l10n),
           siteId: siteId,
@@ -473,6 +474,7 @@ class InventoryRettificaPlan {
       commands.add(
         InventoryRettificaCommand(
           productId: line.productId,
+          variationId: line.variationId,
           correctStock: line.stockBefore!,
           reason: restoreReasonTextFor(line, l10n),
           siteId: siteId,
@@ -493,9 +495,11 @@ class InventoryRettificaCommand {
     required this.reason,
     required this.siteId,
     this.movementKey,
+    this.variationId = 0,
   });
 
   final int productId;
+  final int variationId;
   final int correctStock;
   final String reason;
 
@@ -527,14 +531,23 @@ class InventoryRettificaController with InventoryFeedbackController {
   bool isSubmitting = false;
 
   /// Carica lo stock MGWS del prodotto indicato.
-  Future<InventoryActionFeedback> loadStock(String productIdText) async {
+  ///
+  /// [variationId] indica la variante di un prodotto variabile: MGWS tiene lo
+  /// stock per variante, quindi va letto quello e non quello del padre.
+  Future<InventoryActionFeedback> loadStock(
+    String productIdText, {
+    int variationId = 0,
+  }) async {
     if (isLoading) return invalid((l10n) => l10n.inventoryStockLoadInProgress);
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null) return invalid(invalidFieldText('product_id'));
 
     isLoading = true;
     try {
-      final feedback = await inventory.loadStock(productIdText: '$productId');
+      final feedback = await inventory.loadStock(
+        productIdText: '$productId',
+        variationId: variationId,
+      );
       if (!feedback.success) return remember(feedback);
       final snapshot = InventoryStockSnapshot.fromRecord(
         inventory.stockRows.isEmpty ? null : inventory.stockRows.first,
@@ -601,6 +614,7 @@ class InventoryRettificaController with InventoryFeedbackController {
               siteIdText: '${command.siteId}',
               reasonText: command.reason,
               movementKey: command.movementKey,
+              variationId: command.variationId,
             );
             final result = inventory.lastReconcileResult;
             if (result != null) results.add(result);

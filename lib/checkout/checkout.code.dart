@@ -6,6 +6,7 @@ import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart'
     show WooCoupon;
 
 import '../products/class_products.dart';
+import '../products/product_barcode_lookup.dart';
 import '../products/product_list/product_picker.dart';
 import 'class_receipt.dart';
 import 'checkout_coupon.dart';
@@ -1056,81 +1057,12 @@ class CassaController {
   }
 
   /// Ricerca ON-DEMAND su WooCommerce per barcode (scanner o testo).
-  /// Non carica mai il catalogo: interroga il backend e materializza solo
-  /// l'elemento che corrisponde al codice (variante se il barcode appartiene
-  /// a una variante, prodotto semplice altrimenti).
+  /// Non carica mai il catalogo: la ricerca vive in [cercaProdottoPerBarcode],
+  /// condivisa con i moduli di magazzino.
   Future<ElementoCassa?> ricercaPerBarcode(String barcode) async {
-    final codice = barcode.trim();
-    if (codice.isEmpty) return null;
-    try {
-      // 1) Lookup esatto per barcode interno (global_unique_id).
-      final prodotto = await PlatformManager.prodotti
-          .findProductByBarcodeInternoExact(codice);
-      if (prodotto != null) {
-        return await _elementoDaProdottoPerBarcode(prodotto, codice);
-      }
-      // 2) Fallback: ricerca generica WooCommerce sul termine.
-      final candidati = await PlatformManager.prodotti.searchProducts(
-        codice,
-        limit: 5,
-      );
-      if (candidati.isEmpty) return null;
-      if (candidati.length == 1) {
-        return await _elementoDaProdottoPerBarcode(candidati.first, codice);
-      }
-      for (final candidato in candidati) {
-        final elemento = await _elementoDaProdottoPerBarcode(candidato, codice);
-        if (elemento != null) return elemento;
-      }
-      return null;
-    } catch (e) {
-      AppLogger().w('🔍 Ricerca barcode "$codice" fallita: $e');
-      return null;
-    }
-  }
-
-  /// Da un prodotto trovato per barcode restituisce l'elemento corretto:
-  /// la variante che contiene il codice, oppure il prodotto se semplice.
-  Future<ElementoCassa?> _elementoDaProdottoPerBarcode(
-    ProdottoGlobal prodotto,
-    String barcode,
-  ) async {
-    final codice = barcode.trim().toLowerCase();
-    final hasVariationIds =
-        prodotto.variations != null && prodotto.variations!.isNotEmpty;
-    if (!hasVariationIds) {
-      return ElementoCassa(prodotto);
-    }
-    try {
-      final varianti = await PlatformManager.varianti.getAllVariations(
-        prodotto.id,
-      );
-      for (final variante in varianti) {
-        if (_codiceInVariante(variante, codice)) {
-          return ElementoCassa(prodotto, variante);
-        }
-      }
-    } catch (e) {
-      AppLogger().w('⚠️ Varianti del prodotto ${prodotto.id} non caricate: $e');
-    }
-    return null;
-  }
-
-  /// Verifica se il codice (barcode) appartiene alla variante, confrontando
-  /// barcode interno, barcode fornitore e metadati custom.
-  bool _codiceInVariante(VarianteProductGlobal variante, String codice) {
-    final codici = <String>[
-      variante.barcodeInterno,
-      variante.barcodeFornitore,
-      variante.metadatiCustom?['barcode_manufacturer']?.toString() ?? '',
-      variante.metadatiCustom?['barcode_produttore']?.toString() ?? '',
-      variante.metadatiCustom?['supplier_sku']?.toString() ?? '',
-      variante.metadatiCustom?['barcode']?.toString() ?? '',
-    ];
-    return codici
-        .map((c) => c.trim().toLowerCase())
-        .where((c) => c.isNotEmpty)
-        .any((c) => c.contains(codice));
+    final trovato = await cercaProdottoPerBarcode(barcode);
+    if (trovato == null) return null;
+    return ElementoCassa(trovato.prodotto, trovato.variante);
   }
 
   // =======================================================

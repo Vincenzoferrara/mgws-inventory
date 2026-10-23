@@ -206,6 +206,7 @@ class InventoryMovePlan {
       commands.add(
         InventoryMoveCommand(
           productId: line.productId,
+          variationId: line.variationId,
           fromSiteId: line.source!.siteId,
           fromWarehouseId: line.source!.warehouseId,
           toSiteId: line.destinationSiteId!,
@@ -232,9 +233,11 @@ class InventoryMoveCommand {
     required this.quantity,
     required this.reason,
     this.movementKey,
+    this.variationId = 0,
   });
 
   final int productId;
+  final int variationId;
   final int fromSiteId;
   final int fromWarehouseId;
   final int toSiteId;
@@ -267,14 +270,23 @@ class InventoryMoveController with InventoryFeedbackController {
 
   /// Carica lo stock MGWS del prodotto indicato: da li' l'operatore sceglie il
   /// magazzino di partenza fra le ubicazioni che hanno pezzi.
-  Future<InventoryActionFeedback> loadStock(String productIdText) async {
+  ///
+  /// [variationId] indica la variante di un prodotto variabile: MGWS tiene lo
+  /// stock per variante, quindi va letto quello e non quello del padre.
+  Future<InventoryActionFeedback> loadStock(
+    String productIdText, {
+    int variationId = 0,
+  }) async {
     if (isLoading) return invalid((l10n) => l10n.inventoryStockLoadInProgress);
     final productId = InventoryInputParser.parseProductId(productIdText);
     if (productId == null) return invalid(invalidFieldText('product_id'));
 
     isLoading = true;
     try {
-      final feedback = await inventory.loadStock(productIdText: '$productId');
+      final feedback = await inventory.loadStock(
+        productIdText: '$productId',
+        variationId: variationId,
+      );
       if (!feedback.success) return remember(feedback);
       final snapshot = InventoryStockSnapshot.fromRecord(
         inventory.stockRows.isEmpty ? null : inventory.stockRows.first,
@@ -343,6 +355,7 @@ class InventoryMoveController with InventoryFeedbackController {
               // storico "perche'" e "quale circostanza" restano due fatti.
               note: plan.details.trim(),
               movementKey: command.movementKey,
+              variationId: command.variationId,
             );
             final result = inventory.lastMoveResult;
             if (result != null) results.add(result);

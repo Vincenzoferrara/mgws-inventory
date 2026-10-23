@@ -291,10 +291,16 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
   }
 
   Future<_MoveRow?> _resolve(String code) async {
+    // Stessa ricerca della cassa: un EAN (anche di variante) diventa il suo
+    // prodotto e la sua variante. Il codice non va mai letto come id: MGWS
+    // risponderebbe "prodotto non trovato" per un numero che id non e'.
     final catalog = _catalogController;
-    final match = catalog?.findByBarcode(code);
-    final productId = match?.productId ?? int.tryParse(code.trim());
-    if (productId == null || productId <= 0) {
+    final match = catalog != null
+        ? await catalog.ricercaPerBarcode(code)
+        : await inventoryMatchFromBackend(code);
+    if (!mounted) return null;
+    final productId = match?.productId ?? 0;
+    if (match == null || productId <= 0) {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
@@ -303,28 +309,23 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       );
       return null;
     }
-    if (_rows.any((row) => row.productId == productId)) {
+    if (_rows.any((row) => row.key == '$productId:${match.variationId}')) {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryProdottoGiaInLista(
-            match?.label ??
-                context.l10n.inventoryProdottoNumero(productId.toString()),
-          ),
+          message: (l10n) => l10n.inventoryProdottoGiaInLista(match.label),
         ),
       );
       return null;
     }
     final row = _MoveRow(
       productId: productId,
-      variationId: match?.variationId ?? 0,
-      label:
-          match?.label ??
-          context.l10n.inventoryProdottoNumero(productId.toString()),
-      imageUrl: match?.imageUrl,
-      barcodeInterno: match?.barcodeInterno.isEmpty == true
+      variationId: match.variationId,
+      label: match.label,
+      imageUrl: match.imageUrl,
+      barcodeInterno: match.barcodeInterno.isEmpty
           ? null
-          : match?.barcodeInterno,
+          : match.barcodeInterno,
     );
     setState(() {
       _rows.add(row);
@@ -337,7 +338,10 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
   /// Legge lo stock MGWS: senza le ubicazioni non si sa da dove partire.
   Future<void> _loadSnapshot(_MoveRow row) async {
     setState(() => row.loading = true);
-    final feedback = await _controller.loadStock('${row.productId}');
+    final feedback = await _controller.loadStock(
+      '${row.productId}',
+      variationId: row.variationId,
+    );
     if (!mounted) return;
     setState(() {
       row.loading = false;

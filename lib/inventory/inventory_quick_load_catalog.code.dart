@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../l10n/localized_text.dart';
-import '../login/jwt_api/adapter/platform_manager.dart';
 import '../products/class_products.dart';
+import '../products/product_barcode_lookup.dart';
 import '../products/product_list/product_list.code.dart';
 import 'inventory_quick_load.code.dart';
 
@@ -79,8 +79,8 @@ class InventoryQuickLoadCatalogController extends ChangeNotifier {
   /// Trova prodotto o variante a partire da un barcode letto dallo scanner.
   ///
   /// Cerca prima sul catalogo gia caricato (veloce, nessuna rete). Se non
-  /// trova nulla, interroga WooCommerce on-demand come fa la cassa: prima
-  /// `findProductByBarcodeInternoExact`, poi una ricerca generica. Restituisce
+  /// trova nulla, interroga il backend con [cercaProdottoPerBarcode], la
+  /// stessa ricerca della cassa. Restituisce
   /// `null` se il codice non e in catalogo: e il chiamante a decidere se
   /// avvisare l'operatore, senza creare righe con prodotti inesistenti.
   Future<InventoryQuickLoadMatch?> ricercaPerBarcode(String rawCode) async {
@@ -91,26 +91,10 @@ class InventoryQuickLoadCatalogController extends ChangeNotifier {
     final inMemory = findByBarcode(code);
     if (inMemory != null) return inMemory;
 
-    // 2) Fallback on-demand, come la cassa.
-    try {
-      final prodotto = await PlatformManager.prodotti
-          .findProductByBarcodeInternoExact(code);
-      if (prodotto != null) {
-        return InventoryQuickLoadMatch(product: prodotto, barcode: code);
-      }
-      final candidati = await PlatformManager.prodotti.searchProducts(
-        code,
-        limit: 5,
-      );
-      for (final candidato in candidati) {
-        final match = findByBarcode(candidato.nome ?? '');
-        if (match != null) return match;
-      }
-    } catch (_) {
-      // Il catalogo non e caricato o la rete non risponde: il pannello
-      // gia gestisce il caso con un messaggio all'operatore.
-    }
-    return null;
+    // 2) Fallback on-demand, con la stessa ricerca della cassa: le varianti
+    //    non sono in memoria finche' non si aprono, quindi un EAN di variante
+    //    si trova solo chiedendo al backend.
+    return inventoryMatchFromBackend(code);
   }
 
   /// Trova prodotto o variante a partire da un barcode nel catalogo
@@ -165,6 +149,21 @@ String inventoryVariationLabel(VarianteProductGlobal variant) {
   if (attributes.isNotEmpty) return attributes;
   if (variant.nome.trim().isNotEmpty) return variant.nome.trim();
   return '#${variant.id}';
+}
+
+/// Cerca il barcode sul backend con la stessa ricerca della cassa, senza
+/// passare dal catalogo in memoria: serve ai pannelli aperti senza catalogo.
+Future<InventoryQuickLoadMatch?> inventoryMatchFromBackend(
+  String rawCode,
+) async {
+  final code = rawCode.trim();
+  final trovato = await cercaProdottoPerBarcode(code);
+  if (trovato == null) return null;
+  return InventoryQuickLoadMatch(
+    product: trovato.prodotto,
+    variation: trovato.variante,
+    barcode: code,
+  );
 }
 
 /// Prodotto o variante identificata tramite un barcode.

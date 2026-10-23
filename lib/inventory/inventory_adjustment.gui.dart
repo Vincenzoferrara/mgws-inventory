@@ -280,12 +280,19 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
   // ── Scelta dei prodotti ───────────────────────────────────────────
 
   /// Risoluzione barcode condivisa con gli altri moduli: MGWS ragiona per id,
-  /// quindi un barcode puo' arrivare come id o come codice del catalogo.
+  /// quindi il barcode si traduce in prodotto e variante prima di leggere lo
+  /// stock.
   Future<_RettificaRow?> _resolve(String code) async {
+    // Stessa ricerca della cassa: un EAN (anche di variante) diventa il suo
+    // prodotto e la sua variante. Il codice non va mai letto come id: MGWS
+    // risponderebbe "prodotto non trovato" per un numero che id non e'.
     final catalog = _catalogController;
-    final match = catalog?.findByBarcode(code);
-    final productId = match?.productId ?? int.tryParse(code.trim());
-    if (productId == null || productId <= 0) {
+    final match = catalog != null
+        ? await catalog.ricercaPerBarcode(code)
+        : await inventoryMatchFromBackend(code);
+    if (!mounted) return null;
+    final productId = match?.productId ?? 0;
+    if (match == null || productId <= 0) {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
@@ -294,29 +301,26 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       );
       return null;
     }
-    final existing = _rows.where((row) => row.productId == productId);
+    final existing = _rows.where(
+      (row) => row.key == '$productId:${match.variationId}',
+    );
     if (existing.isNotEmpty) {
       _showFeedback(
         InventoryActionFeedback(
           success: false,
-          message: (l10n) => l10n.inventoryProdottoGiaInLista(
-            match?.label ??
-                context.l10n.inventoryProdottoNumero(productId.toString()),
-          ),
+          message: (l10n) => l10n.inventoryProdottoGiaInLista(match.label),
         ),
       );
       return null;
     }
     final row = _RettificaRow(
       productId: productId,
-      variationId: match?.variationId ?? 0,
-      label:
-          match?.label ??
-          context.l10n.inventoryProdottoNumero(productId.toString()),
-      imageUrl: match?.imageUrl,
-      barcodeInterno: match?.barcodeInterno.isEmpty == true
+      variationId: match.variationId,
+      label: match.label,
+      imageUrl: match.imageUrl,
+      barcodeInterno: match.barcodeInterno.isEmpty
           ? null
-          : match?.barcodeInterno,
+          : match.barcodeInterno,
       // Il prodotto entra con il verso che l'operatore ha scelto in testa: se
       // la scelta cambiasse a meta' operazione, i prodotti gia' corretti
       // resterebbero col verso vecchio e il piano non sarebbe piu' quello che
@@ -338,7 +342,10 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
     // Anche questa puo' partire da initState, quando il seme ha gia' riempito
     // le righe: in quel momento non c'e' ancora un frame da ridisegnare.
     if (_ready) setState(() {});
-    final feedback = await _controller.loadStock('${row.productId}');
+    final feedback = await _controller.loadStock(
+      '${row.productId}',
+      variationId: row.variationId,
+    );
     if (!mounted) return;
     setState(() {
       row.loading = false;
