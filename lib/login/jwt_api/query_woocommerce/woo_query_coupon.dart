@@ -71,12 +71,7 @@ class WooQueryCoupon {
 
     final coupon = WooCoupon(
       code: code,
-      discountType: discountType != null
-          ? WooCouponDiscountType.values.firstWhere(
-              (t) => t.value == discountType,
-              orElse: () => WooCouponDiscountType.percent,
-            )
-          : null,
+      discountType: _discountTypeFrom(discountType),
       amount: double.tryParse(amount ?? ""),
       individualUse: individualUse,
       excludeSaleItems: excludeSaleItems,
@@ -92,6 +87,16 @@ class WooQueryCoupon {
     );
 
     return await woo.createCoupon(coupon);
+  }
+
+  /// Tipo di sconto della libreria dal nome WooCommerce (percent, fixed_cart,
+  /// fixed_product); un nome sconosciuto diventa percent.
+  static WooCouponDiscountType? _discountTypeFrom(String? discountType) {
+    if (discountType == null) return null;
+    return WooCouponDiscountType.values.firstWhere(
+      (t) => t.value == discountType,
+      orElse: () => WooCouponDiscountType.percent,
+    );
   }
 
   /// Aggiorna un coupon esistente
@@ -121,7 +126,7 @@ class WooQueryCoupon {
       id: couponId,
       code: code ?? existingCoupon.code,
       discountType:
-          discountType as WooCouponDiscountType? ?? existingCoupon.discountType,
+          _discountTypeFrom(discountType) ?? existingCoupon.discountType,
       amount: amount as double? ?? existingCoupon.amount,
       individualUse: individualUse ?? existingCoupon.individualUse,
       excludeSaleItems: excludeSaleItems ?? existingCoupon.excludeSaleItems,

@@ -146,7 +146,9 @@ class CouponManagementService {
       code: libCoupon.code ?? '',
       amount: libCoupon.amount?.toString() ?? '0',
       status: 'publish', // La libreria non espone status, assumiamo publish
-      discountType: libCoupon.discountType?.toString() ?? 'fixed_cart',
+      // value e' il nome WooCommerce (percent, fixed_cart, ...); toString()
+      // darebbe 'WooCouponDiscountType.percent', che nessuna etichetta conosce.
+      discountType: libCoupon.discountType?.value ?? 'fixed_cart',
       description: libCoupon.description ?? '',
       dateExpires: libCoupon.dateExpires,
       dateCreated: libCoupon.dateCreated ?? DateTime.now(),
