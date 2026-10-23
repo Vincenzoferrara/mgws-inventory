@@ -16,6 +16,13 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "it.mgws.mgws_inventory"
+
+    // F-Droid rejects the encrypted dependency metadata block that the
+    // Android Gradle Plugin adds to APKs and bundles by default.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
     compileSdk = 36
     ndkVersion = "30.0.16248370"
 

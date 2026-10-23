@@ -1,0 +1,50 @@
+# F-Droid build recipe for MGWS Inventory.
+#
+# Copy this file to metadata/it.mgws.mgws_inventory.yml in a fork of
+# https://gitlab.com/fdroid/fdroiddata and open a merge request. Texts,
+# screenshots and changelogs are read from fastlane/metadata/android/ in this
+# repository. After inclusion, F-Droid builds every new v* tag by itself:
+# the release workflow writes the same version into pubspec.yaml.
+
+Categories:
+  - Money
+License: GPL-3.0-only
+AuthorName: Vincenzo Ferrara
+SourceCode: https://github.com/Vincenzoferrara/mgws-inventory
+IssueTracker: https://github.com/Vincenzoferrara/mgws-inventory/issues
+Changelog: https://github.com/Vincenzoferrara/mgws-inventory/releases
+Donate: https://ko-fi.com/vinc0101
+
+AntiFeatures:
+  NonFreeNet:
+    en-US: The optional AI help can send product data to proprietary services (OpenAI, Anthropic, Google, Mistral), only after the user enables it and gives consent. A local Ollama server is also supported.
+
+AutoName: MGWS Inventory
+
+RepoType: git
+Repo: https://github.com/Vincenzoferrara/mgws-inventory.git
+
+Builds:
+  - versionName: 1.0.59
+    versionCode: 59
+    commit: v1.0.59
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.47.5
+    rm:
+      - docker
+    prebuild:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    scandelete:
+      - .pub-cache
+    build:
+      - export PUB_CACHE=$(pwd)/.pub-cache
+      - $$flutter$$/bin/flutter build apk --release --dart-define=UPDATE_CHECK=false
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
+CurrentVersion: 1.0.59
+CurrentVersionCode: 59
