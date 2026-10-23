@@ -2,7 +2,6 @@
 
 import '../../l10n/error_text.dart';
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 
@@ -10,6 +9,7 @@ import '../class_products.dart';
 import '../../reuse_class/class_formtter.dart';
 import '../product_filters.dart';
 import '../../reuse_class/logic/global_pagination_controller.dart';
+import '../../reuse_class/logic/memory_usage.dart';
 import '../../reuse_class/datagridview/datagridview_cache.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../login/jwt_api/woo_connect.dart';
@@ -623,7 +623,7 @@ class ProdottiGestioneController {
       'scaricati=$scaricati di $totali saltati=$saltati errori=$errori '
       'cacheProdotti=${DataGridViewCache.variantsCacheSize()} '
       'cacheVarianti=${DataGridViewCache.totalVariantsInCache()} '
-      'rssMb=${(ProcessInfo.currentRss / (1024 * 1024)).round()} '
+      'rssMb=${residentMemoryMb()} '
       'dur=${stopwatch.elapsedMilliseconds}ms',
     );
   }

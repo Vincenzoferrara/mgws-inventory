@@ -1,6 +1,5 @@
 import '../../l10n/error_text.dart';
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -15,6 +14,7 @@ import '../../settings/app_settings.dart';
 import '../../settings/machine_ui_preferences.dart';
 import '../../reuse_class/gui/global_pagination_bar.dart';
 import '../../reuse_class/logic/global_pagination_controller.dart';
+import '../../reuse_class/logic/memory_usage.dart';
 import '../../reuse_class/gui/searchable_checkbox_dialog.dart';
 import '../../reuse_class/gui/notification_recap_dialog.dart';
 import '../../reuse_class/datagridview/datagridview.code.dart';
@@ -338,7 +338,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
           log.i(
             '[perf-trace] cache finestra prune rimossi=$rimossi '
             'keep=${keepIds.length} '
-            'rssMb=${(ProcessInfo.currentRss / (1024 * 1024)).round()}',
+            'rssMb=${residentMemoryMb()}',
           );
         }
         _cacheRefillDepth--;
