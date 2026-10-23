@@ -35,6 +35,10 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  /// Padding of the navigation bar, the package default made explicit so the
+  /// pages can end right above the bar.
+  static const _controlsPadding = EdgeInsets.all(16);
+
   /// Rules of the flow, including the single completion and the navigation.
   late final WelcomeLogic _welcomeLogic;
 
@@ -83,6 +87,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     return IntroductionScreen(
       globalBackgroundColor: theme.scaffoldBackgroundColor,
+      // The package draws its controls over the pages. Ending the pages above
+      // the controls keeps every last option visible and scrollable instead
+      // of sitting under the transparent bar: the bar is the padding around
+      // one row of buttons of minimum interactive height.
+      controlsPadding: _controlsPadding,
+      bodyPadding: EdgeInsets.only(
+        bottom: _controlsPadding.vertical + kMinInteractiveDimension,
+      ),
       // The two configurable pages are custom widgets, so every page is a raw
       // page: the package accepts either a list of PageViewModel or a list of
       // widgets, never a mix.
@@ -149,9 +161,6 @@ class _WelcomePurposePage extends StatelessWidget {
 }
 
 /// Layout of the pages that only carry explanatory copy.
-///
-/// The bottom padding leaves room for the navigation bar of the welcome flow,
-/// which the package draws over the page instead of reserving space for it.
 class _WelcomeCopyPage extends StatelessWidget {
   const _WelcomeCopyPage({
     required this.icon,
@@ -175,7 +184,7 @@ class _WelcomeCopyPage extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 48, 24, 104),
+        padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),

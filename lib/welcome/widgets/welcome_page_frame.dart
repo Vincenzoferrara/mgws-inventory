@@ -11,8 +11,8 @@ import '../../l10n/extensions.dart';
 /// every page.
 ///
 /// The column is scrollable because the option list plus the header can exceed
-/// the height of a phone once the navigation bar of the welcome flow is
-/// accounted for. The bottom padding leaves room for that navigation bar.
+/// the height of a phone. The welcome flow ends the page above its navigation
+/// bar, so no extra room for the bar is needed here.
 class WelcomePageFrame extends StatelessWidget {
   const WelcomePageFrame({
     super.key,
@@ -50,7 +50,7 @@ class WelcomePageFrame extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 104),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
