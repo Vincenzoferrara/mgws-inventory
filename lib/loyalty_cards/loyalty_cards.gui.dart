@@ -518,7 +518,7 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
             ),
             _buildInfoRow(
               context.l10n.loyaltyCustomerId,
-              '#${carta['customer_id']}',
+              carta['customer_id'] != null ? '#${carta['customer_id']}' : 'N/A',
             ),
           ]),
 

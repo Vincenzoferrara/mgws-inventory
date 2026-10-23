@@ -79,6 +79,9 @@ class CartaFedeltaController {
         final carta = id != null ? cartePerCliente[id] : null;
         return {
           ...cliente,
+          // Il dettaglio e le azioni sui punti leggono 'customer_id', mentre
+          // il cliente globale espone solo 'id': lo riporto qui.
+          'customer_id': id,
           'has_card': carta != null,
           if (carta != null) ...{
             'card_number': carta['card_number'] ?? '',
