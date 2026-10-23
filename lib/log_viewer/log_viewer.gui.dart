@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mgws_inventory/theme/theme.dart';
+import '../theme/theme.dart';
 import 'package:share_plus/share_plus.dart';
 import '../notification/notification_service.dart';
 import 'app_logger.dart';

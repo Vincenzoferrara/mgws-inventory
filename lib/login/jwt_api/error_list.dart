@@ -11,9 +11,9 @@ import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
-import 'package:mgws_inventory/l10n/extensions.dart';
-import 'package:mgws_inventory/l10n/known_messages.dart';
-import 'package:mgws_inventory/l10n/localized_text.dart';
+import '../../l10n/extensions.dart';
+import '../../l10n/known_messages.dart';
+import '../../l10n/localized_text.dart';
 
 /// Classe base per tutte le eccezioni personalizzate dell'applicazione.
 abstract class AppException implements Exception {
