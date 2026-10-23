@@ -831,7 +831,62 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     _cassaSelectionVersion.value++;
   }
 
-  List<ProdottoGlobal> _buildCassaSelectedProducts() {
+  /// Righe spuntate nella griglia del selettore: un prodotto e' spuntato se e'
+  /// scelto lui (semplice) o almeno una delle sue varianti.
+  Set<int> get _pickerCheckedProductIds => <int>{
+    ..._selectedCassaSimpleProductIds,
+    ..._selectedCassaVariantIdsByProductId.keys,
+  };
+
+  /// Spunta di una riga nel selettore, come la selezione multipla dell'elenco.
+  ///
+  /// Un prodotto variabile entra con tutte le varianti: e' il prodotto intero
+  /// che l'operatore ha spuntato, e il dettaglio resta il posto dove togliere
+  /// quelle che non servono.
+  Future<void> _togglePickerRow(ProdottoGlobal product, bool selected) async {
+    final productId = product.id;
+    if (productId == null || productId <= 0) return;
+    if (!selected) {
+      setState(() {
+        _selectedCassaSimpleProductIds.remove(productId);
+        _selectedCassaVariantIdsByProductId.remove(productId);
+      });
+      _cassaSelectionVersion.value++;
+      return;
+    }
+    if (!product.isVariabile) {
+      _toggleCassaSimpleProductSelection(product, true);
+      return;
+    }
+    final loaded = await _runBusy(
+      context.l10n.productsLoadingVariants,
+      () => _controller.productsWithVariants([product]),
+    );
+    if (!_alive) return;
+    final ids = (loaded.first.varianti ?? const <VarianteProductGlobal>[])
+        .map((variant) => variant.id)
+        .where((id) => id > 0)
+        .toSet();
+    if (ids.isEmpty) return;
+    setState(() => _selectedCassaVariantIdsByProductId[productId] = ids);
+    _cassaSelectionVersion.value++;
+  }
+
+  void _clearPickerSelection() {
+    if (_pickerCheckedProductIds.isEmpty) return;
+    setState(() {
+      _selectedCassaSimpleProductIds.clear();
+      _selectedCassaVariantIdsByProductId.clear();
+    });
+    _cassaSelectionVersion.value++;
+  }
+
+  /// I prodotti scelti, ognuno con dentro le sole varianti spuntate.
+  ///
+  /// Le varianti di una riga spuntata dalla griglia possono essere state
+  /// staccate dalla lista nel frattempo (la RAM resta legata alla pagina
+  /// visibile): vanno quindi riprese prima di filtrarle.
+  Future<List<ProdottoGlobal>> _buildCassaSelectedProducts() async {
     final selectedProducts = <ProdottoGlobal>[];
     final productsById = <int, ProdottoGlobal>{
       for (final product in _controller.prodotti)
@@ -840,6 +895,19 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
           _controller.prodottoSelezionato!.id! > 0)
         _controller.prodottoSelezionato!.id!: _controller.prodottoSelezionato!,
     };
+    final missingVariants = [
+      for (final product in productsById.values)
+        if (_selectedCassaVariantIdsByProductId.containsKey(product.id) &&
+            !product.hasVarianti)
+          product,
+    ];
+    if (missingVariants.isNotEmpty) {
+      for (final product in await _controller.productsWithVariants(
+        missingVariants,
+      )) {
+        productsById[product.id!] = product;
+      }
+    }
     for (final product in productsById.values) {
       final productId = product.id;
       if (productId == null || productId <= 0) continue;
@@ -1156,8 +1224,12 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             child: FilledButton.icon(
               onPressed: selectedCount == 0
                   ? null
-                  : () {
-                      final selected = _buildCassaSelectedProducts();
+                  : () async {
+                      final selected = await _runBusy(
+                        context.l10n.productsLoadingVariants,
+                        _buildCassaSelectedProducts,
+                      );
+                      if (!mounted) return;
                       widget.onAggiungiProdotti?.call(selected);
                       Navigator.of(context).pop<List<ProdottoGlobal>>(selected);
                     },
@@ -1202,7 +1274,16 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             products: _visibleProducts,
             scrollController: _scrollController,
             visibleColumns: _visibleColumns,
-            showSelectionControls: !widget.modalitaCassa,
+            // Nel selettore le spunte non sono la selezione dell'elenco (che
+            // serve a stampare o cancellare) ma quella da restituire: stesse
+            // caselle, stato diverso.
+            checkedProductIds: widget.modalitaCassa
+                ? _pickerCheckedProductIds
+                : null,
+            onProductChecked: widget.modalitaCassa
+                ? (product, selected) =>
+                      unawaited(_togglePickerRow(product, selected))
+                : null,
             onStateChanged: _refresh,
             contextActions: widget.modalitaCassa
                 ? const <DataGridViewContextAction<ProdottoGlobal>>[]
@@ -1210,8 +1291,10 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             onDeleteSelected: widget.modalitaCassa
                 ? null
                 : _deleteSelectedProducts,
-            onClearSelection: _clearGridSelection,
-            onDeleteFromGrid: widget.modalitaCassa ? (_) {} : _deleteFromGrid,
+            onClearSelection: widget.modalitaCassa
+                ? _clearPickerSelection
+                : _clearGridSelection,
+            onDeleteFromGrid: _deleteFromGrid,
             onProductSelected: _handleProductSelected,
             selectAllShortcut: _appSettings.shortcutSelectAll,
             deleteShortcut: _appSettings.shortcutDelete,
@@ -1339,7 +1422,6 @@ class _ProductsGrid extends StatefulWidget {
   final List<ProdottoGlobal> products;
   final ScrollController scrollController;
   final Set<ProductGridColumnId> visibleColumns;
-  final bool showSelectionControls;
   final VoidCallback onStateChanged;
   final List<DataGridViewContextAction<ProdottoGlobal>> contextActions;
   final Future<void> Function(ProdottoGlobal)? onOpenProductDetails;
@@ -1347,6 +1429,11 @@ class _ProductsGrid extends StatefulWidget {
   final VoidCallback onClearSelection;
   final ValueChanged<ProdottoGlobal?> onDeleteFromGrid;
   final void Function(ProdottoGlobal product) onProductSelected;
+
+  /// Spunte da mostrare al posto della selezione dell'elenco, con il loro
+  /// [onProductChecked]: e' il selettore prodotti a usarle.
+  final Set<int>? checkedProductIds;
+  final void Function(ProdottoGlobal product, bool selected)? onProductChecked;
   final String selectAllShortcut;
   final String deleteShortcut;
   final String escapeShortcut;
@@ -1357,12 +1444,13 @@ class _ProductsGrid extends StatefulWidget {
     required this.products,
     required this.scrollController,
     required this.visibleColumns,
-    this.showSelectionControls = true,
     required this.onStateChanged,
     required this.contextActions,
     required this.onClearSelection,
     required this.onDeleteFromGrid,
     required this.onProductSelected,
+    this.checkedProductIds,
+    this.onProductChecked,
     required this.selectAllShortcut,
     required this.deleteShortcut,
     required this.escapeShortcut,
@@ -1557,25 +1645,27 @@ class _ProductsGridState extends State<_ProductsGrid> {
       framed: false,
       verticalScrollController: widget.scrollController,
       selectedRowId: '${widget.controller.prodottoSelezionato?.id ?? ''}',
-      selectedRowIds: widget.controller.selectedProductIds
-          .map((id) => '$id')
-          .toSet(),
-      showCheckboxes: widget.showSelectionControls,
+      selectedRowIds:
+          (widget.checkedProductIds ?? widget.controller.selectedProductIds)
+              .map((id) => '$id')
+              .toSet(),
+      showCheckboxes: true,
       selectAllShortcut: widget.selectAllShortcut,
       deleteShortcut: widget.deleteShortcut,
       escapeShortcut: widget.escapeShortcut,
-      onRowChecked: widget.showSelectionControls ? _toggleBulkSelection : null,
-      onSelectAll: widget.showSelectionControls
-          ? (selected) {
-              _toggleAllVisible(false);
-            }
-          : null,
-      onDeleteShortcut: widget.showSelectionControls
+      onRowChecked: widget.onProductChecked ?? _toggleBulkSelection,
+      onSelectAll: (selected) {
+        if (widget.onProductChecked != null) {
+          widget.onClearSelection();
+        } else {
+          _toggleAllVisible(false);
+        }
+      },
+      // Il selettore non cancella nulla: Canc li' non ha niente da fare.
+      onDeleteShortcut: widget.onProductChecked == null
           ? widget.onDeleteFromGrid
           : null,
-      onEscapeShortcut: widget.showSelectionControls
-          ? widget.onClearSelection
-          : null,
+      onEscapeShortcut: widget.onClearSelection,
       onRowSelected: (product) {
         Future<void>(() => _selectProduct(product));
       },
