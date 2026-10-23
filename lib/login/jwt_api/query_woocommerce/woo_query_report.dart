@@ -234,45 +234,83 @@ class WooQueryReport {
     return endOfDay ? '${day}T23:59:59' : '${day}T00:00:00';
   }
 
+  /// Stati d'ordine conteggiati come vendite, come in `/reports/sales`.
+  static const _paidStatuses = 'completed,processing,on-hold';
+
   /// Ottiene top prodotti più venduti
+  ///
+  /// Aggrega le righe degli ordini del periodo. `/reports/top_sellers` non
+  /// serve: restituisce il nome in `name` (il package legge `title`, che
+  /// resta null) e nessun importo. Le varianti vengono sommate al prodotto
+  /// padre (`product_id`), con il suo nome (`parent_name`).
   Future<List<Map<String, dynamic>>> getTopSellingProducts({
     int limit = 10,
     DateTime? dataInizio,
     DateTime? dataFine,
   }) async {
     try {
-      final woo = _woo;
+      final filters = <String, dynamic>{
+        'status': _paidStatuses,
+        '_fields': 'line_items',
+        'per_page': 100,
+        if (dataInizio != null) 'after': _isoDay(dataInizio, endOfDay: false),
+        if (dataFine != null) 'before': _isoDay(dataFine, endOfDay: true),
+      };
 
-      // Formatta le date
-      String? dateMin;
-      String? dateMax;
+      final byProduct = <int, Map<String, dynamic>>{};
+      var page = 1;
+      var totalPages = 1;
+      do {
+        final response = await _woo.dio.get(
+          '/orders',
+          queryParameters: {...filters, 'page': page},
+        );
+        totalPages =
+            int.tryParse(response.headers.value('x-wp-totalpages') ?? '') ?? 1;
 
-      if (dataInizio != null) {
-        dateMin =
-            '${dataInizio.year}-${dataInizio.month.toString().padLeft(2, '0')}-${dataInizio.day.toString().padLeft(2, '0')}';
-      }
+        final orders = response.data is List ? response.data as List : [];
+        for (final order in orders) {
+          if (order is! Map) continue;
+          final items = order['line_items'];
+          if (items is! List) continue;
+          for (final item in items) {
+            if (item is! Map) continue;
+            final productId = parseIntSafe(item['product_id']) ?? 0;
+            if (productId == 0) continue;
 
-      if (dataFine != null) {
-        dateMax =
-            '${dataFine.year}-${dataFine.month.toString().padLeft(2, '0')}-${dataFine.day.toString().padLeft(2, '0')}';
-      }
+            final parentName = item['parent_name']?.toString() ?? '';
+            final entry = byProduct.putIfAbsent(
+              productId,
+              () => {
+                'product_id': productId,
+                'title': parentName.isNotEmpty
+                    ? parentName
+                    : item['name']?.toString(),
+                'quantity': 0,
+                'total': 0.0,
+              },
+            );
+            entry['quantity'] =
+                (entry['quantity'] as int) +
+                (parseIntSafe(item['quantity']) ?? 0);
+            entry['total'] =
+                (entry['total'] as double) +
+                (parseDoubleSafe(item['total']) ?? 0.0);
+          }
+        }
+        page++;
+      } while (page <= totalPages);
 
-      // Usa l'API nativa del package
-      final List<WooTopSellersReport> reports = await woo.getTopSellersReport(
-        dateMin: dateMin,
-        dateMax: dateMax,
-      );
-
-      // Converti in formato Map (per compatibilità con codice esistente)
-      // Nota: WooTopSellersReport non ha il campo 'total', usiamo quantity
-      return reports.take(limit).map((report) {
-        return {
-          'product_id': report.productId,
-          'title': report.title,
-          'quantity': report.quantity,
-          'total': '0', // Non disponibile nel modello WooTopSellersReport
-        };
-      }).toList();
+      final ranked = byProduct.values.toList()
+        ..sort((a, b) {
+          final byQuantity = (b['quantity'] as int).compareTo(
+            a['quantity'] as int,
+          );
+          return byQuantity != 0
+              ? byQuantity
+              : (b['total'] as double).compareTo(a['total'] as double);
+        });
+      return ranked.take(limit).toList();
     } catch (e) {
       throw Exception('Top products load failed: $e');
     }
