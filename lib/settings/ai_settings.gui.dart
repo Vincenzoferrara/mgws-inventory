@@ -240,10 +240,11 @@ class _AISettingsTabState extends State<AISettingsTab> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: _activeProvider,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor:
+                            context.theme.colorScheme.surfaceContainerLowest,
                       ),
                       items: [
                         DropdownMenuItem(

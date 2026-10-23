@@ -233,7 +233,7 @@ class _CalDavLoginTabState extends State<CalDavLoginTab> {
                 onPressed: _isLoading ? null : _clearCredentials,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colors.errorColorStatus,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.colors.onColoredSurface,
                 ),
                 child: Text(context.l10n.caldavCancella),
               ),

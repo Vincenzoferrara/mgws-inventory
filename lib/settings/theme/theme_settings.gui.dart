@@ -424,7 +424,7 @@ class ThemeSettingsTab extends StatelessWidget {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: themeSettings.primaryColor,
-              child: const Icon(Icons.store, color: Colors.white),
+              child: Icon(Icons.store, color: context.colors.onColoredSurface),
             ),
             title: Text(
               context.l10n.settingsThemePreviewCard,

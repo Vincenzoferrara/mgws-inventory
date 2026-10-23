@@ -498,12 +498,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       onPressed: _isLoading ? null : _submitLogin,
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
-                                color: Colors.white,
+                                color: context.colors.onColoredSurface,
                               ),
                             )
                           : Text(context.l10n.loginAccedi),

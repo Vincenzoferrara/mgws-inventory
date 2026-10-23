@@ -91,7 +91,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
 
   Widget _buildManualFallback(String message) {
     return Container(
-      color: Colors.black87,
+      color: context.colors.cameraBackground.withValues(alpha: 0.87),
       padding: const EdgeInsets.all(24),
       child: Center(
         child: ConstrainedBox(
@@ -150,7 +150,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: context.colors.cameraBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -160,19 +160,25 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
               color: theme.primaryColor,
               child: Row(
                 children: [
-                  const Icon(Icons.qr_code_scanner, color: Colors.white),
+                  Icon(
+                    Icons.qr_code_scanner,
+                    color: context.colors.onColoredSurface,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       context.l10n.scannerTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
+                        color: context.colors.onColoredSurface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(
+                      Icons.close,
+                      color: context.colors.onColoredSurface,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -198,11 +204,11 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                           showToggleCamera: false,
                           showGallery: false,
                           showFlashlight: true,
-                          loading: const ColoredBox(
-                            color: Colors.black,
+                          loading: ColoredBox(
+                            color: context.colors.cameraBackground,
                             child: Center(
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: context.colors.onColoredSurface,
                               ),
                             ),
                           ),
@@ -212,6 +218,8 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                         CustomPaint(
                           painter: ScannerOverlayPainter(
                             primaryColor: theme.primaryColor,
+                            scrimColor: context.colors.cameraScrim,
+                            cornerColor: context.colors.successColor,
                           ),
                           child: Container(),
                         ),
@@ -219,7 +227,9 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                         // Indicatore stato
                         if (!_isScanning)
                           Container(
-                            color: Colors.black.withValues(alpha: 0.7),
+                            color: context.colors.cameraBackground.withValues(
+                              alpha: 0.7,
+                            ),
                             child: Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -233,7 +243,7 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
                                   Text(
                                     context.l10n.scannerCodeDetected,
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: context.colors.onColoredSurface,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -249,14 +259,19 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
             // Footer con controlli
             Container(
               padding: const EdgeInsets.all(16),
-              color: Colors.grey.shade900,
+              color: context.colors.cameraPanel,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Text(
                       context.l10n.scannerHint,
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: TextStyle(
+                        color: context.colors.onColoredSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                        fontSize: 14,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -273,8 +288,14 @@ class _BarcodeScannerDialogState extends State<BarcodeScannerDialog> {
 /// Painter per l'overlay dello scanner con area di scansione
 class ScannerOverlayPainter extends CustomPainter {
   final Color primaryColor;
+  final Color scrimColor;
+  final Color cornerColor;
 
-  ScannerOverlayPainter({required this.primaryColor});
+  ScannerOverlayPainter({
+    required this.primaryColor,
+    required this.scrimColor,
+    required this.cornerColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -295,10 +316,7 @@ class ScannerOverlayPainter extends CustomPainter {
       scanAreaPath,
     );
 
-    canvas.drawPath(
-      overlayPath,
-      Paint()..color = Colors.black.withValues(alpha: 0.6),
-    );
+    canvas.drawPath(overlayPath, Paint()..color = scrimColor);
 
     // Disegna il bordo dell'area di scansione
     final paint = Paint()
@@ -314,7 +332,7 @@ class ScannerOverlayPainter extends CustomPainter {
     // Disegna gli angoli
     const double cornerLength = 30;
     final cornerPaint = Paint()
-      ..color = AppTheme.successColor
+      ..color = cornerColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round;

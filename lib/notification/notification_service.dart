@@ -28,7 +28,7 @@ class NotificationService {
           content: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(style.icon, color: Colors.white),
+              Icon(style.icon, color: context.colors.onColoredSurface),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -40,14 +40,16 @@ class NotificationService {
                         children: [
                           TextSpan(
                             text: title,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: context.colors.onColoredSurface,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           TextSpan(
                             text: '\n$cleanMessage',
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: context.colors.onColoredSurface,
+                            ),
                           ),
                         ],
                       ),
@@ -60,7 +62,7 @@ class NotificationService {
           ),
           action: SnackBarAction(
             label: context.l10n.sharedCopia,
-            textColor: Colors.white,
+            textColor: context.colors.onColoredSurface,
             onPressed: () {
               Clipboard.setData(ClipboardData(text: cleanMessage));
             },
@@ -122,20 +124,20 @@ class NotificationService {
   }
 
   _MessageBarStyle _resolveStyle(BuildContext context, String type) {
-    final appColors = Theme.of(context).extension<AppColorExtension>();
+    final appColors = context.colors;
     final normalizedType = type.trim().toLowerCase();
 
     switch (normalizedType) {
       case 'successo':
         return _MessageBarStyle(
-          color: appColors?.successColor ?? Colors.green,
+          color: appColors.successColor,
           icon: Icons.check_circle,
           duration: const Duration(seconds: 4),
         );
       case 'warning':
       case 'partial':
         return _MessageBarStyle(
-          color: appColors?.warningColor ?? Colors.orange,
+          color: appColors.warningColor,
           icon: Icons.warning_amber_rounded,
           duration: const Duration(seconds: 6),
         );
@@ -148,7 +150,7 @@ class NotificationService {
       case 'errore':
       default:
         return _MessageBarStyle(
-          color: appColors?.errorColorStatus ?? Colors.red,
+          color: appColors.errorColorStatus,
           icon: Icons.error_outline,
           duration: const Duration(seconds: 6),
         );

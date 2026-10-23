@@ -2,6 +2,7 @@ import '../../l10n/error_text.dart';
 import 'package:flutter/material.dart';
 import 'smartcard_service.dart';
 import '../../l10n/extensions.dart';
+import '../../theme/theme.dart';
 import '../gui/login.code.dart';
 import '../../log_viewer/app_logger.dart';
 
@@ -94,7 +95,11 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Icon(Icons.credit_card_off, size: 48, color: Colors.grey),
+              Icon(
+                Icons.credit_card_off,
+                size: 48,
+                color: context.colors.neutralColor,
+              ),
               const SizedBox(height: 16),
               Text(
                 context.l10n.smartcardNonDisponibile,
@@ -137,7 +142,7 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
                       Text(
                         context.l10n.smartcardSottotitolo,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
+                          color: context.colors.neutralColor,
                         ),
                       ),
                     ],
@@ -196,17 +201,17 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: _statusMessage!.startsWith('✅')
-                      ? Colors.green.withValues(alpha: 0.1)
+                      ? context.colors.successColor.withValues(alpha: 0.1)
                       : _statusMessage!.startsWith('❌')
-                      ? Colors.red.withValues(alpha: 0.1)
-                      : Colors.blue.withValues(alpha: 0.1),
+                      ? context.colors.errorColorStatus.withValues(alpha: 0.1)
+                      : context.colors.infoColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: _statusMessage!.startsWith('✅')
-                        ? Colors.green
+                        ? context.colors.successColor
                         : _statusMessage!.startsWith('❌')
-                        ? Colors.red
-                        : Colors.blue,
+                        ? context.colors.errorColorStatus
+                        : context.colors.infoColor,
                   ),
                 ),
                 child: Row(
@@ -218,10 +223,10 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
                           ? Icons.error
                           : Icons.info,
                       color: _statusMessage!.startsWith('✅')
-                          ? Colors.green
+                          ? context.colors.successColor
                           : _statusMessage!.startsWith('❌')
-                          ? Colors.red
-                          : Colors.blue,
+                          ? context.colors.errorColorStatus
+                          : context.colors.infoColor,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -241,7 +246,7 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: context.colors.neutralColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -272,9 +277,13 @@ class _SmartcardLoginWidgetState extends State<SmartcardLoginWidget> {
       avatar: Icon(icon, size: 16),
       label: Text(label),
       backgroundColor: available
-          ? Colors.green.withValues(alpha: 0.2)
-          : Colors.grey.withValues(alpha: 0.2),
-      side: BorderSide(color: available ? Colors.green : Colors.grey),
+          ? context.colors.successColor.withValues(alpha: 0.2)
+          : context.colors.neutralColor.withValues(alpha: 0.2),
+      side: BorderSide(
+        color: available
+            ? context.colors.successColor
+            : context.colors.neutralColor,
+      ),
     );
   }
 }
