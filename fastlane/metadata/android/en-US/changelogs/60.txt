@@ -1,0 +1,5 @@
+- Add the F-Droid build recipe
+- Translate Italian ARB values left in English
+- Localize the remaining shared widgets and modules
+- Localize the login and API layer
+- Localize the customers and coupons modules
