@@ -26,7 +26,10 @@ WooCommerce shop, and what it unlocks when you also install the free
 - **Products**: create and edit products and variants, images, barcodes,
   prices and WooCommerce stock.
 - **Barcode and QR scanner** with the camera.
-- **Orders, customers and coupons.**
+- **Orders, customers and coupons.** Before shipping an order, press
+  **Verify products** and scan the barcode or QR code of each item: the
+  app confirms it is the right product, size and colour included, and
+  warns you when it does not match.
 - **Dashboard** with sales, products and orders figures, PDF and CSV
   exports.
 - **Calendars and contacts** on your CalDAV server.

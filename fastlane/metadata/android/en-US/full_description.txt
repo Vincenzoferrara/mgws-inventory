@@ -4,7 +4,7 @@
 <ul>
 <li>Products and variants: create, edit, images, barcodes, prices and stock</li>
 <li>Barcode and QR scanner with the camera</li>
-<li>Orders, customers and coupons</li>
+<li>Orders, customers and coupons; before shipping, scan the barcode or QR code of each item to check it is the right product</li>
 <li>Dashboard with sales, products and orders, PDF and CSV exports</li>
 <li>CalDAV calendars and contacts</li>
 <li>Optional AI help for product descriptions, with your own API key or a local Ollama server</li>
