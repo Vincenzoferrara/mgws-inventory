@@ -3,17 +3,17 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Colors.redAccent;
-  static const Color primaryColorDark = Color(0xFFD32F2F);
-  static const Color accentColor = Color(0xFFFF5722);
+  static const Color primaryColor = Color(0xFF1E88E5);
+  static const Color primaryColorDark = Color(0xFF1565C0);
+  static const Color accentColor = Color(0xFF29B6F6);
   static const Color backgroundColor = Color(0xFFFAFAFA);
   static const Color surfaceColor = Colors.white;
   static const Color errorColor = Color(0xFFB00020);
 
-  static const Color lightGradientStart = Color(0xFFFFEBEE);
+  static const Color lightGradientStart = Color(0xFFE3F2FD);
   static const Color lightGradientEnd = Color(0xFFFFFFFF);
   static const Color darkGradientStart = Color(0xFF121212);
-  static const Color darkGradientEnd = Color(0xFF1A0000);
+  static const Color darkGradientEnd = Color(0xFF0A1929);
 
   // Status colors (semantic)
   static const Color successColor = Color(0xFF4CAF50);
@@ -38,11 +38,11 @@ class AppTheme {
           cardIconColor: primaryColor,
           subtitleColor: Color(0xFF757575),
           fabGradientStart: primaryColor,
-          fabGradientEnd: Color(0xFFE53935),
+          fabGradientEnd: Color(0xFF1976D2),
           headerGradientStart: primaryColor,
-          headerGradientEnd: Color(0xFFE53935),
-          selectedCardBackground: Color(0xFFFFF3E0),
-          variantSelectedBackground: Color(0xFFFFEBEE),
+          headerGradientEnd: Color(0xFF1976D2),
+          selectedCardBackground: Color(0xFFE1F5FE),
+          variantSelectedBackground: Color(0xFFE3F2FD),
           priceBackground: Color(0xFFE8F5E8),
           stockAvailable: Color(0xFF4CAF50),
           stockUnavailable: Color(0xFFF44336),
@@ -56,7 +56,7 @@ class AppTheme {
           dividerColor: Color(0xFFE0E0E0),
           shadowColor: Color(0x1F000000),
           chipBackground: Color(0xFFF5F5F5),
-          chipSelectedBackground: Color(0xFFFFEBEE),
+          chipSelectedBackground: Color(0xFFE3F2FD),
           badgeBackground: primaryColor,
           overlayColor: Color(0x66000000),
           tierGold: Color(0xFFFFD700),
@@ -69,7 +69,7 @@ class AppTheme {
         AppAccentExtension.light,
       ],
 
-      primarySwatch: Colors.red,
+      primarySwatch: Colors.blue,
       primaryColor: primaryColor,
 
       appBarTheme: const AppBarTheme(
@@ -229,11 +229,11 @@ class AppTheme {
           cardIconColor: primaryColor,
           subtitleColor: Color(0xFFBDBDBD),
           fabGradientStart: primaryColor,
-          fabGradientEnd: Color(0xFFE53935),
+          fabGradientEnd: Color(0xFF1976D2),
           headerGradientStart: primaryColor,
-          headerGradientEnd: Color(0xFFE53935),
-          selectedCardBackground: Color(0xFF1A0000),
-          variantSelectedBackground: Color(0xFF2C1B1B),
+          headerGradientEnd: Color(0xFF1976D2),
+          selectedCardBackground: Color(0xFF0A1929),
+          variantSelectedBackground: Color(0xFF1B2533),
           priceBackground: Color(0xFF1B2A1B),
           stockAvailable: Color(0xFF4CAF50),
           stockUnavailable: Color(0xFFF44336),
@@ -247,7 +247,7 @@ class AppTheme {
           dividerColor: Color(0xFF3D3D3D),
           shadowColor: Color(0x33000000),
           chipBackground: Color(0xFF3D3D3D),
-          chipSelectedBackground: Color(0xFF4A2C2C),
+          chipSelectedBackground: Color(0xFF243447),
           badgeBackground: primaryColor,
           overlayColor: Color(0x80000000),
           tierGold: Color(0xFFFFD700),
@@ -260,7 +260,7 @@ class AppTheme {
         AppAccentExtension.dark,
       ],
 
-      primarySwatch: Colors.red,
+      primarySwatch: Colors.blue,
       primaryColor: primaryColor,
 
       appBarTheme: const AppBarTheme(
@@ -651,7 +651,7 @@ class AppAccentExtension extends ThemeExtension<AppAccentExtension> {
 
   static const AppAccentExtension light = AppAccentExtension(
     cassa: Color(0xFF2E7D32),
-    prodotti: Color(0xFF1565C0),
+    prodotti: Color(0xFF3949AB),
     inventario: AppTheme.primaryColor,
     nuovoProdotto: Color(0xFF6A1B9A),
     coupon: Color(0xFFEF6C00),
@@ -672,7 +672,7 @@ class AppAccentExtension extends ThemeExtension<AppAccentExtension> {
   /// fondi scuri.
   static const AppAccentExtension dark = AppAccentExtension(
     cassa: Color(0xFF66BB6A),
-    prodotti: Color(0xFF64B5F6),
+    prodotti: Color(0xFF9FA8DA),
     inventario: AppTheme.primaryColor,
     nuovoProdotto: Color(0xFFCE93D8),
     coupon: Color(0xFFFFB74D),
