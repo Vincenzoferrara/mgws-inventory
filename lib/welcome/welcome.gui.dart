@@ -72,8 +72,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    // `introduction_screen` draws its Scaffold and buttons with the standalone
+    // `material_ui` package, which never sees this app's Theme and falls back
+    // to the default purple palette. Background and button labels are passed
+    // explicitly so the flow follows the chosen colour and light/dark mode.
+    final buttonLabel = TextStyle(
+      color: theme.colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    );
 
     return IntroductionScreen(
+      globalBackgroundColor: theme.scaffoldBackgroundColor,
       // The two configurable pages are custom widgets, so every page is a raw
       // page: the package accepts either a list of PageViewModel or a list of
       // widgets, never a mix.
@@ -88,10 +97,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       // carries Skip on page one and Back afterwards.
       showSkipButton: true,
       showBackButton: true,
-      skip: Text(l10n.welcomeSkip),
-      back: Text(l10n.welcomeBack),
-      next: Text(l10n.welcomeNext),
-      done: Text(l10n.welcomeStart),
+      skip: Text(l10n.welcomeSkip, style: buttonLabel),
+      back: Text(l10n.welcomeBack, style: buttonLabel),
+      next: Text(l10n.welcomeNext, style: buttonLabel),
+      done: Text(l10n.welcomeStart, style: buttonLabel),
 
       // The package exposes one semantic label per action, so every action of
       // the flow is announced with a sentence instead of the bare label.
