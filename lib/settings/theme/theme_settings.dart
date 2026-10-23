@@ -176,7 +176,7 @@ class ThemeSettings extends ChangeNotifier {
 
     return base.copyWith(
       primaryColor: _primaryColor,
-      colorScheme: base.colorScheme.copyWith(primary: _primaryColor),
+      colorScheme: AppTheme.colorSchemeFor(_primaryColor, base.brightness),
       appBarTheme: base.appBarTheme.copyWith(backgroundColor: _primaryColor),
       // Aggiorna InputDecorationTheme con il nuovo colore primario
       inputDecorationTheme: base.inputDecorationTheme.copyWith(
@@ -206,7 +206,7 @@ class ThemeSettings extends ChangeNotifier {
 
     return base.copyWith(
       primaryColor: _primaryColor,
-      colorScheme: base.colorScheme.copyWith(primary: _primaryColor),
+      colorScheme: AppTheme.colorSchemeFor(_primaryColor, base.brightness),
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: _primaryColor.withValues(alpha: 0.9),
       ),

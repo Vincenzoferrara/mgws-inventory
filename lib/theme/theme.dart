@@ -20,15 +20,29 @@ class AppTheme {
   static const Color warningColor = Color(0xFFFF9800);
   static const Color errorColorSemantic = Color(0xFFF44336);
 
+  /// Schema colori Material 3 generato dal colore del brand.
+  ///
+  /// La variante predefinita di `ColorScheme.fromSeed` (tonalSpot) desatura il
+  /// seme: con #1E88E5 il `primary` diventava un blu-grigio (#39608F) e
+  /// `secondary`/`surfaceTint` tendevano al grigio, per cui header e app bar
+  /// che leggono lo schema non mostravano il colore scelto. `fidelity` resta
+  /// fedele alla tinta del seme e `primary` viene fissato sul seme stesso.
+  /// Usato anche da `ThemeSettings` quando l'utente sceglie un altro colore.
+  static ColorScheme colorSchemeFor(Color seed, Brightness brightness) {
+    return ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+      primary: seed,
+    );
+  }
+
   // ✅ TEMA LIGHT CORRETTO
   static ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light,
 
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        brightness: Brightness.light,
-      ),
+      colorScheme: colorSchemeFor(primaryColor, Brightness.light),
 
       // ✅ IMPORTANTE: Registra SEMPRE l'estensione
       extensions: <ThemeExtension<dynamic>>[
@@ -63,10 +77,17 @@ class AppTheme {
           tierSilver: Color(0xFFC0C0C0),
           tierBronze: Color(0xFFCD7F32),
           tierPlatinum: Color(0xFFE5E4E2),
+          onColoredSurface: Colors.white,
+          pdfExport: Color(0xFFF44336),
+          spreadsheetExport: Color(0xFF4CAF50),
+          cameraBackground: Colors.black,
+          cameraScrim: Color(0x99000000),
+          cameraPanel: Color(0xFF212121),
         ),
         const AppShapeExtension(),
         const AppSpacingExtension(),
         AppAccentExtension.light,
+        AppChartExtension.light,
       ],
 
       primarySwatch: Colors.blue,
@@ -216,10 +237,7 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
 
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
-        brightness: Brightness.dark,
-      ),
+      colorScheme: colorSchemeFor(primaryColor, Brightness.dark),
 
       // ✅ IMPORTANTE: Registra SEMPRE l'estensione
       extensions: <ThemeExtension<dynamic>>[
@@ -254,10 +272,17 @@ class AppTheme {
           tierSilver: Color(0xFFC0C0C0),
           tierBronze: Color(0xFFCD7F32),
           tierPlatinum: Color(0xFFE5E4E2),
+          onColoredSurface: Colors.white,
+          pdfExport: Color(0xFFF44336),
+          spreadsheetExport: Color(0xFF4CAF50),
+          cameraBackground: Colors.black,
+          cameraScrim: Color(0x99000000),
+          cameraPanel: Color(0xFF212121),
         ),
         const AppShapeExtension(),
         const AppSpacingExtension(),
         AppAccentExtension.dark,
+        AppChartExtension.dark,
       ],
 
       primarySwatch: Colors.blue,
@@ -421,6 +446,12 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
     required this.tierSilver,
     required this.tierBronze,
     required this.tierPlatinum,
+    required this.onColoredSurface,
+    required this.pdfExport,
+    required this.spreadsheetExport,
+    required this.cameraBackground,
+    required this.cameraScrim,
+    required this.cameraPanel,
   });
 
   final Color gradientStart;
@@ -454,6 +485,19 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
   final Color tierBronze;
   final Color tierPlatinum;
 
+  /// Testo e icone sopra fondi saturi: header a gradiente, banner di stato,
+  /// badge. Resta chiaro anche in dark mode perche' il fondo resta saturo.
+  final Color onColoredSurface;
+
+  /// Colori identificativi dei formati di esportazione.
+  final Color pdfExport;
+  final Color spreadsheetExport;
+
+  /// Superfici della vista fotocamera, scure in entrambi i temi.
+  final Color cameraBackground;
+  final Color cameraScrim;
+  final Color cameraPanel;
+
   @override
   AppColorExtension copyWith({
     Color? gradientStart,
@@ -486,6 +530,12 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
     Color? tierSilver,
     Color? tierBronze,
     Color? tierPlatinum,
+    Color? onColoredSurface,
+    Color? pdfExport,
+    Color? spreadsheetExport,
+    Color? cameraBackground,
+    Color? cameraScrim,
+    Color? cameraPanel,
   }) {
     return AppColorExtension(
       gradientStart: gradientStart ?? this.gradientStart,
@@ -522,6 +572,12 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
       tierSilver: tierSilver ?? this.tierSilver,
       tierBronze: tierBronze ?? this.tierBronze,
       tierPlatinum: tierPlatinum ?? this.tierPlatinum,
+      onColoredSurface: onColoredSurface ?? this.onColoredSurface,
+      pdfExport: pdfExport ?? this.pdfExport,
+      spreadsheetExport: spreadsheetExport ?? this.spreadsheetExport,
+      cameraBackground: cameraBackground ?? this.cameraBackground,
+      cameraScrim: cameraScrim ?? this.cameraScrim,
+      cameraPanel: cameraPanel ?? this.cameraPanel,
     );
   }
 
@@ -601,6 +657,24 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
       tierSilver: Color.lerp(tierSilver, other.tierSilver, t)!,
       tierBronze: Color.lerp(tierBronze, other.tierBronze, t)!,
       tierPlatinum: Color.lerp(tierPlatinum, other.tierPlatinum, t)!,
+      onColoredSurface: Color.lerp(
+        onColoredSurface,
+        other.onColoredSurface,
+        t,
+      )!,
+      pdfExport: Color.lerp(pdfExport, other.pdfExport, t)!,
+      spreadsheetExport: Color.lerp(
+        spreadsheetExport,
+        other.spreadsheetExport,
+        t,
+      )!,
+      cameraBackground: Color.lerp(
+        cameraBackground,
+        other.cameraBackground,
+        t,
+      )!,
+      cameraScrim: Color.lerp(cameraScrim, other.cameraScrim, t)!,
+      cameraPanel: Color.lerp(cameraPanel, other.cameraPanel, t)!,
     );
   }
 }
@@ -748,6 +822,161 @@ class AppAccentExtension extends ThemeExtension<AppAccentExtension> {
       caldav: Color.lerp(caldav, other.caldav, t)!,
       dipendenti: Color.lerp(dipendenti, other.dipendenti, t)!,
       rfid: Color.lerp(rfid, other.rfid, t)!,
+    );
+  }
+}
+
+/// Palette dei grafici della dashboard.
+///
+/// Le tinte di serie e categoriali sono validate per contrasto e daltonismo su
+/// fondi chiari e scuri; i colori di stato (good/warning/critical) sono
+/// riservati agli indicatori e accompagnati sempre da un'icona. Il tooltip dei
+/// grafici resta scuro in entrambi i temi.
+@immutable
+class AppChartExtension extends ThemeExtension<AppChartExtension> {
+  const AppChartExtension({
+    required this.series,
+    required this.categorical,
+    required this.good,
+    required this.warning,
+    required this.critical,
+    required this.deltaUp,
+    required this.deltaDown,
+    required this.tooltipBackground,
+    required this.tooltipText,
+    required this.tooltipMutedText,
+    required this.tooltipValue,
+    required this.tooltipHighlight,
+  });
+
+  final Color series;
+  final List<Color> categorical;
+  final Color good;
+  final Color warning;
+  final Color critical;
+  final Color deltaUp;
+  final Color deltaDown;
+  final Color tooltipBackground;
+  final Color tooltipText;
+  final Color tooltipMutedText;
+
+  /// Valore principale nel tooltip (es. importo venduto).
+  final Color tooltipValue;
+
+  /// Valore secondario evidenziato nel tooltip.
+  final Color tooltipHighlight;
+
+  static const AppChartExtension light = AppChartExtension(
+    series: Color(0xFF2A78D6),
+    categorical: [
+      Color(0xFF2A78D6),
+      Color(0xFFEB6834),
+      Color(0xFF1BAF7A),
+      Color(0xFFEDA100),
+      Color(0xFFE87BA4),
+      Color(0xFF008300),
+      Color(0xFF6250D6),
+    ],
+    good: Color(0xFF0CA30C),
+    warning: Color(0xFFC98500),
+    critical: Color(0xFFD03B3B),
+    deltaUp: Color(0xFF006300),
+    deltaDown: Color(0xFFD03B3B),
+    tooltipBackground: Color(0xDD000000),
+    tooltipText: Colors.white,
+    tooltipMutedText: Color(0xB3FFFFFF),
+    tooltipValue: Color(0xFF69F0AE),
+    tooltipHighlight: Color(0xFF40C4FF),
+  );
+
+  static const AppChartExtension dark = AppChartExtension(
+    series: Color(0xFF3987E5),
+    categorical: [
+      Color(0xFF3987E5),
+      Color(0xFFD95926),
+      Color(0xFF199E70),
+      Color(0xFFC98500),
+      Color(0xFFD55181),
+      Color(0xFF008300),
+      Color(0xFF9085E9),
+    ],
+    good: Color(0xFF0CA30C),
+    warning: Color(0xFFFAB219),
+    critical: Color(0xFFD03B3B),
+    deltaUp: Color(0xFF0CA30C),
+    deltaDown: Color(0xFFE66767),
+    tooltipBackground: Color(0xDD000000),
+    tooltipText: Colors.white,
+    tooltipMutedText: Color(0xB3FFFFFF),
+    tooltipValue: Color(0xFF69F0AE),
+    tooltipHighlight: Color(0xFF40C4FF),
+  );
+
+  @override
+  AppChartExtension copyWith({
+    Color? series,
+    List<Color>? categorical,
+    Color? good,
+    Color? warning,
+    Color? critical,
+    Color? deltaUp,
+    Color? deltaDown,
+    Color? tooltipBackground,
+    Color? tooltipText,
+    Color? tooltipMutedText,
+    Color? tooltipValue,
+    Color? tooltipHighlight,
+  }) {
+    return AppChartExtension(
+      series: series ?? this.series,
+      categorical: categorical ?? this.categorical,
+      good: good ?? this.good,
+      warning: warning ?? this.warning,
+      critical: critical ?? this.critical,
+      deltaUp: deltaUp ?? this.deltaUp,
+      deltaDown: deltaDown ?? this.deltaDown,
+      tooltipBackground: tooltipBackground ?? this.tooltipBackground,
+      tooltipText: tooltipText ?? this.tooltipText,
+      tooltipMutedText: tooltipMutedText ?? this.tooltipMutedText,
+      tooltipValue: tooltipValue ?? this.tooltipValue,
+      tooltipHighlight: tooltipHighlight ?? this.tooltipHighlight,
+    );
+  }
+
+  @override
+  AppChartExtension lerp(ThemeExtension<AppChartExtension>? other, double t) {
+    if (other is! AppChartExtension) return this;
+    return AppChartExtension(
+      series: Color.lerp(series, other.series, t)!,
+      // Le liste hanno la stessa lunghezza in entrambi i temi.
+      categorical: [
+        for (var i = 0; i < categorical.length; i++)
+          i < other.categorical.length
+              ? Color.lerp(categorical[i], other.categorical[i], t)!
+              : categorical[i],
+      ],
+      good: Color.lerp(good, other.good, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      critical: Color.lerp(critical, other.critical, t)!,
+      deltaUp: Color.lerp(deltaUp, other.deltaUp, t)!,
+      deltaDown: Color.lerp(deltaDown, other.deltaDown, t)!,
+      tooltipBackground: Color.lerp(
+        tooltipBackground,
+        other.tooltipBackground,
+        t,
+      )!,
+      tooltipText: Color.lerp(tooltipText, other.tooltipText, t)!,
+      tooltipMutedText: Color.lerp(
+        tooltipMutedText,
+        other.tooltipMutedText,
+        t,
+      )!,
+      tooltipValue: Color.lerp(tooltipValue, other.tooltipValue, t)!,
+      tooltipHighlight: Color.lerp(
+        tooltipHighlight,
+        other.tooltipHighlight,
+        t,
+      )!,
     );
   }
 }
@@ -930,6 +1159,15 @@ extension AppThemeContext on BuildContext {
         (theme.brightness == Brightness.dark
             ? AppAccentExtension.dark
             : AppAccentExtension.light);
+  }
+
+  /// Palette dei grafici della dashboard.
+  AppChartExtension get charts {
+    final theme = Theme.of(this);
+    return theme.extension<AppChartExtension>() ??
+        (theme.brightness == Brightness.dark
+            ? AppChartExtension.dark
+            : AppChartExtension.light);
   }
 
   TextTheme get text => Theme.of(this).textTheme;
