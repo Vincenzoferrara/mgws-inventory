@@ -25,9 +25,20 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
   late final TextEditingController _altriChiudiController;
   late final TextEditingController _notaChiudiController;
 
+  /// Turno della cassa, letto dallo storico locale.
+  ///
+  /// Nessun widget sopra le Impostazioni fornisce la [CassaController] della
+  /// pagina Cassa: cercarla con Provider lanciava "Provider not found" appena
+  /// la scheda veniva costruita. Lo storico vive in SharedPreferences, quindi
+  /// un controller proprio vede lo stesso turno.
+  final CassaController _cassa = CassaController();
+
   @override
   void initState() {
     super.initState();
+    _cassa.storicoStore.init().then((_) {
+      if (mounted) setState(() {});
+    });
     _cassaController = TextEditingController(text: cassaSettings.nomeCassa);
     _posIdentifierController = TextEditingController(
       text: cassaSettings.posIdentifier,
@@ -81,7 +92,7 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
   /// L'app invia solo i valori contati; il server calcola i totali attesi
   /// dagli ordini collegati allo shift e restituisce eventuali differenze.
   Future<void> _chiudiTurnoMGWS(BuildContext context) async {
-    if (!context.read<CassaController>().hasTurnoAperto) {
+    if (!_cassa.hasTurnoAperto) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.cassaErrorNoOpenShift)),
       );
@@ -92,13 +103,15 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
     final carta = double.tryParse(_cartaChiudiController.text) ?? 0;
     final nota = _notaChiudiController.text.trim();
 
-    final esito = await context.read<CassaController>().chiudiTurno(
+    final esito = await _cassa.chiudiTurno(
       contanteContato: contante,
       cartaContato: carta,
       causaleDifferenza: nota.isEmpty ? null : nota,
       note: nota.isEmpty ? null : nota,
     );
 
+    if (!mounted) return;
+    setState(() {});
     if (esito.ok) {
       // Reset dei campi dopo chiusura riuscita
       _cassaChiudiController.text = '';
@@ -427,6 +440,5 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
     );
   }
 
-  // Helper per accedere allo stato turno dalla controller
-  bool get hasTurnoAperto => context.watch<CassaController>().hasTurnoAperto;
+  bool get hasTurnoAperto => _cassa.hasTurnoAperto;
 }
