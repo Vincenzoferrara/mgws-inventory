@@ -643,8 +643,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                context.colors.headerGradientStart,
+                context.colors.headerGradientEnd,
               ],
             ),
           ),

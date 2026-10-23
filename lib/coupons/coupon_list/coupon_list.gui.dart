@@ -22,8 +22,8 @@ class CouponStatsCompact extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              theme.primaryColor.withValues(alpha: 0.8),
-              theme.primaryColor,
+              context.colors.headerGradientStart,
+              context.colors.headerGradientEnd,
             ],
           ),
           borderRadius: context.shapes.m,

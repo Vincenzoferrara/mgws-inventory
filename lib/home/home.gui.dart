@@ -541,8 +541,8 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                  context.colors.headerGradientStart,
+                  context.colors.headerGradientEnd,
                 ],
               ),
             ),
@@ -1182,10 +1182,8 @@ class _HomeLandingPage extends StatelessWidget {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    colorScheme.primary,
-                                    colorScheme.tertiary.withValues(
-                                      alpha: 0.86,
-                                    ),
+                                    context.colors.headerGradientStart,
+                                    context.colors.headerGradientEnd,
                                   ],
                                 ),
                                 boxShadow: [

@@ -308,8 +308,8 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            theme.primaryColor,
-            theme.primaryColor.withValues(alpha: 0.8),
+            context.colors.headerGradientStart,
+            context.colors.headerGradientEnd,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
