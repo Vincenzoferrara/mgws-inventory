@@ -404,9 +404,12 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
+        // No fixed height: the Column below fills the height the Dialog
+        // allows, so the whole form shows on tall screens and scrolls only
+        // when the window is really short.
+        insetPadding: const EdgeInsets.all(24),
         child: Container(
-          width: 500,
-          height: 600,
+          width: 520,
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
