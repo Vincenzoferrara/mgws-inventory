@@ -122,18 +122,17 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final small = constraints.maxWidth < 800;
-        return Card(
-          key: const ValueKey('inventory-suppliers-panel'),
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: small ? _mobile() : _desktop(),
-        );
-      },
+    // Il pannello e' una sezione intera della home: come le altre pagine sta
+    // sullo sfondo del tema, non dentro una Card che ne prenderebbe il grigio.
+    return Scaffold(
+      key: const ValueKey('inventory-suppliers-panel'),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final small = constraints.maxWidth < 800;
+          return small ? _mobile() : _desktop();
+        },
+      ),
     );
   }
 
