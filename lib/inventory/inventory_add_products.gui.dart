@@ -19,6 +19,7 @@ import '../settings/inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 import 'inventory_add_products.code.dart';
+import 'inventory_move.code.dart';
 import 'inventory_product_section.gui.dart';
 import 'inventory_quick_load.code.dart';
 import 'inventory_quick_load_catalog.code.dart';
@@ -410,6 +411,16 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     final confirmed = await showInventoryAddProductsConfirmDialog(
       context: context,
       plan: plan,
+      places: InventoryLocationDirectory(
+        warehouses: [
+          for (final warehouse in _warehouses)
+            InventoryPlace(
+              id: warehouse.id,
+              name: warehouse.name,
+              siteId: warehouse.siteId,
+            ),
+        ],
+      ),
     );
     if (confirmed != true || !mounted) return;
     final feedback = await _controller.submit(context.l10n, plan);
@@ -1096,6 +1107,7 @@ class _ValidatedCheckbox extends StatelessWidget {
 Future<bool?> showInventoryAddProductsConfirmDialog({
   required BuildContext context,
   required InventoryAddProductsPlan plan,
+  InventoryLocationDirectory places = InventoryLocationDirectory.empty,
 }) {
   final listHeight = (plan.lineCount * 56.0).clamp(56.0, 260.0);
   return showDialog<bool>(
@@ -1125,7 +1137,7 @@ Future<bool?> showInventoryAddProductsConfirmDialog({
             if (plan.warehouseId != null || (plan.room ?? '').isNotEmpty)
               Text(
                 '${context.l10n.inventoryEtichettaPosizione} '
-                '${[if (plan.warehouseId != null) '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}', if ((plan.room ?? '').isNotEmpty) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
+                '${[if (plan.warehouseId != null) places.warehouseLabel(context.l10n, plan.warehouseId!), if ((plan.room ?? '').isNotEmpty) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
               ),
             if (plan.note.trim().isNotEmpty)
               Text('${context.l10n.inventoryLabelDettagli}: ${plan.note}'),

@@ -68,6 +68,7 @@ Future<bool?> showInventoryQuickLoadConfirmDialog({
 Future<bool?> showInventoryQuickLoadBatchConfirmDialog({
   required BuildContext context,
   required InventoryQuickLoadSubmissionPlan plan,
+  InventoryLocationDirectory places = InventoryLocationDirectory.empty,
 }) {
   final listHeight = (plan.lines.length * 56.0).clamp(56.0, 280.0);
   return showDialog<bool>(
@@ -93,7 +94,7 @@ Future<bool?> showInventoryQuickLoadBatchConfirmDialog({
             if (plan.warehouseId != null || plan.room != null)
               Text(
                 '${context.l10n.inventoryEtichettaPosizioneCondivisa} '
-                '${[if (plan.warehouseId != null) '${context.l10n.inventoryAbbreviazioneMagazzino} ${plan.warehouseId}', if (plan.room != null) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
+                '${[if (plan.warehouseId != null) places.warehouseLabel(context.l10n, plan.warehouseId!), if (plan.room != null) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
               ),
             if ((plan.note ?? '').isNotEmpty)
               Text('${context.l10n.inventoryEtichettaNota}: ${plan.note}'),
