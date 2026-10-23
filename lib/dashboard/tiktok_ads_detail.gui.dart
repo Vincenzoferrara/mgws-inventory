@@ -176,7 +176,9 @@ class _TikTokAdsDetailPageState extends State<TikTokAdsDetailPage> {
                         backgroundColor: context.colors.neutralColor,
                         child: Text(
                           '${index + 1}',
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: context.colors.onColoredSurface,
+                          ),
                         ),
                       ),
                       title: Text(

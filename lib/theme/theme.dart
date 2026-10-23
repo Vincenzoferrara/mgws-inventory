@@ -847,6 +847,14 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
     required this.tooltipMutedText,
     required this.tooltipValue,
     required this.tooltipHighlight,
+    required this.palette,
+    required this.orderPending,
+    required this.orderProcessing,
+    required this.orderCompleted,
+    required this.orderOnHold,
+    required this.orderCancelled,
+    required this.orderRefunded,
+    required this.orderFailed,
   });
 
   final Color series;
@@ -865,6 +873,30 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
 
   /// Valore secondario evidenziato nel tooltip.
   final Color tooltipHighlight;
+
+  /// Colori a rotazione per i grafici dei report (barre, fette senza stato).
+  final List<Color> palette;
+
+  /// Colori degli stati ordine WooCommerce nei grafici.
+  final Color orderPending;
+  final Color orderProcessing;
+  final Color orderCompleted;
+  final Color orderOnHold;
+  final Color orderCancelled;
+  final Color orderRefunded;
+  final Color orderFailed;
+
+  /// Colore dello stato ordine WooCommerce, `null` se lo stato non e' noto.
+  Color? orderStatus(String status) => switch (status) {
+    'pending' => orderPending,
+    'processing' => orderProcessing,
+    'completed' => orderCompleted,
+    'on-hold' => orderOnHold,
+    'cancelled' => orderCancelled,
+    'refunded' => orderRefunded,
+    'failed' => orderFailed,
+    _ => null,
+  };
 
   static const AppChartExtension light = AppChartExtension(
     series: Color(0xFF2A78D6),
@@ -887,6 +919,23 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
     tooltipMutedText: Color(0xB3FFFFFF),
     tooltipValue: Color(0xFF69F0AE),
     tooltipHighlight: Color(0xFF40C4FF),
+    palette: [
+      Color(0xFF2196F3),
+      Color(0xFFF44336),
+      Color(0xFF4CAF50),
+      Color(0xFFFF9800),
+      Color(0xFF9C27B0),
+      Color(0xFF00BCD4),
+      Color(0xFFFFEB3B),
+      Color(0xFF795548),
+    ],
+    orderPending: Color(0xFFFF9800),
+    orderProcessing: Color(0xFF00BCD4),
+    orderCompleted: Color(0xFF4CAF50),
+    orderOnHold: Color(0xFFFFEB3B),
+    orderCancelled: Color(0xFFF44336),
+    orderRefunded: Color(0xFF9C27B0),
+    orderFailed: Color(0xFF795548),
   );
 
   static const AppChartExtension dark = AppChartExtension(
@@ -910,6 +959,23 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
     tooltipMutedText: Color(0xB3FFFFFF),
     tooltipValue: Color(0xFF69F0AE),
     tooltipHighlight: Color(0xFF40C4FF),
+    palette: [
+      Color(0xFF2196F3),
+      Color(0xFFF44336),
+      Color(0xFF4CAF50),
+      Color(0xFFFF9800),
+      Color(0xFF9C27B0),
+      Color(0xFF00BCD4),
+      Color(0xFFFFEB3B),
+      Color(0xFF795548),
+    ],
+    orderPending: Color(0xFFFF9800),
+    orderProcessing: Color(0xFF00BCD4),
+    orderCompleted: Color(0xFF4CAF50),
+    orderOnHold: Color(0xFFFFEB3B),
+    orderCancelled: Color(0xFFF44336),
+    orderRefunded: Color(0xFF9C27B0),
+    orderFailed: Color(0xFF795548),
   );
 
   @override
@@ -926,6 +992,14 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
     Color? tooltipMutedText,
     Color? tooltipValue,
     Color? tooltipHighlight,
+    List<Color>? palette,
+    Color? orderPending,
+    Color? orderProcessing,
+    Color? orderCompleted,
+    Color? orderOnHold,
+    Color? orderCancelled,
+    Color? orderRefunded,
+    Color? orderFailed,
   }) {
     return AppChartExtension(
       series: series ?? this.series,
@@ -940,6 +1014,14 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
       tooltipMutedText: tooltipMutedText ?? this.tooltipMutedText,
       tooltipValue: tooltipValue ?? this.tooltipValue,
       tooltipHighlight: tooltipHighlight ?? this.tooltipHighlight,
+      palette: palette ?? this.palette,
+      orderPending: orderPending ?? this.orderPending,
+      orderProcessing: orderProcessing ?? this.orderProcessing,
+      orderCompleted: orderCompleted ?? this.orderCompleted,
+      orderOnHold: orderOnHold ?? this.orderOnHold,
+      orderCancelled: orderCancelled ?? this.orderCancelled,
+      orderRefunded: orderRefunded ?? this.orderRefunded,
+      orderFailed: orderFailed ?? this.orderFailed,
     );
   }
 
@@ -948,13 +1030,7 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
     if (other is! AppChartExtension) return this;
     return AppChartExtension(
       series: Color.lerp(series, other.series, t)!,
-      // Le liste hanno la stessa lunghezza in entrambi i temi.
-      categorical: [
-        for (var i = 0; i < categorical.length; i++)
-          i < other.categorical.length
-              ? Color.lerp(categorical[i], other.categorical[i], t)!
-              : categorical[i],
-      ],
+      categorical: _lerpList(categorical, other.categorical, t),
       good: Color.lerp(good, other.good, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
       critical: Color.lerp(critical, other.critical, t)!,
@@ -977,8 +1053,23 @@ class AppChartExtension extends ThemeExtension<AppChartExtension> {
         other.tooltipHighlight,
         t,
       )!,
+      palette: _lerpList(palette, other.palette, t),
+      orderPending: Color.lerp(orderPending, other.orderPending, t)!,
+      orderProcessing: Color.lerp(orderProcessing, other.orderProcessing, t)!,
+      orderCompleted: Color.lerp(orderCompleted, other.orderCompleted, t)!,
+      orderOnHold: Color.lerp(orderOnHold, other.orderOnHold, t)!,
+      orderCancelled: Color.lerp(orderCancelled, other.orderCancelled, t)!,
+      orderRefunded: Color.lerp(orderRefunded, other.orderRefunded, t)!,
+      orderFailed: Color.lerp(orderFailed, other.orderFailed, t)!,
     );
   }
+
+  /// Le liste hanno la stessa lunghezza in entrambi i temi; se differissero,
+  /// i colori in eccesso restano quelli di partenza.
+  static List<Color> _lerpList(List<Color> a, List<Color> b, double t) => [
+    for (var i = 0; i < a.length; i++)
+      i < b.length ? Color.lerp(a[i], b[i], t)! : a[i],
+  ];
 }
 
 /// Raggi di arrotondamento centralizzati.

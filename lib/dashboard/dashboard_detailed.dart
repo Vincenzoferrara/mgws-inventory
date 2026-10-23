@@ -13,6 +13,7 @@ import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
 import '../l10n/localized_text.dart';
 import '../log_viewer/app_logger.dart';
 import '../l10n/extensions.dart';
+import '../theme/theme.dart';
 
 // =======================================================
 // ==        REPORT TOP PRODOTTI DETTAGLIATO            ==
@@ -101,11 +102,15 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: context.colors.errorColorStatus.withValues(alpha: 0.7),
+            ),
             const SizedBox(height: 16),
             Text(
               _errorMessage!(context.l10n),
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: context.colors.errorColorStatus),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -137,11 +142,13 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
             Container(
               height: 400,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.theme.colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: context.theme.colorScheme.shadow.withValues(
+                      alpha: 0.05,
+                    ),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -185,7 +192,10 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
                 ),
                 Text(
                   '${ReportFormatter.formatDateFull(widget.periodo.dataInizio)} - ${ReportFormatter.formatDateFull(widget.periodo.dataFine)}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.subtitleColor,
+                  ),
                 ),
               ],
             ),
@@ -236,8 +246,8 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
               child: Center(
                 child: Text(
                   '#$position',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colors.onColoredSurface,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -266,13 +276,13 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
                         context.l10n.dashboardQuantitaUnita(
                           '${product.quantitaVenduta}',
                         ),
-                        ReportColors.info,
+                        context.colors.infoColor,
                       ),
                       const SizedBox(width: 16),
                       _buildProductMetric(
                         Icons.attach_money,
                         ReportFormatter.formatCurrency(product.prezzoMedio),
-                        ReportColors.success,
+                        context.colors.successColor,
                       ),
                     ],
                   ),
@@ -286,14 +296,17 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
               children: [
                 Text(
                   context.l10n.commonTotal,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.neutralColor,
+                  ),
                 ),
                 Text(
                   ReportFormatter.formatCurrency(product.totaleVendite),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(ReportColors.primary),
+                    color: context.theme.colorScheme.primary,
                   ),
                 ),
               ],
@@ -304,10 +317,10 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
     );
   }
 
-  Widget _buildProductMetric(IconData icon, String value, int colorValue) {
+  Widget _buildProductMetric(IconData icon, String value, Color accent) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Color(colorValue)),
+        Icon(icon, size: 16, color: accent),
         const SizedBox(width: 4),
         Text(value, style: const TextStyle(fontSize: 12)),
       ],
@@ -315,10 +328,10 @@ class _TopProductsReportPageState extends State<TopProductsReportPage> {
   }
 
   Color _getPositionColor(int position) {
-    if (position == 1) return const Color(0xFFFFD700); // Oro
-    if (position == 2) return const Color(0xFFC0C0C0); // Argento
-    if (position == 3) return const Color(0xFFCD7F32); // Bronzo
-    return Color(ReportColors.primary);
+    if (position == 1) return context.colors.tierGold; // Oro
+    if (position == 2) return context.colors.tierSilver; // Argento
+    if (position == 3) return context.colors.tierBronze; // Bronzo
+    return context.theme.colorScheme.primary;
   }
 }
 
@@ -411,11 +424,15 @@ class _PerformanceTimelineReportPageState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: context.colors.errorColorStatus.withValues(alpha: 0.7),
+            ),
             const SizedBox(height: 16),
             Text(
               _errorMessage!(context.l10n),
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: context.colors.errorColorStatus),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -447,11 +464,13 @@ class _PerformanceTimelineReportPageState
             Container(
               height: 350,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.theme.colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: context.theme.colorScheme.shadow.withValues(
+                      alpha: 0.05,
+                    ),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -462,7 +481,7 @@ class _PerformanceTimelineReportPageState
                 child: SalesLineChart(
                   vendite: _reportVendite!.vendite.andamentoGiornaliero,
                   title: context.l10n.dashboardAndamentoVendite,
-                  lineColor: Color(ReportColors.primary),
+                  lineColor: context.theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -472,11 +491,13 @@ class _PerformanceTimelineReportPageState
             Container(
               height: 300,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.theme.colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: context.theme.colorScheme.shadow.withValues(
+                      alpha: 0.05,
+                    ),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -509,7 +530,7 @@ class _PerformanceTimelineReportPageState
             context.l10n.dashboardExportTotalSales,
             ReportFormatter.formatCurrency(vendite.totaleVendite),
             Icons.euro,
-            ReportColors.primary,
+            context.theme.colorScheme.primary,
           ),
         ),
         const SizedBox(width: 12),
@@ -518,7 +539,7 @@ class _PerformanceTimelineReportPageState
             context.l10n.dashboardExportTotalOrders,
             vendite.numeroOrdini.toString(),
             Icons.shopping_cart,
-            ReportColors.info,
+            context.colors.infoColor,
           ),
         ),
         const SizedBox(width: 12),
@@ -527,7 +548,7 @@ class _PerformanceTimelineReportPageState
             context.l10n.dashboardExportAverageTicket,
             ReportFormatter.formatCurrency(vendite.ticketMedio),
             Icons.receipt,
-            ReportColors.success,
+            context.colors.successColor,
           ),
         ),
       ],
@@ -538,7 +559,7 @@ class _PerformanceTimelineReportPageState
     String label,
     String value,
     IconData icon,
-    int colorValue,
+    Color accent,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -547,14 +568,14 @@ class _PerformanceTimelineReportPageState
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(colorValue).withValues(alpha: 0.1),
-            Color(colorValue).withValues(alpha: 0.05),
+            accent.withValues(alpha: 0.1),
+            accent.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Color(colorValue).withValues(alpha: 0.2),
+            color: accent.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -562,11 +583,14 @@ class _PerformanceTimelineReportPageState
       ),
       child: Column(
         children: [
-          Icon(icon, color: Color(colorValue), size: 32),
+          Icon(icon, color: accent, size: 32),
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+            style: TextStyle(
+              fontSize: 12,
+              color: context.colors.onSurfaceVariantColor,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
@@ -575,7 +599,7 @@ class _PerformanceTimelineReportPageState
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(colorValue),
+              color: accent,
             ),
             textAlign: TextAlign.center,
           ),
@@ -643,7 +667,13 @@ class _PerformanceTimelineReportPageState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.colors.onSurfaceVariantColor,
+            ),
+          ),
           Text(
             value,
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -743,11 +773,15 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: context.colors.errorColorStatus.withValues(alpha: 0.7),
+            ),
             const SizedBox(height: 16),
             Text(
               _errorMessage!(context.l10n),
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: context.colors.errorColorStatus),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -775,11 +809,13 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
             Container(
               height: 350,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.theme.colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: context.theme.colorScheme.shadow.withValues(
+                      alpha: 0.05,
+                    ),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -841,7 +877,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
                           (index) => Icon(
                             index < stars ? Icons.star : Icons.star_border,
                             size: 14,
-                            color: Colors.amber,
+                            color: context.colors.tierGold,
                           ),
                         ),
                       ),
@@ -849,9 +885,9 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
                     Expanded(
                       child: LinearProgressIndicator(
                         value: percentage / 100,
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: context.colors.chipBackground,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Color(ReportColors.warning),
+                          context.colors.warningColor,
                         ),
                       ),
                     ),
@@ -894,7 +930,10 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
                 ),
                 Text(
                   context.l10n.dashboardTotalValue(totalOrders),
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.colors.subtitleColor,
+                  ),
                 ),
               ],
             ),
@@ -953,7 +992,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
           const SizedBox(height: 4),
           LinearProgressIndicator(
             value: percentage / 100,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: context.colors.chipBackground,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ],
@@ -965,15 +1004,7 @@ class _OrdersDetailedReportPageState extends State<OrdersDetailedReportPage> {
       dashboardOrderStatusLabel(context.l10n, status);
 
   Color _getStatusColor(String status) {
-    const colors = {
-      'pending': 0xFFFF9800,
-      'processing': 0xFF00BCD4,
-      'completed': 0xFF4CAF50,
-      'on-hold': 0xFFFFEB3B,
-      'cancelled': 0xFFF44336,
-      'refunded': 0xFF9C27B0,
-      'failed': 0xFF795548,
-    };
-    return Color(colors[status] ?? ReportColors.primary);
+    return context.charts.orderStatus(status) ??
+        context.theme.colorScheme.primary;
   }
 }

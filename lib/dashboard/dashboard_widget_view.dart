@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/extensions.dart';
+import '../theme/theme.dart';
 import 'dashboard.code.dart';
 import 'dashboard_layout.dart';
 import 'dashboard_report.dart';
@@ -49,38 +50,19 @@ class DashboardPalette {
 
   static DashboardPalette of(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    final series = dark ? const Color(0xFF3987E5) : const Color(0xFF2A78D6);
+    final charts = context.charts;
     return DashboardPalette._(
-      series: series,
-      seriesWash: series.withValues(alpha: .12),
-      categorical: dark
-          ? const [
-              Color(0xFF3987E5),
-              Color(0xFFD95926),
-              Color(0xFF199E70),
-              Color(0xFFC98500),
-              Color(0xFFD55181),
-              Color(0xFF008300),
-              Color(0xFF9085E9),
-            ]
-          : const [
-              Color(0xFF2A78D6),
-              Color(0xFFEB6834),
-              Color(0xFF1BAF7A),
-              Color(0xFFEDA100),
-              Color(0xFFE87BA4),
-              Color(0xFF008300),
-              Color(0xFF6250D6),
-            ],
+      series: charts.series,
+      seriesWash: charts.series.withValues(alpha: .12),
+      categorical: charts.categorical,
       other: theme.colorScheme.outline,
       grid: theme.colorScheme.outlineVariant.withValues(alpha: .5),
       baseline: theme.colorScheme.outlineVariant,
-      good: const Color(0xFF0CA30C),
-      warning: dark ? const Color(0xFFFAB219) : const Color(0xFFC98500),
-      critical: const Color(0xFFD03B3B),
-      deltaUp: dark ? const Color(0xFF0CA30C) : const Color(0xFF006300),
-      deltaDown: dark ? const Color(0xFFE66767) : const Color(0xFFD03B3B),
+      good: charts.good,
+      warning: charts.warning,
+      critical: charts.critical,
+      deltaUp: charts.deltaUp,
+      deltaDown: charts.deltaDown,
     );
   }
 }

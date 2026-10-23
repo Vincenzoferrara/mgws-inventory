@@ -464,14 +464,14 @@ class _DashboardPageState extends State<DashboardPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(ReportColors.primary).withValues(alpha: 0.15),
-            Color(ReportColors.primary).withValues(alpha: 0.05),
+            context.theme.colorScheme.primary.withValues(alpha: 0.15),
+            context.theme.colorScheme.primary.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Color(ReportColors.primary).withValues(alpha: 0.15),
+            color: context.theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -490,21 +490,21 @@ class _DashboardPageState extends State<DashboardPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Color(ReportColors.primary),
+                      color: context.theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Color(
-                            ReportColors.primary,
-                          ).withValues(alpha: 0.3),
+                          color: context.theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.euro,
-                      color: Colors.white,
+                      color: context.colors.onColoredSurface,
                       size: 24,
                     ),
                   ),
@@ -523,10 +523,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
-                  color: Color(ReportColors.primary),
+                  color: context.theme.colorScheme.primary,
                   shadows: [
                     Shadow(
-                      color: Color(ReportColors.primary).withValues(alpha: 0.2),
+                      color: context.theme.colorScheme.primary.withValues(
+                        alpha: 0.2,
+                      ),
                       blurRadius: 8,
                     ),
                   ],
@@ -542,7 +544,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       'Ordini',
                       vendite.numeroOrdini.toString(),
                       Icons.shopping_cart,
-                      ReportColors.info,
+                      context.colors.infoColor,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -551,7 +553,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       'Ticket Medio',
                       ReportFormatter.formatCurrency(vendite.ticketMedio),
                       Icons.receipt,
-                      ReportColors.success,
+                      context.colors.successColor,
                     ),
                   ),
                 ],
@@ -565,15 +567,15 @@ class _DashboardPageState extends State<DashboardPage> {
                   decoration: BoxDecoration(
                     color:
                         (vendite.isInCrescita
-                                ? Color(ReportColors.success)
-                                : Color(ReportColors.danger))
+                                ? context.colors.successColor
+                                : context.colors.errorColorStatus)
                             .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color:
                           (vendite.isInCrescita
-                                  ? Color(ReportColors.success)
-                                  : Color(ReportColors.danger))
+                                  ? context.colors.successColor
+                                  : context.colors.errorColorStatus)
                               .withValues(alpha: 0.3),
                       width: 1,
                     ),
@@ -585,8 +587,8 @@ class _DashboardPageState extends State<DashboardPage> {
                             ? Icons.trending_up
                             : Icons.trending_down,
                         color: vendite.isInCrescita
-                            ? Color(ReportColors.success)
-                            : Color(ReportColors.danger),
+                            ? context.colors.successColor
+                            : context.colors.errorColorStatus,
                         size: 24,
                       ),
                       const SizedBox(width: 8),
@@ -594,8 +596,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         vendite.variazioneFormatted,
                         style: TextStyle(
                           color: vendite.isInCrescita
-                              ? Color(ReportColors.success)
-                              : Color(ReportColors.danger),
+                              ? context.colors.successColor
+                              : context.colors.errorColorStatus,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -632,7 +634,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.inventory_2, color: Color(ReportColors.info)),
+                Icon(Icons.inventory_2, color: context.colors.infoColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Prodotti',
@@ -652,14 +654,14 @@ class _DashboardPageState extends State<DashboardPage> {
               'In Stock',
               prodotti.prodottiInStock.toString(),
               Icons.check_circle,
-              color: ReportColors.success,
+              color: context.colors.successColor,
             ),
             const SizedBox(height: 8),
             _buildMetric(
               'Esauriti',
               prodotti.prodottiOutOfStock.toString(),
               Icons.warning,
-              color: ReportColors.danger,
+              color: context.colors.errorColorStatus,
             ),
 
             if (prodotti.hasAllarmeStock) ...[
@@ -667,14 +669,14 @@ class _DashboardPageState extends State<DashboardPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Color(ReportColors.warning).withValues(alpha: 0.1),
+                  color: context.colors.warningColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.warning_amber,
-                      color: Color(ReportColors.warning),
+                      color: context.colors.warningColor,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -705,7 +707,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.receipt_long, color: Color(ReportColors.success)),
+                Icon(Icons.receipt_long, color: context.colors.successColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Ordini',
@@ -725,14 +727,14 @@ class _DashboardPageState extends State<DashboardPage> {
               'Completati',
               ordini.ordiniCompletati.toString(),
               Icons.check,
-              color: ReportColors.success,
+              color: context.colors.successColor,
             ),
             const SizedBox(height: 8),
             _buildMetric(
               'In elaborazione',
               ordini.ordiniInElaborazione.toString(),
               Icons.hourglass_empty,
-              color: ReportColors.info,
+              color: context.colors.infoColor,
             ),
 
             if (ordini.ordiniDaGestire > 0) ...[
@@ -740,12 +742,12 @@ class _DashboardPageState extends State<DashboardPage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Color(ReportColors.info).withValues(alpha: 0.1),
+                  color: context.colors.infoColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info, color: Color(ReportColors.info), size: 20),
+                    Icon(Icons.info, color: context.colors.infoColor, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -774,7 +776,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.people, color: Color(ReportColors.primary)),
+                Icon(Icons.people, color: context.theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 const Text(
                   'Clienti',
@@ -798,7 +800,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     'Nuovi',
                     clienti.nuoviClienti.toString(),
                     Icons.person_add,
-                    color: ReportColors.success,
+                    color: context.colors.successColor,
                   ),
                 ),
                 Expanded(
@@ -835,20 +837,21 @@ class _DashboardPageState extends State<DashboardPage> {
         child: SalesLineChart(
           vendite: _dashboard!.vendite.andamentoGiornaliero,
           title: context.l10n.dashboardAndamentoVendite,
-          lineColor: Color(ReportColors.primary),
+          lineColor: context.theme.colorScheme.primary,
         ),
       ),
     );
   }
 
-  Widget _buildMetric(String label, String value, IconData icon, {int? color}) {
+  Widget _buildMetric(
+    String label,
+    String value,
+    IconData icon, {
+    Color? color,
+  }) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: color != null ? Color(color) : context.colors.subtitleColor,
-        ),
+        Icon(icon, size: 16, color: color ?? context.colors.subtitleColor),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -874,7 +877,7 @@ class _DashboardPageState extends State<DashboardPage> {
     String label,
     String value,
     IconData icon,
-    int colorValue,
+    Color accent,
   ) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -894,10 +897,10 @@ class _DashboardPageState extends State<DashboardPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Color(colorValue).withValues(alpha: 0.1),
+              color: accent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 20, color: Color(colorValue)),
+            child: Icon(icon, size: 20, color: accent),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -939,7 +942,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Top Prodotti',
                 'Analizza i prodotti più venduti',
                 Icons.star,
-                ReportColors.warning,
+                context.colors.warningColor,
                 () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -955,7 +958,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Performance',
                 'Analisi temporale vendite',
                 Icons.trending_up,
-                ReportColors.success,
+                context.colors.successColor,
                 () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -975,7 +978,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Analisi Ordini',
                 'Distribuzione e statistiche',
                 Icons.assessment,
-                ReportColors.info,
+                context.colors.infoColor,
                 () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -990,7 +993,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 'Export Report',
                 'Esporta dati in CSV/PDF',
                 Icons.file_download,
-                ReportColors.primary,
+                context.theme.colorScheme.primary,
                 _generateReport,
               ),
             ),
@@ -1004,7 +1007,7 @@ class _DashboardPageState extends State<DashboardPage> {
     String title,
     String subtitle,
     IconData icon,
-    int colorValue,
+    Color accent,
     VoidCallback onTap,
   ) {
     return InkWell(
@@ -1017,18 +1020,15 @@ class _DashboardPageState extends State<DashboardPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(colorValue).withValues(alpha: 0.1),
-              Color(colorValue).withValues(alpha: 0.05),
+              accent.withValues(alpha: 0.1),
+              accent.withValues(alpha: 0.05),
             ],
           ),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Color(colorValue).withValues(alpha: 0.3),
-            width: 1,
-          ),
+          border: Border.all(color: accent.withValues(alpha: 0.3), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Color(colorValue).withValues(alpha: 0.1),
+              color: accent.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -1042,24 +1042,24 @@ class _DashboardPageState extends State<DashboardPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Color(colorValue),
+                    color: accent,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(colorValue).withValues(alpha: 0.3),
+                        color: accent.withValues(alpha: 0.3),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: Icon(icon, color: Colors.white, size: 24),
+                  child: Icon(
+                    icon,
+                    color: context.colors.onColoredSurface,
+                    size: 24,
+                  ),
                 ),
                 const Spacer(),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: Color(colorValue),
-                ),
+                Icon(Icons.arrow_forward_ios, size: 16, color: accent),
               ],
             ),
             const SizedBox(height: 12),

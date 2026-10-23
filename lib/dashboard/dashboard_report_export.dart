@@ -13,6 +13,7 @@ import 'dashboard.code.dart';
 import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
 import '../log_viewer/app_logger.dart';
 import '../l10n/extensions.dart';
+import '../theme/theme.dart';
 
 /// Contratto per l'export dei report dashboard
 abstract interface class DashboardExportGateway {
@@ -98,10 +99,10 @@ class DashboardExportChoice {
     };
   }
 
-  Color get color {
+  Color color(AppColorExtension colors) {
     return switch (format) {
-      DashboardExportFormat.csv => Colors.green,
-      DashboardExportFormat.pdf => Colors.red,
+      DashboardExportFormat.csv => colors.spreadsheetExport,
+      DashboardExportFormat.pdf => colors.pdfExport,
     };
   }
 }
@@ -733,7 +734,7 @@ class ExportDialog extends StatelessWidget {
           const SizedBox(height: 12),
           for (final choice in DashboardExportChoice.values)
             ListTile(
-              leading: Icon(choice.icon, color: choice.color),
+              leading: Icon(choice.icon, color: choice.color(context.colors)),
               title: Text(choice.title(context.l10n)),
               subtitle: Text(choice.subtitle(context.l10n)),
               onTap: () => Navigator.pop(context, choice),

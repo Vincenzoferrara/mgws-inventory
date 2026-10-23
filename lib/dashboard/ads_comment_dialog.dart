@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../notification/notification_service.dart';
 import 'ads_comment_manager.dart';
 import '../l10n/extensions.dart';
+import '../theme/theme.dart';
 
 /// Dialog per aggiungere o modificare un commento su un'inserzione
 class AdsCommentDialog extends StatefulWidget {
@@ -103,7 +104,9 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colors.errorColorStatus,
+            ),
             child: Text(context.l10n.commonDelete),
           ),
         ],
@@ -160,7 +163,7 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
           Text(
             widget.adTitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey,
+              color: context.colors.neutralColor,
               fontWeight: FontWeight.normal,
             ),
           ),
@@ -187,17 +190,17 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
             if (widget.existingComment != null) ...[
               Text(
                 'Creato: ${_formatDate(widget.existingComment!.timestamp)}',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.colors.neutralColor,
+                ),
               ),
               if (widget.existingComment!.timestamp !=
                   widget.existingComment!.lastModified)
                 Text(
                   'Ultima modifica: ${_formatDate(widget.existingComment!.lastModified)}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: context.colors.neutralColor,
+                  ),
                 ),
             ],
           ],
@@ -207,10 +210,10 @@ class _AdsCommentDialogState extends State<AdsCommentDialog> {
         if (widget.existingComment != null)
           TextButton.icon(
             onPressed: _isSaving ? null : _deleteComment,
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: Icon(Icons.delete, color: context.colors.errorColorStatus),
             label: Text(
               context.l10n.commonDelete,
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: context.colors.errorColorStatus),
             ),
           ),
         const Spacer(),

@@ -9,6 +9,7 @@ import 'dashboard.code.dart';
 import 'class_report.dart';
 import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
 import '../l10n/extensions.dart';
+import '../theme/theme.dart';
 
 // =======================================================
 // ==         GRAFICO A LINEE - VENDITE NEL TEMPO       ==
@@ -127,15 +128,16 @@ class _SalesLineChartState extends State<SalesLineChart>
                     });
                   },
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (touchedSpot) => Colors.black87,
+                    getTooltipColor: (touchedSpot) =>
+                        context.charts.tooltipBackground,
                     //tooltipRoundedRadius: 8,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         final vendita = widget.vendite[spot.spotIndex];
                         return LineTooltipItem(
                           '${ReportFormatter.formatDate(vendita.data)}\n',
-                          const TextStyle(
-                            color: Colors.white,
+                          TextStyle(
+                            color: context.charts.tooltipText,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -144,8 +146,8 @@ class _SalesLineChartState extends State<SalesLineChart>
                               text: ReportFormatter.formatCurrency(
                                 vendita.totale,
                               ),
-                              style: const TextStyle(
-                                color: Colors.greenAccent,
+                              style: TextStyle(
+                                color: context.charts.tooltipValue,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -153,8 +155,8 @@ class _SalesLineChartState extends State<SalesLineChart>
                             TextSpan(
                               text:
                                   '\n${context.l10n.dashboardOrdersCount(vendita.ordini)}',
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: context.charts.tooltipMutedText,
                                 fontSize: 11,
                               ),
                             ),
@@ -171,14 +173,14 @@ class _SalesLineChartState extends State<SalesLineChart>
                   verticalInterval: 1,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.withValues(alpha: 0.2),
+                      color: context.colors.neutralColor.withValues(alpha: 0.2),
                       strokeWidth: 1,
                       dashArray: [5, 5],
                     );
                   },
                   getDrawingVerticalLine: (value) {
                     return FlLine(
-                      color: Colors.grey.withValues(alpha: 0.1),
+                      color: context.colors.neutralColor.withValues(alpha: 0.1),
                       strokeWidth: 1,
                     );
                   },
@@ -192,7 +194,7 @@ class _SalesLineChartState extends State<SalesLineChart>
                         return Text(
                           ReportFormatter.formatCurrencyCompact(value),
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: context.colors.subtitleColor,
                             fontSize: 10,
                           ),
                         );
@@ -214,7 +216,7 @@ class _SalesLineChartState extends State<SalesLineChart>
                                 widget.vendite[index].data,
                               ),
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: context.colors.subtitleColor,
                                 fontSize: 10,
                               ),
                             ),
@@ -234,8 +236,14 @@ class _SalesLineChartState extends State<SalesLineChart>
                 borderData: FlBorderData(
                   show: true,
                   border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-                    left: BorderSide(color: Colors.grey.shade300, width: 1),
+                    bottom: BorderSide(
+                      color: context.colors.dividerColor,
+                      width: 1,
+                    ),
+                    left: BorderSide(
+                      color: context.colors.dividerColor,
+                      width: 1,
+                    ),
                   ),
                 ),
                 minY: minY,
@@ -252,7 +260,7 @@ class _SalesLineChartState extends State<SalesLineChart>
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
                           radius: _touchedIndex == index ? 6 : 4,
-                          color: Colors.white,
+                          color: context.charts.tooltipText,
                           strokeWidth: _touchedIndex == index ? 3 : 2,
                           strokeColor: lineColor,
                         );
@@ -430,15 +438,16 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                         });
                       },
                       touchTooltipData: BarTouchTooltipData(
-                        getTooltipColor: (group) => Colors.black87,
+                        getTooltipColor: (group) =>
+                            context.charts.tooltipBackground,
                         //tooltipRoundedRadius: 8,
                         tooltipPadding: const EdgeInsets.all(8),
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           final product = products[groupIndex];
                           return BarTooltipItem(
                             '${product.titolo}\n',
-                            const TextStyle(
-                              color: Colors.white,
+                            TextStyle(
+                              color: context.charts.tooltipText,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -447,8 +456,8 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                                 text: ReportFormatter.formatCurrency(
                                   product.totaleVendite,
                                 ),
-                                style: const TextStyle(
-                                  color: Colors.greenAccent,
+                                style: TextStyle(
+                                  color: context.charts.tooltipValue,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -456,8 +465,8 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                               TextSpan(
                                 text:
                                     '\n${context.l10n.dashboardQuantitaUnita('${product.quantitaVenduta}')}',
-                                style: const TextStyle(
-                                  color: Colors.white70,
+                                style: TextStyle(
+                                  color: context.charts.tooltipMutedText,
                                   fontSize: 11,
                                 ),
                               ),
@@ -485,7 +494,7 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                                 child: Text(
                                   label,
                                   style: TextStyle(
-                                    color: Colors.grey[700],
+                                    color: context.colors.onSurfaceVariantColor,
                                     fontSize: 10,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -507,7 +516,7 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                             return Text(
                               ReportFormatter.formatCurrencyCompact(value),
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: context.colors.subtitleColor,
                                 fontSize: 10,
                               ),
                             );
@@ -525,10 +534,13 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                       show: true,
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey.shade300,
+                          color: context.colors.dividerColor,
                           width: 1,
                         ),
-                        left: BorderSide(color: Colors.grey.shade300, width: 1),
+                        left: BorderSide(
+                          color: context.colors.dividerColor,
+                          width: 1,
+                        ),
                       ),
                     ),
                     gridData: FlGridData(
@@ -539,7 +551,9 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
                       ),
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: context.colors.neutralColor.withValues(
+                            alpha: 0.2,
+                          ),
                           strokeWidth: 1,
                           dashArray: [5, 5],
                         );
@@ -575,7 +589,7 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
             backDrawRodData: BackgroundBarChartRodData(
               show: true,
               toY: product.totaleVendite,
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: context.colors.neutralColor.withValues(alpha: 0.1),
             ),
           ),
         ],
@@ -584,8 +598,8 @@ class _TopProductsBarChartState extends State<TopProductsBarChart>
   }
 
   Color _getBarColor(int index, bool isTouched) {
-    final colors = ReportColors.chartColors;
-    final baseColor = Color(colors[index % colors.length]);
+    final colors = context.charts.palette;
+    final baseColor = colors[index % colors.length];
     return isTouched ? baseColor : baseColor.withValues(alpha: 0.85);
   }
 
@@ -622,16 +636,6 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
   late AnimationController _animationController;
   late Animation<double> _animation;
   int _touchedIndex = -1;
-
-  static const _statusColors = {
-    'pending': 0xFFFF9800,
-    'processing': 0xFF00BCD4,
-    'completed': 0xFF4CAF50,
-    'on-hold': 0xFFFFEB3B,
-    'cancelled': 0xFFF44336,
-    'refunded': 0xFF9C27B0,
-    'failed': 0xFF795548,
-  };
 
   @override
   void initState() {
@@ -745,10 +749,10 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
       final percentage = (entry.value / total) * 100;
       final animatedPercentage = percentage * progress;
 
-      final color = Color(
-        _statusColors[entry.key] ??
-            ReportColors.chartColors[index % ReportColors.chartColors.length],
-      );
+      final palette = context.charts.palette;
+      final color =
+          context.charts.orderStatus(entry.key) ??
+          palette[index % palette.length];
 
       final section = PieChartSectionData(
         value: entry.value.toDouble(),
@@ -758,8 +762,13 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
         titleStyle: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
-          shadows: const [Shadow(color: Colors.black26, blurRadius: 2)],
+          color: context.charts.tooltipText,
+          shadows: [
+            Shadow(
+              color: context.theme.colorScheme.shadow.withValues(alpha: 0.26),
+              blurRadius: 2,
+            ),
+          ],
         ),
       );
 
@@ -772,7 +781,9 @@ class _OrderStatusPieChartState extends State<OrderStatusPieChart>
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: widget.ordersByStatus.entries.map((entry) {
-        final color = Color(_statusColors[entry.key] ?? ReportColors.primary);
+        final color =
+            context.charts.orderStatus(entry.key) ??
+            context.theme.colorScheme.primary;
         final label = dashboardOrderStatusLabel(context.l10n, entry.key);
 
         return Padding(
@@ -905,14 +916,15 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                         });
                       },
                       touchTooltipData: BarTouchTooltipData(
-                        getTooltipColor: (group) => Colors.black87,
+                        getTooltipColor: (group) =>
+                            context.charts.tooltipBackground,
                         //tooltipRoundedRadius: 8,
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           final vendita = widget.vendite[groupIndex];
                           return BarTooltipItem(
                             '${ReportFormatter.formatDate(vendita.data)}\n',
-                            const TextStyle(
-                              color: Colors.white,
+                            TextStyle(
+                              color: context.charts.tooltipText,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -921,8 +933,8 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                                 text: context.l10n.dashboardOrdersCount(
                                   vendita.ordini,
                                 ),
-                                style: const TextStyle(
-                                  color: Colors.lightBlueAccent,
+                                style: TextStyle(
+                                  color: context.charts.tooltipHighlight,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -948,7 +960,7 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                                     widget.vendite[index].data,
                                   ),
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color: context.colors.subtitleColor,
                                     fontSize: 10,
                                   ),
                                 ),
@@ -966,7 +978,7 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                             return Text(
                               value.toInt().toString(),
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: context.colors.subtitleColor,
                                 fontSize: 10,
                               ),
                             );
@@ -984,10 +996,13 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                       show: true,
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey.shade300,
+                          color: context.colors.dividerColor,
                           width: 1,
                         ),
-                        left: BorderSide(color: Colors.grey.shade300, width: 1),
+                        left: BorderSide(
+                          color: context.colors.dividerColor,
+                          width: 1,
+                        ),
                       ),
                     ),
                     gridData: FlGridData(
@@ -995,7 +1010,9 @@ class _OrdersBarChartState extends State<OrdersBarChart>
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: context.colors.neutralColor.withValues(
+                            alpha: 0.2,
+                          ),
                           strokeWidth: 1,
                           dashArray: [5, 5],
                         );
@@ -1025,7 +1042,7 @@ class _OrdersBarChartState extends State<OrdersBarChart>
 
       // Calcola l'intensità del colore in base al numero di ordini
       final intensity = maxOrders > 0 ? vendita.ordini / maxOrders : 0.5;
-      final baseColor = Color(ReportColors.info);
+      final baseColor = context.colors.infoColor;
       final color = Color.lerp(
         baseColor.withValues(alpha: 0.4),
         baseColor,

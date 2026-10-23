@@ -1001,36 +1001,3 @@ class ReportFormatter {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
-
-/// Colori per i report
-class ReportColors {
-  // Colori principali
-  static const primary = 0xFF2196F3;
-  static const success = 0xFF4CAF50;
-  static const warning = 0xFFFF9800;
-  static const danger = 0xFFF44336;
-  static const info = 0xFF00BCD4;
-
-  // Colori per trend
-  static const trendUp = success;
-  static const trendDown = danger;
-  static const trendStable = 0xFF9E9E9E;
-
-  // Colori per stati ordine
-  static const statusPending = warning;
-  static const statusProcessing = info;
-  static const statusCompleted = success;
-  static const statusCancelled = danger;
-
-  // Colori per grafici
-  static const chartColors = [
-    0xFF2196F3,
-    0xFFF44336,
-    0xFF4CAF50,
-    0xFFFF9800,
-    0xFF9C27B0,
-    0xFF00BCD4,
-    0xFFFFEB3B,
-    0xFF795548,
-  ];
-}
