@@ -1132,17 +1132,43 @@ class WooQueryProdotti {
     final barcodeNormalizzato = barcodeInterno.trim();
     if (barcodeNormalizzato.isEmpty) return null;
 
-    final products = await getProducts(
-      perPage: 5,
-      includeAllStatus: true,
-      filters: ProductFilters(barcodeInterno: barcodeNormalizzato),
+    // La ricerca per global_unique_id restituisce anche le varianti come
+    // righe a se', con il loro id e `parent_id`. Chi chiede un barcode vuole
+    // il prodotto a cui appartiene: per una variante e' il padre, e la
+    // variante si ritrova fra le sue. Restituire la variante come prodotto
+    // farebbe viaggiare l'id della variante dove serve quello del padre
+    // (MGWS risponde 404 a /inventory/stock/product/{idVariante}).
+    final response = await _woo.dio.get(
+      '/products',
+      queryParameters: {
+        'per_page': 5,
+        'search': barcodeNormalizzato,
+        'search_fields': ['global_unique_id'],
+      },
     );
+    final items = response.data;
+    if (items is! List) return null;
 
-    for (final product in products) {
-      if ((product.id ?? 0) == excludeProductId) continue;
-      if ((product.barcodeInterno ?? '').trim().toLowerCase() ==
-          barcodeNormalizzato.toLowerCase()) {
-        return product;
+    for (final item in items.whereType<Map<String, dynamic>>()) {
+      final barcode = (item['global_unique_id'] ?? '').toString().trim();
+      if (barcode.toLowerCase() != barcodeNormalizzato.toLowerCase()) continue;
+      final parentId = (item['parent_id'] as num?)?.toInt() ?? 0;
+      final isVariation = item['type'] == 'variation' && parentId > 0;
+      final productId = isVariation
+          ? parentId
+          : (item['id'] as num?)?.toInt() ?? 0;
+      if (productId == excludeProductId) continue;
+      if (isVariation) return getProductById(parentId);
+      try {
+        return convert_wooproduct_To_ProdottoGlobal(
+          WooProduct.fromJson(item),
+          productData: item,
+        );
+      } catch (e) {
+        log.e(
+          '❌ Errore conversione prodotto da barcode $barcodeNormalizzato',
+          e,
+        );
       }
     }
 
