@@ -48,7 +48,7 @@
   "@commonNoData": {
     "description": "Mostrato quando una lista e vuota"
   },
-  "commonYes": "Si",
+  "commonYes": "Sì",
   "@commonYes": {
     "description": "Pulsante di risposta affermativa"
   },

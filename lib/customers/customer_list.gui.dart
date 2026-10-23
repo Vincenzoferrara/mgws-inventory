@@ -456,7 +456,9 @@ class _ClienteDettagli extends StatelessWidget {
               _buildInfoRow(
                 context,
                 context.l10n.customersPaying,
-                cliente.isPayingCustomer == true ? 'Sì' : 'No',
+                cliente.isPayingCustomer == true
+                    ? context.l10n.commonYes
+                    : context.l10n.commonNo,
               ),
               _buildInfoRow(
                 context,
