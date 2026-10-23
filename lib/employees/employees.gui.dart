@@ -22,7 +22,16 @@ class _DipendentiGuiState extends State<DipendentiGui> {
   @override
   void initState() {
     super.initState();
+    // La sede di un dipendente e' quella in uso del suo utente WordPress: se
+    // l'utente collegato la cambia, la sua riga in elenco va riletta.
+    QueryMgwsSite.changes.addListener(_service.loadDipendenti);
     _service.loadDipendenti();
+  }
+
+  @override
+  void dispose() {
+    QueryMgwsSite.changes.removeListener(_service.loadDipendenti);
+    super.dispose();
   }
 
   @override
@@ -346,6 +355,9 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
   void initState() {
     super.initState();
     _wpUserIdController.addListener(() => setState(() {}));
+    // Chi non gestisce le sedi vede solo quella in uso: se cambia, il menu
+    // proporrebbe quella di prima.
+    QueryMgwsSite.changes.addListener(_caricaSedi);
     _caricaSedi();
     if (widget.isEdit && widget.dipendente != null) {
       if (widget.dipendente!.siteId > 0) {
@@ -366,6 +378,7 @@ class _DipendenteFormScreenState extends State<DipendenteFormScreen> {
 
   @override
   void dispose() {
+    QueryMgwsSite.changes.removeListener(_caricaSedi);
     _nomeController.dispose();
     _cognomeController.dispose();
     _emailController.dispose();

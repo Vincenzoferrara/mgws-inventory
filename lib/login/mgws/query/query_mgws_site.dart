@@ -1,5 +1,6 @@
 import '../../../l10n/known_messages.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import 'query_mgws_base.dart';
 
@@ -83,10 +84,22 @@ class QueryMgwsSite {
 
   static const String _meSite = '/wp-json/mgws/v1/me/site';
 
+  /// Cresce ogni volta che la sede in uso cambia da questa app.
+  ///
+  /// La sede vive sul server, ma ogni schermata la legge una volta e la tiene:
+  /// chi la mostra (Inventario, Impostazioni, Dipendenti) ascolta questo
+  /// valore e la rilegge, cosi' nessuna resta sulla sede di prima.
+  static final ValueNotifier<int> changes = ValueNotifier<int>(0);
+
   Future<MgwsSiteStatus> getMySite() => _status(() => _base.get(_meSite));
 
-  Future<MgwsSiteStatus> setMySite(int siteId) =>
-      _status(() => _base.put(_meSite, data: {'site_id': siteId}));
+  Future<MgwsSiteStatus> setMySite(int siteId) async {
+    final status = await _status(
+      () => _base.put(_meSite, data: {'site_id': siteId}),
+    );
+    changes.value++;
+    return status;
+  }
 
   Future<MgwsSite> createSite(String name) async {
     try {
@@ -98,6 +111,9 @@ class QueryMgwsSite {
       if (site == null) {
         throw const MgwsSiteException(AppMessages.invalidServerResponse);
       }
+      // La prima sede del negozio diventa quella di tutti: chi la mostrava
+      // vuota deve rileggerla.
+      changes.value++;
       return site;
     } on DioException catch (e) {
       throw MgwsSiteException(_message(e));

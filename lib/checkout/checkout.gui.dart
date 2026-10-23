@@ -14,6 +14,7 @@ import '../reuse_class/barcode/barcode_scanner.dart';
 import '../reuse_class/image_url_resolver.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../settings/checkout_settings.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 
 class CassaPage extends StatefulWidget {
   const CassaPage({super.key});
@@ -34,6 +35,7 @@ class CassaPageState extends State<CassaPage>
   @override
   void initState() {
     super.initState();
+    QueryMgwsSite.changes.addListener(_aggiornaSede);
     _initContestoCassa();
   }
 
@@ -41,6 +43,13 @@ class CassaPageState extends State<CassaPage>
     await cassaSettings.init();
     await _controller.storicoStore.init();
     await _controller.risolviOperatoreDaLogin();
+    await _controller.aggiornaSedeMgws();
+    if (mounted) setState(() {});
+  }
+
+  /// La sede in uso e' cambiata altrove (Impostazioni, Inventario).
+  Future<void> _aggiornaSede() async {
+    await _controller.aggiornaSedeMgws();
     if (mounted) setState(() {});
   }
 
@@ -252,6 +261,7 @@ class CassaPageState extends State<CassaPage>
 
   @override
   void dispose() {
+    QueryMgwsSite.changes.removeListener(_aggiornaSede);
     _searchController.dispose();
     super.dispose();
   }
@@ -393,7 +403,7 @@ class CassaPageState extends State<CassaPage>
           child: Text(
             '${context.l10n.cassaEtichettaOperatore(_controller.operatoreLabel ?? context.l10n.cassaOperatorUnassigned)}'
             '${cassaSettings.hasCassa ? ' · ${cassaSettings.nomeCassa}' : ''}'
-            '${cassaSettings.hasSede ? ' · ${cassaSettings.sede}' : ''}',
+            '${_controller.sedeCorrenteLabel.isNotEmpty ? ' · ${_controller.sedeCorrenteLabel}' : ''}',
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12),
           ),

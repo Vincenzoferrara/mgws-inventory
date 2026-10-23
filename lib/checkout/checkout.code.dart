@@ -17,6 +17,8 @@ import 'fiscal_register/fiscal_register_repository.dart';
 import 'checkout_history.code.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
+import '../login/mgws/connection/mgws_connection.dart';
+import '../login/mgws/query/query_mgws_site.dart';
 import '../settings/checkout_settings.dart';
 
 /// Rappresenta un elemento della lista cassa (può essere un prodotto o una variante)
@@ -155,7 +157,35 @@ class CassaController {
     return cassa.isEmpty ? 'cassa' : cassa;
   }
 
-  String get sedeCorrenteLabel => cassaSettings.sede.trim();
+  /// Sede in uso su MGWS, `null` finche' non e' letta o senza MGWS.
+  String? _sedeMgws;
+
+  /// Sede scritta su turni e scontrini.
+  ///
+  /// E' la stessa sede in uso di Inventario e Dipendenti, quando MGWS c'e':
+  /// due sedi diverse per la stessa cassa farebbero dire allo storico POS una
+  /// cosa e al magazzino un'altra. Il testo delle Impostazioni resta per chi
+  /// lavora senza MGWS.
+  String get sedeCorrenteLabel {
+    final mgws = _sedeMgws;
+    if (mgws != null && mgws.isNotEmpty) return mgws;
+    return cassaSettings.sede.trim();
+  }
+
+  /// Rilegge la sede in uso da MGWS. Un errore lascia quella gia' letta: la
+  /// cassa non deve fermarsi per un'etichetta.
+  Future<void> aggiornaSedeMgws() async {
+    if (!await MgwsConnection.instance.ensureConnected()) {
+      _sedeMgws = null;
+      return;
+    }
+    try {
+      final stato = await QueryMgwsSite().getMySite();
+      _sedeMgws = stato.hasSite ? stato.siteName.trim() : null;
+    } on MgwsSiteException {
+      // Resta la sede di prima.
+    }
+  }
 
   /// Turno aperto per la cassa corrente. Il filtro e solo sulla cassa, non
   /// sulla giornata: un turno resta "aperto" finche non viene chiuso, anche
@@ -221,6 +251,7 @@ class CassaController {
   Future<EsitoReso> apriTurno({required double fondoIniziale}) async {
     await storicoStore.init();
     await risolviOperatoreDaLogin();
+    await aggiornaSedeMgws();
     final cassa = cassaCorrenteLabel;
     final sede = sedeCorrenteLabel;
     if (storicoStore.turnoAperto(cassaNome: cassa) != null) {
@@ -389,7 +420,7 @@ class CassaController {
     scontrino.operatoreNome = _operatoreNome;
     scontrino.operatoreCognome = _operatoreCognome;
     final cassa = cassaSettings.nomeCassa.trim();
-    final sede = cassaSettings.sede.trim();
+    final sede = sedeCorrenteLabel;
     scontrino.cassaNome = cassa.isEmpty ? null : cassa;
     scontrino.sede = sede.isEmpty ? null : sede;
     scontrino.giornataId = Scontrino.calcolaGiornataId(

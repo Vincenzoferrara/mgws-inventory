@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../inventory/inventory_site_panel.gui.dart';
+import '../login/mgws/connection/mgws_auth.dart';
+import '../login/mgws/connection/mgws_connection.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../login/mgws/query/query_mgws_site.dart';
 import 'inventory_quick_load_settings.dart';
+import '../reuse_class/gui/mgws_unavailable_notice.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 
@@ -27,6 +30,44 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
   /// c'e' una sede o mentre si leggono.
   List<MgwsInventoryWarehouse>? _magazzini;
   bool _magazziniInCaricamento = false;
+
+  /// MGWS risponde? `null` mentre si verifica. Le Impostazioni si aprono
+  /// anche senza login, e la sede in uso esiste solo su MGWS: senza, al
+  /// posto del pannello va l'avviso che usa anche la home.
+  bool? _mgwsPronto;
+  MgwsUnavailableReason _mgwsMotivo = MgwsUnavailableReason.unknown;
+
+  @override
+  void initState() {
+    super.initState();
+    MgwsConnection.instance.changes.addListener(_onMgwsCambiato);
+    _verificaMgws();
+  }
+
+  /// Login o logout mentre la scheda e' aperta: si legge lo stato nuovo
+  /// senza verificarlo da qui, perche' la verifica la fa la catena di login.
+  void _onMgwsCambiato() {
+    final connection = MgwsConnection.instance;
+    if (!mounted || !connection.isChecked) return;
+    if (_mgwsPronto == connection.isConnected) return;
+    setState(() {
+      _mgwsPronto = connection.isConnected;
+      _mgwsMotivo = connection.lastFailure;
+    });
+  }
+
+  Future<void> _verificaMgws({bool forza = false}) async {
+    setState(() => _mgwsPronto = null);
+    final connection = MgwsConnection.instance;
+    final pronto = forza
+        ? await connection.verify()
+        : await connection.ensureConnected();
+    if (!mounted) return;
+    setState(() {
+      _mgwsPronto = pronto;
+      _mgwsMotivo = connection.lastFailure;
+    });
+  }
 
   Future<void> _onSede(MgwsSiteStatus? stato) async {
     if (stato == null) {
@@ -62,6 +103,7 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
 
   @override
   void dispose() {
+    MgwsConnection.instance.changes.removeListener(_onMgwsCambiato);
     _warehouseController.dispose();
     _roomController.dispose();
     _rackController.dispose();
@@ -122,8 +164,41 @@ class _InventorySettingsTabState extends State<InventorySettingsTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          InventorySitePanel(onStatusChanged: _onSede),
-                          if (_magazziniInCaricamento) ...[
+                          Text(
+                            context.l10n.sedeInUso,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(context.l10n.settingsSiteInUseHint),
+                          const SizedBox(height: 16),
+                          if (_mgwsPronto == null)
+                            Row(
+                              children: [
+                                const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    context.l10n.settingsSiteInUseChecking,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (_mgwsPronto == false)
+                            MgwsUnavailableNotice(
+                              reason: _mgwsMotivo,
+                              onRetry: () => _verificaMgws(forza: true),
+                            )
+                          else
+                            InventorySitePanel(onStatusChanged: _onSede),
+                          if (_mgwsPronto != true)
+                            const SizedBox.shrink()
+                          else if (_magazziniInCaricamento) ...[
                             const SizedBox(height: 16),
                             const LinearProgressIndicator(),
                           ] else if (_magazzini != null) ...[

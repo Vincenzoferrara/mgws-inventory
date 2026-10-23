@@ -143,6 +143,10 @@ class _InventoryPageState extends State<InventoryPage> {
   /// La sede arriva dal pannello: i pannelli dei moduli la leggono dal
   /// campo condiviso per costruire il piano da inviare.
   void _onSiteStatus(MgwsSiteStatus? status) {
+    final previous = _site?.siteId;
+    // Cambiata la sede, lo stock letto prima vale per l'altra: uno
+    // spostamento ripartirebbe da magazzini che non si possono piu' usare.
+    if (previous != null && previous != status?.siteId) _moveController.clear();
     setState(() => _site = status);
     _siteController.text = status == null ? '' : '${status.siteId}';
   }
@@ -268,6 +272,11 @@ class _InventoryPageState extends State<InventoryPage> {
                               ),
                             if (_activeModule == InventoryModule.move)
                               InventoryMovePanel(
+                                // Una sede nuova riparte da zero: sedi e
+                                // magazzini proposti sono quelli della sede.
+                                key: ValueKey(
+                                  'inventory-move-site-${_site!.siteId}',
+                                ),
                                 controller: _moveController,
                                 catalogController: _catalogController,
                                 detailsController: _detailsController,

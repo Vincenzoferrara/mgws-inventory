@@ -132,11 +132,11 @@
   "@settingsGeneralDescription": {
     "description": "Sottotitolo della scheda impostazioni generali"
   },
-  "settingsGeneralSede": "Sede in uso (opzionale)",
+  "settingsGeneralSede": "Nome negozio sugli scontrini senza MGWS (opzionale)",
   "@settingsGeneralSede": {
     "description": "Etichetta del campo sede in uso"
   },
-  "settingsGeneralSedeDescription": "Usata da cassa e storico POS per indicare il negozio o punto vendita corrente. Se vuota, non viene salvata negli scontrini.",
+  "settingsGeneralSedeDescription": "Usato da cassa e storico POS solo quando MGWS non è collegato. Con MGWS usano la sede in uso, scelta in Impostazioni > Inventario. Se vuoto, non viene salvato negli scontrini.",
   "@settingsGeneralSedeDescription": {
     "description": "Testo esplicativo sotto il campo sede in uso"
   },
@@ -6342,6 +6342,14 @@
   "sedeNonAssegnataTesto": "Il negozio ha più sedi e al tuo utente non ne è stata assegnata una. Chiedi a chi gestisce i dipendenti di assegnartela.",
   "@sedeNonAssegnataTesto": {
     "description": "Sede in uso: sedeNonAssegnataTesto"
+  },
+  "settingsSiteInUseHint": "La sede in cui lavori. È salvata sul server per il tuo utente WordPress, quindi Inventario, spostamenti e Dipendenti la seguono su ogni dispositivo.",
+  "@settingsSiteInUseHint": {
+    "description": "Hint under the Site in use heading in Settings > Inventory"
+  },
+  "settingsSiteInUseChecking": "Verifica della connessione MGWS…",
+  "@settingsSiteInUseChecking": {
+    "description": "Shown in Settings > Inventory while the app checks whether MGWS is available"
   },
   "sedeInUso": "Sede in uso",
   "@sedeInUso": {

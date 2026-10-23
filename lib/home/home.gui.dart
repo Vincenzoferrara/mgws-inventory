@@ -23,6 +23,7 @@ import '../products/product_editor/product_editor.gui.dart';
 import '../products/product_list/product_list.gui.dart';
 import '../report/print_job.dart';
 import '../report/report.gui.dart';
+import '../reuse_class/gui/mgws_unavailable_notice.dart';
 import '../settings/settings.gui.dart';
 import '../theme/theme.dart';
 import '../notification/notification_bell.gui.dart';
@@ -446,22 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // lancerebbe. Senza dialog l'utente resta semplicemente sulla home.
     if (!mounted) return;
     final l10n = context.l10n;
-    final String messaggio;
-    switch (reason) {
-      case MgwsUnavailableReason.noSession:
-        messaggio = l10n.mgwsNonDisponibileMessaggio;
-      case MgwsUnavailableReason.unreachable:
-        messaggio = l10n.mgwsNonRaggiungibile;
-      case MgwsUnavailableReason.serviceDisabled:
-        messaggio = l10n.mgwsServizioSpento;
-      case MgwsUnavailableReason.pluginOutdated:
-        messaggio = l10n.mgwsPluginDaAggiornare(
-          MgwsConnection.instance.pluginVersion ?? '?',
-          MgwsAuth.minPluginVersion,
-        );
-      case MgwsUnavailableReason.unknown:
-        messaggio = l10n.mgwsNonDisponibileMessaggio;
-    }
+    final messaggio = mgwsUnavailableMessage(l10n, reason);
 
     showDialog<void>(
       context: context,

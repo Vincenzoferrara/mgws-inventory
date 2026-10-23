@@ -49,13 +49,23 @@ class _InventorySitePanelState extends State<InventorySitePanel> {
   @override
   void initState() {
     super.initState();
+    QueryMgwsSite.changes.addListener(_onSiteChangedElsewhere);
     _load();
   }
 
   @override
   void dispose() {
+    QueryMgwsSite.changes.removeListener(_onSiteChangedElsewhere);
     _nameController.dispose();
     super.dispose();
+  }
+
+  /// La sede e' cambiata da un altro pannello (Impostazioni, Inventario): si
+  /// rilegge. Se il cambio l'ha chiesto questo pannello, [_run] ha gia' lo
+  /// stato nuovo in mano.
+  void _onSiteChangedElsewhere() {
+    if (_busy || !mounted) return;
+    _run(_query.getMySite);
   }
 
   Future<void> _load() async {

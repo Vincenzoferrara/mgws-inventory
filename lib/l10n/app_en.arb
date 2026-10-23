@@ -132,11 +132,11 @@
   "@settingsGeneralDescription": {
     "description": "Subtitle of the general settings tab"
   },
-  "settingsGeneralSede": "Location in use (optional)",
+  "settingsGeneralSede": "Store name on receipts without MGWS (optional)",
   "@settingsGeneralSede": {
     "description": "Label of the store location field"
   },
-  "settingsGeneralSedeDescription": "Used by the till and the POS history to indicate the current store or point of sale. If left empty it is not saved on receipts.",
+  "settingsGeneralSedeDescription": "Used by the till and the POS history only when MGWS is not connected. With MGWS they use the site in use, chosen in Settings > Inventory. If left empty it is not saved on receipts.",
   "@settingsGeneralSedeDescription": {
     "description": "Explanatory text below the store location field"
   },
@@ -6345,6 +6345,14 @@
   "sedeNonAssegnataTesto": "The shop has more than one site and none is assigned to your user. Ask whoever manages employees to assign one.",
   "@sedeNonAssegnataTesto": {
     "description": "Sede in uso: sedeNonAssegnataTesto"
+  },
+  "settingsSiteInUseHint": "The site you work in. It is saved on the server for your WordPress user, so Inventory, transfers and Employees follow it on every device.",
+  "@settingsSiteInUseHint": {
+    "description": "Hint under the Site in use heading in Settings > Inventory"
+  },
+  "settingsSiteInUseChecking": "Checking the MGWS connection…",
+  "@settingsSiteInUseChecking": {
+    "description": "Shown in Settings > Inventory while the app checks whether MGWS is available"
   },
   "sedeInUso": "Site in use",
   "@sedeInUso": {

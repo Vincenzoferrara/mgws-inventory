@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'mgws_auth.dart';
 
 /// Unico proprietario dello stato di connessione MGWS.
@@ -33,6 +35,12 @@ class MgwsConnection {
   /// prima di un logout completerebbe e riattiverebbe MGWS su una sessione che
   /// non esiste piu'.
   int _generation = 0;
+
+  /// Cresce quando lo stato cambia: verifica conclusa o stato invalidato.
+  ///
+  /// Serve alle schermate che si aprono anche senza MGWS (Impostazioni): le
+  /// altre passano dalla home, che le apre solo a MGWS verificato.
+  final ValueNotifier<int> changes = ValueNotifier<int>(0);
 
   /// MGWS e' utilizzabile secondo l'ultima verifica.
   bool get isConnected => _isConnected;
@@ -79,6 +87,7 @@ class MgwsConnection {
     _lastFailure = result.available
         ? MgwsUnavailableReason.unknown
         : result.reason;
+    changes.value++;
     return _isConnected;
   }
 
@@ -103,5 +112,6 @@ class MgwsConnection {
     _isConnected = false;
     _isChecked = false;
     _lastFailure = reason;
+    changes.value++;
   }
 }
