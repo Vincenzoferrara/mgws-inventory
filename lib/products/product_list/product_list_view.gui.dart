@@ -211,8 +211,8 @@ class _GalleryNavigationButton extends StatelessWidget {
       child: IconButton(
         onPressed: enabled ? onPressed : null,
         tooltip: tooltip,
-        color: Colors.white,
-        disabledColor: Colors.white54,
+        color: context.colors.onColoredSurface,
+        disabledColor: context.colors.onColoredSurface.withValues(alpha: 0.54),
         iconSize: 32,
         icon: Icon(icon),
       ),

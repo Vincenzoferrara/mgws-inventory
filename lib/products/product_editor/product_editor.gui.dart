@@ -543,7 +543,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       data: Theme.of(context).copyWith(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white.withValues(alpha: 0.9),
+          fillColor: context.theme.colorScheme.surfaceContainerLowest
+              .withValues(alpha: 0.9),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -630,8 +631,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                 ? context.l10n.productsEditTitle
                 : context.l10n.productsNewTitle,
             key: ValueKey(_isUpdatingExisting),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.colors.onColoredSurface,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -652,22 +653,25 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       actions: [
         if (_isUpdatingExisting)
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+            icon: Icon(
+              Icons.add_circle_outline,
+              color: context.colors.onColoredSurface,
+            ),
             tooltip: context.l10n.productsTooltipCreateNew,
             onPressed: _resetForm,
           ),
         if (_prodottiController != null)
           IconButton(
             icon: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: context.colors.onColoredSurface,
                       strokeWidth: 2,
                     ),
                   )
-                : const Icon(Icons.save, color: Colors.white),
+                : Icon(Icons.save, color: context.colors.onColoredSurface),
             tooltip: context.l10n.productsTooltipSaveProduct,
             onPressed: _isLoading ? null : _salvaProdotto,
           ),
@@ -2380,7 +2384,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                     ),
                     child: Text(
                       '${urls.length}',
-                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                      style: TextStyle(
+                        color: context.colors.onColoredSurface,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ),
@@ -2479,9 +2486,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                         color: context.colors.tierGold,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.all(3),
-                        child: Icon(Icons.star, size: 14, color: Colors.white),
+                        child: Icon(
+                          Icons.star,
+                          size: 14,
+                          color: context.colors.onColoredSurface,
+                        ),
                       ),
                     ),
                   ),
@@ -2653,7 +2664,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
@@ -3143,9 +3154,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
                 color: context.colors.tierGold,
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(3),
-                child: Icon(Icons.star, size: 14, color: Colors.white),
+                child: Icon(
+                  Icons.star,
+                  size: 14,
+                  color: context.colors.onColoredSurface,
+                ),
               ),
             ),
           ),
@@ -3850,12 +3865,12 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     return FloatingActionButton.extended(
       onPressed: _isLoading ? null : _salvaProdotto,
       icon: _isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.white,
+                color: context.colors.onColoredSurface,
               ),
             )
           : Icon(_isUpdatingExisting ? Icons.update : Icons.save),

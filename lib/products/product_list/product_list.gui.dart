@@ -1171,7 +1171,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
                 backgroundColor:
                     theme.extension<AppColorExtension>()?.successColor ??
                     context.colors.successColor,
-                foregroundColor: Colors.white,
+                foregroundColor: context.colors.onColoredSurface,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),

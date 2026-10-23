@@ -11,6 +11,7 @@ import '../../class_media.dart';
 import '../../../reuse_class/image_url_resolver.dart';
 import '../../../l10n/extensions.dart';
 import '../../../l10n/localized_text.dart';
+import '../../../theme/theme.dart';
 
 /// Dialog per selezionare immagini dalla libreria media di WordPress
 class MediaSelectorDialog extends StatefulWidget {
@@ -311,7 +312,9 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                       if (widget.multiSelect) ...[
                         Text(
                           '${_selectedUrls.length} selezionate',
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: TextStyle(
+                            color: context.colors.onSurfaceVariantColor,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         FilledButton.icon(
@@ -337,8 +340,8 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                         icon: const Icon(Icons.upload_file),
                         label: Text(context.l10n.prodottiCarica),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.theme.colorScheme.primary,
+                          foregroundColor: context.colors.onColoredSurface,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -380,9 +383,13 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: context.colors.chipSelectedBackground,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade200),
+                        border: Border.all(
+                          color: context.theme.colorScheme.primary.withValues(
+                            alpha: 0.4,
+                          ),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -405,7 +412,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                                     _uploadingFileName!,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: context.colors.subtitleColor,
                                     ),
                                   ),
                               ],
@@ -426,7 +433,10 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                                 _selectedUrls.length,
                               )
                             : context.l10n.mediaImagesFound(_images.length),
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(
+                          color: context.colors.subtitleColor,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
 
@@ -439,9 +449,11 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
               if (_isDragging)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: context.theme.colorScheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     border: Border.all(
-                      color: Colors.blue,
+                      color: context.theme.colorScheme.primary,
                       width: 3,
                       strokeAlign: BorderSide.strokeAlignInside,
                     ),
@@ -451,11 +463,13 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                     child: Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.theme.colorScheme.surfaceContainerLowest,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: context.theme.colorScheme.shadow.withValues(
+                              alpha: 0.1,
+                            ),
                             blurRadius: 10,
                           ),
                         ],
@@ -466,7 +480,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                           Icon(
                             Icons.cloud_upload,
                             size: 64,
-                            color: Colors.blue,
+                            color: context.theme.colorScheme.primary,
                           ),
                           SizedBox(height: 16),
                           Text(
@@ -494,7 +508,11 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: context.colors.errorColorStatus,
+            ),
             const SizedBox(height: 16),
             Text(_error!(context.l10n), textAlign: TextAlign.center),
             const SizedBox(height: 16),
@@ -525,11 +543,15 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.image_not_supported, size: 64, color: Colors.grey[400]),
+            Icon(
+              Icons.image_not_supported,
+              size: 64,
+              color: context.colors.neutralColor,
+            ),
             const SizedBox(height: 16),
             Text(
               context.l10n.mediaNoImageFound,
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: context.colors.subtitleColor),
             ),
           ],
         ),
@@ -635,7 +657,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: Colors.grey[300],
+                        color: context.colors.dividerColor,
                         child: const Icon(Icons.broken_image, size: 48),
                       );
                     },
@@ -648,7 +670,9 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withValues(alpha: 0.6),
+                          context.theme.colorScheme.scrim.withValues(
+                            alpha: 0.6,
+                          ),
                         ],
                       ),
                     ),
@@ -659,7 +683,11 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                       left: 6,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: context
+                              .theme
+                              .colorScheme
+                              .surfaceContainerLowest
+                              .withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Checkbox(
@@ -683,7 +711,7 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
             // Info
             Container(
               padding: const EdgeInsets.all(8),
-              color: Colors.white,
+              color: context.theme.colorScheme.surfaceContainerLowest,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -700,7 +728,10 @@ class _MediaSelectorDialogState extends State<MediaSelectorDialog> {
                   if (image.width != null && image.height != null)
                     Text(
                       '${image.width} × ${image.height}',
-                      style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: context.colors.subtitleColor,
+                      ),
                     ),
                   if (isOversized) ...[
                     const SizedBox(height: 4),
@@ -746,9 +777,11 @@ class ProductImageDimensionWarningBadge extends StatelessWidget {
       ),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.orange.shade50,
+          color: context.colors.warningColor.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: Colors.orange.shade300),
+          border: Border.all(
+            color: context.colors.warningColor.withValues(alpha: 0.5),
+          ),
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -758,7 +791,7 @@ class ProductImageDimensionWarningBadge extends StatelessWidget {
               Icon(
                 Icons.warning_amber_outlined,
                 size: 12,
-                color: Colors.orange,
+                color: context.colors.warningColor,
               ),
               SizedBox(width: 4),
               Flexible(
@@ -766,7 +799,10 @@ class ProductImageDimensionWarningBadge extends StatelessWidget {
                   context.l10n.mediaOverThreshold,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 10, color: Colors.orange),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: context.colors.warningColor,
+                  ),
                 ),
               ),
             ],
