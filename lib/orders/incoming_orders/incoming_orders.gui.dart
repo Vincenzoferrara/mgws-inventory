@@ -229,13 +229,17 @@ class _HeaderInArrivoWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.local_shipping, color: Colors.white, size: 28),
+          Icon(
+            Icons.local_shipping,
+            color: context.colors.onColoredSurface,
+            size: 28,
+          ),
           SizedBox(width: context.spacing.m),
           Expanded(
             child: Text(
               context.l10n.ordersIncomingTitle,
               style: theme.textTheme.titleLarge?.copyWith(
-                color: Colors.white,
+                color: context.colors.onColoredSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -244,7 +248,9 @@ class _HeaderInArrivoWidget extends StatelessWidget {
             label: Text(
               context.l10n.ordiniConteggio('${controller.ordini.length}'),
             ),
-            backgroundColor: Colors.white.withValues(alpha: 0.9),
+            backgroundColor: context.colors.onColoredSurface.withValues(
+              alpha: 0.9,
+            ),
           ),
         ],
       ),

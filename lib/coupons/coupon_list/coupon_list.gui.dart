@@ -40,12 +40,16 @@ class CouponStatsCompact extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.analytics, color: Colors.white, size: 24),
+                Icon(
+                  Icons.analytics,
+                  color: context.colors.onColoredSurface,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   l10n.couponsStatistiche,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
+                    color: context.colors.onColoredSurface,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -102,12 +106,12 @@ class CouponStatsCompact extends StatelessWidget {
     return Container(
       padding: context.spacing.iS,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
+        color: context.colors.onColoredSurface.withValues(alpha: 0.2),
         borderRadius: context.shapes.s,
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white, size: 20),
+          Icon(icon, color: context.colors.onColoredSurface, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -117,7 +121,7 @@ class CouponStatsCompact extends StatelessWidget {
                 Text(
                   value,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
+                    color: context.colors.onColoredSurface,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -125,7 +129,9 @@ class CouponStatsCompact extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: context.colors.onColoredSurface.withValues(
+                      alpha: 0.9,
+                    ),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -184,14 +190,14 @@ class CouponBadge extends StatelessWidget {
           children: [
             Icon(
               _getTypeIcon(coupon.discountType),
-              color: Colors.white,
+              color: context.colors.onColoredSurface,
               size: 16,
             ),
             SizedBox(width: context.spacing.s),
             Text(
               coupon.code,
               style: theme.textTheme.labelMedium?.copyWith(
-                color: Colors.white,
+                color: context.colors.onColoredSurface,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),
@@ -200,7 +206,7 @@ class CouponBadge extends StatelessWidget {
             Text(
               coupon.discountDisplay,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: context.colors.onColoredSurface.withValues(alpha: 0.9),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -676,17 +682,20 @@ class _CouponSelectorDialogState extends State<CouponSelectorDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.discount, color: Colors.white),
+                  Icon(Icons.discount, color: context.colors.onColoredSurface),
                   SizedBox(width: context.spacing.s),
                   Text(
                     l10n.couponsSelezionaTitolo,
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
+                      color: context.colors.onColoredSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(
+                      Icons.close,
+                      color: context.colors.onColoredSurface,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -728,7 +737,7 @@ class _CouponSelectorDialogState extends State<CouponSelectorDialog> {
                               label: Text(context.l10n.couponScaduto),
                               backgroundColor: context.colors.errorColorStatus,
                               labelStyle: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white,
+                                color: context.colors.onColoredSurface,
                               ),
                             )
                           : null,

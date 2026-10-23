@@ -3,6 +3,7 @@ import '../order_list/order_list.code.dart';
 import '../class_orders.dart';
 import '../../notification/notification_service.dart';
 import '../../l10n/extensions.dart';
+import '../../theme/theme.dart';
 
 /// Pagina per la creazione di un nuovo ordine
 class OrdiniCreaPage extends StatefulWidget {
@@ -150,14 +151,16 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
         title: Text(context.l10n.ordiniCreaNuovoOrdine),
         actions: [
           if (_isCreating)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(16.0),
               child: SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.colors.onColoredSurface,
+                  ),
                 ),
               ),
             ),
@@ -466,13 +469,13 @@ class _OrdiniCreaPageState extends State<OrdiniCreaPage> {
                 child: ElevatedButton(
                   onPressed: _isCreating ? null : _creaOrdine,
                   child: _isCreating
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              context.colors.onColoredSurface,
                             ),
                           ),
                         )

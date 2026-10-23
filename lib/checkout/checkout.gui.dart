@@ -672,7 +672,7 @@ class _LatoSinistroWidget extends StatelessWidget {
               Text(
                 context.l10n.cassaSearchProducts,
                 style: theme.textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
+                  color: context.colors.onColoredSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -682,40 +682,45 @@ class _LatoSinistroWidget extends StatelessWidget {
                 builder: (context, constraints) {
                   final barcodeField = TextField(
                     controller: searchController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: context.colors.onColoredSurface),
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       hintText:
                           context.l10n.inventoryHintInserisciOscansionaBarcode,
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: context.colors.onColoredSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.qr_code,
-                        color: Colors.white,
+                        color: context.colors.onColoredSurface,
                       ),
                       suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             tooltip: context.l10n.cassaAggiungiBarcode,
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.add_shopping_cart,
-                              color: Colors.white,
+                              color: context.colors.onColoredSurface,
                             ),
                             onPressed: () => _aggiungiBarcodeDiretto(context),
                           ),
                           IconButton(
                             tooltip: context.l10n.cassaCancellaBarcode,
-                            icon: const Icon(Icons.clear, color: Colors.white),
+                            icon: Icon(
+                              Icons.clear,
+                              color: context.colors.onColoredSurface,
+                            ),
                             onPressed: () => searchController.clear(),
                           ),
                           IconButton(
                             tooltip: context.l10n.cassaScansiona,
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.qr_code_scanner,
-                              color: Colors.white,
+                              color: context.colors.onColoredSurface,
                             ),
                             onPressed: () async {
                               final scannedCode = await showBarcodeScanner(
@@ -731,7 +736,9 @@ class _LatoSinistroWidget extends StatelessWidget {
                         ],
                       ),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.2),
+                      fillColor: context.colors.onColoredSurface.withValues(
+                        alpha: 0.2,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -998,7 +1005,7 @@ class _MobileCheckoutBar extends StatelessWidget {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: customColors.successColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: context.colors.onColoredSurface,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
@@ -1052,7 +1059,11 @@ class _LatoDestroWidget extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.receipt_long, color: Colors.white, size: 28),
+                Icon(
+                  Icons.receipt_long,
+                  color: context.colors.onColoredSurface,
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1061,14 +1072,16 @@ class _LatoDestroWidget extends StatelessWidget {
                       Text(
                         context.l10n.cassaReceiptHeader,
                         style: theme.textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
+                          color: context.colors.onColoredSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         '#${scontrino.id.substring(scontrino.id.length - 6)}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: context.colors.onColoredSurface.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                     ],
@@ -1082,7 +1095,7 @@ class _LatoDestroWidget extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.colors.onColoredSurface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -1448,7 +1461,7 @@ class _LatoDestroWidget extends StatelessWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: customColors.successColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: context.colors.onColoredSurface,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),

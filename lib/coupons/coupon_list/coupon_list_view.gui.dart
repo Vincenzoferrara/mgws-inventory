@@ -363,19 +363,19 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
   ) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 28),
+        Icon(icon, color: context.colors.onColoredSurface, size: 28),
         const SizedBox(height: 8),
         Text(
           value,
           style: theme.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
+            color: context.colors.onColoredSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.9),
+            color: context.colors.onColoredSurface.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -551,13 +551,13 @@ class CouponCard extends StatelessWidget {
                       Icon(
                         _getTypeIcon(coupon.discountType),
                         size: 16,
-                        color: Colors.white,
+                        color: context.colors.onColoredSurface,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _getTypeLabel(context, coupon.discountType),
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
+                          color: context.colors.onColoredSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1029,7 +1029,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                 children: [
                   Icon(
                     widget.coupon == null ? Icons.add : Icons.edit,
-                    color: Colors.white,
+                    color: context.colors.onColoredSurface,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1037,12 +1037,15 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                         ? context.l10n.couponNuovoCoupon
                         : context.l10n.couponsEditTitle,
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
+                      color: context.colors.onColoredSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(
+                      Icons.close,
+                      color: context.colors.onColoredSurface,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
