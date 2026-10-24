@@ -1,0 +1,7 @@
+- Show the warehouse name in the Add and Quick load confirmations
+- Read the till shift in Settings without a missing Provider
+- Keep the site in use in sync across Settings, Inventory, Employees and Checkout
+- Show site and warehouse names in the inventory transfer
+- Describe the order verification scan in README and store texts
+- Return the parent product when a barcode belongs to a variation
+- Use relative imports only and drop the jwt_exception aliases
