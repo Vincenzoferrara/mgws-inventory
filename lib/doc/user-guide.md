@@ -455,9 +455,20 @@ shown or shared.
 **Does the app work without Google services?** Yes. It has no Google
 dependency, no tracking and no ads. The barcode scanner works offline.
 
-**Does the developer see my data?** No. Your data goes only to your
+**Do I need a server or a database for the app?** No. The app uses your
+WordPress site as its only backend. There is nothing else to install, run
+or pay for.
+
+**Does the developer see my data?** No. The app has no analytics,
+telemetry or automatic crash reports. Your data goes only to your
 WordPress site and, if you enable them, to the AI services you choose. See
 the [privacy policy](../../PRIVACY.md).
+
+**How do I report a bug or ask for a feature?** Open an issue on
+[GitHub](https://github.com/Vincenzoferrara/mgws-inventory/issues). Issues
+are public, so leave out your shop address, names, emails and passwords.
+Security problems go through the private channel described in
+[SECURITY.md](../../SECURITY.md).
 
 **Does the app talk to ATUM, myCred or other plugins?** No. It talks only
 to WooCommerce and MGWS; any other plugin must be reached through MGWS.

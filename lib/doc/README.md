@@ -1,5 +1,10 @@
 # MGWS Inventory documentation
 
+MGWS Inventory uses your WordPress site as its only backend: no separate
+server or database is needed. It sends no data to the developer; bugs and
+requests are reported as
+[GitHub issues](https://github.com/Vincenzoferrara/mgws-inventory/issues).
+
 ## For shop staff
 
 - [User guide](user-guide.md): every screen and the daily procedures.

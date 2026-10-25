@@ -11,8 +11,18 @@ loyalty cards.
 **Platforms:** for now the app works with **WordPress + WooCommerce**.
 Support for other e-commerce platforms, such as Shopify, is planned.
 
-Your data stays on your server. No account, no ads, no tracking. English
-and Italian.
+**No server to set up.** Your WordPress site is the whole backend: the app
+talks to it directly, so there is no extra server, database or cloud
+service to install, run or pay for.
+
+**Private.** The app sends nothing to the developer: no analytics, no
+telemetry, no automatic crash reports, no account to create, no ads. Your
+data goes only to your own WordPress site and, if you turn on the optional
+AI help, to the AI provider you choose. Bugs and ideas are reported as
+[GitHub issues](https://github.com/Vincenzoferrara/mgws-inventory/issues)
+that you write and send yourself.
+
+English and Italian.
 
 ## Features
 
@@ -80,9 +90,11 @@ The guides are in [`lib/doc`](lib/doc/README.md):
 
 ## Privacy
 
-The developer receives no data from the app. See the
-[privacy policy](PRIVACY.md) for what is stored on the device, on your
-site and, only if you enable them, sent to AI services.
+The developer receives no data from the app: there is no analytics,
+telemetry or automatic crash reporting. Problems reach the developer only
+as GitHub issues that you choose to open, and you see their text before
+sending. See the [privacy policy](PRIVACY.md) for what is stored on the
+device, on your site and, only if you enable them, sent to AI services.
 
 ## Contributing
 

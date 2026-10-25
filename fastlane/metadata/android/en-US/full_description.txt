@@ -1,4 +1,8 @@
-<p>MGWS Inventory runs the daily work of a clothing store on top of your own online shop. For now it works with WordPress and WooCommerce; other platforms, such as Shopify, are planned. Your data stays on your server.</p>
+<p>MGWS Inventory runs the daily work of a clothing store on top of your own online shop. For now it works with WordPress and WooCommerce; other platforms, such as Shopify, are planned.</p>
+
+<p><b>No server to set up.</b> Your WordPress site is the whole backend: there is no extra server, database or cloud service to install, run or pay for.</p>
+
+<p><b>Private.</b> The app sends nothing to the developer: no analytics, no telemetry, no automatic crash reports, no account, no ads. Your data goes only to your WordPress site and, if you turn on the optional AI help, to the AI provider you choose. Bugs and ideas are reported as GitHub issues that you write and send yourself.</p>
 
 <p><b>With the app only (WooCommerce)</b></p>
 <ul>

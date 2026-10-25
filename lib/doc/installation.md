@@ -19,6 +19,9 @@ platforms, such as Shopify, are planned.
   work you do (for example reading and moving stock, or managing the
   shop).
 
+Nothing else. Your WordPress site is the only backend: there is no
+separate server, database or cloud account to set up for the app.
+
 ## Download
 
 | Platform | Where |

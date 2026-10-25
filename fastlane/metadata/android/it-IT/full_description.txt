@@ -1,4 +1,8 @@
-<p>MGWS Inventory gestisce il lavoro di tutti i giorni di un negozio di abbigliamento sul tuo negozio online. Per ora funziona con WordPress e WooCommerce; altre piattaforme, come Shopify, sono in programma. I dati restano sul tuo server.</p>
+<p>MGWS Inventory gestisce il lavoro di tutti i giorni di un negozio di abbigliamento sul tuo negozio online. Per ora funziona con WordPress e WooCommerce; altre piattaforme, come Shopify, sono in programma.</p>
+
+<p><b>Nessun server da configurare.</b> Il tuo sito WordPress è tutto il backend: non serve installare, gestire o pagare nessun altro server, database o servizio cloud.</p>
+
+<p><b>Privacy completa.</b> L'app non invia nulla allo sviluppatore: niente statistiche, telemetria, segnalazioni automatiche di errori, account o pubblicità. I tuoi dati vanno solo al tuo sito WordPress e, se attivi l'aiuto IA facoltativo, al fornitore IA che scegli. Bug e idee si segnalano con le issue su GitHub, che scrivi e invii tu.</p>
 
 <p><b>Con la sola app (WooCommerce)</b></p>
 <ul>
