@@ -68,6 +68,17 @@ WooCommerce shop, and what it unlocks when you also install the free
 
 Like most plugins, MGWS adds its own tables to the WordPress database.
 
+## Screenshots
+
+| Home | Products |
+|---|---|
+| ![Home](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) | ![Products](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) |
+| **Point of sale** | **Dashboard** |
+| ![Point of sale](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png) | ![Dashboard](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png) |
+
+Taken with invented demo data. More in
+[`fastlane/metadata/android/en-US/images/phoneScreenshots`](fastlane/metadata/android/en-US/images/phoneScreenshots).
+
 ## Download
 
 | Platform | Download |
