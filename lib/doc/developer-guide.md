@@ -208,7 +208,7 @@ Pass them with `--dart-define=NAME=value`:
 | Name | Default | Effect |
 |------|---------|--------|
 | `DONATIONS` | `true` | `false` hides the Ko-fi donation button in `Settings > About`. It is always hidden on iOS. |
-| `UPDATE_CHECK` | `true` | `false` turns off the "new version" notice on Android. |
+| `UPDATE_CHECK` | `true` | `false` turns off the "new version" notice on Android and the Velopack updater on Windows and Linux. Inside a Flatpak the updater is always off. |
 | `DEBUG_BUILD_NR` | none | Debug build counter, set by `script/run_debug.sh`. |
 
 Recommended values:
@@ -218,6 +218,7 @@ Recommended values:
 | GitHub releases, Obtainium, desktop | `true` | `true` |
 | F-Droid | `true` | `false` |
 | Google Play | `false` | `false` |
+| Flathub | `true` | `false` |
 | App Store | `false` (hidden anyway) | (Android only) |
 
 ## Versions and releases

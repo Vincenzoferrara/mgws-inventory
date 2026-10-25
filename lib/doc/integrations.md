@@ -242,5 +242,6 @@ the user enters. Its credentials are kept in secure storage.
 `https://api.github.com/repos/Vincenzoferrara/mgws-inventory/releases/latest`.
 On Windows and Linux, Velopack downloads and installs the release. On
 Android the app only notifies. Builds made with
-`--dart-define=UPDATE_CHECK=false` (F-Droid, stores) skip the check on
-Android. See [Developer guide](developer-guide.md#build-options).
+`--dart-define=UPDATE_CHECK=false` (F-Droid, Flathub, stores) skip the
+check on every platform, and a Flatpak never runs Velopack because Flathub
+delivers its updates. See [Developer guide](developer-guide.md#build-options).

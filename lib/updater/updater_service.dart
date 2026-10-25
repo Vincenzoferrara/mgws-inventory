@@ -39,17 +39,23 @@ class UpdaterService {
   static bool _runtimeInitialized = false;
 
   static bool get isDesktopUpdateSupported {
-    if (kIsWeb) return false;
+    if (kIsWeb || !_updateCheckEnabled || _isFlatpak) return false;
     return Platform.isWindows || Platform.isLinux;
   }
 
-  /// Le build per F-Droid e per gli store si compilano con
+  /// Le build per F-Droid, Flathub e gli store si compilano con
   /// `--dart-define=UPDATE_CHECK=false`: lì gli aggiornamenti li porta lo
   /// store, e Google Play non accetta avvisi che rimandano a download esterni.
   static const bool _updateCheckEnabled = bool.fromEnvironment(
     'UPDATE_CHECK',
     defaultValue: true,
   );
+
+  /// Dentro Flatpak gli aggiornamenti li porta Flathub e /app e' in sola
+  /// lettura: Velopack resta spento anche se la build ha dimenticato
+  /// `UPDATE_CHECK=false`.
+  static bool get _isFlatpak =>
+      Platform.isLinux && Platform.environment.containsKey('FLATPAK_ID');
 
   /// Android riceve gli aggiornamenti da F-Droid, Obtainium o dallo store:
   /// l'app non scarica ne installa nulla, avvisa soltanto che esiste una
