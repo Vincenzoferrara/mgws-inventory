@@ -498,17 +498,25 @@ jobs:
           cp build/app/outputs/bundle/release/app-release.aab "dist/google-play/${GOOGLE_PLAY_AAB_NAME}"
 
       # Reproducible build for F-Droid: the same commands as the recipe in
-      # fdroid/it.mgws.mgws_inventory.yml, from a clean tree, signed with the
-      # release key. F-Droid rebuilds the app from source, checks that it
-      # matches this APK and then ships this one, signed by us.
+      # fdroid/it.mgws.mgws_inventory.yml, signed with the release key.
+      # F-Droid rebuilds the app from source, checks that it matches this APK
+      # and then ships this one, signed by us. The Dart snapshot embeds the
+      # absolute path of the generated plugin registrant, so the app is built
+      # in the folder the F-Droid build server uses, from a clean copy.
       - name: Build signed F-Droid APK
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
-          flutter clean
+          fdroid_dir=/home/vagrant/build/it.mgws.mgws_inventory
+          sudo mkdir -p "$fdroid_dir"
+          sudo chown -R "$(id -u):$(id -g)" /home/vagrant
+          rsync -a --delete --exclude /build/ --exclude /.dart_tool/ --exclude /dist/ ./ "$fdroid_dir/"
+          dist_dir="$(pwd)/dist/android"
+          cd "$fdroid_dir"
+          export PUB_CACHE="$(pwd)/.pub-cache"
           flutter config --no-analytics
           flutter pub get
           flutter build apk --release --dart-define=UPDATE_CHECK=false
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/android/${FDROID_APK_NAME}"
+          cp build/app/outputs/flutter-apk/app-release.apk "$dist_dir/${FDROID_APK_NAME}"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7
