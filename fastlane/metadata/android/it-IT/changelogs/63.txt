@@ -1,0 +1,1 @@
+- Build the F-Droid APK in the F-Droid build server's folder
