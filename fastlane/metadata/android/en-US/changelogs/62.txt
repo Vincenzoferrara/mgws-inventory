@@ -1,0 +1,4 @@
+- Prepare reproducible F-Droid builds signed with our key
+- Fix the F-Droid recipe so it passes lint and builds
+- Add store screenshots and point the F-Droid recipe at v1.0.61
+- State that no server is needed and that no data reaches the developer
