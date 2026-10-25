@@ -39,6 +39,7 @@ env:
   APP_EXE: mgws_inventory
   ANDROID_APK_NAME: mgws_inventory.apk
   ANDROID_AAB_NAME: mgws_inventory.aab
+  FDROID_APK_NAME: mgws_inventory-fdroid.apk
   GOOGLE_PLAY_AAB_NAME: mgws_inventory-google-play.aab
   REPORT_REPO: ${{ vars.REPORT_REPO || 'Vincenzoferrara/report_flutter' }}
   REPORT_REF: ${{ vars.REPORT_REF || 'main' }}
@@ -495,6 +496,19 @@ jobs:
             --dart-define=UPDATE_CHECK=false
           mkdir -p dist/google-play
           cp build/app/outputs/bundle/release/app-release.aab "dist/google-play/${GOOGLE_PLAY_AAB_NAME}"
+
+      # Reproducible build for F-Droid: the same commands as the recipe in
+      # fdroid/it.mgws.mgws_inventory.yml, from a clean tree, signed with the
+      # release key. F-Droid rebuilds the app from source, checks that it
+      # matches this APK and then ships this one, signed by us.
+      - name: Build signed F-Droid APK
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          flutter clean
+          flutter config --no-analytics
+          flutter pub get
+          flutter build apk --release --dart-define=UPDATE_CHECK=false
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/android/${FDROID_APK_NAME}"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7

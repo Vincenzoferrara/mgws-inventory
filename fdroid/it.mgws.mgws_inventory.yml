@@ -16,6 +16,8 @@ AutoName: MGWS Inventory
 
 RepoType: git
 Repo: https://github.com/Vincenzoferrara/mgws-inventory.git
+Binaries: 
+  https://github.com/Vincenzoferrara/mgws-inventory/releases/download/v%v/mgws_inventory-fdroid.apk
 
 Builds:
   - versionName: 1.0.61
@@ -35,6 +37,8 @@ Builds:
     build:
       - export PUB_CACHE=$(pwd)/.pub-cache
       - $$flutter$$/bin/flutter build apk --release --dart-define=UPDATE_CHECK=false
+
+AllowedAPKSigningKeys: e57507b7f01b5a815ac399264c67a0de49f8cc9d2fc0b479d549310802b45fbd
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
