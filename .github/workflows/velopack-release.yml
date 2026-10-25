@@ -33,6 +33,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # When this changes, also move the flutter@X.Y.Z srclib of the F-Droid
+  # recipe (fdroid/ and fdroiddata) in the same release: see fdroid/README.md.
   FLUTTER_VERSION: '3.47.5'
   PROJECT_PATH: src/mgws_inventory
   PACK_ID: mgws_inventory

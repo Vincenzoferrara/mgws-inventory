@@ -243,7 +243,9 @@ Recommended values:
   hand, commit `changelogs/N.txt` before the release: an existing file is kept.
 - Then the workflow builds and publishes:
   - the GitHub release: Windows installer and portable zip, Linux AppImage,
-    Android APK and AAB (donations and update check on);
+    Android APK and AAB (donations and update check on), and
+    `mgws_inventory-fdroid.apk`, the reference APK for the reproducible
+    F-Droid build (see [Stores and F-Droid](#stores-and-f-droid));
   - Google Play: a separate AAB with `DONATIONS=false` and
     `UPDATE_CHECK=false`, skipped while the service-account secret is missing.
 - `N`, the Android version code, is the last number of the version. It must
@@ -308,18 +310,28 @@ other change to the workflows is needed.
      `draft` while the app has never been published) and
      `GOOGLE_PLAY_PACKAGE_NAME`.
   5. Every release is a Play review: move to `production` only when ready.
-- **F-Droid**
-  1. Open a merge request on
-     [fdroiddata](https://gitlab.com/fdroid/fdroiddata) with
-     `metadata/it.mgws.mgws_inventory.yml`: Flutter build recipe with
-     `--dart-define=UPDATE_CHECK=false`, the `NonFreeNet` anti-feature,
-     `AutoUpdateMode: Version`, `UpdateCheckMode: Tags`. report_flutter must
-     be on pub.dev (or a pinned public commit) because F-Droid builds from
-     source.
-  2. After inclusion F-Droid builds each new `vX.Y.Z` tag by itself and reads
-     texts and changelogs from `fastlane/`. Nothing to set in GitHub.
-  3. F-Droid signs with its own key, so its APK does not update over the
-     GitHub one (and the other way round).
+- **F-Droid** (reproducible build, signed with our key)
+  1. The recipe is `fdroid/it.mgws.mgws_inventory.yml`; `fdroid/README.md`
+     explains how to check and submit it. It builds with
+     `--dart-define=UPDATE_CHECK=false`, declares `NonFreeNet`, updates
+     itself from tags (`AutoUpdateMode: Version`, `UpdateCheckMode: Tags`),
+     and points `Binaries` at `mgws_inventory-fdroid.apk` with our signing
+     certificate in `AllowedAPKSigningKeys`.
+  2. After inclusion F-Droid notices each new `vX.Y.Z` tag by itself, usually
+     within days, rebuilds it in `/home/vagrant/build/it.mgws.mgws_inventory`
+     and, if the result matches `mgws_inventory-fdroid.apk`, ships our signed
+     APK. Texts, screenshots and changelogs come from `fastlane/`.
+  3. The match holds only because the release workflow builds that APK with
+     the recipe's commands, in the same folder (the Dart snapshot embeds the
+     build path), and native libraries are linked without a build-id
+     (`android/build.gradle.kts`).
+  4. **When `FLUTTER_VERSION` changes in the workflows**, open a merge request
+     on fdroiddata that moves the recipe's `flutter@X.Y.Z` srclib to the same
+     version, in the same release. Automatic updates copy the old srclib, so
+     otherwise the rebuild no longer matches and F-Droid stops updating.
+  5. Also update the fdroiddata recipe when the build commands or
+     `--dart-define` flags of the F-Droid APK change, and keep the workflow
+     step "Build signed F-Droid APK" identical to the recipe.
 - **pub.dev (report_flutter)**
   1. Publish the first version by hand: `flutter pub publish` in the library.
   2. On pub.dev, package Admin → Automated publishing: enable "Publishing from
