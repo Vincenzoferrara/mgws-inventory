@@ -164,9 +164,17 @@ jobs:
             fi
           done
 
+          # Flathub and Linux software centres read the release list from the
+          # AppStream metainfo: the new version goes on top of it.
+          metainfo=linux/packaging/io.github.vincenzoferrara.mgws-inventory.metainfo.xml
+          if ! grep -q "<release version=\"${VERSION}\"" "$metainfo"; then
+            release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+            sed -i "s|^  <releases>\$|&\n    <release version=\"${VERSION}\" date=\"$(date -u +%F)\">\n      <url type=\"details\">${release_url}</url>\n    </release>|" "$metainfo"
+          fi
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add pubspec.yaml fastlane/metadata/android/*/changelogs/"${BUILD_NUMBER}.txt"
+          git add pubspec.yaml fastlane/metadata/android/*/changelogs/"${BUILD_NUMBER}.txt" "$metainfo"
           git commit -q -m "Release $TAG"
 
           # Someone may have pushed while this run was starting: put the release

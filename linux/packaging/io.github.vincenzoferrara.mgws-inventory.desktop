@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=MGWS Inventory
+GenericName=Store Manager
+GenericName[it]=Gestionale negozio
+Comment=Run your clothing store on your WooCommerce site
+Comment[it]=Gestisci il tuo negozio di abbigliamento con il tuo sito WooCommerce
+Exec=mgws_inventory
+Icon=io.github.vincenzoferrara.mgws-inventory
+Terminal=false
+Categories=Office;Finance;
+Keywords=POS;point of sale;inventory;stock;WooCommerce;WordPress;labels;barcode;clothing;shop;
+Keywords[it]=cassa;POS;magazzino;inventario;WooCommerce;WordPress;etichette;barcode;abbigliamento;negozio;
+StartupNotify=true
+StartupWMClass=mgws_inventory

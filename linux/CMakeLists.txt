@@ -8,6 +8,14 @@ set(BINARY_NAME "mgws_inventory")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "it.mgws.mgws_inventory")
+# Name of the desktop file in runner/resources, copied into the bundle.
+set(BUNDLE_DESKTOP_ID "${APPLICATION_ID}")
+# flatpak-builder sets FLATPAK_ID: inside the Flatpak the window must carry the
+# Flatpak ID, so the desktop file and the icon match it. Other Linux builds keep
+# the old ID, which also names their settings folder in ~/.local/share.
+if(DEFINED ENV{FLATPAK_ID})
+  set(APPLICATION_ID "$ENV{FLATPAK_ID}")
+endif()
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -110,11 +118,11 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/app_icon.png"
   RENAME "${APPLICATION_ID}.png"
   COMPONENT Runtime)
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/${APPLICATION_ID}.desktop"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/${BUNDLE_DESKTOP_ID}.desktop"
   DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications"
   COMPONENT Runtime)
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/${APPLICATION_ID}.desktop"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/${BUNDLE_DESKTOP_ID}.desktop"
   DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 

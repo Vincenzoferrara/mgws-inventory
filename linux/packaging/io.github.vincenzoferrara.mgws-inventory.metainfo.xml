@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.vincenzoferrara.mgws-inventory</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+
+  <name>MGWS Inventory</name>
+  <summary>Run your clothing store</summary>
+  <summary xml:lang="it">Gestisci il tuo negozio di abbigliamento</summary>
+
+  <developer id="io.github.vincenzoferrara">
+    <name>Vincenzo Ferrara</name>
+  </developer>
+
+  <description>
+    <p>
+      MGWS Inventory runs the daily work of a clothing store on top of your own online shop.
+      Your WordPress and WooCommerce site is the whole backend: there is no extra server,
+      database or cloud service to set up or pay for.
+    </p>
+    <p>
+      The app sends nothing to the developer: no analytics, no telemetry, no account and no ads.
+      Your data goes only to your own site and, if you turn on the optional AI help,
+      to the AI provider you choose.
+    </p>
+    <p>With the app alone:</p>
+    <ul>
+      <li>Products and variants with images, barcodes, prices and stock</li>
+      <li>Orders, customers and coupons</li>
+      <li>Dashboard with sales, products and orders, with PDF and CSV exports</li>
+      <li>CalDAV calendars and contacts</li>
+      <li>Optional AI help for product descriptions, with your own API key or a local Ollama server</li>
+    </ul>
+    <p>With the free MGWS plugin installed on your site:</p>
+    <ul>
+      <li>Point of sale with sales, returns, exchanges, receipts and cash shifts</li>
+      <li>Stock in, adjustments and transfers, with a movement ledger that can be undone</li>
+      <li>Drag-and-drop designer for labels, shop signs and reports, printed on A4 sheets or label rolls</li>
+      <li>Loyalty cards with points</li>
+      <li>Employees and suppliers, with permissions</li>
+    </ul>
+    <p>
+      You need a WordPress site with WooCommerce. Sign in with your WordPress credentials,
+      WooCommerce API keys, JWT or an application password. The interface is in English and Italian.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.vincenzoferrara.mgws-inventory.desktop</launchable>
+
+  <url type="homepage">https://github.com/Vincenzoferrara/mgws-inventory</url>
+  <url type="bugtracker">https://github.com/Vincenzoferrara/mgws-inventory/issues</url>
+  <url type="vcs-browser">https://github.com/Vincenzoferrara/mgws-inventory</url>
+  <url type="contribute">https://github.com/Vincenzoferrara/mgws-inventory/blob/master/CONTRIBUTING.md</url>
+  <url type="donation">https://ko-fi.com/vinc0101</url>
+
+  <categories>
+    <category>Office</category>
+    <category>Finance</category>
+  </categories>
+
+  <keywords>
+    <keyword>POS</keyword>
+    <keyword>point of sale</keyword>
+    <keyword>inventory</keyword>
+    <keyword>WooCommerce</keyword>
+    <keyword>WordPress</keyword>
+    <keyword>labels</keyword>
+    <keyword>barcode</keyword>
+  </keywords>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#9cc7d8</color>
+    <color type="primary" scheme_preference="dark">#2a4653</color>
+  </branding>
+
+  <content_rating type="oars-1.1" />
+
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png</image>
+      <caption>Product list with the details of the selected product</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png</image>
+      <caption>Point of sale with the receipt being built</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/8.png</image>
+      <caption>Label templates ready to print</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/5.png</image>
+      <caption>Sales dashboard compared with the previous period</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png</image>
+      <caption>Orders with customer, address and products</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/Vincenzoferrara/mgws-inventory/v1.0.63/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png</image>
+      <caption>Loyalty cards with points and tiers</caption>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="1.0.63" date="2026-10-25">
+      <url type="details">https://github.com/Vincenzoferrara/mgws-inventory/releases/tag/v1.0.63</url>
+    </release>
+  </releases>
+</component>
