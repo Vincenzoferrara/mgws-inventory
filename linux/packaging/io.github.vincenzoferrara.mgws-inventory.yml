@@ -1,0 +1,49 @@
+# Flatpak of the Linux release bundle, attached to the GitHub releases as
+# mgws_inventory.flatpak. Not a Flathub manifest: Flathub builds from source.
+# Build it with script/build_flatpak.sh, which first builds the bundle with
+# FLATPAK_ID set and UPDATE_CHECK=false.
+app-id: io.github.vincenzoferrara.mgws-inventory
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+command: mgws_inventory
+finish-args:
+  # The WordPress/WooCommerce site, the AI providers and a local Ollama.
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # Impeller renders with OpenGL.
+  - --device=dri
+  # The printing plugin opens the GTK print dialog, which talks to CUPS
+  # directly instead of the print portal.
+  - --socket=cups
+  # Files go through the FileChooser portal and passwords through the Secret
+  # portal (libsecret file backend): no filesystem or keyring access.
+
+modules:
+  - name: mgws-inventory
+    buildsystem: simple
+    build-options:
+      no-debuginfo: true
+    build-commands:
+      - mkdir -p /app/lib/mgws_inventory /app/bin
+      - cp -r bundle/. /app/lib/mgws_inventory/
+      - ln -s /app/lib/mgws_inventory/mgws_inventory /app/bin/mgws_inventory
+      - install -Dm644 ${FLATPAK_ID}.desktop -t /app/share/applications
+      - install -Dm644 ${FLATPAK_ID}.metainfo.xml -t /app/share/metainfo
+      - cp -r icons /app/share/
+      - install -Dm644 LICENSE -t /app/share/licenses/${FLATPAK_ID}
+    sources:
+      - type: dir
+        path: ../../build/linux/x64/release/bundle
+        dest: bundle
+      - type: file
+        path: io.github.vincenzoferrara.mgws-inventory.desktop
+      - type: file
+        path: io.github.vincenzoferrara.mgws-inventory.metainfo.xml
+      - type: dir
+        path: icons
+        dest: icons
+      - type: file
+        path: ../../LICENSE
