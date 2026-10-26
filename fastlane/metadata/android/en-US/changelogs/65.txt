@@ -1,0 +1,1 @@
+- Drop the audio and storage permissions added by the camera plugin
