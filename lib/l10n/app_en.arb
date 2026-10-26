@@ -8082,6 +8082,15 @@
   "@logSharedAndCleared": {
     "description": "Notice after sharing the log and clearing it"
   },
+  "logSavedAndCleared": "Log saved to {file} and temporary memory cleared",
+  "@logSavedAndCleared": {
+    "description": "Notice after saving the log (Linux) and clearing it",
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
   "logShareError": "Could not share the log: {error}",
   "@logShareError": {
     "description": "Error shown when sharing the log fails",

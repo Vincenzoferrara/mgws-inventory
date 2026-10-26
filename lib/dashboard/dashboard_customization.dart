@@ -14,7 +14,6 @@
 // shop managers can create or change shared dashboards.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -634,7 +633,7 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
     final period = _filters.toPeriod();
     setState(() => _exporting = true);
     try {
-      final File file = switch ((choice.scope, choice.format)) {
+      final file = switch ((choice.scope, choice.format)) {
         (DashboardExportScope.dashboard, DashboardExportFormat.csv) =>
           await _exporter.exportDashboardToCsv(dashboard, l10n),
         (DashboardExportScope.dashboard, DashboardExportFormat.pdf) =>
@@ -650,14 +649,16 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
             l10n,
           ),
       };
-      await _exporter.shareFile(
+      final saved = await _exporter.saveFile(
         file,
-        subject: choice.shareSubject(context.l10n),
+        dialogTitle: choice.title(l10n),
       );
+      // Finestra annullata: nessun messaggio.
+      if (saved == null) return;
       NotificationService.instance.messageBar(
         'successo',
         'dashboard',
-        l10n.dashboardReportGenerato(file.path),
+        l10n.dashboardReportGenerato(saved),
       );
     } catch (error) {
       log.e('Dashboard export failed', error);

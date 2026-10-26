@@ -1,43 +1,59 @@
 // Report Export - Funzionalità di esportazione report
 //
-// Gestisce l'esportazione dei report in formato CSV e PDF
+// Gestisce l'esportazione dei report in formato CSV e PDF; il file viene
+// salvato dove sceglie l'utente, con la finestra di salvataggio di sistema.
 
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import 'dashboard.code.dart';
 import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;
 import '../log_viewer/app_logger.dart';
+import '../reuse_class/logic/save_file_dialog.dart';
 import '../l10n/extensions.dart';
 import '../theme/theme.dart';
 
+/// Report pronto da salvare: nome proposto, contenuto e tipo MIME.
+class DashboardExportFile {
+  const DashboardExportFile({
+    required this.fileName,
+    required this.bytes,
+    required this.mimeType,
+  });
+
+  final String fileName;
+  final Uint8List bytes;
+  final String mimeType;
+}
+
 /// Contratto per l'export dei report dashboard
 abstract interface class DashboardExportGateway {
-  Future<File> exportDashboardToCsv(
+  Future<DashboardExportFile> exportDashboardToCsv(
     DashboardData dashboard,
     AppLocalizations l10n,
   );
 
-  Future<File> exportVenditeToCsv(
+  Future<DashboardExportFile> exportVenditeToCsv(
     ReportVenditeDettagliato report,
     AppLocalizations l10n,
   );
 
-  Future<File> exportDashboardToPdf(
+  Future<DashboardExportFile> exportDashboardToPdf(
     DashboardData dashboard,
     AppLocalizations l10n,
   );
 
-  Future<File> exportVenditeToPdf(
+  Future<DashboardExportFile> exportVenditeToPdf(
     ReportVenditeDettagliato report,
     AppLocalizations l10n,
   );
 
-  Future<void> shareFile(File file, {String? subject});
+  /// Chiede dove salvare [file] e lo scrive. Restituisce il percorso (o il
+  /// nome) del file salvato, null se l'utente annulla.
+  Future<String?> saveFile(DashboardExportFile file, {String? dialogTitle});
 }
 
 enum DashboardExportScope { dashboard, vendite }
@@ -117,7 +133,7 @@ class ReportExporter implements DashboardExportGateway {
   final _currencyFormat = NumberFormat.currency(locale: 'it_IT', symbol: '€');
 
   /// Esporta dashboard in CSV
-  Future<File> exportDashboardToCsv(
+  Future<DashboardExportFile> exportDashboardToCsv(
     DashboardData dashboard,
     AppLocalizations l10n,
   ) async {
@@ -229,14 +245,8 @@ class ReportExporter implements DashboardExportGateway {
         }
       }
 
-      // Salva file
-      final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final file = File('${directory.path}/report_dashboard_$timestamp.csv');
-      await file.writeAsString(buffer.toString());
-
-      log.i('CSV Dashboard esportato: ${file.path}');
-      return file;
+      log.i('CSV Dashboard pronto');
+      return _csvFile('dashboard', buffer);
     } catch (e) {
       log.e('Errore export CSV dashboard', e);
       rethrow;
@@ -244,7 +254,7 @@ class ReportExporter implements DashboardExportGateway {
   }
 
   /// Esporta report vendite dettagliato in CSV
-  Future<File> exportVenditeToCsv(
+  Future<DashboardExportFile> exportVenditeToCsv(
     ReportVenditeDettagliato report,
     AppLocalizations l10n,
   ) async {
@@ -319,14 +329,8 @@ class ReportExporter implements DashboardExportGateway {
         }
       }
 
-      // Salva file
-      final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final file = File('${directory.path}/report_vendite_$timestamp.csv');
-      await file.writeAsString(buffer.toString());
-
-      log.i('CSV Vendite esportato: ${file.path}');
-      return file;
+      log.i('CSV Vendite pronto');
+      return _csvFile('vendite', buffer);
     } catch (e) {
       log.e('Errore export CSV vendite', e);
       rethrow;
@@ -334,7 +338,7 @@ class ReportExporter implements DashboardExportGateway {
   }
 
   /// Esporta dashboard in PDF
-  Future<File> exportDashboardToPdf(
+  Future<DashboardExportFile> exportDashboardToPdf(
     DashboardData dashboard,
     AppLocalizations l10n,
   ) async {
@@ -520,14 +524,8 @@ class ReportExporter implements DashboardExportGateway {
         ),
       );
 
-      // Salva file
-      final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final file = File('${directory.path}/report_dashboard_$timestamp.pdf');
-      await file.writeAsBytes(await pdf.save());
-
-      log.i('PDF Dashboard esportato: ${file.path}');
-      return file;
+      log.i('PDF Dashboard pronto');
+      return await _pdfFile('dashboard', pdf);
     } catch (e) {
       log.e('Errore export PDF dashboard', e);
       rethrow;
@@ -535,7 +533,7 @@ class ReportExporter implements DashboardExportGateway {
   }
 
   /// Esporta report vendite in PDF
-  Future<File> exportVenditeToPdf(
+  Future<DashboardExportFile> exportVenditeToPdf(
     ReportVenditeDettagliato report,
     AppLocalizations l10n,
   ) async {
@@ -674,31 +672,51 @@ class ReportExporter implements DashboardExportGateway {
         ),
       );
 
-      // Salva file
-      final directory = await getApplicationDocumentsDirectory();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final file = File('${directory.path}/report_vendite_$timestamp.pdf');
-      await file.writeAsBytes(await pdf.save());
-
-      log.i('PDF Vendite esportato: ${file.path}');
-      return file;
+      log.i('PDF Vendite pronto');
+      return await _pdfFile('vendite', pdf);
     } catch (e) {
       log.e('Errore export PDF vendite', e);
       rethrow;
     }
   }
 
-  /// Condivide un file esportato
-  Future<void> shareFile(File file, {String? subject}) async {
+  /// Salva un report con la finestra di sistema (portale XDG su Linux).
+  Future<String?> saveFile(
+    DashboardExportFile file, {
+    String? dialogTitle,
+  }) async {
     try {
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], subject: subject ?? 'Report'),
+      final saved = await saveFileWithDialog(
+        dialogTitle: dialogTitle,
+        fileName: file.fileName,
+        bytes: file.bytes,
+        mimeType: file.mimeType,
       );
+      if (saved != null) log.i('Report salvato: $saved');
+      return saved;
     } catch (e) {
-      log.e('Errore condivisione file', e);
+      log.e('Errore salvataggio report', e);
       rethrow;
     }
   }
+
+  /// Nome proposto, per esempio `report-dashboard-2026-10-26.pdf`.
+  String _fileName(String kind, String extension) =>
+      'report-$kind-${DateFormat('yyyy-MM-dd').format(DateTime.now())}.$extension';
+
+  DashboardExportFile _csvFile(String kind, StringBuffer buffer) =>
+      DashboardExportFile(
+        fileName: _fileName(kind, 'csv'),
+        bytes: Uint8List.fromList(utf8.encode(buffer.toString())),
+        mimeType: 'text/csv',
+      );
+
+  Future<DashboardExportFile> _pdfFile(String kind, pw.Document pdf) async =>
+      DashboardExportFile(
+        fileName: _fileName(kind, 'pdf'),
+        bytes: await pdf.save(),
+        mimeType: 'application/pdf',
+      );
 
   // Helper per creare riga key-value nel PDF
   pw.Widget _buildPdfKeyValue(String key, String value) {

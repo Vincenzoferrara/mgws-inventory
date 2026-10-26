@@ -3,7 +3,6 @@
 // Dashboard e visualizzazione statistiche WooCommerce
 // Mostra vendite, prodotti, ordini e statistiche
 
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -166,18 +165,20 @@ class _DashboardPageState extends State<DashboardPage> {
 
     setState(() => _isExporting = true);
     try {
+      final l10n = context.l10n;
       final file = await _exportReport(choice, dashboard);
-      await _exportGateway.shareFile(
+      final saved = await _exportGateway.saveFile(
         file,
-        subject: choice.shareSubject(context.l10n),
+        dialogTitle: choice.title(l10n),
       );
-      if (!mounted) {
+      // Finestra annullata: nessun messaggio.
+      if (saved == null || !mounted) {
         return;
       }
       NotificationService.instance.messageBar(
         'successo',
         'dashboard',
-        'Report generato: ${file.path}',
+        l10n.dashboardReportGenerato(saved),
       );
     } catch (e) {
       log.e('❌ Errore generazione report dashboard', e);
@@ -187,7 +188,7 @@ class _DashboardPageState extends State<DashboardPage> {
       NotificationService.instance.messageBar(
         'errore',
         'dashboard',
-        'Export non riuscito: $e',
+        context.l10n.dashboardExportFallito(e),
       );
     } finally {
       if (mounted) {
@@ -196,7 +197,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  Future<File> _exportReport(
+  Future<DashboardExportFile> _exportReport(
     DashboardExportChoice choice,
     DashboardData dashboard,
   ) async {

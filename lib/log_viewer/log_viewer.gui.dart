@@ -1,11 +1,13 @@
 import '../l10n/error_text.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/theme.dart';
 import 'package:share_plus/share_plus.dart';
 import '../notification/notification_service.dart';
+import '../reuse_class/logic/save_file_dialog.dart';
 import 'app_logger.dart';
 import '../l10n/extensions.dart';
 
@@ -255,16 +257,33 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     setState(() => _isLoading = true);
     try {
       await log.stopTemporaryRecording();
-      final file = await log.createTemporarySnapshot(content: _filteredContent);
-      if (file == null) return;
+      String? savedTo;
+      if (Platform.isLinux) {
+        // share_plus non condivide file su Linux: si salva dove sceglie
+        // l'utente (portale XDG, quindi anche dentro il Flatpak).
+        savedTo = await saveFileWithDialog(
+          dialogTitle: l10n.logShareSubject,
+          fileName:
+              'mgws-inventory-log-${DateTime.now().toIso8601String().substring(0, 10)}.txt',
+          bytes: Uint8List.fromList(utf8.encode(_filteredContent)),
+          mimeType: 'text/plain',
+        );
+        // Finestra annullata: il log resta com'e'.
+        if (savedTo == null) return;
+      } else {
+        final file = await log.createTemporarySnapshot(
+          content: _filteredContent,
+        );
+        if (file == null) return;
 
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], subject: l10n.logShareSubject),
-      );
-      await log.clearAllLogs();
-      if (await file.exists()) {
-        await file.delete();
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(file.path)], subject: l10n.logShareSubject),
+        );
+        if (await file.exists()) {
+          await file.delete();
+        }
       }
+      await log.clearAllLogs();
       _selectedFile = null;
       await _loadLogFiles();
 
@@ -272,7 +291,9 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       NotificationService.instance.messageBar(
         'successo',
         'log_viewer',
-        l10n.logSharedAndCleared,
+        savedTo == null
+            ? l10n.logSharedAndCleared
+            : l10n.logSavedAndCleared(savedTo),
       );
     } catch (error) {
       if (!mounted) return;

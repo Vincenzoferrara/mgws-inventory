@@ -8079,6 +8079,15 @@
   "@logSharedAndCleared": {
     "description": "Avviso dopo la condivisione e la pulizia del log"
   },
+  "logSavedAndCleared": "Log salvato in {file} e memoria temporanea svuotata",
+  "@logSavedAndCleared": {
+    "description": "Avviso dopo il salvataggio del log (Linux) e la pulizia",
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
   "logShareError": "Errore condivisione log: {error}",
   "@logShareError": {
     "description": "Errore mostrato quando la condivisione del log non riesce",
