@@ -111,6 +111,9 @@
   </screenshots>
 
   <releases>
+    <release version="1.0.64" date="2026-10-26">
+      <url type="details">https://github.com/Vincenzoferrara/mgws-inventory/releases/tag/v1.0.64</url>
+    </release>
     <release version="1.0.63" date="2026-10-25">
       <url type="details">https://github.com/Vincenzoferrara/mgws-inventory/releases/tag/v1.0.63</url>
     </release>

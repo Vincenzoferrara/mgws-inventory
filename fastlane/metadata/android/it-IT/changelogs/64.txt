@@ -1,0 +1,7 @@
+- Use report_flutter with saving through the system save dialog
+- Publish the release even if the Flatpak job fails
+- Attach mgws_inventory.flatpak to every GitHub release
+- Add a Flatpak manifest and build script for the GitHub release
+- Document the Flatpak download and how the release builds it
+- Document that PDFs and exports are saved through the save dialog
+- Save dashboard reports and the Linux log through the system save dialog
