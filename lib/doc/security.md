@@ -39,7 +39,10 @@ configuration files out of public backups and repositories.
 
 - Logs stay in memory; files are written only when the user records a
   temporary log, in the app's temporary folder, never in Documents or
-  Downloads.
+  Downloads. On Linux, `Share and clear` saves the log only where the user
+  chooses in the save dialog.
+- PDFs and exports are saved only where the user chooses in the system save
+  dialog; the app writes no files to fixed user folders.
 - Message, error and stack trace are sanitised at every level: passwords,
   tokens, JWTs, Bearer tokens, API keys, Application Passwords, secrets and
   consumer keys never appear in shared logs.

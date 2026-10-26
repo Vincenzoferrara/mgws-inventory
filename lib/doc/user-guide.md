@@ -308,8 +308,9 @@ screens, at the top on phones.
   start; printing begins right after them. The preview shows them in grey.
 - `Paper format`: applies to this print only.
 - `One` / `Whole sheet` switch the preview between one label and the sheet.
-- `Print` opens the system print dialog; `Save PDF` saves or shares the
-  file. The arrow next to the name goes back to the list.
+- `Print` opens the system print dialog; `Save PDF` asks where to save the
+  file (see [Where files are saved](#where-files-are-saved)). The arrow next
+  to the name goes back to the list.
 
 **Labels from products.** `Print labels` in `Products` opens this tab with
 the selected products: only label templates are listed, and every variant
@@ -414,7 +415,21 @@ The dashboard is a grid of widgets that each user builds.
 - Without MGWS, personal dashboards stay on the device and cannot be
   shared.
 - `More options > Export report` creates `Dashboard CSV`, `Dashboard PDF`,
-  `Sales CSV` or `Sales PDF` for the filtered period.
+  `Sales CSV` or `Sales PDF` for the filtered period and asks where to save
+  it.
+
+### Where files are saved
+
+PDFs and exports are never written to a fixed folder: the app opens the
+system save dialog with a suggested name (for example
+`report-dashboard-2026-10-26.pdf`) and saves the file where you choose. The
+dialog usually reopens in the last folder you used. Closing the dialog
+saves nothing. On Linux the dialog comes from the desktop portal, so it
+works in the Flatpak too.
+
+In the system print dialog, "Print to file" is handled by the printing
+system, not by the app: in the Flatpak that file stays inside the sandbox.
+Use `Save PDF` instead.
 
 ## Settings
 
@@ -440,7 +455,9 @@ in memory and are not saved in your folders.
 
 - `Record temporary log` writes them to a temporary file inside the app,
   useful while you reproduce a problem; `Stop temporary log` stops it.
-- `Share and clear` shares the filtered messages and then deletes them.
+- `Share and clear` shares the filtered messages and then deletes them. On
+  Linux, where files cannot be shared, it asks where to save them instead;
+  closing the dialog keeps the messages.
 - `Delete log` deletes them without sharing.
 - `Filter by level` shows all messages, or only debug, warnings or errors;
   `Filter by tag` narrows them to one part of the app.
