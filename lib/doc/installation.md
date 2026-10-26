@@ -27,7 +27,7 @@ separate server, database or cloud account to set up for the app.
 | Platform | Where |
 |----------|-------|
 | Windows | Installer or portable zip from the [latest release](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest) |
-| Linux | AppImage from the [latest release](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest) |
+| Linux | AppImage or Flatpak (`mgws_inventory.flatpak`) from the [latest release](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest) |
 | Android | APK from the [latest release](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest), or [Obtainium](https://github.com/ImranR98/Obtainium) with the address `https://github.com/Vincenzoferrara/mgws-inventory`. F-Droid and Google Play are coming. |
 | macOS, iOS | Build from source for now. |
 
@@ -36,6 +36,23 @@ The direct links are in the [project README](../../README.md#download).
 Release versions are `major.minor.build`, for example `1.0.58`. On Android
 the last number is also the technical version code used to recognise
 updates.
+
+### Linux Flatpak
+
+Install the downloaded file for your user:
+
+```bash
+flatpak install --user mgws_inventory.flatpak
+```
+
+Flatpak downloads the runtime from Flathub the first time. A double click
+on the file opens it in the software centre, which does the same. Start the
+app from the application menu or with
+`flatpak run io.github.vincenzoferrara.mgws-inventory`.
+
+The Flatpak sees only its own folder: open and save files through the
+system dialogs. Passwords go to the system keyring through the desktop
+portal.
 
 ## First login
 
@@ -61,9 +78,11 @@ updates.
 
 ## Updates
 
-On Windows and Linux the app updates itself from `Updates`. On Android it
-only tells you that a new version exists: the update comes from F-Droid,
-Obtainium or the store. See [Updates](user-guide.md#updates).
+On Windows and with the Linux AppImage the app updates itself from
+`Updates`. The Flatpak does not update yet: download the new
+`mgws_inventory.flatpak` and install it again with the same command. On
+Android the app only tells you that a new version exists: the update comes
+from F-Droid, Obtainium or the store. See [Updates](user-guide.md#updates).
 
 ## Build from source
 

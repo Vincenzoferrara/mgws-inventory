@@ -84,11 +84,12 @@ Taken with invented demo data. More in
 | Platform | Download |
 |----------|----------|
 | Windows | [Installer](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory-win-Setup.exe) · [Portable](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory-win-Portable.zip) |
-| Linux | [AppImage](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.AppImage) |
+| Linux | [AppImage](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.AppImage) · [Flatpak](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.flatpak) |
 | Android | [APK](https://github.com/Vincenzoferrara/mgws-inventory/releases/latest/download/mgws_inventory.apk) · [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Vincenzoferrara/mgws-inventory) · F-Droid and Google Play coming soon |
 
 All releases: <https://github.com/Vincenzoferrara/mgws-inventory/releases>.
-The desktop versions update themselves.
+The Windows version and the Linux AppImage update themselves. The Flatpak
+does not update yet: install the new `mgws_inventory.flatpak` over the old one.
 
 ## Documentation
 

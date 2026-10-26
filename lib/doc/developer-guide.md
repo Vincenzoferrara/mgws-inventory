@@ -218,7 +218,7 @@ Recommended values:
 | GitHub releases, Obtainium, desktop | `true` | `true` |
 | F-Droid | `true` | `false` |
 | Google Play | `false` | `false` |
-| Flathub | `true` | `false` |
+| Flatpak in the GitHub release, Flathub | `true` | `false` |
 | App Store | `false` (hidden anyway) | (Android only) |
 
 ## Versions and releases
@@ -244,11 +244,19 @@ Recommended values:
   hand, commit `changelogs/N.txt` before the release: an existing file is kept.
 - Then the workflow builds and publishes:
   - the GitHub release: Windows installer and portable zip, Linux AppImage,
-    Android APK and AAB (donations and update check on), and
+    Android APK and AAB (donations and update check on),
+    `mgws_inventory.flatpak` (see below), and
     `mgws_inventory-fdroid.apk`, the reference APK for the reproducible
     F-Droid build (see [Stores and F-Droid](#stores-and-f-droid));
   - Google Play: a separate AAB with `DONATIONS=false` and
     `UPDATE_CHECK=false`, skipped while the service-account secret is missing.
+- The Flatpak (`build-flatpak` job) runs `script/build_flatpak.sh`: a Linux
+  bundle with `UPDATE_CHECK=false` and `FLATPAK_ID` set, repackaged by
+  `linux/packaging/io.github.vincenzoferrara.mgws-inventory.yml` on the
+  Flathub `org.freedesktop.Platform` runtime. The same script builds it
+  locally (it needs `flatpak` and `flatpak-builder`). The bundle has no
+  update channel yet, and it is not the Flathub package: Flathub builds from
+  source with a manifest kept in its own repository.
 - `N`, the Android version code, is the last number of the version. It must
   grow with every release: Google Play refuses a code it has already seen.
 - The release commit is pushed with `GITHUB_TOKEN`, which starts no other
