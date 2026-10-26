@@ -1313,8 +1313,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "0447e5403eb589aa27aa8b386eeddaad92620104"
-      resolved-ref: "0447e5403eb589aa27aa8b386eeddaad92620104"
+      ref: "8c2c37ef73ee57ce74dcf16749c7c4678c373f59"
+      resolved-ref: "8c2c37ef73ee57ce74dcf16749c7c4678c373f59"
       url: "https://github.com/Vincenzoferrara/report_flutter.git"
     source: git
     version: "1.0.0"

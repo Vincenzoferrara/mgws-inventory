@@ -94,7 +94,7 @@ dependencies:
   report_flutter:
     git:
       url: https://github.com/Vincenzoferrara/report_flutter.git
-      ref: 0447e5403eb589aa27aa8b386eeddaad92620104
+      ref: 8c2c37ef73ee57ce74dcf16749c7c4678c373f59
 
   # ADS_CONNECTOR_DISABLED_FOR_FDROID: escluso temporaneamente dalla build F-Droid.
   # ads_connector:
