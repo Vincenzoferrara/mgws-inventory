@@ -636,6 +636,14 @@ jobs:
       - build-linux
       - build-flatpak
       - build-android
+    # The Flatpak is an extra: if its job fails, the release still goes out
+    # with the other platforms, just without mgws_inventory.flatpak.
+    if: >-
+      ${{ !cancelled()
+      && needs.resolve-version.result == 'success'
+      && needs.build-windows.result == 'success'
+      && needs.build-linux.result == 'success'
+      && needs.build-android.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       # The Google Play bundle stays out of the GitHub release.
@@ -646,6 +654,7 @@ jobs:
           path: release-assets
 
       - name: Download Flatpak artifact
+        if: ${{ needs.build-flatpak.result == 'success' }}
         uses: actions/download-artifact@v8
         with:
           name: flatpak-linux
