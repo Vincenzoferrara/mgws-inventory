@@ -20,9 +20,9 @@ Binaries:
   https://github.com/Vincenzoferrara/mgws-inventory/releases/download/v%v/mgws_inventory-fdroid.apk
 
 Builds:
-  - versionName: 1.0.63
-    versionCode: 63
-    commit: 594255829beb15bc7707a9b5358bb3eaf88b7b7d
+  - versionName: 1.0.65
+    versionCode: 65
+    commit: eaae36ed84b3dba745d52b4697dd79f1b37e770b
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.47.5
@@ -43,5 +43,5 @@ AllowedAPKSigningKeys: e57507b7f01b5a815ac399264c67a0de49f8cc9d2fc0b479d54931080
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.63
-CurrentVersionCode: 63
+CurrentVersion: 1.0.65
+CurrentVersionCode: 65
