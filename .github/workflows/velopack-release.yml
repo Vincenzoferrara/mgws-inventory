@@ -385,6 +385,92 @@ jobs:
           path: ${{ env.PROJECT_PATH }}/dist/velopack/linux/**
           if-no-files-found: error
 
+  # The Flatpak repackages a Linux bundle built with UPDATE_CHECK=false:
+  # Velopack cannot update files inside a Flatpak. script/build_flatpak.sh
+  # holds the commands, so a local run builds the same file.
+  build-flatpak:
+    name: Build Linux Flatpak
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout app repository
+        uses: actions/checkout@v7
+        with:
+          path: ${{ env.PROJECT_PATH }}
+          ref: ${{ needs.resolve-version.outputs.sha }}
+          sparse-checkout: |
+            /*
+            !/docker/
+          sparse-checkout-cone-mode: false
+
+      - name: Checkout local package report
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.REPORT_REPO }}
+          ref: ${{ env.REPORT_REF }}
+          path: report
+
+      - name: Checkout local package ads_connector_flutter
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.ADS_CONNECTOR_REPO }}
+          path: ads_connector_flutter
+
+      - name: Verify external local packages
+        run: |
+          missing=0
+          for dir in report ads_connector_flutter; do
+            if [ ! -d "$GITHUB_WORKSPACE/$dir" ]; then
+              echo "::error::Missing local package '$dir'. Set repository variable '$([ "$dir" = report ] && printf REPORT_REPO || printf ADS_CONNECTOR_REPO)' to owner/repo or vendor the package into this repository."
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - name: Install Linux build dependencies and Flatpak tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev flatpak flatpak-builder
+          # Ubuntu's AppArmor blocks the user namespaces that bubblewrap uses
+          # for the build sandbox.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      # velopack_flutter builds its Rust library even where it stays off.
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          flutter config --enable-linux-desktop
+          flutter pub get
+
+      - name: Build Flatpak bundle
+        working-directory: ${{ env.PROJECT_PATH }}
+        env:
+          BUILD_NAME: ${{ needs.resolve-version.outputs.flutter_version }}
+          BUILD_NUMBER: ${{ needs.resolve-version.outputs.build_number }}
+          FLATPAK_WORK_DIR: ${{ runner.temp }}/flatpak
+        run: |
+          script/build_flatpak.sh --build-name "$BUILD_NAME" --build-number "$BUILD_NUMBER"
+
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-linux
+          path: ${{ env.PROJECT_PATH }}/build/mgws_inventory.flatpak
+          if-no-files-found: error
+
   build-android:
     name: Build signed Android release
     needs: resolve-version
@@ -548,6 +634,7 @@ jobs:
       - resolve-version
       - build-windows
       - build-linux
+      - build-flatpak
       - build-android
     runs-on: ubuntu-latest
     steps:
@@ -557,6 +644,12 @@ jobs:
         with:
           pattern: velopack-*
           path: release-assets
+
+      - name: Download Flatpak artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: flatpak-linux
+          path: release-assets/flatpak
 
       - name: Download Android artifacts
         uses: actions/download-artifact@v8
