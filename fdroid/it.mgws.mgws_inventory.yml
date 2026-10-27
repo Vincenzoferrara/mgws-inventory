@@ -2,8 +2,9 @@ AntiFeatures:
   NonFreeNet:
     en-US: The optional AI help can send product data to proprietary services (OpenAI,
       Anthropic, Google, Mistral), only after the user enables it and gives consent.
-      A local Ollama server is also supported. To show a "new version" notice, the app
-      checks the latest release on the GitHub API; it never downloads or installs it.
+      A local Ollama server is also supported. To show a "new version" notice, the
+      app checks the latest release on the GitHub API; it never downloads or installs
+      it.
 Categories:
   - Inventory
 License: GPL-3.0-only
@@ -21,9 +22,9 @@ Binaries:
   https://github.com/Vincenzoferrara/mgws-inventory/releases/download/v%v/mgws_inventory.apk
 
 Builds:
-  - versionName: 1.0.65
-    versionCode: 65
-    commit: eaae36ed84b3dba745d52b4697dd79f1b37e770b
+  - versionName: 1.0.66
+    versionCode: 66
+    commit: de0e62efdc5b4031503c07f0e275e2925d3b28a4
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.47.5
@@ -44,5 +45,5 @@ AllowedAPKSigningKeys: e57507b7f01b5a815ac399264c67a0de49f8cc9d2fc0b479d54931080
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.65
-CurrentVersionCode: 65
+CurrentVersion: 1.0.66
+CurrentVersionCode: 66

@@ -1,0 +1,26 @@
+# Configurazione di flutter_release_checklist.
+# Uso, dalla cartella dell'app:
+#   flutter_release_checklist run --no-color
+
+checks:
+  android_manifest: true
+  ios_plist: true
+  hardcoded_secrets: true
+  proguard: true
+  debug_mode: true
+  analyze: true
+  version_bump: true
+  # Resta saltato finché non esiste la cartella test/.
+  test_coverage: true
+  app_icon: true
+  dart_define_leak: true
+
+thresholds:
+  test_coverage_min: 70
+
+# Prefissi relativi alla radice del progetto, usati da debug_mode e
+# hardcoded_secrets.
+exclude_paths:
+  # Il logger usa debugPrint come uscita di console, già spenta in release
+  # dentro _consolePrint; il controllo non sa riconoscere la protezione.
+  - lib/log_viewer/app_logger.dart

@@ -73,6 +73,11 @@ static void my_application_activate(GApplication* application) {
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
+  // Con l'isolate UI sul thread GTK (default di Flutter 3.47) la sezione
+  // Prodotti in debug si bloccava a caso: il thread principale restava in
+  // attesa dentro la VM Dart e la finestra non rispondeva piu'. Su un thread
+  // separato il loop GTK resta libero.
+  fl_dart_project_set_ui_thread_policy(project, FL_UI_THREAD_POLICY_RUN_ON_SEPARATE_THREAD);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));

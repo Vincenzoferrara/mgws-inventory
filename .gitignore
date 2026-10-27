@@ -97,3 +97,5 @@ lib/l10n/untranslated.json
 
 # Override locale delle dipendenze (report_flutter da ../../report)
 pubspec_overrides.yaml
+# Widget Preview related
+.widget_preview/

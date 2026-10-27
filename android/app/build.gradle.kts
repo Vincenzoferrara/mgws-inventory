@@ -61,6 +61,14 @@ android {
                 logger.warn("key.properties assente: APK release NON firmato")
                 null
             }
+            // Flutter attiverebbe già R8 da solo: lo dichiariamo esplicito
+            // così la configurazione release è leggibile e verificabile.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

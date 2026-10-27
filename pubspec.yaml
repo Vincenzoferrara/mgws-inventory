@@ -89,12 +89,9 @@ dependencies:
 
   # Report Flutter - Sistema report/etichette con drag-and-drop
   # Stessa licenza GPL-3.0, sorgente: https://github.com/Vincenzoferrara/report_flutter
-  # Fino alla pubblicazione su pub.dev resta fissata a un commit su GitHub;
-  # per lo sviluppo locale pubspec_overrides.yaml punta alla cartella ../../report.
-  report_flutter:
-    git:
-      url: https://github.com/Vincenzoferrara/report_flutter.git
-      ref: 8c2c37ef73ee57ce74dcf16749c7c4678c373f59
+  # Pubblicata su pub.dev; per lo sviluppo locale pubspec_overrides.yaml punta
+  # alla cartella ../../report.
+  report_flutter: ^1.0.0
 
   # ADS_CONNECTOR_DISABLED_FOR_FDROID: escluso temporaneamente dalla build F-Droid.
   # ads_connector:
