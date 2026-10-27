@@ -1,1 +1,0 @@
-<?php return array('dependencies' => array('atum-bootstrap', 'atum-chartjs', 'atum-sweetalert2', 'jquery'), 'version' => '70fd1e33aac8');

@@ -54,15 +54,13 @@ app.*.map.json
 *.p12
 *.mobileprovision
 
-# Docker database data
-docker/wordpress-docker/db_data/
-docker/wordpress-docker/db_data_fresh_*/
-
-# Docker generated uploads
-docker/wordpress-docker/wordpress_uploads/[0-9][0-9][0-9][0-9]/
-docker/wordpress-docker/wordpress_uploads/wc-imports/
-
-# Docker local secrets
+# Docker: nel repo restano solo i file di configurazione (compose, README,
+# php/, script). Database, core WordPress, plugin, temi e upload sono
+# generati in locale dal container.
+docker/wordpress-docker/*
+!docker/wordpress-docker/docker-compose.yml
+!docker/wordpress-docker/README.md
+!docker/wordpress-docker/php/
 docker/wordpress-docker/.env
 .opencode/
 .omo/
