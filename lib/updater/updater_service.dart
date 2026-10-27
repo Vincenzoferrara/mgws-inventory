@@ -43,9 +43,10 @@ class UpdaterService {
     return Platform.isWindows || Platform.isLinux;
   }
 
-  /// Le build per F-Droid, Flathub e gli store si compilano con
+  /// Le build per Flathub e Google Play si compilano con
   /// `--dart-define=UPDATE_CHECK=false`: lì gli aggiornamenti li porta lo
   /// store, e Google Play non accetta avvisi che rimandano a download esterni.
+  /// F-Droid usa lo stesso APK di GitHub, con l'avviso acceso.
   static const bool _updateCheckEnabled = bool.fromEnvironment(
     'UPDATE_CHECK',
     defaultValue: true,

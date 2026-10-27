@@ -15,10 +15,12 @@ To submit or update it:
 
 The build is reproducible: F-Droid rebuilds each tag in
 `/home/vagrant/build/it.mgws.mgws_inventory`, compares it with
-`mgws_inventory-fdroid.apk` from the GitHub release (`Binaries`) and ships
-that APK, signed with our key (`AllowedAPKSigningKeys`).
+`mgws_inventory.apk` from the GitHub release (`Binaries`) and ships
+that APK, signed with our key (`AllowedAPKSigningKeys`). It is the same APK
+offered on GitHub and to Obtainium: the "new version" notice stays on, it
+only tells the user to update from the app store they use.
 
-**Keep the two builds identical.** The workflow step "Build signed F-Droid
+**Keep the two builds identical.** The workflow step "Build signed Android
 APK" in `.github/workflows/velopack-release.yml` must run the same commands,
 flags and Flutter version as this recipe:
 

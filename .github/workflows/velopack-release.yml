@@ -41,7 +41,6 @@ env:
   APP_EXE: mgws_inventory
   ANDROID_APK_NAME: mgws_inventory.apk
   ANDROID_AAB_NAME: mgws_inventory.aab
-  FDROID_APK_NAME: mgws_inventory-fdroid.apk
   GOOGLE_PLAY_AAB_NAME: mgws_inventory-google-play.aab
   REPORT_REPO: ${{ vars.REPORT_REPO || 'Vincenzoferrara/report_flutter' }}
   REPORT_REF: ${{ vars.REPORT_REF || 'main' }}
@@ -559,13 +558,6 @@ jobs:
         working-directory: ${{ env.PROJECT_PATH }}
         run: flutter analyze
 
-      - name: Build signed Android APK
-        working-directory: ${{ env.PROJECT_PATH }}
-        run: |
-          flutter build apk --release \
-            --build-name "${{ needs.resolve-version.outputs.flutter_version }}" \
-            --build-number "${{ needs.resolve-version.outputs.build_number }}"
-
       - name: Build signed Android App Bundle
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
@@ -577,7 +569,6 @@ jobs:
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
           mkdir -p dist/android
-          cp build/app/outputs/flutter-apk/app-release.apk "dist/android/${ANDROID_APK_NAME}"
           cp build/app/outputs/bundle/release/app-release.aab "dist/android/${ANDROID_AAB_NAME}"
 
       # Google Play has its own updates and does not allow donation links that
@@ -593,13 +584,15 @@ jobs:
           mkdir -p dist/google-play
           cp build/app/outputs/bundle/release/app-release.aab "dist/google-play/${GOOGLE_PLAY_AAB_NAME}"
 
-      # Reproducible build for F-Droid: the same commands as the recipe in
-      # fdroid/it.mgws.mgws_inventory.yml, signed with the release key.
-      # F-Droid rebuilds the app from source, checks that it matches this APK
-      # and then ships this one, signed by us. The Dart snapshot embeds the
-      # absolute path of the generated plugin registrant, so the app is built
-      # in the folder the F-Droid build server uses, from a clean copy.
-      - name: Build signed F-Droid APK
+      # One APK for GitHub, Obtainium and F-Droid, built reproducibly with the
+      # same commands as the recipe in fdroid/it.mgws.mgws_inventory.yml and
+      # signed with the release key. F-Droid rebuilds the app from source,
+      # checks that it matches this APK and then ships this one, signed by us.
+      # The Dart snapshot embeds the absolute path of the generated plugin
+      # registrant, so the app is built in the folder the F-Droid build server
+      # uses, from a clean copy. The version comes from pubspec.yaml, already
+      # bumped by resolve-version.
+      - name: Build signed Android APK
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
           fdroid_dir=/home/vagrant/build/it.mgws.mgws_inventory
@@ -611,8 +604,8 @@ jobs:
           export PUB_CACHE="$(pwd)/.pub-cache"
           flutter config --no-analytics
           flutter pub get
-          flutter build apk --release --dart-define=UPDATE_CHECK=false
-          cp build/app/outputs/flutter-apk/app-release.apk "$dist_dir/${FDROID_APK_NAME}"
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk "$dist_dir/${ANDROID_APK_NAME}"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7

@@ -216,7 +216,7 @@ Recommended values:
 | Build | `DONATIONS` | `UPDATE_CHECK` |
 |-------|-------------|----------------|
 | GitHub releases, Obtainium, desktop | `true` | `true` |
-| F-Droid | `true` | `false` |
+| F-Droid (same APK as GitHub) | `true` | `true` |
 | Google Play | `false` | `false` |
 | Flatpak in the GitHub release, Flathub | `true` | `false` |
 | App Store | `false` (hidden anyway) | (Android only) |
@@ -244,10 +244,10 @@ Recommended values:
   hand, commit `changelogs/N.txt` before the release: an existing file is kept.
 - Then the workflow builds and publishes:
   - the GitHub release: Windows installer and portable zip, Linux AppImage,
-    Android APK and AAB (donations and update check on),
-    `mgws_inventory.flatpak` (see below), and
-    `mgws_inventory-fdroid.apk`, the reference APK for the reproducible
-    F-Droid build (see [Stores and F-Droid](#stores-and-f-droid));
+    Android APK and AAB (donations and update check on), and
+    `mgws_inventory.flatpak` (see below). The APK is built reproducibly and
+    is also the reference APK for F-Droid (see
+    [Stores and F-Droid](#stores-and-f-droid));
   - Google Play: a separate AAB with `DONATIONS=false` and
     `UPDATE_CHECK=false`, skipped while the service-account secret is missing.
 - The Flatpak (`build-flatpak` job) runs `script/build_flatpak.sh`: a Linux
@@ -322,13 +322,14 @@ other change to the workflows is needed.
 - **F-Droid** (reproducible build, signed with our key)
   1. The recipe is `fdroid/it.mgws.mgws_inventory.yml`; `fdroid/README.md`
      explains how to check and submit it. It builds with
-     `--dart-define=UPDATE_CHECK=false`, declares `NonFreeNet`, updates
+     the default flags (the "new version" notice stays on), declares
+     `NonFreeNet` (AI providers and the GitHub release check), updates
      itself from tags (`AutoUpdateMode: Version`, `UpdateCheckMode: Tags`),
-     and points `Binaries` at `mgws_inventory-fdroid.apk` with our signing
+     and points `Binaries` at `mgws_inventory.apk` with our signing
      certificate in `AllowedAPKSigningKeys`.
   2. After inclusion F-Droid notices each new `vX.Y.Z` tag by itself, usually
      within days, rebuilds it in `/home/vagrant/build/it.mgws.mgws_inventory`
-     and, if the result matches `mgws_inventory-fdroid.apk`, ships our signed
+     and, if the result matches `mgws_inventory.apk`, ships our signed
      APK. Texts, screenshots and changelogs come from `fastlane/`.
   3. The match holds only because the release workflow builds that APK with
      the recipe's commands, in the same folder (the Dart snapshot embeds the
