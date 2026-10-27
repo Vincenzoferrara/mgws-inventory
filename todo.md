@@ -850,3 +850,224 @@ Contesto 2026-09-19: confronto con `test_altri_programmi/VetrinaDigitale` (C# Wi
   - obiettivo: attivazione licenza, multi-azienda/negozio, setup guidato, dataset demo moda, manuale operativo, note release, canale supporto/SLA
   - perche: senza packaging commerciale resta progetto interno
   - verifica minima: nuova installazione parte da wizard con demo e licenza attiva
+
+## To publish
+
+Piano operativo per pubblicare MGWS Inventory come software libero (GPL-3.0) sostenuto da donazioni: GitHub e F-Droid, poi Google Play, il plugin MGWS su wordpress.org, la libreria `report_flutter` su pub.dev, comunicazione su Reddit e campagna Kickstarter. Ordine delle fasi: chiusura codice → (legale, pub.dev, plugin in parallelo) → release GitHub → donazioni → F-Droid → Google Play → comunicazione → Kickstarter. Kickstarter va per ultimo: le campagne software riescono quando esiste gia' un pubblico.
+
+Gia' fatto (22 ottobre 2026): licenza GPL-3.0 con tab `Info` e licenze open source nell'app; consenso prima dell'invio di dati ai servizi IA cloud; nome "MGWS Inventory" su tutte le piattaforme; opzioni di build `DONATIONS` e `UPDATE_CHECK`; permessi macOS e predisposizione iOS; `report_flutter` da GitHub con versione `1.0.58+58`; `fastlane/` per F-Droid, `PRIVACY.md`, `CONTRIBUTING.md`, `SECURITY.md`; README e `lib/doc` in inglese con funzioni divise tra "solo app" e "con plugin MGWS"; cartelle e file rinominati in inglese; test rimossi; `report_flutter` pronta per pub.dev (dry-run pulito, 12 screenshot, schermate in inglese e italiano).
+
+Decisioni prese: pulizia di `docker/` dalla cronologia del repo saltata; nessuna email di contatto per gli store (contatto = issue GitHub); iOS e App Store rimandati.
+
+### Fase 1 - Chiusura del codice
+
+- [ ] Finire la traduzione dei testi italiani scritti nel codice
+  - tipo: app/l10n
+  - priorita: high
+  - obiettivo: completare la sessione "Localize remaining hard-coded Italian UI strings" modulo per modulo e controllarne i commit
+  - perche: con l'app in inglese alcune schermate mostrano ancora testi italiani
+  - verifica minima: nessuna stringa italiana visibile con lingua inglese; `flutter analyze` pulito
+
+- [ ] Provare l'app completa e fare il push su GitHub
+  - tipo: verifica/release
+  - priorita: high
+  - obiettivo: provare cassa, magazzino, stampa, tab `Info` e consenso IA sul WordPress locale, rileggere i commit e fare `git push origin master`
+  - verifica minima: workflow `Flutter Build` verde su GitHub
+
+- [ ] Configurare il repository GitHub
+  - tipo: process
+  - priorita: medium
+  - obiettivo: attivare Private vulnerability reporting (Settings → Security), descrizione, topics (`flutter`, `woocommerce`, `pos`, `inventory`, `open-source`, `retail`), immagine social, modelli per le issue in `.github/ISSUE_TEMPLATE/`
+  - perche: il link in `SECURITY.md` non funziona finche' la segnalazione privata non e' attiva
+  - verifica minima: "Report a vulnerability" visibile nella scheda Security
+
+### Fase 2 - Aspetti legali, fiscali e licenza
+
+- [ ] Decidere la clausola sugli app store in `CONTRIBUTING.md`
+  - tipo: decisione/legale
+  - priorita: medium
+  - obiettivo: confermare o togliere il permesso aggiuntivo (GPL-3.0 sezione 7) che consente la distribuzione dei contributi esterni tramite App Store e Google Play
+  - perche: senza, un contributo esterno puo' bloccare in futuro la pubblicazione su iOS
+  - verifica minima: testo definitivo in `CONTRIBUTING.md`
+
+- [ ] Consultare il commercialista su donazioni e Kickstarter
+  - tipo: fiscale
+  - priorita: high
+  - obiettivo: trattamento fiscale di Ko-fi, Liberapay, GitHub Sponsors e fondi Kickstarter (prestazione occasionale o partita IVA forfettaria, IVA sulle ricompense come prevendita)
+  - perche: e' l'unico punto che blocca insieme donazioni, Google Play (stato trader) e Kickstarter
+  - verifica minima: modalita' di incasso e fatturazione decisa per iscritto
+
+- [ ] Decidere lo stato "trader" per Google Play (DSA)
+  - tipo: decisione/legale
+  - priorita: medium
+  - obiettivo: dichiarare se lo sviluppatore e' un trader secondo il Digital Services Act
+  - perche: se trader, indirizzo e telefono diventano pubblici sulla scheda Play
+  - verifica minima: dichiarazione compilata in Play Console
+
+### Fase 3 - Libreria report_flutter su pub.dev
+
+- [ ] Pubblicare report_flutter su pub.dev
+  - tipo: release
+  - priorita: high
+  - obiettivo: `cd ../../report && flutter pub publish` (login Google)
+  - nota: un pacchetto pubblicato non si cancella, si puo' solo marcare "discontinued"
+  - verifica minima: pagina <https://pub.dev/packages/report_flutter> con README, screenshot e licenza GPL-3.0
+
+- [ ] Passare l'app alla versione pub.dev di report_flutter
+  - tipo: app/dipendenze
+  - priorita: high
+  - obiettivo: sostituire la dipendenza Git con `report_flutter: ^1.0.0`, rigenerare `pubspec.lock` senza `pubspec_overrides.yaml`, aggiornare `lib/doc/developer-guide.md`
+  - verifica minima: `flutter pub get` e `flutter analyze` puliti senza override
+
+### Fase 4 - Plugin MGWS su GitHub e wordpress.org
+
+Repository: <https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>. Il plugin va pubblicato anche nella directory ufficiale di wordpress.org.
+
+- [ ] Eseguire Plugin Check prima dell'invio
+  - tipo: plugin/verifica
+  - priorita: high
+  - obiettivo: installare il plugin ufficiale "Plugin Check" su un WordPress di prova, analizzare lo zip della release e correggere quanto segnala
+  - nota: revisione di sicurezza fatta il 22 ottobre 2026: nessun problema bloccante (permessi su tutte le 53 rotte REST, nonce e capability su tutti gli AJAX, SQL preparato); corretti input non sanitizzati, intestazione con licenza e URI, FAQ con link all'app
+  - verifica minima: Plugin Check senza errori
+
+- [ ] Inviare il plugin a wordpress.org
+  - tipo: release
+  - priorita: high
+  - obiettivo: creare l'account wordpress.org, inviare lo zip dalla pagina "Add your plugin", rispondere ai revisori (di solito qualche settimana), poi pubblicare con SVN il codice in `trunk`, il tag della versione e le immagini in `assets/` (icona 256×256, banner 1544×500 e 772×250, screenshot)
+  - verifica minima: plugin installabile da Bacheca → Plugin → Aggiungi nuovo
+
+- [ ] Release del plugin su GitHub e collegamento con l'app
+  - tipo: release/docs
+  - priorita: medium
+  - obiettivo: release GitHub con lo zip installabile; nel README del plugin il link all'app e la stessa divisione "solo app / con plugin"; nel README dell'app e in `lib/doc` il link alla pagina wordpress.org quando sara' online
+  - verifica minima: da ogni README si arriva agli altri due progetti
+
+### Fase 5 - Release su GitHub e Obtainium
+
+- [ ] Creare la prima release pubblica v1.0.58
+  - tipo: release
+  - priorita: high
+  - obiettivo: tag `v1.0.58` (uguale a `version: 1.0.58+58` nel `pubspec.yaml`, necessario per F-Droid) che avvia `Velopack Release`; note di rilascio in inglese
+  - verifica minima: installer e zip Windows, AppImage Linux, APK e AAB firmati presenti e installabili; badge Obtainium funzionante
+
+- [ ] Fare gli screenshot dell'app e un video demo
+  - tipo: marketing/docs
+  - priorita: high
+  - obiettivo: screenshot reali (cassa, prodotti, magazzino, stampa, dashboard) dal WordPress locale con dati di prova, per README, F-Droid e Play; video di 1-2 minuti per Reddit e Kickstarter
+  - perche: oggi esistono solo gli screenshot della libreria
+  - verifica minima: screenshot nel README e in `fastlane/metadata/android/*/images/phoneScreenshots/`
+
+### Fase 6 - Donazioni
+
+- [ ] Aprire Liberapay e GitHub Sponsors
+  - tipo: process
+  - priorita: medium
+  - obiettivo: aggiungere ai Ko-fi esistenti Liberapay (molto usato nel mondo FOSS e da F-Droid) e GitHub Sponsors
+  - verifica minima: profili attivi e collegati al conto
+
+- [ ] Collegare gli account donazioni ovunque
+  - tipo: app/docs
+  - priorita: medium
+  - obiettivo: `.github/FUNDING.yml`, README di app, plugin e libreria, campi `Donate`/`Liberapay` di F-Droid, tab `Info`
+  - nota: nelle build per Google Play e App Store niente link alle donazioni dentro l'app (`DONATIONS=false`)
+  - verifica minima: pulsante "Sponsor" visibile su GitHub
+
+### Fase 7 - F-Droid
+
+- [ ] Preparare la ricetta di build per fdroiddata
+  - tipo: release/build
+  - priorita: high
+  - obiettivo: `it.mgws.mgws_inventory.yml` con Flutter come srclib, `--dart-define=UPDATE_CHECK=false`, licenza GPL-3.0, anti-feature NonFreeNet (provider IA proprietari), campi donazione
+  - rischio: `velopack_flutter` compila codice Rust: verificare che non entri nella build Android, altrimenti escluderlo su Android o aggiungere Rust alla ricetta
+  - verifica minima: `fdroid build` locale riuscito
+
+- [ ] Inviare la merge request a fdroiddata
+  - tipo: release
+  - priorita: high
+  - obiettivo: account gitlab.com, merge request a `fdroid/fdroiddata`, risposte ai revisori; facoltativo: build riproducibili per pubblicare con la propria firma
+  - verifica minima: app su <https://f-droid.org/packages/it.mgws.mgws_inventory/>
+
+- [ ] Fare il backup sicuro della chiave di firma Android
+  - tipo: sicurezza
+  - priorita: high
+  - obiettivo: copia cifrata fuori dal computer di `android/keystore/` e della password
+  - perche: senza la chiave non si puo' piu' aggiornare l'app su Play ne', con build riproducibili, su F-Droid
+  - verifica minima: backup ripristinato con successo su un'altra macchina
+
+### Fase 8 - Google Play
+
+- [ ] Aprire l'account sviluppatore Google Play
+  - tipo: process
+  - priorita: medium
+  - obiettivo: account (25 $ una tantum), verifica dell'identita', stato trader (fase 2)
+  - verifica minima: Play Console accessibile
+
+- [ ] Preparare la build e la scheda per Google Play
+  - tipo: release
+  - priorita: medium
+  - obiettivo: AAB con `--dart-define=DONATIONS=false --dart-define=UPDATE_CHECK=false`; testi (riusare quelli F-Droid), screenshot, icona 512, immagine in evidenza 1024×500; modulo Sicurezza dei dati (nessun dato raccolto dallo sviluppatore, dati verso il sito dell'utente e facoltativamente i provider IA); URL privacy <https://github.com/Vincenzoferrara/mgws-inventory/blob/master/PRIVACY.md>; classificazione dei contenuti; giustificare il traffico HTTP in chiaro (WordPress in LAN) o limitarlo con `network_security_config`
+  - verifica minima: scheda completa senza avvisi in Play Console
+
+- [ ] Preparare un sito WordPress demo per i revisori
+  - tipo: infrastruttura
+  - priorita: high
+  - obiettivo: WordPress con WooCommerce, MGWS, dati finti e credenziali di prova da indicare nella revisione
+  - perche: senza backend l'app non mostra nulla e viene rifiutata
+  - verifica minima: login dall'app con le credenziali di prova su una rete esterna
+
+- [ ] Completare il test chiuso obbligatorio
+  - tipo: release
+  - priorita: high
+  - obiettivo: almeno 12 tester per 14 giorni consecutivi (regola per i nuovi account personali), poi richiesta di accesso alla produzione
+  - verifica minima: app pubblicata in produzione
+
+### Fase 9 - Comunicazione e Reddit
+
+- [ ] Preparare il post di presentazione
+  - tipo: marketing
+  - priorita: medium
+  - obiettivo: testo in inglese (problema → soluzione → open source → cosa fa senza e con il plugin → link), screenshot e video; facoltativa una pagina web semplice su GitHub Pages
+  - verifica minima: bozza approvata
+
+- [ ] Pubblicare su Reddit e nelle comunita'
+  - tipo: marketing
+  - priorita: medium
+  - obiettivo: un subreddit alla volta, a qualche giorno di distanza, leggendo prima le regole sull'autopromozione: r/selfhosted (dati sul proprio server), r/opensource e r/coolgithubprojects (cerco contributori), r/woocommerce e r/Wordpress (app + plugin), r/FlutterDev (app + libreria), r/smallbusiness e r/retail (taglio pratico), r/fdroid (dopo F-Droid); forum e gruppi italiani di commercianti e WooCommerce; Mastodon
+  - regole: rispondere ai commenti, non copiare lo stesso testo ovunque, non chiedere soldi nei primi post, portare i feedback nelle issue
+  - verifica minima: feedback raccolti come issue su GitHub
+
+### Fase 10 - Kickstarter
+
+Regole verificate su <https://www.kickstarter.com/rules>: si puo' fare se la campagna finanzia qualcosa di nuovo. Il vecchio divieto su "e-commerce e strumenti gestionali" non esiste piu'.
+
+- [ ] Decidere obiettivo, cifra e durata della campagna
+  - tipo: decisione
+  - priorita: medium
+  - obiettivo: una funzione nuova e concreta da finanziare (candidato naturale: supporto a Shopify; in alternativa app iOS o driver per i registratori fiscali); cifra = ore di lavoro × tariffa + 5% Kickstarter + ~5% pagamenti + tasse + ricompense fisiche + margine; durata 30 giorni
+  - perche: Kickstarter non ammette campagne per un prodotto gia' esistente e gratuito
+  - verifica minima: obiettivo e cifra approvati anche dal commercialista
+
+- [ ] Preparare la campagna nel rispetto delle regole
+  - tipo: marketing/legale
+  - priorita: medium
+  - obiettivo: ricompense nuove e create dal progetto (accesso anticipato alle nuove funzioni, nome nei ringraziamenti della tab `Info`, pacchetti di modelli di etichette, gadget disegnati da te, voto sulla roadmap; non l'app gia' gratuita); niente servizi come cuore del progetto, niente quote o partecipazioni agli utili, niente rimandi a Ko-fi o altre piattaforme nella pagina; dichiarazione obbligatoria sull'IA (funzioni IA nell'app con chiave dell'utente e consenso, eventuale uso di assistenti IA nello sviluppo, contributo umano chiaro); mostrare solo funzioni che esistono davvero
+  - requisiti: maggiorenne, residente in Italia, documento italiano, conto bancario italiano; beneficenza facoltativa fino al 10% se dichiarata prima del lancio
+  - verifica minima: progetto approvato dalla revisione di Kickstarter
+
+- [ ] Lanciare e seguire la campagna
+  - tipo: marketing
+  - priorita: medium
+  - obiettivo: da 6 a 4 settimane prima testi, video, grafica e pagina "in arrivo"; da 4 a 1 settimana prima annunci su Reddit, GitHub, F-Droid e README verso la pagina "in arrivo"; lancio martedi' o mercoledi' mattina (ora USA); aggiornamenti settimanali durante i 30 giorni; dopo, sviluppo della funzione finanziata e consegna delle ricompense
+  - verifica minima: campagna conclusa e ricompense consegnate
+
+### Fase 11 - Dopo il lancio
+
+- [ ] Gestire issue e release con regolarita'
+  - tipo: process
+  - priorita: medium
+  - obiettivo: risposta alle issue entro la settimana con etichette `bug`, `enhancement`, `good first issue`; una release ogni 2-4 settimane con tag e versione del `pubspec.yaml` allineati; changelog in `fastlane/metadata/android/*/changelogs/<versionCode>.txt`; `lib/doc` aggiornata insieme al codice; ringraziamenti a donatori e sostenitori
+  - verifica minima: nessuna issue senza risposta da piu' di una settimana
+
+### Rimandati
+
+- iOS e App Store: account Apple (99 €/anno), risposta sulla crittografia (`ITSAppUsesNonExemptEncryption`), privacy manifest, revisione Apple, nessun link esterno per donazioni.
