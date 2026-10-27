@@ -9,6 +9,9 @@ import '../customers/customer_list.gui.dart';
 import '../coupons/coupon_list/coupon_list_view.gui.dart';
 import '../dashboard/dashboard_customization.dart';
 import '../employees/employees.gui.dart';
+import '../feedback/feedback_dialog.gui.dart';
+import '../feedback/feedback_report.dart';
+import '../feedback/feedback_sanitizer.dart';
 import '../inventory/inventory.gui.dart';
 import '../inventory/inventory_site_panel.gui.dart';
 import '../inventory/inventory_suppliers.gui.dart';
@@ -648,6 +651,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Apre il modulo di feedback che prepara una issue pubblica su GitHub.
+  ///
+  /// Al filtro passano dominio, nomi ed email dell'utente corrente: sono i
+  /// dati che piu' facilmente finiscono nel testo o nei log per sbaglio.
+  Widget _buildFeedbackButton() {
+    return IconButton(
+      icon: const Icon(Icons.feedback_outlined),
+      tooltip: context.l10n.feedbackTooltip,
+      onPressed: () async {
+        final user = _homeLogic.currentUser;
+        final mgws = MgwsConnection.instance;
+        final techInfo = await FeedbackTechInfo.collect(
+          locale: Localizations.localeOf(context).toLanguageTag(),
+          connected: _homeLogic.isConnected,
+          mgwsAvailable: mgws.isConnected,
+          mgwsVersion: mgws.pluginVersion,
+        );
+        if (!mounted) return;
+        await showFeedbackDialog(
+          context,
+          fullScreen: _isSmallScreen(context),
+          techInfo: techInfo,
+          sanitizer: FeedbackSanitizer(
+            siteUrl: _homeLogic.currentSiteUrl,
+            knownNames: [
+              user?.displayName,
+              user?.name,
+              user?.username,
+              user?.nickname,
+              user?.slug,
+              user?.firstName,
+              user?.lastName,
+              user?.email,
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   /// Bottone log riusato dalla vecchia home (bug_report rosso su cerchio nero).
   Widget _buildLogButton() {
     return IconButton(
@@ -882,6 +925,7 @@ class _HomeScreenState extends State<HomeScreen> {
             compact: isSmallScreen,
             onOpenSection: _openSectionById,
           ),
+          _buildFeedbackButton(),
           _buildLogButton(),
           _buildAuthAction(),
           const SizedBox(width: 8),

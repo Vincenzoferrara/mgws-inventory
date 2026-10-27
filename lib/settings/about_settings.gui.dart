@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../reuse_class/logic/project_links.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 
-/// Indirizzi del progetto mostrati nella scheda Info.
-const _sourceUrl = 'https://github.com/Vincenzoferrara/mgws-inventory';
-const _issuesUrl = 'https://github.com/Vincenzoferrara/mgws-inventory/issues';
-const _pluginUrl =
-    'https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin';
 const _licenseUrl = 'https://www.gnu.org/licenses/gpl-3.0.html';
 const _donateUrl = 'https://ko-fi.com/vinc0101';
 
@@ -98,9 +94,9 @@ class AboutSettingsTab extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.code),
                 title: Text(l10n.aboutSourceCode),
-                subtitle: const Text(_sourceUrl),
+                subtitle: const Text(projectSourceUrl),
                 trailing: const Icon(Icons.open_in_new),
-                onTap: () => _open(context, _sourceUrl),
+                onTap: () => _open(context, projectSourceUrl),
               ),
               ListTile(
                 leading: const Icon(Icons.gavel),
@@ -112,13 +108,13 @@ class AboutSettingsTab extends StatelessWidget {
                 leading: const Icon(Icons.extension),
                 title: Text(l10n.aboutWordpressPlugin),
                 trailing: const Icon(Icons.open_in_new),
-                onTap: () => _open(context, _pluginUrl),
+                onTap: () => _open(context, projectPluginUrl),
               ),
               ListTile(
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.aboutReportIssue),
                 trailing: const Icon(Icons.open_in_new),
-                onTap: () => _open(context, _issuesUrl),
+                onTap: () => _open(context, projectIssuesUrl),
               ),
               ListTile(
                 leading: const Icon(Icons.description_outlined),

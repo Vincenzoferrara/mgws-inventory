@@ -5,6 +5,14 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Unico punto in cui il logger scrive in console: in release resta muto,
+/// perché `debugPrint` stampa anche nelle build di produzione.
+void _consolePrint(String message) {
+  if (!kReleaseMode) {
+    debugPrint(message);
+  }
+}
+
 /// Livelli di logging usati dal filtro pubblico del logger.
 enum LogLevel {
   debug, // Dettagli tecnici, info operative e tracce diagnostiche.
@@ -164,7 +172,7 @@ class _AsyncTempFileSink {
           await _trimIfNeeded();
         })
         .catchError((Object error) {
-          debugPrint('Error writing temporary log file: $error');
+          _consolePrint('Error writing temporary log file: $error');
         });
   }
 
@@ -195,7 +203,7 @@ class _AsyncTempFileSink {
           await entity.delete();
         }
       } catch (error) {
-        debugPrint('Error cleaning temporary log file: $error');
+        _consolePrint('Error cleaning temporary log file: $error');
       }
     }
   }
@@ -239,6 +247,9 @@ class AppLogger {
   String? get currentLogPath => _logFile?.path;
 
   String get memoryLogContent => _buffer.dump();
+
+  /// Eventi in memoria, gia' sanitizzati, dal piu' vecchio al piu' recente.
+  List<AppLogEvent> get memoryEvents => _buffer.events;
   List<String> get availableTags => _buffer.tags();
 
   Future<void> init({LogLevel minLevel = LogLevel.debug}) async {
@@ -253,7 +264,7 @@ class AppLogger {
         'Logger initialized - Level: ${minLevel.name} - Mode: memory only',
       );
     } catch (error) {
-      debugPrint('Error initializing logger: $error');
+      _consolePrint('Error initializing logger: $error');
     }
   }
 
@@ -331,7 +342,7 @@ class AppLogger {
           .toList()
         ..sort((a, b) => b.path.compareTo(a.path));
     } catch (error) {
-      debugPrint('Error reading temporary log files: $error');
+      _consolePrint('Error reading temporary log files: $error');
       return [];
     }
   }
@@ -359,9 +370,9 @@ class AppLogger {
         }
       }
 
-      debugPrint('All temporary logs cleared (${files.length} files)');
+      _consolePrint('All temporary logs cleared (${files.length} files)');
     } catch (error) {
-      debugPrint('Error clearing logs: $error');
+      _consolePrint('Error clearing logs: $error');
     }
   }
 
@@ -416,9 +427,7 @@ class AppLogger {
     _buffer.add(event);
     _events.add(event);
 
-    if (!kReleaseMode) {
-      debugPrint(event.formatted);
-    }
+    _consolePrint(event.formatted);
 
     _fileSink?.write(event.formatted);
   }
@@ -436,8 +445,14 @@ class AppLogger {
 
   String _sanitize(dynamic message) {
     if (message == null) return 'null';
+    return redactSecrets(message.toString());
+  }
 
-    var text = message.toString();
+  /// Oscura password, token, chiavi API e JWT riconoscibili in [text].
+  ///
+  /// Pubblico perche' lo riusa anche il feedback verso GitHub, che aggiunge
+  /// sopra i propri filtri per dominio, email e indirizzi.
+  static String redactSecrets(String text) {
     for (final pattern in _sensitivePatterns) {
       text = text.replaceAllMapped(pattern, (match) {
         final matched = match.group(0) ?? '';

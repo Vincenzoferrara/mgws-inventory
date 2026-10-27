@@ -13532,5 +13532,94 @@
         "type": "String"
       }
     }
+  },
+  "feedbackTooltip": "Feedback and help",
+  "@feedbackTooltip": {
+    "description": "Tooltip of the home top bar button that opens the feedback form"
+  },
+  "feedbackTitolo": "Send feedback",
+  "@feedbackTitolo": {
+    "description": "Title of the feedback form"
+  },
+  "feedbackAvvisoPubblico": "Your report will be public on GitHub. Do not write passwords, your shop's domain or customer data.",
+  "@feedbackAvvisoPubblico": {
+    "description": "Notice at the top of the feedback form"
+  },
+  "feedbackTipoBug": "Problem",
+  "@feedbackTipoBug": {
+    "description": "Feedback type: something does not work"
+  },
+  "feedbackTipoIdea": "Idea",
+  "@feedbackTipoIdea": {
+    "description": "Feedback type: suggestion"
+  },
+  "feedbackTipoDomanda": "Question",
+  "@feedbackTipoDomanda": {
+    "description": "Feedback type: question"
+  },
+  "feedbackCampoTitolo": "Title",
+  "@feedbackCampoTitolo": {
+    "description": "Label of the feedback title field"
+  },
+  "feedbackTitoloObbligatorio": "Enter a title",
+  "@feedbackTitoloObbligatorio": {
+    "description": "Validation error when the feedback title is empty"
+  },
+  "feedbackCampoDescrizione": "What happened? What did you expect?",
+  "@feedbackCampoDescrizione": {
+    "description": "Label of the feedback description field"
+  },
+  "feedbackAllegaLog": "Attach the latest warnings and errors from the log",
+  "@feedbackAllegaLog": {
+    "description": "Checkbox to attach log lines to the feedback"
+  },
+  "feedbackAllegaLogDettaglio": "Passwords, domain, emails and addresses are removed. Check the preview anyway.",
+  "@feedbackAllegaLogDettaglio": {
+    "description": "Explanation under the attach log checkbox"
+  },
+  "feedbackSicurezza": "Security problem? Report it privately",
+  "@feedbackSicurezza": {
+    "description": "Link to the private GitHub security advisory form"
+  },
+  "feedbackAnteprima": "Preview",
+  "@feedbackAnteprima": {
+    "description": "Button that shows the final text before sending"
+  },
+  "feedbackAnteprimaSpiegazione": "This is the text that will be published. You can still edit it.",
+  "@feedbackAnteprimaSpiegazione": {
+    "description": "Explanation above the feedback preview"
+  },
+  "feedbackIndietro": "Back",
+  "@feedbackIndietro": {
+    "description": "Button that returns from the preview to the form"
+  },
+  "feedbackCopia": "Copy text",
+  "@feedbackCopia": {
+    "description": "Button that copies the feedback text"
+  },
+  "feedbackCopiato": "Text copied to the clipboard",
+  "@feedbackCopiato": {
+    "description": "Message after copying the feedback text"
+  },
+  "feedbackApriGithub": "Continue on GitHub",
+  "@feedbackApriGithub": {
+    "description": "Button that opens the prefilled GitHub issue page"
+  },
+  "feedbackGithubAperto": "Finish by pressing \"Create\" on the GitHub page.",
+  "@feedbackGithubAperto": {
+    "description": "Message after the browser opened GitHub"
+  },
+  "feedbackBrowserErrore": "Could not open the browser. Copy the text and paste it on {url}",
+  "@feedbackBrowserErrore": {
+    "description": "Error when the browser cannot be opened",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackLingue": "Write in English or Italian.",
+  "@feedbackLingue": {
+    "description": "Hint under the feedback description: the only accepted languages"
   }
 }

@@ -31,6 +31,14 @@ tracking, no ads.
 - **Update check.** On Windows, Linux and Android builds from GitHub, the
   app asks `api.github.com` for the latest release. GitHub sees your IP
   address, as for any web request. Store and F-Droid builds do not check.
+- **Feedback, only when you send it.** The Feedback button in the top
+  bar opens a prefilled issue page on GitHub in your browser; nothing is
+  sent until you press the button there with your own GitHub account.
+  The text holds what you write plus app version, operating system,
+  language, whether you are logged in and the MGWS plugin version. Log
+  lines are attached only if you tick the box. Your site's domain, your
+  name, emails, IP addresses, passwords and keys are removed, and you see
+  the final text before sending. Issues are **public**.
 
 ## Permissions
 
@@ -88,6 +96,14 @@ statistica, nessun tracciamento, nessuna pubblicità.
   scaricate da GitHub, l'app chiede a `api.github.com` l'ultima versione.
   GitHub vede il tuo indirizzo IP, come per qualunque richiesta web. Le
   build degli store e di F-Droid non fanno questo controllo.
+- **Feedback, solo quando lo invii.** Il tasto Feedback nella barra in
+  alto apre nel browser una pagina di GitHub con la issue già compilata;
+  non parte nulla finché non premi il pulsante lì, con il tuo account
+  GitHub. Il testo contiene quello che scrivi più versione dell'app,
+  sistema operativo, lingua, se sei collegato e la versione del plugin
+  MGWS. Le righe di log si allegano solo se spunti la casella. Dominio
+  del sito, nome, email, indirizzi IP, password e chiavi vengono tolti, e
+  vedi il testo finale prima dell'invio. Le issue sono **pubbliche**.
 
 ## Permessi
 

@@ -13529,5 +13529,94 @@
         "type": "String"
       }
     }
+  },
+  "feedbackTooltip": "Feedback e aiuto",
+  "@feedbackTooltip": {
+    "description": "Tooltip del pulsante della barra in alto che apre il modulo di feedback"
+  },
+  "feedbackTitolo": "Invia un feedback",
+  "@feedbackTitolo": {
+    "description": "Titolo del modulo di feedback"
+  },
+  "feedbackAvvisoPubblico": "La segnalazione sarà pubblica su GitHub. Non scrivere password, il dominio del negozio o dati dei clienti.",
+  "@feedbackAvvisoPubblico": {
+    "description": "Avviso in cima al modulo di feedback"
+  },
+  "feedbackTipoBug": "Problema",
+  "@feedbackTipoBug": {
+    "description": "Tipo di feedback: qualcosa non funziona"
+  },
+  "feedbackTipoIdea": "Idea",
+  "@feedbackTipoIdea": {
+    "description": "Tipo di feedback: suggerimento"
+  },
+  "feedbackTipoDomanda": "Domanda",
+  "@feedbackTipoDomanda": {
+    "description": "Tipo di feedback: domanda"
+  },
+  "feedbackCampoTitolo": "Titolo",
+  "@feedbackCampoTitolo": {
+    "description": "Etichetta del campo titolo del feedback"
+  },
+  "feedbackTitoloObbligatorio": "Scrivi un titolo",
+  "@feedbackTitoloObbligatorio": {
+    "description": "Errore quando il titolo del feedback è vuoto"
+  },
+  "feedbackCampoDescrizione": "Cosa è successo? Cosa ti aspettavi?",
+  "@feedbackCampoDescrizione": {
+    "description": "Etichetta del campo descrizione del feedback"
+  },
+  "feedbackAllegaLog": "Allega gli ultimi avvisi ed errori del log",
+  "@feedbackAllegaLog": {
+    "description": "Casella per allegare righe di log al feedback"
+  },
+  "feedbackAllegaLogDettaglio": "Password, dominio, email e indirizzi vengono rimossi. Controlla comunque l'anteprima.",
+  "@feedbackAllegaLogDettaglio": {
+    "description": "Spiegazione sotto la casella dei log"
+  },
+  "feedbackSicurezza": "Problema di sicurezza? Segnalalo in privato",
+  "@feedbackSicurezza": {
+    "description": "Link al modulo privato di GitHub per le vulnerabilità"
+  },
+  "feedbackAnteprima": "Anteprima",
+  "@feedbackAnteprima": {
+    "description": "Pulsante che mostra il testo finale prima dell'invio"
+  },
+  "feedbackAnteprimaSpiegazione": "Questo è il testo che verrà pubblicato. Puoi ancora modificarlo.",
+  "@feedbackAnteprimaSpiegazione": {
+    "description": "Spiegazione sopra l'anteprima del feedback"
+  },
+  "feedbackIndietro": "Indietro",
+  "@feedbackIndietro": {
+    "description": "Pulsante che torna dall'anteprima al modulo"
+  },
+  "feedbackCopia": "Copia testo",
+  "@feedbackCopia": {
+    "description": "Pulsante che copia il testo del feedback"
+  },
+  "feedbackCopiato": "Testo copiato negli appunti",
+  "@feedbackCopiato": {
+    "description": "Messaggio dopo la copia del testo del feedback"
+  },
+  "feedbackApriGithub": "Continua su GitHub",
+  "@feedbackApriGithub": {
+    "description": "Pulsante che apre la pagina GitHub della issue già compilata"
+  },
+  "feedbackGithubAperto": "Completa l'invio premendo \"Create\" nella pagina di GitHub.",
+  "@feedbackGithubAperto": {
+    "description": "Messaggio dopo l'apertura di GitHub nel browser"
+  },
+  "feedbackBrowserErrore": "Impossibile aprire il browser. Copia il testo e incollalo in {url}",
+  "@feedbackBrowserErrore": {
+    "description": "Errore quando il browser non si apre",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackLingue": "Scrivi in italiano o in inglese.",
+  "@feedbackLingue": {
+    "description": "Suggerimento sotto la descrizione del feedback: le sole lingue accettate"
   }
 }
