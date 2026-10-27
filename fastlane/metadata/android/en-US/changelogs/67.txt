@@ -1,0 +1,3 @@
+- Add store screenshots and the publishing plan
+- Use report_flutter from pub.dev and enable R8 for release builds
+- Add a feedback button that prepares a GitHub issue
