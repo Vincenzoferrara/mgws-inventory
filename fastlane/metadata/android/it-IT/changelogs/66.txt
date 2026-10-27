@@ -1,0 +1,2 @@
+- Ship one Android APK for GitHub, Obtainium and F-Droid
+- Point the F-Droid recipe at v1.0.65
