@@ -12,11 +12,13 @@ orders, customers, loyalty cards, employees and reports.
 - [Logging in](#logging-in)
 - [The home screen](#the-home-screen)
 - [Cashier](#cashier)
+- [Lists](#lists)
 - [Products](#products)
 - [MGWS Inventory](#mgws-inventory)
 - [Suppliers](#suppliers)
 - [Templates and print](#templates-and-print)
-- [Customers and employees](#customers-and-employees)
+- [Orders and coupons](#orders-and-coupons)
+- [Customers, users and employees](#customers-users-and-employees)
 - [Loyalty cards](#loyalty-cards)
 - [Dashboard](#dashboard)
 - [Settings](#settings)
@@ -92,6 +94,7 @@ the app shows one screen at a time.
 | `Coupon` | WooCommerce discounts | no |
 | `Orders` | WooCommerce orders | no |
 | `Customers` | WooCommerce customers | no |
+| `Users` | Accounts of the store website, read only | no |
 | `Suppliers` | Supplier registry | yes |
 | `Loyalty Cards` | Cards, points and history | yes |
 | `Templates and print` | Labels, shop signs and reports | yes |
@@ -162,9 +165,24 @@ The counters under the operation type (sales, returns, exchanges and their
 values) cover the open shift, or today's sales of the till when no shift is
 open.
 
-## Products
+## Lists
 
-`Products` is the catalogue workstation.
+`Products`, `Customers`, `Orders`, `Coupon` and `Users` share the same list:
+
+- The `Filter` panel has a quick search over every field, filters by field,
+  operator and value, and sorting. The quick search starts when you stop
+  typing; `Add filter` adds a chip, `Clear all` removes every filter.
+- `Choose columns` picks the visible columns; the choice is remembered.
+- The pagination bar shows the total found and moves between pages, or
+  loads more rows while you scroll with `∞`. The total is the one of the
+  whole store, not of the page on screen.
+- Quick search, sorting and some filters (order status, user role,
+  customer email, coupon code) are answered by the website, one page at a
+  time. Other filters load the whole list once and then work offline.
+- On a computer list and details sit side by side and the divider can be
+  dragged; on a phone a tap opens the details in a page.
+- `Refresh cache and list` reloads from the website.
+
 
 - The filter panel searches and filters by field, operator and value,
   hides out-of-stock items and sorts the list. `Article code / SKU`,
@@ -361,9 +379,27 @@ The data fields of labels and signs are the product fields (`nome`, `sku`,
 `scontoTesto`. Previews use an example product; reports still use example
 figures and say so.
 
-## Customers and employees
+## Orders and coupons
 
-`Customers` shows and edits WooCommerce customers. It has no staff roles.
+`Orders` lists the WooCommerce orders. Above the list, one chip per status
+shows how many orders the store has in that status; a click filters the
+list. Selecting an order shows customer, addresses, products and totals,
+and its menu changes the status, adds a note or deletes it. `New order`
+creates one.
+
+`Coupon` shows on top the totals of the whole store: coupons, active ones,
+uses and discount given. `New coupon` is in the filter panel and in the
+right-click menu; the details card edits, enables, disables or deletes the
+selected coupon.
+
+## Customers, users and employees
+
+`Customers` lists the WooCommerce customers with orders and total spent.
+It has no staff roles.
+
+`Users` lists every account of the store website, staff and customers, with
+roles and registration date. It is read only: permissions are changed from
+the linked employee in `Employees`.
 
 `Employees` is the staff registry kept by MGWS.
 

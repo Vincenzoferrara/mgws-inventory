@@ -298,25 +298,15 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
 
 ## Audit esteso 2 - utenti, clienti, dipendenti
 
-- [ ] Clienti: caricare oltre la prima pagina WooCommerce
+- [ ] Clienti: esporre o rimuovere `eliminaCliente` non collegato alla UI
   - tipo: bug/app
   - priorita: medium
-  - obiettivo: evitare che ricerca e statistiche si fermino ai primi 100 clienti
-
-- [ ] Clienti: esporre o rimuovere CRUD non collegato alla UI
-  - tipo: bug/app
-  - priorita: medium
-  - obiettivo: allineare controller e schermata clienti, evitando metodi mai usati o funzioni non accessibili
+  - obiettivo: allineare controller e schermata clienti; creazione e modifica sono gia' state tolte dal controller (prendevano `WooCustomer`), resta l'eliminazione senza un comando nella lista
 
 - [ ] Chiarire clienti WooCommerce vs clienti gestionali MGWS
   - tipo: architettura/app-plugin
   - priorita: high
   - obiettivo: definire se il dominio clienti resta WooCommerce diretto o se serve un gateway MGWS dedicato per dati gestionali aggiuntivi
-
-- [ ] Utenti: caricare oltre i primi 20 record
-  - tipo: bug/app
-  - priorita: medium
-  - obiettivo: evitare che la lista utenti sia limitata al default WooCommerce/WordPress
 
 - [ ] Utenti: implementare o rimuovere FAB `Aggiungi Utente`
   - tipo: bug/app
@@ -523,16 +513,6 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
 
 ## Audit esteso 5 - ordini e coupon
 
-- [ ] Ordini: caricare oltre i primi 100 ordini
-  - tipo: bug/app
-  - priorita: high
-  - obiettivo: evitare che lista, statistiche e totali vendite restino limitati alla prima pagina di WooCommerce
-
-- [ ] Ordini: statistiche calcolate solo sulla pagina caricata
-  - tipo: bug/app
-  - priorita: high
-  - obiettivo: non falsare conteggi stato e totale vendite quando gli ordini superano la pagina caricata
-
 - [ ] Ordini: riallineare dettaglio dopo cambio stato
   - tipo: bug/app
   - priorita: medium
@@ -557,16 +537,6 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - tipo: bug/app
   - priorita: high
   - obiettivo: evitare creazione di ordini vuoti o incompleti
-
-- [ ] Coupon: aggiungere paginazione reale
-  - tipo: bug/app
-  - priorita: medium
-  - obiettivo: evitare liste tronche e rendere navigabile l'archivio coupon
-
-- [ ] Coupon: aggiungere debounce e protezione race alla ricerca
-  - tipo: bug/app
-  - priorita: medium
-  - obiettivo: evitare risultati fuori ordine durante il typing rapido
 
 - [ ] Coupon: non simulare sempre validazione positiva
   - tipo: bug/app

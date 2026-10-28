@@ -162,6 +162,44 @@ Use `context.text.<style>?.copyWith(...)`. `elevation: 4` is already the
 
 - Operational lists use `DataGridView` (`lib/reuse_class/datagridview/`);
   do not build bespoke tables.
+- A management list (Products, Customers, Orders, Coupons, Users) is a
+  `DataGridListView<T>`, generic on the model. The screen passes:
+  - `fields`: the `DataGridField<T>`s of the model, declared on the model as
+    `static gridFields` (`ProdottoGlobal.gridFields`, `ClienteGlobal`,
+    `OrdiniGlobal`, `CouponGlobal`, `UserGlobal`). A field has the model
+    field `name` (also the key saved in column preferences), a translated
+    `label`, `aliases`, a `type` (text, number, boolean, date, list) that
+    decides the filter operators, and `read(T)`, which may return several
+    values (variants, metadata, roles). `options` translate the values of a
+    list field; `format` gives the cell text.
+  - `idOf`, `detailsOf(context, item, inPage)` (panel on desktop, page on
+    phones), `contextActions`, and optional `cellsOf` for custom cells.
+  - `loadPage(DataGridPageRequest)` returning a `PaginatedResult<T>` with
+    the server total (`X-WP-Total`).
+- The library never imports a model and works by field name: filters,
+  quick search (300 ms debounce), sorting, column picker, pagination and
+  cache all read the field list.
+- Server or memory is decided per request by `DataGridListController`. When
+  every active filter has a `serverParam` with an operator in
+  `serverOperators`, the sort field has a `serverSortParam` and the search
+  can go to the server, `loadPage` receives search, filters and sort and
+  returns one page (`applyResult`). Otherwise the list asks for every page
+  with no filters, keeps the full list in `DataGridViewCache<T>` and
+  filters, sorts and pages in memory (`syncLocalItems`). Products always
+  work in memory (`serverFiltering: false`), because their filters look
+  inside variants.
+- Every load has a sequence number: an answer that arrives after a newer
+  request is dropped, so the last request wins.
+- `DataGridViewCache.of<T>(key)` is one cache per model key, shared by tabs
+  and sections: full list with TTL and `dirty` flag, `append` while pages
+  arrive, `replace`, `updateWhere`/`touch` after edits in place, and the
+  server pages already read per (search, filters, sort, page). Product
+  variants and prices are not there: they live in `ProdottiCache`
+  (`lib/products/product_cache.dart`), which keeps the product list in the
+  generic cache under the key `prodotti`.
+- Saved columns are resolved by field name or alias, so renaming a field
+  keeps old preferences when the old name becomes an alias (Products:
+  `sku`, `quantita`, `stato`, `marca`).
 - `DataGridView.framed` (default `true`) draws the grid's frame. Set it to
   `false` inside a container that already has a border: one frame per
   region.
