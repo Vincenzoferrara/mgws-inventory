@@ -10,17 +10,6 @@ enum TipoRigaCassa { vendita, reso }
 
 enum StatoTurnoCassa { aperto, chiuso }
 
-extension StatoTurnoCassaX on StatoTurnoCassa {
-  String get value {
-    switch (this) {
-      case StatoTurnoCassa.aperto:
-        return 'aperto';
-      case StatoTurnoCassa.chiuso:
-        return 'chiuso';
-    }
-  }
-}
-
 extension TipoOperazioneCassaX on TipoOperazioneCassa {
   String get value {
     switch (this) {
@@ -68,9 +57,9 @@ String cassaTipoRigaLabel(AppLocalizations l10n, TipoRigaCassa tipo) =>
 /// Rappresenta uno scontrino completo
 ///
 /// Canale documentale: `pos` per la vendita fisica, mai mescolato con gli
-/// ordini WooCommerce (canale `woo`). Lo storico POS vive in
-/// `StoricoCassaStore` (SharedPreferences/JSON) in attesa degli endpoint
-/// MGWS definitivi, che restano l'enforcement server-side.
+/// ordini WooCommerce (canale `woo`). Lo storico POS vive sul server MGWS
+/// (`mg_pos_receipts` e `mg_pos_receipt_lines`) e si legge con
+/// `StoricoCassaServer`: il dispositivo non ne tiene copia.
 class Scontrino {
   String id;
   DateTime data;
@@ -92,7 +81,7 @@ class Scontrino {
 
   // Separazione canali: 'pos' per scontrini fisici, mai 'woo'.
   String canale;
-  // Progressivo locale dello storico POS (assegnato alla chiusura).
+  // Progressivo del documento, assegnato da MGWS nel checkout.
   int? numeroProgressivo;
   // Progressivo emesso dal registratore telematico, quando collegato.
   // Resta null in modalita' simulazione, dove nessun dispositivo emette.
@@ -327,107 +316,11 @@ class Scontrino {
         : cassaNome!.trim();
     return '$giorno|$cassa';
   }
-
-  void aggiungiRettifica(String nota) {
-    final trimmed = nota.trim();
-    if (trimmed.isEmpty) return;
-    rettifiche.add('${DateTime.now().toIso8601String()} — $trimmed');
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'data': data.toIso8601String(),
-    'righe': righe.map((r) => r.toJson()).toList(),
-    'subtotale': subtotale,
-    'iva': iva,
-    'sconto': sconto,
-    'scontoPercentuale': scontoPercentuale,
-    'totale': totale,
-    'clienteId': clienteId,
-    'clienteNome': clienteNome,
-    'clienteEmail': clienteEmail,
-    'clienteTelefono': clienteTelefono,
-    'metodoPagamento': metodoPagamento,
-    'note': note,
-    'stato': stato,
-    'tipoOperazione': tipoOperazione.value,
-    'couponCode': couponCode,
-    'couponSconto': couponSconto,
-    'importoRicevuto': importoRicevuto,
-    'aliquotaIva': aliquotaIva,
-    'canale': canale,
-    'numeroProgressivo': numeroProgressivo,
-    'numeroProgressivoDispositivo': numeroProgressivoDispositivo,
-    'operatoreId': operatoreId,
-    'operatoreNome': operatoreNome,
-    'operatoreCognome': operatoreCognome,
-    'cassaNome': cassaNome,
-    'sede': sede,
-    'giornataId': giornataId,
-    'turnoId': turnoId,
-    'wooOrderId': wooOrderId?.toString(),
-    'mgwsOrderId': mgwsOrderId?.toString(),
-    'dataChiusura': dataChiusura?.toIso8601String(),
-    'rettifiche': rettifiche,
-  };
-
-  factory Scontrino.fromJson(Map<String, dynamic> json) {
-    TipoOperazioneCassa tipo = TipoOperazioneCassa.vendita;
-    final rawTipo = json['tipoOperazione']?.toString();
-    for (final v in TipoOperazioneCassa.values) {
-      if (v.value == rawTipo) tipo = v;
-    }
-    final scontrino = Scontrino(
-      id: json['id']?.toString() ?? '',
-      data: DateTime.tryParse(json['data']?.toString() ?? '') ?? DateTime.now(),
-      righe: ((json['righe'] as List?) ?? const [])
-          .whereType<Map>()
-          .map((e) => RigaScontrino.fromJson(Map<String, dynamic>.from(e)))
-          .toList(),
-      subtotale: (json['subtotale'] as num?)?.toDouble() ?? 0,
-      iva: (json['iva'] as num?)?.toDouble() ?? 0,
-      sconto: (json['sconto'] as num?)?.toDouble() ?? 0,
-      scontoPercentuale: (json['scontoPercentuale'] as num?)?.toDouble() ?? 0,
-      totale: (json['totale'] as num?)?.toDouble() ?? 0,
-      clienteId: json['clienteId']?.toString(),
-      clienteNome: json['clienteNome']?.toString(),
-      clienteEmail: json['clienteEmail']?.toString(),
-      clienteTelefono: json['clienteTelefono']?.toString(),
-      metodoPagamento: json['metodoPagamento']?.toString() ?? 'contanti',
-      note: json['note']?.toString(),
-      stato: json['stato']?.toString() ?? 'pagato',
-      tipoOperazione: tipo,
-      couponCode: json['couponCode']?.toString(),
-      couponSconto: (json['couponSconto'] as num?)?.toDouble() ?? 0,
-      importoRicevuto: (json['importoRicevuto'] as num?)?.toDouble() ?? 0,
-      aliquotaIva: (json['aliquotaIva'] as num?)?.toDouble() ?? 22,
-      canale: json['canale']?.toString() ?? 'pos',
-      numeroProgressivo: (json['numeroProgressivo'] as num?)?.toInt(),
-      numeroProgressivoDispositivo:
-          json['numeroProgressivoDispositivo'] as String?,
-      operatoreId: (json['operatoreId'] as num?)?.toInt(),
-      operatoreNome: json['operatoreNome']?.toString(),
-      operatoreCognome: json['operatoreCognome']?.toString(),
-      cassaNome: json['cassaNome']?.toString(),
-      sede: json['sede']?.toString(),
-      giornataId: json['giornataId']?.toString(),
-      turnoId: json['turnoId']?.toString(),
-      wooOrderId: json['wooOrderId']?.toString(),
-      mgwsOrderId: json['mgwsOrderId']?.toString(),
-      dataChiusura: json['dataChiusura'] != null
-          ? DateTime.tryParse(json['dataChiusura'].toString())
-          : null,
-      rettifiche: ((json['rettifiche'] as List?) ?? const [])
-          .map((e) => e.toString())
-          .toList(),
-    );
-    return scontrino;
-  }
 }
 
 /// Turno operativo di cassa aperto prima delle vendite e chiuso con una
-/// chiusura cassa. Persistito localmente nello storico cassa; MGWS riceve il
-/// riferimento nel payload POS per enforcement server-side futuro.
+/// chiusura cassa. Vive su MGWS (`mg_pos_shifts`): la cassa lo rilegge dal
+/// server e lo riferisce come `shift_id` in ogni checkout.
 class TurnoCassa {
   final String id;
   final String giornataId;
@@ -464,58 +357,6 @@ class TurnoCassa {
     if (operatoreId != null) return '$nome (id $operatoreId)';
     return nome;
   }
-
-  TurnoCassa chiudi(DateTime dataChiusura) => TurnoCassa(
-    id: id,
-    giornataId: giornataId,
-    cassaNome: cassaNome,
-    sede: sede,
-    operatoreId: operatoreId,
-    operatoreNome: operatoreNome,
-    operatoreCognome: operatoreCognome,
-    dataApertura: dataApertura,
-    dataChiusura: dataChiusura,
-    fondoIniziale: fondoIniziale,
-    stato: StatoTurnoCassa.chiuso,
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'giornataId': giornataId,
-    'cassaNome': cassaNome,
-    'sede': sede,
-    'operatoreId': operatoreId,
-    'operatoreNome': operatoreNome,
-    'operatoreCognome': operatoreCognome,
-    'dataApertura': dataApertura.toIso8601String(),
-    'dataChiusura': dataChiusura?.toIso8601String(),
-    'fondoIniziale': fondoIniziale,
-    'stato': stato.value,
-  };
-
-  factory TurnoCassa.fromJson(Map<String, dynamic> json) {
-    final rawStato = json['stato']?.toString();
-    final stato = rawStato == StatoTurnoCassa.chiuso.value
-        ? StatoTurnoCassa.chiuso
-        : StatoTurnoCassa.aperto;
-    return TurnoCassa(
-      id: json['id']?.toString() ?? '',
-      giornataId: json['giornataId']?.toString() ?? '',
-      cassaNome: json['cassaNome']?.toString() ?? 'cassa',
-      sede: json['sede']?.toString(),
-      operatoreId: (json['operatoreId'] as num?)?.toInt(),
-      operatoreNome: json['operatoreNome']?.toString(),
-      operatoreCognome: json['operatoreCognome']?.toString(),
-      dataApertura:
-          DateTime.tryParse(json['dataApertura']?.toString() ?? '') ??
-          DateTime.now(),
-      dataChiusura: json['dataChiusura'] != null
-          ? DateTime.tryParse(json['dataChiusura'].toString())
-          : null,
-      fondoIniziale: (json['fondoIniziale'] as num?)?.toDouble() ?? 0,
-      stato: stato,
-    );
-  }
 }
 
 /// Rappresenta una singola riga dello scontrino
@@ -545,6 +386,13 @@ class RigaScontrino {
   // change after the sale.
   double? recordedPrice;
 
+  // Chiave della riga come l'ha registrata il server. Una riga riletta dallo
+  // storico la conserva, cosi' un reso punta esattamente alla riga venduta
+  // anche se la chiave ricalcolata differisse.
+  // Line key as recorded by the server. A line read back from the history
+  // keeps it, so a return points at exactly the sold line.
+  String? recordedLineKey;
+
   RigaScontrino({
     required this.prodotto,
     this.variante,
@@ -559,6 +407,7 @@ class RigaScontrino {
     this.motivoReso,
     this.esitoMerce,
     this.recordedPrice,
+    this.recordedLineKey,
   });
 
   /// Ottiene il prezzo unitario effettivo (variante o prodotto)
@@ -651,6 +500,8 @@ class RigaScontrino {
   /// Chiave stabile della riga vendita: identifica cosa e stato venduto e a
   /// quali condizioni, senza usare il prezzo di listino corrente.
   String get chiaveRiga {
+    final registrata = recordedLineKey;
+    if (registrata != null && registrata.isNotEmpty) return registrata;
     final prodottoId =
         prodotto.id?.toString() ?? prodotto.barcodeInterno ?? '?';
     final varianteId = variante?.id.toString() ?? '-';
@@ -658,87 +509,6 @@ class RigaScontrino {
         '${prezzoUnitario.toStringAsFixed(2)}|'
         '${scontoRiga.toStringAsFixed(2)}|'
         '${scontoPercentuale.toStringAsFixed(2)}';
-  }
-
-  Map<String, dynamic> toJson() => {
-    'productId': prodotto.id,
-    'productName': prodotto.nome,
-    'productCode': prodotto.codiceProdotto,
-    'productBarcode': prodotto.barcodeInterno,
-    'productSku': prodotto.barcodeInterno,
-    'variationId': variante?.id,
-    'variationCode': variante?.codiceProdotto,
-    'variationBarcode': variante?.barcodeInterno,
-    'variationSku': variante?.barcodeInterno,
-    'variationName': variante?.nomeVisualizzabile,
-    'unitPrice': prezzoUnitario,
-    'quantita': quantita,
-    'subtotale': subtotale,
-    'scontoRiga': scontoRiga,
-    'scontoPercentuale': scontoPercentuale,
-    'note': note,
-    'tipoMovimento': tipoMovimento.value,
-    'riferimentoScontrinoId': riferimentoScontrinoId,
-    'riferimentoChiaveRiga': riferimentoChiaveRiga,
-    'motivoReso': motivoReso,
-    'esitoMerce': esitoMerce,
-  };
-
-  factory RigaScontrino.fromJson(Map<String, dynamic> json) {
-    TipoRigaCassa tipo = TipoRigaCassa.vendita;
-    final raw = json['tipoMovimento']?.toString();
-    for (final v in TipoRigaCassa.values) {
-      if (v.value == raw) tipo = v;
-    }
-    final prodotto = ProdottoGlobal(
-      id: (json['productId'] as num?)?.toInt(),
-      nome: json['productName']?.toString(),
-      codiceProdotto: json['productCode']?.toString(),
-      barcodeInterno:
-          json['productBarcode']?.toString() ?? json['productSku']?.toString(),
-      prezzoNormale: (json['unitPrice'] as num?)?.toDouble(),
-    );
-    VarianteProductGlobal? variante;
-    if (json['variationId'] != null) {
-      variante = VarianteProductGlobal(
-        id: (json['variationId'] as num?)?.toInt(),
-        nome: json['variationName']?.toString(),
-        codiceProdotto: json['variationCode']?.toString(),
-        barcodeInterno:
-            json['variationBarcode']?.toString() ??
-            json['variationSku']?.toString() ??
-            '',
-        prezzo: (json['unitPrice'] as num?)?.toDouble(),
-      );
-    }
-    final riga = RigaScontrino(
-      prodotto: prodotto,
-      variante: variante,
-      quantita: (json['quantita'] as num?)?.toInt() ?? 0,
-      subtotale: (json['subtotale'] as num?)?.toDouble() ?? 0,
-      scontoRiga: (json['scontoRiga'] as num?)?.toDouble() ?? 0,
-      scontoPercentuale: (json['scontoPercentuale'] as num?)?.toDouble() ?? 0,
-      note: json['note']?.toString(),
-      tipoMovimento: tipo,
-      riferimentoScontrinoId: json['riferimentoScontrinoId']?.toString(),
-      riferimentoChiaveRiga: json['riferimentoChiaveRiga']?.toString(),
-      motivoReso: json['motivoReso']?.toString(),
-      esitoMerce: json['esitoMerce']?.toString(),
-    );
-    // Se lo storico non conserva il prezzo unitario, lo ricostruisce dal
-    // subtotale per mantenere il vincolo reso = prezzo realmente pagato.
-    final storedUnit = (json['unitPrice'] as num?)?.toDouble();
-    if (storedUnit != null &&
-        riga.quantita > 0 &&
-        (riga.prezzoUnitario == 0 || storedUnit != riga.prezzoUnitario)) {
-      final lordo = storedUnit * riga.quantita;
-      final daSconti = lordo - riga.subtotale;
-      if (daSconti > 0.009 && riga.scontoRiga == 0) {
-        riga.scontoRiga = double.parse(daSconti.toStringAsFixed(2));
-        riga.calcolaSubtotale();
-      }
-    }
-    return riga;
   }
 
   /// Aggiorna la quantità e ricalcola

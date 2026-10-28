@@ -154,17 +154,20 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   sequence. Each register has its own sequence per business day.
 - With a fiscal register attached, the device issues the number and the app
   sends it as `receipt_number`; MGWS records it instead of allocating one.
-- When the answer has no `sequential_number`, the app falls back to a local
-  counter that resumes from the local maximum, so a sale is never lost and
-  the sequence never goes back.
+- The device keeps no copy of the history. `StoricoCassaServer`
+  (`checkout_history.code.dart`) reads receipts, lines, the open shift and
+  the closings from MGWS, so a reinstall or a new device finds everything.
+  The only in-memory state is the open shift, reloaded when the till opens.
 - `mg_pos_receipt_lines` stores the lines once per document, so a replayed
-  checkout cannot count twice.
+  checkout cannot count twice. Operation and movement types are stored in
+  canonical form (`sale`, `return`, `exchange`) whatever the app sends.
 - MGWS computes the returnable remainder of each line from every recorded
-  return, on every device. The app asks for it before a return; when the
-  server is unreachable it uses the same check on `StoricoCassaStore`. The
-  server figure is the one that counts.
-- `StoricoCassaStore` keeps on the device the presentation data: closing
-  totals, shifts and pending receipts.
+  return, on every device, ignoring cancelled documents. The app reads it
+  before a return (`validaReso`) and the checkout checks it again; without
+  the server no return is prepared.
+- The shift totals and the till counters (`CassaMetricheSnapshot`) are
+  built from `GET /pos/receipts` for the open shift, or for the register's
+  business day when no shift is open.
 - `checkout/fiscal_register/` isolates the fiscal register behind a driver
   contract; the POS never speaks a vendor protocol. `FiscalRegisterRepository`
   selects and stores the driver. Simulation is a declared mode, not a

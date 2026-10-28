@@ -54,7 +54,6 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
 
   Future<void> _reload() async {
     setState(() => _loading = true);
-    await widget.controller.storicoStore.init();
     final receipts = await _filtered();
     if (!mounted) return;
     setState(() {
@@ -63,9 +62,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     });
   }
 
-  /// Loads the history from the server, keeping the local store as fallback.
+  /// Loads the history from the server.
   Future<List<Scontrino>> _filtered() async {
-    return widget.controller.storicoStore.filter(
+    return widget.controller.storico.filter(
       queryCliente: _query,
       cassaNome: _cassaFiltroController.text.trim().isEmpty
           ? null
@@ -248,7 +247,8 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
 
   Future<void> _dialogDettaglio(BuildContext context, Scontrino s) async {
     final theme = Theme.of(context);
-    final rendibili = widget.controller.storicoStore.righeRendibili(s.id);
+    final rendibili = await widget.controller.storico.righeRendibili(s.id);
+    if (!context.mounted) return;
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -561,7 +561,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     );
     controller.dispose();
     if (motivo == null) return;
-    final esito = await widget.controller.storicoStore.cancelReceipt(
+    final esito = await widget.controller.storico.cancelReceipt(
       receiptId: s.id,
       reason: motivo,
     );
@@ -614,8 +614,10 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     );
     controller.dispose();
     if (nota == null) return;
-    final esito = await widget.controller.storicoStore
-        .aggiungiRettificaScontrino(scontrinoId: s.id, nota: nota);
+    final esito = await widget.controller.storico.aggiungiRettificaScontrino(
+      scontrino: s,
+      nota: nota,
+    );
     if (!mounted) return;
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(
@@ -630,8 +632,8 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
   }
 
   Future<void> _dialogChiusura(BuildContext context) async {
-    final store = widget.controller.storicoStore;
-    await store.init();
+    final store = widget.controller.storico;
+    await widget.controller.aggiornaStatoCassa();
     final turno = widget.controller.turnoCorrente;
     if (!context.mounted) return;
     if (turno == null) {
@@ -640,8 +642,15 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
       );
       return;
     }
-    final totali = store.totaliGiornata(turno.giornataId, turnoId: turno.id);
-    final esistente = store.cercaChiusuraTurno(turno.id);
+    final totali = await store.totaliGiornata(
+      turno.giornataId,
+      turnoId: turno.id,
+    );
+    final esistente = await store.cercaChiusuraTurno(
+      turno.id,
+      cassaNome: turno.cassaNome,
+    );
+    if (!context.mounted) return;
     if (esistente != null) {
       await showDialog(
         context: context,
@@ -831,7 +840,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
           : noteController.text.trim(),
     );
     if (!context.mounted) return;
-    final chiusura = store.cercaChiusuraTurno(turno.id);
+    final chiusura = store.ultimaChiusura;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

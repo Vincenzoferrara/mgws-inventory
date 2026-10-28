@@ -59,7 +59,7 @@ The clients live in `lib/login/mgws/query/`:
 
 | Client | Routes |
 |--------|--------|
-| `QueryMgwsPos` | `pos/settings`, `pos/shifts`, `pos/checkout`, `pos/receipts` |
+| `QueryMgwsPos` | `pos/settings`, `pos/shifts`, `pos/checkout`, `pos/receipts`, `pos/closings` |
 | `QueryMgwsInventory` | `inventory/*` (stock, movements, suppliers, reorder, purchase orders, receipts, counts, sites) |
 | `QueryMgwsLoyalty` | `loyalty/*` |
 | `QueryMgwsEmployees` | `employees`, `users/{wp_user_id}/…` |
@@ -96,9 +96,19 @@ The clients live in `lib/login/mgws/query/`:
 - `POST /pos/shifts/{shift_key}/close` sends only the counted cash and card
   totals, reason and notes. MGWS computes `expected_totals` from the
   shift's orders and returns the differences.
-- `GET /pos/receipts` lists documents with aggregate totals;
-  `GET /pos/receipts/{receipt_key}` returns a document with its lines and
-  the `returnable` map.
+- `GET /pos/receipts` lists documents with aggregate totals, filtered by
+  business day, register, shift (`shift_id`, the shift key), date range
+  (`date_from`/`date_to`), payment method, type, status or text, with
+  `limit`/`offset`. Cancelled documents stay in the list but not in the
+  `summary`. `GET /pos/receipts/{receipt_key}` returns a document with its
+  lines, `returned_quantity` and `returnable_quantity` per sold line, and
+  the `returnable` map. These two routes are the POS history: the app keeps
+  no local copy.
+- When a shift key is sent, the receipt is tied to it even with the
+  mandatory shift off, so the per-shift history and the closing see it.
+- `GET /pos/shifts?status=open&cassa_name=…` gives the open shift of a
+  register; `POST /pos/closings` records the closing with a key tied to the
+  shift, and `GET /pos/closings` lists them.
 
 ### Inventory
 

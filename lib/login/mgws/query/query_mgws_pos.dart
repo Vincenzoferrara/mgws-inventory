@@ -16,14 +16,9 @@ class QueryMgwsPos {
   /// Elenco scontrini con sintesi, per lo storico e i report.
   ///
   /// La sintesi arriva gia' dal server, cosi' il riepilogo di giornata non
-  /// richiede di scaricare ogni documento.
+  /// richiede di scaricare ogni documento. `shiftId` e' la shift_key del
+  /// turno; `dateFrom`/`dateTo` sono date `YYYY-MM-DD` o istanti ISO 8601.
   /// Receipt list with aggregates, for the history and the reports.
-  /// Dettaglio documento con righe e residuo rendibile.
-  ///
-  /// Il residuo e' calcolato dal server su tutti i resi registrati: e' la
-  /// fonte che vale, perche' conosce anche i resi fatti da altri dispositivi.
-  /// Document detail with lines and the returnable remainder, computed by the
-  /// server from every recorded return.
   Future<Map<String, dynamic>> listReceipts({
     String? businessDayId,
     String? registerName,
@@ -31,6 +26,9 @@ class QueryMgwsPos {
     String? paymentMethod,
     String? status,
     int? customerId,
+    String? shiftId,
+    String? dateFrom,
+    String? dateTo,
     String? query,
     int? limit,
     int? offset,
@@ -55,6 +53,9 @@ class QueryMgwsPos {
           'payment_method': paymentMethod,
         if (status != null && status.isNotEmpty) 'status': status,
         if (customerId != null && customerId > 0) 'customer_id': customerId,
+        if (shiftId != null && shiftId.isNotEmpty) 'shift_id': shiftId,
+        if (dateFrom != null && dateFrom.isNotEmpty) 'date_from': dateFrom,
+        if (dateTo != null && dateTo.isNotEmpty) 'date_to': dateTo,
         if (query != null && query.isNotEmpty) 'query': query,
         if (limit != null) 'limit': limit,
         if (offset != null) 'offset': offset,
@@ -210,6 +211,12 @@ class QueryMgwsPos {
     };
   }
 
+  /// Dettaglio documento con righe e residuo rendibile.
+  ///
+  /// Il residuo e' calcolato dal server su tutti i resi registrati: e' la
+  /// fonte che vale, perche' conosce anche i resi fatti da altri dispositivi.
+  /// Document detail with lines and the returnable remainder, computed by the
+  /// server from every recorded return.
   Future<Map<String, dynamic>> getReceipt(String receiptKey) async {
     if (!await MgwsConnection.instance.ensureConnected()) {
       return const <String, dynamic>{
@@ -307,6 +314,46 @@ class QueryMgwsPos {
       'success':
           (response.statusCode ?? 500) >= 200 &&
           (response.statusCode ?? 500) < 300,
+      'status_code': response.statusCode,
+    };
+  }
+
+  /// Turni registrati sul server, dal piu' recente.
+  ///
+  /// La cassa legge da qui il turno aperto: dopo una reinstallazione il
+  /// turno resta quello del server, non quello del dispositivo.
+  /// Shifts recorded server-side, newest first. The till reads its open shift
+  /// from here, so a reinstall does not lose it.
+  Future<Map<String, dynamic>> listShifts({
+    String? status,
+    String? cassaName,
+    String? giornataId,
+  }) async {
+    if (!await MgwsConnection.instance.ensureConnected()) {
+      return const <String, dynamic>{
+        'success': false,
+        'message': AppMessages.mgwsUnavailable,
+      };
+    }
+
+    final response = await _base.get(
+      '/wp-json/mgws/v1/pos/shifts',
+      queryParameters: <String, dynamic>{
+        if (status != null && status.isNotEmpty) 'status': status,
+        if (cassaName != null && cassaName.isNotEmpty) 'cassa_name': cassaName,
+        if (giornataId != null && giornataId.isNotEmpty)
+          'giornata_id': giornataId,
+      },
+    );
+
+    final data = response.data;
+    if (data is Map<String, dynamic> && data['shifts'] is List) {
+      return <String, dynamic>{...data, 'success': true};
+    }
+
+    _log.w('MGWS POS listShifts ha restituito una risposta non strutturata');
+    return <String, dynamic>{
+      'success': false,
       'status_code': response.statusCode,
     };
   }

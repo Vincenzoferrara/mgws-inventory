@@ -719,15 +719,13 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
 
 ## Conformita' fiscale e registratore telematico
 
-- [ ] Portare lo storico scontrini su MGWS e rimuovere `StoricoCassaStore`
-  - tipo: app/plugin/UI
-  - priorita: high
-  - obiettivo: scontrini, chiusure e progressivo su MGWS come unica fonte, con lettura dello storico da server invece che da SharedPreferences
-  - perche: il progressivo e' gia' assegnato dal server e salvato in `mg_pos_receipts`, ma lo storico completo resta in `storico_cassa_scontrini_pos_v1` su SharedPreferences; se il dispositivo si rompe o l'app viene reinstallata, righe, resi e chiusure di quel giorno spariscono e il backup WordPress non le ripristina, perche' non sono nel database
-  - dipendenze: le tabelle `mg_pos_sales` e `mg_pos_sale_lines` e gli endpoint `GET /pos/sales` e `GET /pos/sales/{receipt_key}` sono gia' stati definiti nel design ma non implementati; `mg_pos_receipts` copre solo l'intestazione del documento
-  - impatti: `validaReso` e `cercaPerId` in `cassa.code.dart` leggono lo store locale, quindi il residuo rendibile per linea deve diventare calcolabile dal server; `totaliGiornata` in `storico_cassa.code.dart` deve diventare la sintesi di `GET /pos/sales`; `cassa_metrics.dart` deriva i suoi otto contatori dagli scontrini server e i contatori locali si eliminano
-  - nota: `architecture.md:80` impone gia' che i dati condivisi persistenti passino da WordPress/MGWS, quindi questa voce allinea il codice a una regola gia' scritta
-  - verifica minima: dopo reinstall dell'app su un dispositivo nuovo lo storico scontrini, le chiusure e il progressivo sono completi e il residuo rendibile di una linea restituita e' corretto
+- [ ] Verificare in app lo storico scontrini letto da MGWS dopo una reinstallazione
+  - tipo: test/app
+  - priorita: medium
+  - obiettivo: confermare dall'interfaccia che storico, turno aperto, chiusure, progressivo e residuo rendibile arrivano dal server
+  - stato: `StoricoCassaStore` e i contatori locali sono stati rimossi; l'app legge tutto da `GET /pos/receipts`, `GET /pos/shifts` e `/pos/closings` (plugin schema 11, tipi documento normalizzati). Endpoint, residuo e reso oltre il limite sono provati sul WordPress locale con i payload generati dall'app, ma non con la GUI
+  - nota: i dati rimasti in SharedPreferences (`storico_cassa_*`, `cassa_metriche_*`) sui dispositivi gia' in uso non vengono piu' letti ne' migrati; le chiusure registrate solo in locale prima di questa versione non compaiono nello storico
+  - verifica minima: su un dispositivo appena installato, collegato al WordPress locale, aprire turno, vendere, fare un reso parziale e chiudere il turno; poi reinstallare e ritrovare storico, chiusura, progressivo e residuo corretto della riga resa
 
 - [ ] Trovare l'adapter corretto per il registratore telematico
   - tipo: ricerca/app

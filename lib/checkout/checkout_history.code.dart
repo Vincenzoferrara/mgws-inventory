@@ -1,21 +1,32 @@
 // checkout_history.code.dart
 //
-// Local POS history: receipts, closings and shifts.
+// POS history read from MGWS: receipts, lines, returns, shifts and closings.
 //
-// SharedPreferences/JSON persistence is only a fallback. MGWS is the source
-// of truth for the receipt number, the lines and the returnable remainder, so
-// the till keeps working without the local copy and loses nothing when the
-// device is replaced.
-
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
+// The device keeps no copy. The server allocates the receipt number, stores
+// the lines and computes the returnable remainder, so replacing or
+// reinstalling the device loses nothing.
 
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../products/class_products.dart';
 import 'checkout_failure.dart';
+import 'checkout_metrics.dart';
 import 'class_receipt.dart';
+
+/// Istante GMT del server (`Y-m-d H:i:s`) convertito nell'ora locale.
+///
+/// Il server non mette il fuso: letto cosi' com'e' Dart lo tratterebbe come
+/// ora locale e lo storico slitterebbe di un'ora o due.
+/// Server GMT timestamp converted to local time. Without the explicit UTC
+/// marker Dart would read it as local time.
+DateTime parseServerGmt(String? valore) {
+  final testo = (valore ?? '').trim();
+  if (testo.isEmpty) return DateTime.now();
+  var iso = testo.replaceFirst(' ', 'T');
+  final haFuso = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(iso);
+  if (!haFuso) iso = '${iso}Z';
+  return DateTime.tryParse(iso)?.toLocal() ?? DateTime.now();
+}
 
 /// Sold line with the quantity still returnable.
 class RigaRendibile {
@@ -113,226 +124,241 @@ class ChiusuraCassa {
   bool get hasDifferenze =>
       differenzaContanti.abs() > 0.009 || differenzaCarta.abs() > 0.009;
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'giornataId': giornataId,
-    'turnoId': turnoId,
-    'cassaNome': cassaNome,
-    'sede': sede,
-    'data': data.toIso8601String(),
-    'operatoreId': operatoreId,
-    'operatoreNome': operatoreNome,
-    'operatoreCognome': operatoreCognome,
-    'fondoIniziale': fondoIniziale,
-    'incassiContanti': incassiContanti,
-    'incassiCarta': incassiCarta,
-    'incassiAltri': incassiAltri,
-    'rimborsi': rimborsi,
-    'entrateManuali': entrateManuali,
-    'usciteManuali': usciteManuali,
-    'contanteContato': contanteContato,
-    'cartaContato': cartaContato,
-    'causaleDifferenza': causaleDifferenza,
-    'note': note,
-    'rettifiche': rettifiche,
-  };
+  /// Chiusura come la restituisce `GET /pos/closings`.
+  /// Closing as returned by `GET /pos/closings`.
+  factory ChiusuraCassa.fromServer(Map<String, dynamic> mappa) {
+    double numero(Object? valore) =>
+        valore is num ? valore.toDouble() : double.tryParse('$valore') ?? 0;
+    String? testo(Object? valore) {
+      final t = valore?.toString().trim() ?? '';
+      return t.isEmpty ? null : t;
+    }
 
-  factory ChiusuraCassa.fromJson(Map<String, dynamic> json) => ChiusuraCassa(
-    id: json['id']?.toString() ?? '',
-    giornataId: json['giornataId']?.toString() ?? '',
-    turnoId: json['turnoId']?.toString(),
-    cassaNome: json['cassaNome']?.toString() ?? 'cassa',
-    sede: json['sede']?.toString(),
-    data: DateTime.tryParse(json['data']?.toString() ?? '') ?? DateTime.now(),
-    operatoreId: (json['operatoreId'] as num?)?.toInt(),
-    operatoreNome: json['operatoreNome']?.toString(),
-    operatoreCognome: json['operatoreCognome']?.toString(),
-    fondoIniziale: (json['fondoIniziale'] as num?)?.toDouble() ?? 0,
-    incassiContanti: (json['incassiContanti'] as num?)?.toDouble() ?? 0,
-    incassiCarta: (json['incassiCarta'] as num?)?.toDouble() ?? 0,
-    incassiAltri: (json['incassiAltri'] as num?)?.toDouble() ?? 0,
-    rimborsi: (json['rimborsi'] as num?)?.toDouble() ?? 0,
-    entrateManuali: (json['entrateManuali'] as num?)?.toDouble() ?? 0,
-    usciteManuali: (json['usciteManuali'] as num?)?.toDouble() ?? 0,
-    contanteContato: (json['contanteContato'] as num?)?.toDouble() ?? 0,
-    cartaContato: (json['cartaContato'] as num?)?.toDouble() ?? 0,
-    causaleDifferenza: json['causaleDifferenza']?.toString(),
-    note: json['note']?.toString(),
-    rettifiche: ((json['rettifiche'] as List?) ?? const [])
-        .map((e) => e.toString())
-        .toList(),
-  );
-
-  ChiusuraCassa withRettifica(String nota) => ChiusuraCassa(
-    id: id,
-    giornataId: giornataId,
-    turnoId: turnoId,
-    cassaNome: cassaNome,
-    sede: sede,
-    data: data,
-    operatoreId: operatoreId,
-    operatoreNome: operatoreNome,
-    operatoreCognome: operatoreCognome,
-    fondoIniziale: fondoIniziale,
-    incassiContanti: incassiContanti,
-    incassiCarta: incassiCarta,
-    incassiAltri: incassiAltri,
-    rimborsi: rimborsi,
-    entrateManuali: entrateManuali,
-    usciteManuali: usciteManuali,
-    contanteContato: contanteContato,
-    cartaContato: cartaContato,
-    causaleDifferenza: causaleDifferenza,
-    note: note,
-    rettifiche: [...rettifiche, nota],
-  );
+    final rettifiche = <String>[];
+    final correzioni = mappa['corrections'];
+    if (correzioni is List) {
+      for (final voce in correzioni) {
+        if (voce is Map && voce['note'] != null) {
+          rettifiche.add('${voce['at'] ?? ''} - ${voce['note']}'.trim());
+        }
+      }
+    }
+    return ChiusuraCassa(
+      id: mappa['closing_key']?.toString() ?? '',
+      giornataId: mappa['business_day_id']?.toString() ?? '',
+      turnoId: testo(mappa['shift_key']),
+      cassaNome: testo(mappa['register_name']) ?? 'cassa',
+      sede: testo(mappa['location']),
+      data: parseServerGmt(mappa['closed_at']?.toString()),
+      operatoreId: (mappa['operator_id'] as num?)?.toInt(),
+      operatoreNome: testo(mappa['operator_name']),
+      fondoIniziale: numero(mappa['opening_float']),
+      incassiContanti: numero(mappa['cash_collected']),
+      incassiCarta: numero(mappa['card_collected']),
+      incassiAltri: numero(mappa['other_collected']),
+      rimborsi: numero(mappa['refunds']),
+      entrateManuali: numero(mappa['manual_in']),
+      usciteManuali: numero(mappa['manual_out']),
+      contanteContato: numero(mappa['cash_counted']),
+      cartaContato: numero(mappa['card_counted']),
+      causaleDifferenza: testo(mappa['difference_reason']),
+      note: testo(mappa['note']),
+      rettifiche: rettifiche,
+    );
+  }
 }
 
-/// Local store for the POS history and the closings.
-class StoricoCassaStore {
-  static const String _scontriniKey = 'storico_cassa_scontrini_pos_v1';
-  static const String _chiusureKey = 'storico_cassa_chiusure_v1';
-  static const String _turniKey = 'storico_cassa_turni_v1';
-  static const String _progressivoKey = 'storico_cassa_progressivo_v1';
+/// Storico cassa letto dal server MGWS.
+///
+/// Non salva nulla sul dispositivo: l'unico stato in memoria e' il turno
+/// aperto della cassa, riletto dal server a ogni apertura della schermata.
+/// POS history read from MGWS. Nothing is stored on the device: the only
+/// in-memory state is the open shift, reloaded from the server.
+class StoricoCassaServer {
+  TurnoCassa? _turnoAperto;
+  ChiusuraCassa? _ultimaChiusura;
 
-  final List<Scontrino> _scontrini = [];
-  final List<ChiusuraCassa> _chiusure = [];
-  final List<TurnoCassa> _turni = [];
-  int _progressivo = 0;
-  bool _initialized = false;
+  TurnoCassa? get turnoAperto => _turnoAperto;
 
-  List<Scontrino> get scontrini => List.unmodifiable(_scontrini);
-  List<ChiusuraCassa> get chiusure => List.unmodifiable(_chiusure);
-  List<TurnoCassa> get turni => List.unmodifiable(_turni);
+  /// Ultima chiusura registrata da questa schermata, per il riepilogo.
+  ChiusuraCassa? get ultimaChiusura => _ultimaChiusura;
 
-  Future<void> init() async {
-    if (_initialized) return;
-    final prefs = await SharedPreferences.getInstance();
-    _progressivo = prefs.getInt(_progressivoKey) ?? 0;
-    final rawScontrini = prefs.getString(_scontriniKey);
-    if (rawScontrini != null && rawScontrini.isNotEmpty) {
-      try {
-        final list = (jsonDecode(rawScontrini) as List).whereType<Map>();
-        _scontrini
-          ..clear()
-          ..addAll(
-            list.map((e) => Scontrino.fromJson(Map<String, dynamic>.from(e))),
-          );
-      } catch (e) {
-        AppLogger().w('Storico cassa: scontrini locali non leggibili: $e');
+  /// Rilegge dal server il turno aperto della cassa.
+  ///
+  /// Se il server non risponde il turno gia' noto resta: una rete lenta non
+  /// deve far sembrare chiusa una cassa aperta.
+  /// Reloads the open shift of the register. When the server does not answer
+  /// the known shift stays.
+  Future<TurnoCassa?> aggiornaTurno(String cassaNome) async {
+    try {
+      final risposta = await PlatformManager.pos.listShifts(
+        status: 'open',
+        cassaName: cassaNome,
+      );
+      if (risposta['success'] != true) return _turnoAperto;
+      final turni = risposta['shifts'];
+      _turnoAperto = null;
+      if (turni is List) {
+        for (final turno in turni) {
+          if (turno is! Map) continue;
+          _turnoAperto = _shiftFromMap(Map<String, dynamic>.from(turno));
+          break;
+        }
       }
+    } catch (errore) {
+      AppLogger().w('Storico POS: turno aperto non letto dal server: $errore');
     }
-    final rawChiusure = prefs.getString(_chiusureKey);
-    if (rawChiusure != null && rawChiusure.isNotEmpty) {
-      try {
-        final list = (jsonDecode(rawChiusure) as List).whereType<Map>();
-        _chiusure
-          ..clear()
-          ..addAll(
-            list.map(
-              (e) => ChiusuraCassa.fromJson(Map<String, dynamic>.from(e)),
-            ),
-          );
-      } catch (e) {
-        AppLogger().w('Storico cassa: chiusure locali non leggibili: $e');
-      }
-    }
-    final rawTurni = prefs.getString(_turniKey);
-    if (rawTurni != null && rawTurni.isNotEmpty) {
-      try {
-        final list = (jsonDecode(rawTurni) as List).whereType<Map>();
-        _turni
-          ..clear()
-          ..addAll(
-            list.map((e) => TurnoCassa.fromJson(Map<String, dynamic>.from(e))),
-          );
-      } catch (e) {
-        AppLogger().w('Storico cassa: turni locali non leggibili: $e');
-      }
-    }
-    _initialized = true;
+    return _turnoAperto;
   }
 
-  Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_progressivoKey, _progressivo);
-    await prefs.setString(
-      _scontriniKey,
-      jsonEncode(_scontrini.map((e) => e.toJson()).toList()),
-    );
-    await prefs.setString(
-      _chiusureKey,
-      jsonEncode(_chiusure.map((e) => e.toJson()).toList()),
-    );
-    await prefs.setString(
-      _turniKey,
-      jsonEncode(_turni.map((e) => e.toJson()).toList()),
+  /// Turno aperto confermato dal server.
+  /// Open shift confirmed by the server.
+  void registraTurnoAperto(TurnoCassa turno) {
+    _turnoAperto = turno;
+    AppLogger().i(
+      'Turno cassa aperto ${turno.id} (${turno.cassaNome}, fondo €${turno.fondoIniziale.toStringAsFixed(2)})',
     );
   }
 
-  TurnoCassa? turnoAperto({String? cassaNome, String? giornataId}) {
-    final cassa = (cassaNome ?? '').trim();
-    for (final turno in _turni) {
-      if (!turno.isAperto) continue;
-      if (giornataId != null && turno.giornataId != giornataId) continue;
-      if (cassa.isNotEmpty && turno.cassaNome != cassa) continue;
-      return turno;
+  TurnoCassa _shiftFromMap(Map<String, dynamic> mappa) {
+    return TurnoCassa(
+      id: mappa['shift_key']?.toString() ?? '',
+      giornataId: mappa['giornata_id']?.toString() ?? '',
+      cassaNome: _textOr(mappa['cassa_name'], 'cassa')!,
+      sede: _textOr(mappa['sede'], null),
+      operatoreId: _intFrom(mappa['operator_id']),
+      operatoreNome: _textOr(mappa['operator_name'], null),
+      dataApertura: parseServerGmt(mappa['opened_at_gmt']?.toString()),
+      fondoIniziale: _doubleFrom(mappa['fondo_iniziale']),
+      stato: mappa['status'] == 'closed'
+          ? StatoTurnoCassa.chiuso
+          : StatoTurnoCassa.aperto,
+    );
+  }
+
+  /// Registra la chiusura del turno appena chiuso sul server.
+  ///
+  /// La chiusura e' un dato contabile: finisce in `mg_pos_closings` con una
+  /// chiave legata al turno, cosi' un doppio invio non ne crea due.
+  /// Records the closing of the shift just closed server-side. The key is
+  /// tied to the shift, so a double submit cannot create two closings.
+  Future<EsitoReso> registraChiusura(
+    ChiusuraCassa chiusura, {
+    int? serverShiftId,
+  }) async {
+    if (chiusura.hasDifferenze &&
+        (chiusura.causaleDifferenza ?? '').trim().isEmpty) {
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.differenceReasonRequired),
+      );
+    }
+    _turnoAperto = null;
+    try {
+      final risposta = await PlatformManager.pos.createClosing(
+        <String, dynamic>{
+          'closing_key': chiusura.id,
+          'business_day_id': chiusura.giornataId,
+          'register_name': chiusura.cassaNome,
+          'location': chiusura.sede ?? '',
+          'shift_id': serverShiftId ?? 0,
+          'operator_id': chiusura.operatoreId ?? 0,
+          'operator_name': [
+            chiusura.operatoreNome ?? '',
+            chiusura.operatoreCognome ?? '',
+          ].join(' ').trim(),
+          'opening_float': chiusura.fondoIniziale,
+          'cash_collected': chiusura.incassiContanti,
+          'card_collected': chiusura.incassiCarta,
+          'other_collected': chiusura.incassiAltri,
+          'refunds': chiusura.rimborsi,
+          'manual_in': chiusura.entrateManuali,
+          'manual_out': chiusura.usciteManuali,
+          'cash_counted': chiusura.contanteContato,
+          'card_counted': chiusura.cartaContato,
+          if ((chiusura.causaleDifferenza ?? '').isNotEmpty)
+            'difference_reason': chiusura.causaleDifferenza,
+          if ((chiusura.note ?? '').isNotEmpty) 'note': chiusura.note,
+        },
+      );
+      if (risposta['success'] == true) {
+        _ultimaChiusura = chiusura;
+        return const EsitoReso.ok();
+      }
+      final messaggio = risposta['message']?.toString();
+      if (messaggio != null && messaggio.isNotEmpty) {
+        return EsitoReso.ko(CassaFailure.server(messaggio));
+      }
+    } catch (errore) {
+      AppLogger().w('Storico POS: chiusura non registrata sul server: $errore');
+    }
+    return const EsitoReso.ko(
+      CassaFailure(CassaFailureCode.invalidServerResponse),
+    );
+  }
+
+  /// Chiusura gia' registrata per un turno, se esiste.
+  /// Closing already recorded for a shift, if any.
+  Future<ChiusuraCassa?> cercaChiusuraTurno(
+    String turnoId, {
+    String? cassaNome,
+  }) async {
+    try {
+      final risposta = await PlatformManager.pos.listClosings(
+        registerName: cassaNome,
+      );
+      final chiusure = risposta['closings'];
+      if (risposta['success'] != true || chiusure is! List) return null;
+      for (final grezza in chiusure) {
+        if (grezza is! Map) continue;
+        final chiusura = ChiusuraCassa.fromServer(
+          Map<String, dynamic>.from(grezza),
+        );
+        if (chiusura.turnoId == turnoId) return chiusura;
+      }
+    } catch (errore) {
+      AppLogger().w('Storico POS: chiusure non lette dal server: $errore');
     }
     return null;
   }
 
-  Future<EsitoReso> apriTurno(TurnoCassa turno) async {
-    await init();
-    if (turnoAperto(cassaNome: turno.cassaNome) != null) {
+  /// Appende una rettifica a una chiusura: i totali non cambiano.
+  /// Appends a correction to a closing; the totals never change.
+  Future<EsitoReso> aggiungiRettifica(String chiusuraId, String nota) async {
+    if (nota.trim().isEmpty) {
       return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.shiftAlreadyOpen),
+        CassaFailure(CassaFailureCode.adjustmentNoteRequired),
       );
     }
-    _turni.insert(0, turno);
-    await _save();
-    AppLogger().i(
-      'Turno cassa aperto ${turno.id} (${turno.cassaNome}, fondo €${turno.fondoIniziale.toStringAsFixed(2)})',
+    try {
+      final risposta = await PlatformManager.pos.addClosingCorrection(
+        closingKey: chiusuraId,
+        note: nota.trim(),
+      );
+      if (risposta['success'] == true) return const EsitoReso.ok();
+      final messaggio = risposta['message']?.toString();
+      if (messaggio != null && messaggio.isNotEmpty) {
+        return EsitoReso.ko(CassaFailure.server(messaggio));
+      }
+    } catch (errore) {
+      AppLogger().w('Storico POS: rettifica chiusura non riuscita: $errore');
+    }
+    return const EsitoReso.ko(
+      CassaFailure(CassaFailureCode.invalidServerResponse),
     );
-    return const EsitoReso.ok();
   }
 
-  Future<EsitoReso> chiudiTurno({
-    required String turnoId,
-    required ChiusuraCassa chiusura,
-  }) async {
-    await init();
-    final index = _turni.indexWhere((turno) => turno.id == turnoId);
-    if (index < 0)
-      return const EsitoReso.ko(CassaFailure(CassaFailureCode.shiftNotFound));
-    final turno = _turni[index];
-    if (!turno.isAperto) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.shiftAlreadyClosed),
-      );
-    }
-    final esitoChiusura = await registraChiusura(chiusura);
-    if (!esitoChiusura.ok) return esitoChiusura;
-    _turni[index] = turno.chiudi(chiusura.data);
-    await _save();
-    return const EsitoReso.ok();
-  }
-
-  /// Receipts read from the server, falling back to the local store.
+  /// Scontrini letti da `GET /pos/receipts`, con ricerca e filtri del server.
   ///
-  /// The server is the source: search, filters and paging come from
-  /// `GET /pos/receipts`. The local store is only used when the backend does
-  /// not answer, because showing an empty history is worse than showing a
-  /// device-local one.
-  /// Receipts read from the server, falling back to the local store.
-  ///
-  /// Reads from `GET /pos/receipts`. The local store is only a fallback when the
-  /// backend does not answer, because an empty history is worse than a stale one.
-  Future<List<Scontrino>> receiptsFromServer({
+  /// Le righe non fanno parte dell'elenco: arrivano con il dettaglio, cosi'
+  /// l'elenco resta leggero anche con molte vendite.
+  /// Receipts from `GET /pos/receipts`. Lines are loaded with the detail.
+  Future<List<Scontrino>> filter({
     String? queryCliente,
     String? cassaNome,
     String? metodoPagamento,
     bool? soloResi,
     String? giornataId,
+    String? turnoId,
     int? limit,
   }) async {
     try {
@@ -341,6 +367,7 @@ class StoricoCassaStore {
         registerName: cassaNome,
         paymentMethod: metodoPagamento,
         businessDayId: giornataId,
+        shiftId: turnoId,
         limit: limit ?? 200,
       );
       if (risposta['success'] != true) return const [];
@@ -351,7 +378,10 @@ class StoricoCassaStore {
       for (final grezzo in grezzi) {
         if (grezzo is! Map) continue;
         final scontrino = _receiptFromMap(Map<String, dynamic>.from(grezzo));
-        if (soloResi == true && !scontrino.hasResi) continue;
+        if (soloResi == true &&
+            scontrino.tipoOperazione == TipoOperazioneCassa.vendita) {
+          continue;
+        }
         risultato.add(scontrino);
       }
       return risultato;
@@ -362,24 +392,24 @@ class StoricoCassaStore {
   }
 
   /// Rebuilds a receipt from the server response.
-  ///
-  /// Lines are not part of the list: they load when the detail is opened, so
-  /// the list stays small even with many sales.
-  /// Rebuilds a receipt from the server response. Lines are not part of the
-  /// list, they are loaded on demand when the detail is opened.
   Scontrino _receiptFromMap(Map<String, dynamic> mappa) {
+    final emesso = parseServerGmt(mappa['issued_at']?.toString());
+    final turno = _textOr(mappa['shift_key'], null);
     return Scontrino(
       id: mappa['receipt_key']?.toString() ?? '',
-      data: _dateFromGmt(mappa['issued_at']?.toString()),
+      data: emesso,
       numeroProgressivo: _intFrom(mappa['sequential_number']),
       operatoreNome: _textOr(mappa['operator_name'], null),
       cassaNome: _textOr(mappa['register_name'], null),
       sede: _textOr(mappa['location'], null),
       giornataId: _textOr(mappa['business_day_id'], null),
-      turnoId: _intFrom(mappa['shift_id'])?.toString(),
+      turnoId: turno,
       wooOrderId: _intFrom(mappa['order_id']),
       mgwsOrderId: _intFrom(mappa['order_id']),
       metodoPagamento: _textOr(mappa['payment_method'], 'contanti')!,
+      clienteId: (_intFrom(mappa['customer_id']) ?? 0) > 0
+          ? '${mappa['customer_id']}'
+          : null,
       clienteNome: _textOr(mappa['customer_name'], null),
       couponCode: _textOr(mappa['coupon_code'], null),
       note: _textOr(mappa['note'], null),
@@ -391,7 +421,7 @@ class StoricoCassaStore {
       iva: _doubleFrom(mappa['vat_total']),
       aliquotaIva: _doubleFrom(mappa['tax_rate'], fallback: 22),
       canale: 'pos',
-      dataChiusura: _dateFromGmt(mappa['issued_at']?.toString()),
+      dataChiusura: emesso,
       tipoOperazione: _operationTypeFrom(mappa['operation_type']?.toString()),
     )..rettifiche = _notesFromCorrections(mappa['corrections']);
   }
@@ -411,8 +441,7 @@ class StoricoCassaStore {
   ///
   /// The server speaks `paid`/`cancelled`/`refunded` while the history keeps
   /// Italian labels: the conversion lives here, not in the widgets.
-  /// Maps the server status onto the POS history labels.
-  dynamic _statusFrom(String? stato) {
+  String _statusFrom(String? stato) {
     switch (stato) {
       case 'cancelled':
         return 'annullato';
@@ -420,6 +449,17 @@ class StoricoCassaStore {
         return 'rimborsato';
       default:
         return 'pagato';
+    }
+  }
+
+  String _statusToServer(String stato) {
+    switch (stato) {
+      case 'annullato':
+        return 'cancelled';
+      case 'rimborsato':
+        return 'refunded';
+      default:
+        return 'paid';
     }
   }
 
@@ -432,11 +472,6 @@ class StoricoCassaStore {
       default:
         return TipoOperazioneCassa.vendita;
     }
-  }
-
-  DateTime _dateFromGmt(String? valore) {
-    if (valore == null || valore.isEmpty) return DateTime.now();
-    return DateTime.tryParse(valore)?.toLocal() ?? DateTime.now();
   }
 
   int? _intFrom(Object? valore) {
@@ -457,12 +492,17 @@ class StoricoCassaStore {
     return testo;
   }
 
-  /// Loads the document lines from the server.
+  /// Documento completo letto dal server, righe comprese.
   ///
-  /// Lo storico locale le teneva solo sul dispositivo: senza questa lettura il
-  /// dettaglio perderebbe le righe appena reinstallata l'app.
-  /// Loads the document lines from the server.
-  Future<Scontrino?> detailFromServer(String receiptKey) async {
+  /// E' anche la ricerca per id: lo storico non esiste altrove.
+  /// Full document read from the server, lines included. It is also the
+  /// lookup by id: the history exists nowhere else.
+  Future<Scontrino?> cercaPerId(String receiptKey) async {
+    final dettaglio = await _detail(receiptKey);
+    return dettaglio?.scontrino;
+  }
+
+  Future<_DettaglioScontrino?> _detail(String receiptKey) async {
     final chiave = receiptKey.trim();
     if (chiave.isEmpty) return null;
 
@@ -473,14 +513,31 @@ class StoricoCassaStore {
       if (grezzo is! Map) return null;
 
       final scontrino = _receiptFromMap(Map<String, dynamic>.from(grezzo));
+      final rendibili = <RigaRendibile>[];
       final righe = grezzo['lines'];
       if (righe is List) {
         for (final riga in righe) {
           if (riga is! Map) continue;
-          scontrino.righe.add(_lineFromMap(Map<String, dynamic>.from(riga)));
+          final mappa = Map<String, dynamic>.from(riga);
+          final linea = _lineFromMap(mappa);
+          scontrino.righe.add(linea);
+          if (linea.isReso) continue;
+          final venduta = _intFrom(mappa['quantity']) ?? 0;
+          final resa = _intFrom(mappa['returned_quantity']) ?? 0;
+          rendibili.add(
+            RigaRendibile(
+              chiaveRiga: linea.chiaveRiga,
+              nome: linea.nomeCompleto,
+              barcodeInterno: mappa['barcode']?.toString() ?? '',
+              prezzoUnitario: linea.prezzoUnitario,
+              quantitaVenduta: venduta,
+              // Un documento annullato non ha piu' nulla da rendere.
+              quantitaGiaResa: scontrino.stato == 'annullato' ? venduta : resa,
+            ),
+          );
         }
       }
-      return scontrino;
+      return _DettaglioScontrino(scontrino, rendibili);
     } catch (errore) {
       AppLogger().w('Storico POS: dettaglio non letto dal server: $errore');
       return null;
@@ -488,22 +545,21 @@ class StoricoCassaStore {
   }
 
   RigaScontrino _lineFromMap(Map<String, dynamic> mappa) {
-    final quantita = _intFrom(mappa['quantity']) ?? 0;
-    final unitaio = _doubleFrom(mappa['unit_price']);
+    final variazione = _intFrom(mappa['variation_id']) ?? 0;
     return RigaScontrino(
       prodotto: ProdottoGlobal(
         id: _intFrom(mappa['product_id']),
         nome: mappa['name']?.toString() ?? '',
         barcodeInterno: mappa['barcode']?.toString() ?? '',
       ),
-      variante: _intFrom(mappa['variation_id']) != null
+      variante: variazione > 0
           ? VarianteProductGlobal(
-              id: _intFrom(mappa['variation_id']),
+              id: variazione,
               codiceProdotto: mappa['sku']?.toString() ?? '',
               barcodeInterno: mappa['barcode']?.toString() ?? '',
             )
           : null,
-      quantita: quantita,
+      quantita: _intFrom(mappa['quantity'])?.abs() ?? 0,
       subtotale: _doubleFrom(mappa['subtotal']),
       scontoRiga: _doubleFrom(mappa['discount_total']),
       scontoPercentuale: _doubleFrom(mappa['discount_percent']),
@@ -514,372 +570,85 @@ class StoricoCassaStore {
       riferimentoChiaveRiga: _textOr(mappa['source_line_key'], null),
       motivoReso: _textOr(mappa['return_reason'], null),
       esitoMerce: _textOr(mappa['return_outcome'], null),
-      recordedPrice: unitaio,
+      recordedPrice: _doubleFrom(mappa['unit_price']),
+      recordedLineKey: _textOr(mappa['line_key'], null),
     );
   }
 
-  /// Righe vendita di uno scontrino con quantita gia resa e residuo.
+  /// Righe vendute con quantita' gia' resa e residuo, calcolati dal server.
   ///
-  /// Il residuo arriva dal server quando disponibile, perche' il server vede i
-  /// resi di tutti i dispositivi; senza risposta si ricade sullo store locale.
-  /// Sold lines with the already-returned quantity and the remainder.
-  Future<List<RigaRendibile>> returnableLinesFromServer(
-    String receiptKey,
-  ) async {
-    final chiave = receiptKey.trim();
-    if (chiave.isEmpty) return const [];
-
-    try {
-      final risposta = await PlatformManager.pos.getReceipt(chiave);
-      if (risposta['success'] != true) return const [];
-      final scontrino = risposta['receipt'];
-      if (scontrino is! Map<String, dynamic>) return const [];
-
-      final righe = scontrino['lines'];
-      if (righe is! List) return const [];
-
-      final residui = <String, int>{};
-      final returnable = scontrino['returnable'];
-      if (returnable is Map) {
-        for (final entry in returnable.entries) {
-          final valore = entry.value;
-          if (entry.key is String && valore is num) {
-            residui[entry.key as String] = valore.toInt();
-          }
-        }
-      }
-
-      final risultato = <RigaRendibile>[];
-      for (final riga in righe) {
-        if (riga is! Map) continue;
-        if (riga['movement_type'] != 'sale') continue;
-        final lineKey = riga['line_key'];
-        final quantita = riga['quantity'];
-        if (lineKey is! String || quantita is! num) continue;
-        final nome = riga['name']?.toString() ?? '';
-        final barcode = riga['barcode']?.toString() ?? '';
-        final prezzo = riga['unit_price'];
-        final residuo = residui[lineKey] ?? quantita.toInt();
-        risultato.add(
-          RigaRendibile(
-            chiaveRiga: lineKey,
-            nome: nome,
-            barcodeInterno: barcode,
-            prezzoUnitario: prezzo is num ? prezzo.toDouble() : 0,
-            quantitaVenduta: quantita.toInt(),
-            quantitaGiaResa: quantita.toInt() - residuo,
-          ),
-        );
-      }
-      return risultato;
-    } catch (errore) {
-      AppLogger().w(
-        'Storico POS: righe rendibili non lette dal server: $errore',
-      );
-      return const [];
-    }
-  }
-
-  /// Registra uno scontrino POS chiuso. Gli ordini Woo non entrano mai qui:
-  /// resta il documento origine solo come riferimento `wooOrderId`.
-  ///
-  /// Il progressivo lo assegna MGWS durante il checkout: il contatore locale
-  /// resta solo come fallback per quando il backend non ha risposto, perche'
-  /// con due casse aperte un contatore locale duplicherebbe i numeri.
-  /// The receipt number is allocated by MGWS during checkout. The local
-  /// counter remains a fallback when the backend did not answer, because with
-  /// two tills open a local counter would duplicate numbers.
-  Future<Scontrino> registraScontrinoChiuso(
-    Scontrino scontrino, {
-    int? serverNumber,
-  }) async {
-    await init();
-    final progressivo = serverNumber != null && serverNumber > 0
-        ? serverNumber
-        : _assignFallbackNumber();
-    scontrino.numeroProgressivo = progressivo;
-    _progressivo = progressivo;
-    scontrino.canale = 'pos';
-    scontrino.dataChiusura = DateTime.now();
-    scontrino.giornataId ??= Scontrino.calcolaGiornataId(
-      scontrino.data,
-      scontrino.cassaNome,
-    );
-    if (scontrino.stato == 'aperto' || scontrino.stato == 'sospeso') {
-      scontrino.stato = scontrino.totale < 0 ? 'rimborsato' : 'pagato';
-    }
-    _scontrini.insert(0, scontrino);
-    await _save();
-    AppLogger().i(
-      'Storico POS #$progressivo registrato (${scontrino.righe.length} righe)',
-    );
-    return scontrino;
-  }
-
-  /// Counter used only when the server did not return a number.
-  ///
-  /// Non e' il percorso normale: MGWS assegna il progressivo nel checkout. Il
-  /// fallback serve a non perdere la vendita se il numero non arriva, e
-  /// riparte dal massimo gia' locale per non andare indietro nella sequenza.
-  /// This is not the normal path: MGWS allocates the number during checkout.
-  /// The fallback prevents losing a sale when the number does not arrive and
-  /// resumes from the local maximum so the sequence never goes backwards.
-  int _assignFallbackNumber() {
-    var massimo = _progressivo;
-    for (final scontrino in _scontrini) {
-      final numero = scontrino.numeroProgressivo ?? 0;
-      if (numero > massimo) massimo = numero;
-    }
-    return massimo + 1;
-  }
-
-  /// Filtra lo storico, leggendo dal server.
-  ///
-  /// Il server e' la fonte e sa filtrare meglio di una scansione locale; lo
-  /// store interviene solo se il backend non risponde.
-  /// Filters the history, reading from the server. The store is only a fallback.
-  Future<List<Scontrino>> filter({
-    DateTime? dal,
-    DateTime? al,
-    String? cassaNome,
-    String? metodoPagamento,
-    String? queryCliente,
-    int? operatoreId,
-    bool? soloResi,
-    String? giornataId,
-    int? limit,
-  }) async {
-    final fromServer = await receiptsFromServer(
-      queryCliente: queryCliente,
-      cassaNome: cassaNome,
-      metodoPagamento: metodoPagamento,
-      soloResi: soloResi,
-      giornataId: giornataId,
-      limit: limit,
-    );
-    if (fromServer.isNotEmpty) return fromServer;
-    return filterLocal(
-      dal: dal,
-      al: al,
-      cassaNome: cassaNome,
-      metodoPagamento: metodoPagamento,
-      queryCliente: queryCliente,
-      operatoreId: operatoreId,
-      soloResi: soloResi,
-    );
-  }
-
-  /// Filtra solo sullo store locale, senza interrogare il server.
-  /// Filters on the local store only, without asking the server.
-  List<Scontrino> filterLocal({
-    DateTime? dal,
-    DateTime? al,
-    String? cassaNome,
-    String? metodoPagamento,
-    String? queryCliente,
-    int? operatoreId,
-    bool? soloResi,
-  }) {
-    return _scontrini.where((s) {
-      if (dal != null && s.data.isBefore(dal)) return false;
-      if (al != null && s.data.isAfter(al)) return false;
-      if (cassaNome != null && cassaNome.isNotEmpty) {
-        if ((s.cassaNome ?? '') != cassaNome) return false;
-      }
-      if (metodoPagamento != null && metodoPagamento.isNotEmpty) {
-        if (s.metodoPagamento != metodoPagamento) return false;
-      }
-      if (operatoreId != null && s.operatoreId != operatoreId) return false;
-      if (soloResi == true && !s.hasResi) return false;
-      if (queryCliente != null && queryCliente.trim().isNotEmpty) {
-        final q = queryCliente.toLowerCase();
-        final haystack =
-            '${s.clienteNome ?? ''} ${s.clienteEmail ?? ''} '
-            '${s.numeroProgressivo ?? ''} ${s.wooOrderId ?? ''} ${s.id}';
-        if (!haystack.toLowerCase().contains(q)) return false;
-      }
-      return true;
-    }).toList();
-  }
-
-  Scontrino? cercaPerId(String id) {
-    for (final s in _scontrini) {
-      if (s.id == id) return s;
-    }
-    return null;
-  }
-
-  /// Cancels a document on the server.
-  ///
-  /// The server never deletes the row: it changes the status and records the
-  /// note, so the accounting history stays reconstructable.
-  Future<EsitoReso> cancelReceipt({
-    required String receiptId,
-    required String reason,
-  }) async {
-    await init();
-    if (reason.trim().isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.cancelReasonRequired),
-      );
-    }
-
-    try {
-      final response = await PlatformManager.pos.updateReceiptStatus(
-        receiptKey: receiptId,
-        status: 'cancelled',
-        note: reason.trim(),
-      );
-      if (response['success'] == true) {
-        await _alignLocalStatus(receiptId, 'annullato', reason.trim());
-        return const EsitoReso.ok();
-      }
-      final message = response['message']?.toString();
-      if (message != null && message.isNotEmpty) {
-        return EsitoReso.ko(CassaFailure.server(message));
-      }
-    } catch (error) {
-      AppLogger().w(
-        'Storico POS: annullamento non riuscito sul server: $error',
-      );
-    }
-
-    return _cancelLocalReceipt(receiptId: receiptId, reason: reason);
-  }
-
-  /// Aligns the local copy with the document cancelled server-side.
-  Future<void> _alignLocalStatus(
-    String receiptId,
-    String status,
-    String note,
-  ) async {
-    final index = _scontrini.indexWhere((s) => s.id == receiptId);
-    if (index < 0) return;
-    _scontrini[index].stato = status;
-    if (note.isNotEmpty) _scontrini[index].rettifiche.add(note);
-    await _save();
-  }
-
-  /// Cancels on the local store only, without asking the server.
-  Future<EsitoReso> _cancelLocalReceipt({
-    required String receiptId,
-    required String reason,
-  }) async {
-    final index = _scontrini.indexWhere((s) => s.id == receiptId);
-    if (index < 0)
-      return const EsitoReso.ko(CassaFailure(CassaFailureCode.receiptNotFound));
-    final receipt = _scontrini[index];
-    if (receipt.stato == 'annullato') {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.receiptAlreadyCancelled),
-      );
-    }
-    if (receipt.stato == 'aperto' || receipt.stato == 'sospeso') {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.onlyClosedReceiptsCancellable),
-      );
-    }
-    if (reason.trim().isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.cancelReasonRequired),
-      );
-    }
-    receipt.stato = 'annullato';
-    receipt.aggiungiRettifica('ANNULLO: ${reason.trim()}');
-    await _save();
-    return const EsitoReso.ok();
-  }
-
-  Future<EsitoReso> aggiungiRettificaScontrino({
-    required String scontrinoId,
-    required String nota,
-  }) async {
-    await init();
-    final scontrino = cercaPerId(scontrinoId);
-    if (scontrino == null)
-      return const EsitoReso.ko(CassaFailure(CassaFailureCode.receiptNotFound));
-    if (nota.trim().isEmpty)
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.adjustmentNoteRequired),
-      );
-    scontrino.aggiungiRettifica(nota);
-    await _save();
-    return const EsitoReso.ok();
-  }
-
-  /// Righe vendita di uno scontrino con quantita gia resa e residuo.
-  List<RigaRendibile> righeRendibili(String scontrinoId) {
-    final origine = cercaPerId(scontrinoId);
-    if (origine == null) return const [];
-    if (origine.stato == 'annullato') return const [];
-    final rese = <String, int>{};
-    for (final s in _scontrini) {
-      if (s.stato == 'annullato') continue;
-      for (final riga in s.righe) {
-        if (riga.isReso &&
-            riga.riferimentoScontrinoId == scontrinoId &&
-            riga.riferimentoChiaveRiga != null) {
-          rese[riga.riferimentoChiaveRiga!] =
-              (rese[riga.riferimentoChiaveRiga!] ?? 0) + riga.quantita;
-        }
-      }
-    }
-    final out = <RigaRendibile>[];
-    for (final riga in origine.righe) {
-      if (riga.isReso) continue;
-      out.add(
-        RigaRendibile(
-          chiaveRiga: riga.chiaveRiga,
-          nome: riga.nomeCompleto,
-          barcodeInterno: riga.barcodeInterno,
-          prezzoUnitario: riga.prezzoUnitario,
-          quantitaVenduta: riga.quantita,
-          quantitaGiaResa: rese[riga.chiaveRiga] ?? 0,
-        ),
-      );
-    }
-    return out;
+  /// Il server vede i resi di tutte le casse, quindi il residuo non dipende
+  /// dal dispositivo che apre il documento.
+  /// Sold lines with returned and remaining quantities, computed server-side.
+  Future<List<RigaRendibile>> righeRendibili(String receiptKey) async {
+    final dettaglio = await _detail(receiptKey);
+    return dettaglio?.rendibili ?? const [];
   }
 
   /// Controllo rigido: il reso esiste solo come riga collegata a una vendita
-  /// reale, entro il residuo rendibile e con motivo obbligatorio.
-  EsitoReso validaReso({
+  /// reale, entro il residuo rendibile calcolato dal server e con motivo
+  /// obbligatorio. Il server ripete lo stesso controllo nel checkout.
+  /// Strict check against the server remainder; the checkout repeats it.
+  Future<EsitoReso> validaReso({
     required String scontrinoOrigineId,
     required String chiaveRiga,
     required int quantita,
     required String? motivo,
-  }) {
-    if (cercaPerId(scontrinoOrigineId) == null) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.originReceiptNotFound),
-      );
+  }) async {
+    final verifica = await verificaReso(
+      scontrinoOrigineId: scontrinoOrigineId,
+      chiaveRiga: chiaveRiga,
+      quantita: quantita,
+      motivo: motivo,
+    );
+    return verifica.esito;
+  }
+
+  /// Come [validaReso], ma restituisce anche il documento di origine e la
+  /// riga venduta, letti con la stessa richiesta.
+  /// Like [validaReso], also returning the origin document and the sold line
+  /// read with the same request.
+  Future<({EsitoReso esito, Scontrino? origine, RigaScontrino? venduta})>
+  verificaReso({
+    required String scontrinoOrigineId,
+    required String chiaveRiga,
+    required int quantita,
+    required String? motivo,
+  }) async {
+    ({EsitoReso esito, Scontrino? origine, RigaScontrino? venduta}) ko(
+      CassaFailure errore,
+    ) => (esito: EsitoReso.ko(errore), origine: null, venduta: null);
+
+    final dettaglio = await _detail(scontrinoOrigineId);
+    if (dettaglio == null) {
+      return ko(const CassaFailure(CassaFailureCode.originReceiptNotFound));
     }
-    if (cercaPerId(scontrinoOrigineId)!.stato == 'annullato') {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.originReceiptCancelled),
-      );
-    }
-    if (quantita <= 0) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.invalidReturnQuantity),
-      );
+    final origine = dettaglio.scontrino;
+    if (origine.stato == 'annullato') {
+      return ko(const CassaFailure(CassaFailureCode.originReceiptCancelled));
     }
     if (motivo == null || motivo.trim().isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.returnReasonRequired),
-      );
+      return ko(const CassaFailure(CassaFailureCode.returnReasonRequired));
     }
     RigaRendibile? target;
-    for (final r in righeRendibili(scontrinoOrigineId)) {
+    for (final r in dettaglio.rendibili) {
       if (r.chiaveRiga == chiaveRiga) target = r;
     }
-    if (target == null) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.saleLineNotFound),
-      );
+    RigaScontrino? venduta;
+    for (final riga in origine.righe) {
+      if (!riga.isReso && riga.chiaveRiga == chiaveRiga) venduta = riga;
+    }
+    if (target == null || venduta == null) {
+      return ko(const CassaFailure(CassaFailureCode.saleLineNotFound));
+    }
+    if (target.isEsaurita) {
+      return ko(const CassaFailure(CassaFailureCode.lineFullyReturned));
+    }
+    if (quantita <= 0) {
+      return ko(const CassaFailure(CassaFailureCode.invalidReturnQuantity));
     }
     if (quantita > target.quantitaRendibile) {
-      return EsitoReso.ko(
+      return ko(
         CassaFailure(
           CassaFailureCode.returnExceedsRemaining,
           disponibili: target.quantitaRendibile,
@@ -888,96 +657,151 @@ class StoricoCassaStore {
         ),
       );
     }
-    return const EsitoReso.ok();
+    return (esito: const EsitoReso.ok(), origine: origine, venduta: venduta);
   }
 
-  /// Totali di una giornata o di un turno: base della chiusura.
+  /// Annulla un documento sul server.
   ///
-  /// Quando viene passato `turnoId` il filtro e solo per turno: un turno che
-  /// attraversa la mezzanotte include tutti i suoi scontrini, anche se emessi
-  /// in una giornata diversa da quella di apertura.
-  Map<String, double> totaliGiornata(String giornataId, {String? turnoId}) {
-    double contanti = 0;
-    double carta = 0;
-    double altri = 0;
-    double rimborsi = 0;
-    for (final s in _scontrini) {
-      if (s.stato == 'annullato') continue;
-      if (turnoId != null) {
-        if (s.turnoId != turnoId) continue;
-      } else {
-        if (s.giornataId != giornataId) continue;
-      }
-      if (s.totale < 0) {
-        rimborsi += s.totale.abs();
-        continue;
-      }
-      switch (s.metodoPagamento) {
-        case 'contanti':
-          contanti += s.totale;
-          break;
-        case 'carta':
-        case 'bancomat':
-          carta += s.totale;
-          break;
-        default:
-          altri += s.totale;
-      }
-    }
-    return {
-      'contanti': contanti,
-      'carta': carta,
-      'altri': altri,
-      'rimborsi': rimborsi,
-    };
-  }
-
-  bool hasChiusura(String giornataId, {String? turnoId}) {
-    if (turnoId != null) return _chiusure.any((c) => c.turnoId == turnoId);
-    return _chiusure.any((c) => c.giornataId == giornataId);
-  }
-
-  /// Registra la chiusura. Causale obbligatoria in presenza di differenze.
-  /// La chiusura non si modifica: solo note di rettifica append-only.
-  Future<EsitoReso> registraChiusura(ChiusuraCassa chiusura) async {
-    await init();
-    if (hasChiusura(chiusura.giornataId, turnoId: chiusura.turnoId)) {
+  /// Il server non cancella mai la riga: cambia lo stato e registra la nota,
+  /// cosi' lo storico contabile resta ricostruibile.
+  /// Cancels a document on the server; the row is never deleted.
+  Future<EsitoReso> cancelReceipt({
+    required String receiptId,
+    required String reason,
+  }) async {
+    if (reason.trim().isEmpty) {
       return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.shiftAlreadyClosed),
+        CassaFailure(CassaFailureCode.cancelReasonRequired),
       );
     }
-    if (chiusura.hasDifferenze &&
-        (chiusura.causaleDifferenza ?? '').trim().isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.differenceReasonRequired),
-      );
-    }
-    _chiusure.insert(0, chiusura);
-    await _save();
-    return const EsitoReso.ok();
+    return _updateStatus(receiptId, 'cancelled', 'ANNULLO: ${reason.trim()}');
   }
 
-  Future<void> aggiungiRettifica(String chiusuraId, String nota) async {
-    await init();
-    final index = _chiusure.indexWhere((c) => c.id == chiusuraId);
-    if (index < 0) return;
-    _chiusure[index] = _chiusure[index].withRettifica(
-      '${DateTime.now().toIso8601String()} - $nota',
+  /// Appende una rettifica allo scontrino senza cambiarne lo stato.
+  /// Appends a correction to the receipt without changing its status.
+  Future<EsitoReso> aggiungiRettificaScontrino({
+    required Scontrino scontrino,
+    required String nota,
+  }) async {
+    if (nota.trim().isEmpty) {
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.adjustmentNoteRequired),
+      );
+    }
+    return _updateStatus(
+      scontrino.id,
+      _statusToServer(scontrino.stato),
+      nota.trim(),
     );
-    await _save();
   }
 
-  ChiusuraCassa? cercaChiusura(String giornataId) {
-    for (final c in _chiusure) {
-      if (c.giornataId == giornataId) return c;
+  Future<EsitoReso> _updateStatus(
+    String receiptKey,
+    String status,
+    String note,
+  ) async {
+    try {
+      final risposta = await PlatformManager.pos.updateReceiptStatus(
+        receiptKey: receiptKey,
+        status: status,
+        note: note,
+      );
+      if (risposta['success'] == true) return const EsitoReso.ok();
+      final messaggio = risposta['message']?.toString();
+      if (messaggio != null && messaggio.isNotEmpty) {
+        return EsitoReso.ko(CassaFailure.server(messaggio));
+      }
+    } catch (errore) {
+      AppLogger().w(
+        'Storico POS: aggiornamento documento non riuscito: $errore',
+      );
     }
-    return null;
+    return const EsitoReso.ko(
+      CassaFailure(CassaFailureCode.invalidServerResponse),
+    );
   }
 
-  ChiusuraCassa? cercaChiusuraTurno(String turnoId) {
-    for (final c in _chiusure) {
-      if (c.turnoId == turnoId) return c;
+  /// Sintesi di `GET /pos/receipts` per un turno o una giornata.
+  ///
+  /// I totali li calcola il server, documenti annullati esclusi. Con
+  /// `turnoId` il filtro e' solo per turno: un turno che attraversa la
+  /// mezzanotte include tutti i suoi scontrini.
+  /// Server summary for a shift or a business day, cancelled documents
+  /// excluded.
+  Future<Map<String, double>> totaliGiornata(
+    String giornataId, {
+    String? turnoId,
+  }) async {
+    final totali = <String, double>{
+      'contanti': 0,
+      'carta': 0,
+      'altri': 0,
+      'rimborsi': 0,
+    };
+    final sintesi = await _summary(giornataId: giornataId, turnoId: turnoId);
+    final metodi = sintesi?['by_payment_method'];
+    if (metodi is! List) return totali;
+    for (final voce in metodi) {
+      if (voce is! Map) continue;
+      final incassato = _doubleFrom(voce['collected']);
+      totali['rimborsi'] = totali['rimborsi']! + _doubleFrom(voce['refunded']);
+      final chiave = switch (voce['payment_method']?.toString()) {
+        'contanti' => 'contanti',
+        'carta' || 'bancomat' => 'carta',
+        _ => 'altri',
+      };
+      totali[chiave] = totali[chiave]! + incassato;
     }
-    return null;
+    return totali;
   }
+
+  /// Contatori di cassa per un turno o una giornata, dai documenti del server.
+  /// Till counters for a shift or a business day, from the server documents.
+  Future<CassaMetricheSnapshot> metriche({
+    String? giornataId,
+    String? turnoId,
+  }) async {
+    try {
+      final risposta = await PlatformManager.pos.listReceipts(
+        businessDayId: turnoId == null ? giornataId : null,
+        shiftId: turnoId,
+        limit: 500,
+      );
+      if (risposta['success'] != true) return const CassaMetricheSnapshot();
+      final grezzi = risposta['receipts'];
+      if (grezzi is! List) return const CassaMetricheSnapshot();
+      return CassaMetricheSnapshot.fromServerReceipts(
+        grezzi.whereType<Map>().map(Map<String, dynamic>.from),
+      );
+    } catch (errore) {
+      AppLogger().w('Storico POS: contatori non letti dal server: $errore');
+      return const CassaMetricheSnapshot();
+    }
+  }
+
+  Future<Map<String, dynamic>?> _summary({
+    String? giornataId,
+    String? turnoId,
+  }) async {
+    try {
+      final risposta = await PlatformManager.pos.listReceipts(
+        businessDayId: turnoId == null ? giornataId : null,
+        shiftId: turnoId,
+        limit: 1,
+      );
+      final sintesi = risposta['summary'];
+      if (risposta['success'] != true || sintesi is! Map) return null;
+      return Map<String, dynamic>.from(sintesi);
+    } catch (errore) {
+      AppLogger().w('Storico POS: sintesi non letta dal server: $errore');
+      return null;
+    }
+  }
+}
+
+class _DettaglioScontrino {
+  final Scontrino scontrino;
+  final List<RigaRendibile> rendibili;
+
+  const _DettaglioScontrino(this.scontrino, this.rendibili);
 }

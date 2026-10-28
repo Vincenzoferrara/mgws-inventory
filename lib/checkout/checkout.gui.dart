@@ -41,9 +41,10 @@ class CassaPageState extends State<CassaPage>
 
   Future<void> _initContestoCassa() async {
     await cassaSettings.init();
-    await _controller.storicoStore.init();
     await _controller.risolviOperatoreDaLogin();
     await _controller.aggiornaSedeMgws();
+    if (mounted) setState(() {});
+    await _controller.aggiornaStatoCassa();
     if (mounted) setState(() {});
   }
 
@@ -144,7 +145,8 @@ class CassaPageState extends State<CassaPage>
       );
       return;
     }
-    final totali = _controller.totaliTurnoCorrente();
+    final totali = await _controller.totaliTurnoCorrente();
+    if (!mounted) return;
     final contantiController = TextEditingController();
     final cartaController = TextEditingController();
     final causaleController = TextEditingController();

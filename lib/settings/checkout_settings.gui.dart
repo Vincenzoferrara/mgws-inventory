@@ -25,18 +25,18 @@ class _CassaSettingsTabState extends State<CassaSettingsTab> {
   late final TextEditingController _altriChiudiController;
   late final TextEditingController _notaChiudiController;
 
-  /// Turno della cassa, letto dallo storico locale.
+  /// Turno della cassa, letto dal server MGWS.
   ///
   /// Nessun widget sopra le Impostazioni fornisce la [CassaController] della
   /// pagina Cassa: cercarla con Provider lanciava "Provider not found" appena
-  /// la scheda veniva costruita. Lo storico vive in SharedPreferences, quindi
-  /// un controller proprio vede lo stesso turno.
+  /// la scheda veniva costruita. Il turno vive sul server, quindi un
+  /// controller proprio vede lo stesso turno.
   final CassaController _cassa = CassaController();
 
   @override
   void initState() {
     super.initState();
-    _cassa.storicoStore.init().then((_) {
+    _cassa.aggiornaStatoCassa().then((_) {
       if (mounted) setState(() {});
     });
     _cassaController = TextEditingController(text: cassaSettings.nomeCassa);

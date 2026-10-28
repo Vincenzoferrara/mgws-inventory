@@ -101,7 +101,7 @@ class CassaController {
   List<ElementoCassa> _elementiFiltrati = [];
   String _filtroRicerca = '';
   Timer? _debounceRicerca;
-  final CassaMetricheStore _metricheStore = CassaMetricheStore();
+  CassaMetricheSnapshot _metriche = const CassaMetricheSnapshot();
 
   // Cliente selezionato (opzionale)
   String? _clienteNome;
@@ -111,8 +111,8 @@ class CassaController {
   // Scontrini sospesi
   final List<Scontrino> _scontriniSospesi = [];
 
-  // Storico POS locale (SharedPreferences/JSON) separato dagli ordini Woo.
-  final StoricoCassaStore storicoStore = StoricoCassaStore();
+  // Storico POS letto da MGWS, separato dagli ordini Woo.
+  final StoricoCassaServer storico = StoricoCassaServer();
 
   // Operatore di cassa: l'utente loggato e l'utente che usa la cassa.
   // Risolto automaticamente dalla sessione (WordPress o JWT), mai impostato
@@ -136,7 +136,7 @@ class CassaController {
   String? get clienteEmail => _clienteEmail;
   String? get clienteTelefono => _clienteTelefono;
   List<Scontrino> get scontriniSospesi => List.unmodifiable(_scontriniSospesi);
-  CassaMetricheSnapshot get metricheSnapshot => _metricheStore.snapshot;
+  CassaMetricheSnapshot get metricheSnapshot => _metriche;
   int? get operatoreId => _operatoreId;
   String? get operatoreNome => _operatoreNome;
   String? get operatoreCognome => _operatoreCognome;
@@ -187,11 +187,38 @@ class CassaController {
     }
   }
 
-  /// Turno aperto per la cassa corrente. Il filtro e solo sulla cassa, non
-  /// sulla giornata: un turno resta "aperto" finche non viene chiuso, anche
-  /// se la giornata operativa e cambiata a mezzanotte.
-  TurnoCassa? get turnoCorrente =>
-      storicoStore.turnoAperto(cassaNome: cassaCorrenteLabel);
+  /// Turno aperto per la cassa corrente, come l'ha letto il server. Il
+  /// filtro e solo sulla cassa, non sulla giornata: un turno resta "aperto"
+  /// finche non viene chiuso, anche se la giornata e cambiata a mezzanotte.
+  TurnoCassa? get turnoCorrente {
+    final turno = storico.turnoAperto;
+    if (turno == null || turno.cassaNome != cassaCorrenteLabel) return null;
+    return turno;
+  }
+
+  /// Rilegge dal server il turno aperto e i contatori della cassa.
+  ///
+  /// Va chiamata quando la schermata si apre: dopo una reinstallazione o un
+  /// cambio di dispositivo turno e contatori tornano quelli del server.
+  /// Reloads the open shift and the till counters from the server.
+  Future<void> aggiornaStatoCassa() async {
+    await storico.aggiornaTurno(cassaCorrenteLabel);
+    _applicaContestoCassa(_scontrinoCorrente);
+    await aggiornaMetriche();
+  }
+
+  /// Contatori del turno aperto o, senza turno, della giornata della cassa.
+  /// Counters of the open shift or, without one, of the register's day.
+  Future<void> aggiornaMetriche() async {
+    final turno = turnoCorrente;
+    _metriche = await storico.metriche(
+      turnoId: turno?.id,
+      giornataId: Scontrino.calcolaGiornataId(
+        DateTime.now(),
+        _scontrinoCorrente.cassaNome,
+      ),
+    );
+  }
 
   bool get hasTurnoAperto => turnoCorrente != null;
   bool get richiedeTurnoAperto => cassaSettings.turnoObbligatorio;
@@ -249,12 +276,11 @@ class CassaController {
   }
 
   Future<EsitoReso> apriTurno({required double fondoIniziale}) async {
-    await storicoStore.init();
     await risolviOperatoreDaLogin();
     await aggiornaSedeMgws();
     final cassa = cassaCorrenteLabel;
     final sede = sedeCorrenteLabel;
-    if (storicoStore.turnoAperto(cassaNome: cassa) != null) {
+    if (await storico.aggiornaTurno(cassa) != null) {
       return const EsitoReso.ko(
         CassaFailure(CassaFailureCode.shiftAlreadyOpen),
       );
@@ -272,10 +298,9 @@ class CassaController {
       fondoIniziale: fondoIniziale,
     );
 
-    // Enforcement server-first: si apre lo shift MGWS PRIMA del turno locale.
-    // Il server è autorevole: se non conferma (409 già aperto, backend giù…)
-    // nessun turno locale. Lo shift_key coincide con turno.id, così il
-    // checkout lo riferirà come shift_id e il server lo risolve by key.
+    // Il turno esiste solo se MGWS lo conferma (409 gia' aperto, backend
+    // giu'...: nessun turno). Lo shift_key coincide con turno.id, cosi' il
+    // checkout lo riferira' come shift_id e il server lo risolve by key.
     final shiftResponse = await PlatformManager.pos.openShift(<String, dynamic>{
       'shift_key': turno.id,
       'giornata_id': turno.giornataId,
@@ -288,9 +313,10 @@ class CassaController {
     final esitoServer = _esitoShiftServer(shiftResponse);
     if (!esitoServer.ok) return esitoServer;
 
-    final esito = await storicoStore.apriTurno(turno);
-    if (esito.ok) _applicaContestoCassa(_scontrinoCorrente);
-    return esito;
+    storico.registraTurnoAperto(turno);
+    _applicaContestoCassa(_scontrinoCorrente);
+    await aggiornaMetriche();
+    return const EsitoReso.ok();
   }
 
   /// Valuta una risposta openShift/closeShift del server MGWS. Il server è
@@ -345,7 +371,6 @@ class CassaController {
     String? causaleDifferenza,
     String? note,
   }) async {
-    await storicoStore.init();
     final turno = turnoCorrente;
     if (turno == null)
       return const EsitoReso.ko(CassaFailure(CassaFailureCode.noOpenShift));
@@ -369,15 +394,15 @@ class CassaController {
     final esitoServer = _esitoShiftServer(shiftResponse);
     if (!esitoServer.ok) return esitoServer;
 
-    // Totali attesi dal server (autorevoli); fallback locale solo se il
-    // backend non espone close_totals (compatibilità con versioni vecchie).
+    // Totali attesi calcolati dal server alla chiusura; la sintesi degli
+    // scontrini del turno serve solo se il backend non espone close_totals.
     final attesi = _expectedTotalsDaChiusura(shiftResponse);
-    final totali = storicoStore.totaliGiornata(
-      turno.giornataId,
-      turnoId: turno.id,
-    );
+    final totali = attesi.isEmpty
+        ? await storico.totaliGiornata(turno.giornataId, turnoId: turno.id)
+        : attesi;
     final chiusura = ChiusuraCassa(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // Chiave legata al turno: un secondo invio non crea un'altra chiusura.
+      id: 'chiusura-${turno.id}',
       giornataId: turno.giornataId,
       turnoId: turno.id,
       cassaNome: turno.cassaNome,
@@ -387,10 +412,10 @@ class CassaController {
       operatoreNome: turno.operatoreNome,
       operatoreCognome: turno.operatoreCognome,
       fondoIniziale: turno.fondoIniziale,
-      incassiContanti: attesi['contanti'] ?? totali['contanti'] ?? 0,
-      incassiCarta: attesi['carta'] ?? totali['carta'] ?? 0,
-      incassiAltri: attesi['altri'] ?? totali['altri'] ?? 0,
-      rimborsi: attesi['rimborsi'] ?? totali['rimborsi'] ?? 0,
+      incassiContanti: totali['contanti'] ?? 0,
+      incassiCarta: totali['carta'] ?? 0,
+      incassiAltri: totali['altri'] ?? 0,
+      rimborsi: totali['rimborsi'] ?? 0,
       contanteContato: contanteContato,
       cartaContato: cartaContato,
       causaleDifferenza: (causaleDifferenza ?? '').trim().isEmpty
@@ -398,20 +423,24 @@ class CassaController {
           : causaleDifferenza!.trim(),
       note: (note ?? '').trim().isEmpty ? null : note!.trim(),
     );
-    final esito = await storicoStore.chiudiTurno(
-      turnoId: turno.id,
-      chiusura: chiusura,
+    final shiftId = shiftResponse is Map ? shiftResponse['id'] : null;
+    final esito = await storico.registraChiusura(
+      chiusura,
+      serverShiftId: shiftId is num ? shiftId.toInt() : null,
     );
-    if (esito.ok) _applicaContestoCassa(_scontrinoCorrente);
+    _applicaContestoCassa(_scontrinoCorrente);
+    await aggiornaMetriche();
     return esito;
   }
 
-  Map<String, double> totaliTurnoCorrente() {
+  /// Incassi del turno aperto, dalla sintesi del server.
+  /// Takings of the open shift, from the server summary.
+  Future<Map<String, double>> totaliTurnoCorrente() async {
     final turno = turnoCorrente;
     if (turno == null) {
       return const {'contanti': 0, 'carta': 0, 'altri': 0, 'rimborsi': 0};
     }
-    return storicoStore.totaliGiornata(turno.giornataId, turnoId: turno.id);
+    return storico.totaliGiornata(turno.giornataId, turnoId: turno.id);
   }
 
   void _applicaContestoCassa(Scontrino scontrino) {
@@ -441,49 +470,22 @@ class CassaController {
     String esitoMerce = 'reintegro',
     bool preparaCambio = false,
   }) async {
-    await storicoStore.init();
-    // Il residuo rendibile viene chiesto al server: conosce i resi di tutti i
-    // dispositivi, quindi il controllo non dipende dal telefono che apre il
-    // documento. Se il server non risponde si ricade sullo store locale.
-    // The returnable remainder comes from the server, which sees returns from
-    // every device; without a response the local store is used.
-    var righeRendibili = await storicoStore.returnableLinesFromServer(
-      scontrinoOrigineId,
-    );
-    if (righeRendibili.isEmpty) {
-      righeRendibili = storicoStore.righeRendibili(scontrinoOrigineId);
-    }
-
-    final esito = _validateReturnWithLines(
-      righeRendibili: righeRendibili,
+    // Documento, riga e residuo arrivano dal server, che conosce i resi di
+    // tutte le casse: il controllo non dipende dal telefono che lo apre.
+    // Document, line and remainder come from the server, which sees the
+    // returns of every till.
+    final verifica = await storico.verificaReso(
+      scontrinoOrigineId: scontrinoOrigineId,
       chiaveRiga: chiaveRiga,
       quantita: quantita,
       motivo: motivo,
     );
-    if (!esito.ok) {
-      return esito.errore ??
+    if (!verifica.esito.ok) {
+      return verifica.esito.errore ??
           const CassaFailure(CassaFailureCode.returnNotAllowed);
     }
-
-    final origine = storicoStore.cercaPerId(scontrinoOrigineId);
-    RigaScontrino? venduta;
-    if (origine != null) {
-      for (final r in origine.righe) {
-        if (!r.isReso && r.chiaveRiga == chiaveRiga) venduta = r;
-      }
-    }
-    // Il documento puo' non essere nello store locale, perche' la sua esistenza
-    // e' sul server. In quel caso la riga si ricostruisce dai dati letti.
-    final rigaVenduta =
-        venduta ??
-        _lineFromReturnable(righeRendibili, chiaveRiga) ??
-        (quantita > 0
-            ? _lineForReturn(scontrinoOrigineId, chiaveRiga, quantita)
-            : null);
-    if (rigaVenduta == null) {
-      return const CassaFailure(CassaFailureCode.saleLineNotFound);
-    }
-    venduta = rigaVenduta;
+    final origine = verifica.origine!;
+    final venduta = verifica.venduta!;
 
     // Nuovo scontrino di reso collegato, con prezzo reale della vendita.
     await risolviOperatoreDaLogin();
@@ -493,11 +495,11 @@ class CassaController {
       tipoOperazione: preparaCambio
           ? TipoOperazioneCassa.cambio
           : TipoOperazioneCassa.reso,
-      metodoPagamento: origine?.metodoPagamento ?? 'contanti',
-      clienteId: origine?.clienteId,
-      clienteNome: origine?.clienteNome,
-      clienteEmail: origine?.clienteEmail,
-      clienteTelefono: origine?.clienteTelefono,
+      metodoPagamento: origine.metodoPagamento,
+      clienteId: origine.clienteId,
+      clienteNome: origine.clienteNome,
+      clienteEmail: origine.clienteEmail,
+      clienteTelefono: origine.clienteTelefono,
     );
     _applicaContestoCassa(_scontrinoCorrente);
     final unitario = venduta.prezzoUnitario;
@@ -516,6 +518,9 @@ class CassaController {
       riferimentoChiaveRiga: chiaveRiga,
       motivoReso: motivo.trim(),
       esitoMerce: esitoMerce,
+      // La riga letta dal server non ha il listino: il prezzo e' quello
+      // pagato, che il reso deve rimborsare.
+      recordedPrice: unitario,
     );
     // Forza il prezzo reale: allinea il listino usato per il calcolo al prezzo
     // effettivamente pagato, poi ricalcola il totale dello scontrino.
@@ -855,100 +860,13 @@ class CassaController {
     return completaOperazione();
   }
 
-  /// Valida un reso sulle righe rendibili, dal server o dallo store locale.
-  ///
-  /// Il controllo resta identico in entrambi i casi: cambia solo da dove
-  /// arrivano le righe.
-  /// Validates a return against the returnable lines.
-  EsitoReso _validateReturnWithLines({
-    required List<RigaRendibile> righeRendibili,
-    required String chiaveRiga,
-    required int quantita,
-    required String motivo,
-  }) {
-    if (righeRendibili.isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.originReceiptNotFound),
-      );
-    }
-    if (motivo.trim().isEmpty) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.returnReasonRequired),
-      );
-    }
-    RigaRendibile? riga;
-    for (final candidate in righeRendibili) {
-      if (candidate.chiaveRiga == chiaveRiga) riga = candidate;
-    }
-    if (riga == null)
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.saleLineNotFound),
-      );
-    if (riga.isEsaurita) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.lineFullyReturned),
-      );
-    }
-    if (quantita <= 0) {
-      return const EsitoReso.ko(
-        CassaFailure(CassaFailureCode.invalidReturnQuantity),
-      );
-    }
-    if (quantita > riga.quantitaRendibile) {
-      return EsitoReso.ko(
-        CassaFailure(
-          CassaFailureCode.returnExceedsRemaining,
-          disponibili: riga.quantitaRendibile,
-        ),
-      );
-    }
-    return const EsitoReso.ok();
-  }
-
-  /// Ricostruisce la riga venduta dai dati letti dal server.
-  /// Rebuilds the sold line from the data read server-side.
-  RigaScontrino? _lineFromReturnable(
-    List<RigaRendibile> righe,
-    String chiaveRiga,
-  ) {
-    for (final candidate in righe) {
-      if (candidate.chiaveRiga != chiaveRiga) continue;
-      return RigaScontrino(
-        prodotto: ProdottoGlobal(
-          nome: candidate.nome,
-          barcodeInterno: candidate.barcodeInterno,
-        ),
-        quantita: candidate.quantitaVenduta,
-        subtotale: 0,
-        riferimentoChiaveRiga: candidate.chiaveRiga,
-      );
-    }
-    return null;
-  }
-
-  /// Riga minima per un reso senza documento locale.
-  /// Minimal line for a return without a local document.
-  RigaScontrino? _lineForReturn(
-    String scontrinoOrigineId,
-    String chiaveRiga,
-    int quantita,
-  ) {
-    return RigaScontrino(
-      prodotto: ProdottoGlobal(nome: ''),
-      quantita: quantita,
-      subtotale: 0,
-      riferimentoChiaveRiga: chiaveRiga,
-      riferimentoScontrinoId: scontrinoOrigineId,
-    );
-  }
-
   /// Legge il progressivo scontrino dalla risposta del checkout.
   ///
   /// Il server lo assegna in simulazione; con registratore telematico arriva
-  /// gia' emesso dal dispositivo. Se manca, si torna al fallback locale.
+  /// gia' emesso dal dispositivo.
   /// Reads the receipt number from the checkout response. The server
   /// allocates it in simulation; with a fiscal register it arrives already
-  /// issued by the device. When missing, the local fallback applies.
+  /// issued by the device.
   int? _readServerNumber(Map<String, dynamic> response) {
     final valore = response['sequential_number'];
     if (valore is num && valore.toInt() > 0) return valore.toInt();
@@ -1012,9 +930,7 @@ class CassaController {
         AppLogger().i('✅ Checkout MGWS completato');
       }
 
-      await _metricheStore.registraOperazione(_scontrinoCorrente);
-
-      // Aggiorna lo stato dello scontrino locale
+      _scontrinoCorrente.numeroProgressivo = serverNumber;
       _scontrinoCorrente.stato = _scontrinoCorrente.totale < 0
           ? 'rimborsato'
           : 'pagato';
@@ -1036,19 +952,16 @@ class CassaController {
         AppLogger().w('Registratore telematico: emissione non riuscita: $e');
       }
 
-      // Storico POS separato dagli ordini Woo: archivia lo scontrino chiuso
-      // con righe, pagamenti, operatore, cassa e riferimento ordine.
-      try {
-        await storicoStore.registraScontrinoChiuso(
-          _scontrinoCorrente,
-          serverNumber: serverNumber,
-        );
-      } catch (e) {
-        AppLogger().w('Storico POS: archiviazione locale fallita: $e');
-      }
+      // Lo storico e' gia' sul server: il checkout ha registrato documento e
+      // righe. Qui si rileggono solo i contatori.
+      AppLogger().i(
+        'Storico POS #${serverNumber ?? '-'} registrato su MGWS '
+        '(${_scontrinoCorrente.righe.length} righe)',
+      );
 
       // Crea un nuovo scontrino per la prossima vendita
       _nuovoScontrino();
+      await aggiornaMetriche();
 
       return true;
     } catch (e, stackTrace) {

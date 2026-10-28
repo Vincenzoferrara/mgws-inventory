@@ -121,9 +121,11 @@ the app shows one screen at a time.
 
 MGWS confirms the sale, creates the WooCommerce order and records the stock
 movement. If the network drops and the same sale is sent again, MGWS
-recognises it and does not create a second order. The receipt is saved in
-the `Checkout history` on the device, with lines, payment method, operator,
-till, shift, totals and the number of the WooCommerce order.
+recognises it and does not create a second order. The receipt is saved on
+the site and appears in the `Checkout history` with lines, payment method,
+till, shift, totals and the number of the WooCommerce order. Nothing stays
+only on the device: after a reinstall, or on another device, the history,
+the open shift and the closings are all there.
 
 On a computer the right side holds operation type, customer, loyalty card,
 coupons, parked receipts, totals and payment. On a phone the cart fills the
@@ -153,8 +155,12 @@ with a reason. Cancelled receipts leave the totals and cannot be returned.
 Use `Close shift` in the cashier or `Closing` in the `Checkout history`. Enter the
 counted cash and card totals, a reason and notes. MGWS works out the
 expected totals from the shift's sales and shows the differences. The shift
-closes on the device only when the server has closed it; a recorded closing
-cannot be changed, only annotated.
+closes only when the server has closed it; a recorded closing cannot be
+changed, only annotated.
+
+The counters under the operation type (sales, returns, exchanges and their
+values) cover the open shift, or today's sales of the till when no shift is
+open.
 
 ## Products
 
