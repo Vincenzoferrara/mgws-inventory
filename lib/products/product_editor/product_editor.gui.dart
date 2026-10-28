@@ -13,7 +13,7 @@ import '../../log_viewer/app_logger.dart';
 import '../../notification/notification_service.dart';
 import '../../reuse_class/gui/searchable_checkbox_dialog.dart';
 import '../../reuse_class/gui/notification_recap_dialog.dart';
-import '../../reuse_class/datagridview/datagridview_cache.dart';
+import '../product_cache.dart';
 import '../../reuse_class/image_url_resolver.dart';
 import '../../reuse_class/barcode/barcode_generator.dart';
 import '../../l10n/extensions.dart';
@@ -4715,10 +4715,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       );
       final savedProductId = savedProduct.id ?? prodotto.id ?? 0;
       if (savedProductId > 0) {
-        DataGridViewCache.markProductsDirty();
-        DataGridViewCache.removeVariants(savedProductId);
+        ProdottiCache.markProductsDirty();
+        ProdottiCache.removeVariants(savedProductId);
       } else {
-        DataGridViewCache.clearAll();
+        ProdottiCache.clearAll();
       }
       log.d(
         'PCREA_SAVE_DONE savedProductId=${savedProduct.id} sku=${savedProduct.barcodeInterno}',

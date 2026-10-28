@@ -10,7 +10,7 @@ import '../../reuse_class/class_formtter.dart';
 import '../product_filters.dart';
 import '../../reuse_class/logic/global_pagination_controller.dart';
 import '../../reuse_class/logic/memory_usage.dart';
-import '../../reuse_class/datagridview/datagridview_cache.dart';
+import '../product_cache.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../login/jwt_api/woo_connect.dart';
 import '../../login/jwt_api/jwt_connect.dart';
@@ -22,10 +22,9 @@ import '../../inventory/inventory_adjustment.code.dart';
 import '../../login/mgws/connection/mgws_connection.dart';
 import '../../login/mgws/query/query_mgws_inventory.dart';
 
-// Re-export del layer datagrid: consumer della .code.dart accedono a
-// DataGridViewCache (pricing) e ProdottoPricingInfo senza import diretti.
-export '../../reuse_class/datagridview/datagridview_cache.dart'
-    show DataGridViewCache, ProdottoPricingInfo;
+// Re-export della cache prodotti: consumer della .code.dart accedono a
+// ProdottiCache (pricing) e ProdottoPricingInfo senza import diretti.
+export '../product_cache.dart' show ProdottiCache, ProdottoPricingInfo;
 
 /// Definisce i tipi di ordinamento possibili per la lista dei prodotti.
 enum OrdinamentoProdotti {
@@ -234,17 +233,17 @@ class ProdottiGestioneController {
   }
 
   bool _canUseSharedCache() {
-    return DataGridViewCache.hasFreshProducts();
+    return ProdottiCache.hasFreshProducts();
   }
 
   void _publishSharedCache() {
-    DataGridViewCache.replaceProducts(_prodotti);
+    ProdottiCache.replaceProducts(_prodotti);
   }
 
   void _markSharedDirty() {
-    DataGridViewCache.markProductsDirty();
-    DataGridViewCache.clearProducts();
-    DataGridViewCache.clearVariants();
+    ProdottiCache.markProductsDirty();
+    ProdottiCache.clearProducts();
+    ProdottiCache.clearVariants();
   }
 
   /// Se true, mostra solo le varianti con quantità > 0.
@@ -346,7 +345,7 @@ class ProdottiGestioneController {
         '${cachedVariants == null ? 'MISS' : 'HIT'} id=$productId',
       );
       if (cachedVariants != null) {
-        DataGridViewCache.replaceVariants(
+        ProdottiCache.replaceVariants(
           productId,
           cachedVariants,
           _prodotti,
@@ -414,11 +413,11 @@ class ProdottiGestioneController {
   }
 
   List<VarianteProductGlobal>? _cachedVariants(int productId) {
-    return DataGridViewCache.readVariants(productId, _variantsTtl);
+    return ProdottiCache.readVariants(productId, _variantsTtl);
   }
 
   void _removeVariantsFromCache(int productId) {
-    DataGridViewCache.removeVariants(productId);
+    ProdottiCache.removeVariants(productId);
   }
 
   /// Rimette sulle righe le varianti gia presenti in cache: nessuna rete,
@@ -435,7 +434,7 @@ class ProdottiGestioneController {
         continue;
       }
       if (prodotto.varianti?.isNotEmpty ?? false) continue;
-      if (!DataGridViewCache.hasVariants(productId, _variantsTtl)) continue;
+      if (!ProdottiCache.hasVariants(productId, _variantsTtl)) continue;
       final cached = _cachedVariants(productId);
       if (cached != null) lista[i] = prodotto.copyWith(varianti: cached);
     }
@@ -485,7 +484,7 @@ class ProdottiGestioneController {
         if (prodotto.id != null) prodotto.id!: prodotto,
     };
     for (final id in perId.keys) {
-      DataGridViewCache.removeVariants(id);
+      ProdottiCache.removeVariants(id);
     }
     void sostituisci(List<ProdottoGlobal> lista) {
       for (int i = 0; i < lista.length; i++) {
@@ -508,7 +507,7 @@ class ProdottiGestioneController {
   /// il prodotto selezionato, i filtri o i token di caricamento della selezione.
   /// Usa un pool di download concorrenti limitato, come il caricamento dei
   /// prodotti che avanza pagina per pagina; la griglia si aggiorna in tempo
-  /// reale via DataGridViewCache.onVariantsUpdated.
+  /// reale via ProdottiCache.onVariantsUpdated.
   Future<void> prefetchVariantiVisibili(
     List<ProdottoGlobal> prodotti, {
     int? maxProdotti,
@@ -565,7 +564,7 @@ class ProdottiGestioneController {
       if (_prodottoSelezionato?.id == productId) continue;
       // Check economico su cache condivisa: `hasVariants` evita di copiare
       // la lista (List.from in readVariants) per ogni prodotto del loop.
-      if (DataGridViewCache.hasVariants(productId, _variantsTtl)) {
+      if (ProdottiCache.hasVariants(productId, _variantsTtl)) {
         saltati++;
         continue;
       }
@@ -589,7 +588,7 @@ class ProdottiGestioneController {
             productId,
             attributiProdotto: prodotto.attributi,
           );
-          DataGridViewCache.replaceVariants(
+          ProdottiCache.replaceVariants(
             productId,
             varianti,
             _prodotti,
@@ -621,8 +620,8 @@ class ProdottiGestioneController {
     log.d(
       '[perf-trace] prefetchVarianti DONE '
       'scaricati=$scaricati di $totali saltati=$saltati errori=$errori '
-      'cacheProdotti=${DataGridViewCache.variantsCacheSize()} '
-      'cacheVarianti=${DataGridViewCache.totalVariantsInCache()} '
+      'cacheProdotti=${ProdottiCache.variantsCacheSize()} '
+      'cacheVarianti=${ProdottiCache.totalVariantsInCache()} '
       'rssMb=${residentMemoryMb()} '
       'dur=${stopwatch.elapsedMilliseconds}ms',
     );
@@ -657,7 +656,7 @@ class ProdottiGestioneController {
           ),
         );
         if (!onlyIfStillSelected || _prodottoSelezionato?.id == productId) {
-          DataGridViewCache.replaceVariants(
+          ProdottiCache.replaceVariants(
             productId,
             cachedVariants,
             _prodotti,
@@ -699,7 +698,7 @@ class ProdottiGestioneController {
       );
       log.i('✅ Caricate ${variantiComplete.length} varianti complete');
 
-      DataGridViewCache.replaceVariants(
+      ProdottiCache.replaceVariants(
         productId,
         variantiComplete,
         _prodotti,
@@ -766,7 +765,7 @@ class ProdottiGestioneController {
   /// visibile. Da NON chiamare in `_applicaFiltroEOrdinamento` (chiamata
   /// anche dal caricamento a chunk) né nel debounce cache del widget.
   void _resetVariantCache() {
-    DataGridViewCache.clearVariants();
+    ProdottiCache.clearVariants();
   }
 
   void setFiltroRicerca(String filtro) {
@@ -1078,13 +1077,13 @@ class ProdottiGestioneController {
     int? prefetchLimit,
   }) async {
     final previousLocal =
-        DataGridViewCache.readProducts() ??
+        ProdottiCache.readProducts() ??
         List<ProdottoGlobal>.from(_prodotti);
     try {
       _lastLoadWarning = null;
 
       if (!forceRefresh && _canUseSharedCache()) {
-        _prodotti = DataGridViewCache.readProducts() ?? <ProdottoGlobal>[];
+        _prodotti = ProdottiCache.readProducts() ?? <ProdottoGlobal>[];
         _riattaccaVariantiDaCache(_prodotti);
         _applicaFiltroEOrdinamento();
         onProgress?.call(List<ProdottoGlobal>.unmodifiable(_prodottiFiltrati));
@@ -1093,8 +1092,8 @@ class ProdottiGestioneController {
       }
 
       if (forceRefresh) {
-        DataGridViewCache.clearProducts();
-        DataGridViewCache.clearVariants();
+        ProdottiCache.clearProducts();
+        ProdottiCache.clearVariants();
       }
 
       log.i('📦 Caricamento prodotti da WooCommerce...');
@@ -1173,7 +1172,7 @@ class ProdottiGestioneController {
     try {
       _lastLoadWarning = null;
       final hasLocalProducts =
-          _prodotti.isNotEmpty || DataGridViewCache.hasProducts;
+          _prodotti.isNotEmpty || ProdottiCache.hasProducts;
       if (!hasLocalProducts) {
         await caricaProdotti();
       }
@@ -1344,7 +1343,7 @@ class ProdottiGestioneController {
             if (_varianteSelezionata?.id == varianteId) {
               _varianteSelezionata = varianteAggiornata;
             }
-            DataGridViewCache.replaceVariants(
+            ProdottiCache.replaceVariants(
               prodottoId,
               varianti,
               _prodotti,
@@ -1995,7 +1994,7 @@ class ProdottiGestioneController {
                     const <VarianteProductGlobal>[])
                 .where((variant) => !deletedIds.contains(variant.id))
                 .toList();
-        DataGridViewCache.replaceVariants(
+        ProdottiCache.replaceVariants(
           productId,
           remaining,
           _prodotti,
@@ -2124,7 +2123,7 @@ class ProdottiGestioneController {
         final merged = currentVariants
             .map((v) => updatedVariantsById[v.id] ?? v)
             .toList();
-        DataGridViewCache.replaceVariants(
+        ProdottiCache.replaceVariants(
           productId,
           merged,
           _prodotti,
@@ -2248,7 +2247,7 @@ class ProdottoUtils {
   }
 
   static ProdottoPricingInfo getPricingInfo(ProdottoGlobal prodotto) {
-    return DataGridViewCache.getPricingInfo(prodotto);
+    return ProdottiCache.getPricingInfo(prodotto);
   }
 }
 

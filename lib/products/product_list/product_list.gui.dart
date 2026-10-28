@@ -257,7 +257,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     // immediato per ciascuno comporrebbe la griglia ~86 volte di fila e
     // riporterebbe l'utente alla prima pagina. Il debounce raggruppa il burst
     // in un unico refresh a fine caricamento.
-    _variantsUpdateSubscription = DataGridViewCache.onVariantsUpdated.listen(
+    _variantsUpdateSubscription = ProdottiCache.onVariantsUpdated.listen(
       (_) => _scheduleCacheRefresh(),
     );
     _loadProducts();
@@ -305,7 +305,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     };
     final selectedId = _controller.prodottoSelezionato?.id;
     if (selectedId is int && selectedId > 0) keepIds.add(selectedId);
-    final rimossi = DataGridViewCache.pruneVariantsOutside(keepIds);
+    final rimossi = ProdottiCache.pruneVariantsOutside(keepIds);
     _controller.staccaVariantiFuori(keepIds);
 
     // Questo metodo parte a ogni ridisegno, anche per ogni variante che
@@ -612,7 +612,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     // (_syncPagination → _schedulePagePrefetch → _prefetchCurrentWindow)
     // rifempia la cache con la sola nuova finestra. Stesso principio dei
     // filtri (R2): il cambio 100→50 o 50→100 parte dalla cache vuota.
-    DataGridViewCache.clearVariants();
+    ProdottiCache.clearVariants();
     _syncPagination(jumpTop: true);
     if (_alive) setState(() {});
   }

@@ -1,357 +1,178 @@
-import 'dart:async';
+import 'package:flutter/foundation.dart';
 
-import '../../products/class_products.dart';
-import '../../l10n/generated/app_localizations.dart';
-import '../class_formtter.dart';
+import '../logic/global_pagination_controller.dart';
 
-/// Informazioni di pricing derivate per un prodotto (prezzo, sconto,
-/// variabilità). Vivono nel layer datagrid perché sono i valori che le
-/// griglie mostrano nelle colonne Prezzo/Sconto.
+/// Cache condivisa di una lista gestionale, una per chiave di modello
+/// (`prodotti`, `clienti`, `ordini`, ...).
 ///
-/// La cache non ha un BuildContext: conserva solo i valori formattati e i
-/// flag di variabilità; il testo tradotto per i casi variabili si sceglie al
-/// momento della visualizzazione, così segue la lingua corrente.
-class ProdottoPricingInfo {
-  final String _prezzo;
-  final String _sconto;
-  final String _percentualeSconto;
-  final bool hasSconto;
-  final bool prezzoVariabile;
-  final bool scontoVariabile;
-  final bool percentualeVariabile;
+/// Tiene due cose:
+/// - l'elenco completo degli elementi, quando la lista lavora in memoria
+///   (filtri e paginazione locali). Si riempie a pezzi con [append] mentre
+///   arrivano le pagine dal server e si sostituisce con [replace];
+/// - le pagine gia' lette dal server, per combinazione di filtri, ordinamento
+///   e pagina, quando la lista lavora sul server.
+///
+/// E' globale perche' due schede della stessa sezione, o due sezioni che
+/// mostrano lo stesso modello, devono vedere gli stessi dati senza
+/// riscaricarli. Chi modifica gli elementi chiama [replace] o [updateWhere]:
+/// le liste aperte ascoltano la cache e si ridisegnano.
+class DataGridViewCache<T> extends ChangeNotifier {
+  DataGridViewCache._(this.key);
 
-  const ProdottoPricingInfo({
-    required String prezzo,
-    required String sconto,
-    required String percentualeSconto,
-    required this.hasSconto,
-    required this.prezzoVariabile,
-    required this.scontoVariabile,
-    this.percentualeVariabile = false,
-  }) : _prezzo = prezzo,
-       _sconto = sconto,
-       _percentualeSconto = percentualeSconto;
+  static final Map<String, DataGridViewCache<dynamic>> _instances =
+      <String, DataGridViewCache<dynamic>>{};
 
-  String prezzoLabel(AppLocalizations l10n) =>
-      prezzoVariabile ? l10n.productsVariablePrices : _prezzo;
+  /// Cache della chiave [key]. La stessa chiave deve usare sempre lo stesso
+  /// tipo di elemento.
+  static DataGridViewCache<T> of<T>(String key) {
+    final existing = _instances[key];
+    if (existing != null) return existing as DataGridViewCache<T>;
+    final created = DataGridViewCache<T>._(key);
+    _instances[key] = created;
+    return created;
+  }
 
-  String scontoLabel(AppLocalizations l10n) =>
-      hasSconto && scontoVariabile ? l10n.productsVariablePrices : _sconto;
+  /// Segna da ricaricare tutte le cache, per esempio al cambio di negozio.
+  static void markAllDirty() {
+    for (final cache in _instances.values) {
+      cache.markDirty();
+    }
+  }
 
-  String percentualeScontoLabel(AppLocalizations l10n) => percentualeVariabile
-      ? l10n.productsVariablePercentage
-      : _percentualeSconto;
+  final String key;
 
-  String prezzoCompletoLabel(AppLocalizations l10n) =>
-      prezzoVariabile || (hasSconto && scontoVariabile)
-      ? l10n.productsVariablePrices
-      : hasSconto
-      ? l10n.productsSalePriceWas(_sconto, _prezzo)
-      : _prezzo;
-}
+  List<T>? _items;
+  DateTime? _itemsAt;
+  bool _dirty = true;
+  bool _complete = false;
+  int _revision = 0;
 
-class DataGridViewCache {
-  static List<ProdottoGlobal>? _products;
-  static DateTime? _productsAt;
-  static bool _productsDirty = true;
+  final Map<String, _CachedPage<T>> _pages = <String, _CachedPage<T>>{};
 
-  static final Map<int, List<VarianteProductGlobal>> _variants =
-      <int, List<VarianteProductGlobal>>{};
-  static final Map<int, DateTime> _variantsAt = <int, DateTime>{};
+  /// Cresce a ogni modifica degli elementi: chi ha copiato l'elenco capisce
+  /// se la sua copia e' ancora quella attuale.
+  int get revision => _revision;
 
-  /// Cache pricing precomputata (productId → pricingInfo).
-  static final Map<int, ProdottoPricingInfo> _pricingCache =
-      <int, ProdottoPricingInfo>{};
+  bool get hasItems => _items != null && _items!.isNotEmpty;
 
-  /// Notifica i subscriber che le varianti di un prodotto sono state
-  /// aggiornate (es. prefetch completato). Le griglie iscritte devono
-  /// riallineare lo snapshot paginato e ricomporsi.
-  static final StreamController<int> _onVariantsUpdated =
-      StreamController<int>.broadcast();
-  static Stream<int> get onVariantsUpdated => _onVariantsUpdated.stream;
+  /// L'elenco e' arrivato fino all'ultima pagina del server.
+  bool get isComplete => _complete;
 
-  static bool get hasProducts => _products != null && _products!.isNotEmpty;
+  bool get isDirty => _dirty;
 
-  static bool hasFreshProducts([Duration? ttl]) {
-    if (_productsDirty || _products == null || _productsAt == null) {
+  /// Elenco completo, non segnato da ricaricare e, con [ttl], piu' recente
+  /// di [ttl].
+  bool isFresh([Duration? ttl]) {
+    if (_dirty || !_complete || _items == null || _itemsAt == null) {
       return false;
     }
     if (ttl == null) return true;
-    return DateTime.now().difference(_productsAt!) <= ttl;
+    return DateTime.now().difference(_itemsAt!) <= ttl;
   }
 
-  static List<ProdottoGlobal>? readProducts() {
-    final products = _products;
-    if (products == null) return null;
-    return List<ProdottoGlobal>.from(products);
+  /// Copia dell'elenco, o null se non e' mai stato caricato.
+  List<T>? read() {
+    final items = _items;
+    if (items == null) return null;
+    return List<T>.from(items);
   }
 
-  static void writeProducts(List<ProdottoGlobal> products) {
-    _products = List<ProdottoGlobal>.from(products);
-    _productsAt = DateTime.now();
-    _productsDirty = false;
-    // Prodotti sostituiti: il pricing derivato potrebbe non essere più valido.
-    _pricingCache.clear();
+  /// Elenco senza copia, per chi lo legge soltanto e subito.
+  List<T> get items => _items ?? const [];
+
+  /// Sostituisce l'elenco. [complete] dice se contiene tutto quello che c'e'
+  /// sul server o solo le prime pagine.
+  void replace(List<T> items, {bool complete = true}) {
+    _items = List<T>.from(items);
+    _itemsAt = DateTime.now();
+    _dirty = false;
+    _complete = complete;
+    _changed();
   }
 
-  static void replaceProducts(List<ProdottoGlobal> products) {
-    writeProducts(products);
+  /// Aggiunge una pagina in coda all'elenco, durante il caricamento.
+  void append(List<T> items, {bool complete = false}) {
+    _items = <T>[...?_items, ...items];
+    _itemsAt = DateTime.now();
+    _dirty = false;
+    _complete = complete;
+    _changed();
   }
 
-  static void appendProducts(List<ProdottoGlobal> products) {
-    final current = _products ?? <ProdottoGlobal>[];
-    _products = <ProdottoGlobal>[...current, ...products];
-    _productsAt = DateTime.now();
-    _productsDirty = false;
+  /// Sostituisce gli elementi che soddisfano [test] con [update]. Ritorna
+  /// quanti ne ha cambiati.
+  int updateWhere(bool Function(T item) test, T Function(T item) update) {
+    final items = _items;
+    if (items == null) return 0;
+    var changed = 0;
+    for (var i = 0; i < items.length; i++) {
+      if (test(items[i])) {
+        items[i] = update(items[i]);
+        changed++;
+      }
+    }
+    if (changed > 0) {
+      _pages.clear();
+      _changed();
+    }
+    return changed;
   }
 
-  static void markProductsDirty() {
-    _productsDirty = true;
+  /// Toglie gli elementi che soddisfano [test].
+  int removeWhere(bool Function(T item) test) {
+    final items = _items;
+    if (items == null) return 0;
+    final before = items.length;
+    items.removeWhere(test);
+    final removed = before - items.length;
+    if (removed > 0) {
+      _pages.clear();
+      _changed();
+    }
+    return removed;
   }
 
-  static void clearProducts() {
-    _products = null;
-    _productsAt = null;
-    _productsDirty = true;
-    _pricingCache.clear();
+  /// I dati vanno ricaricati alla prossima apertura: l'elenco resta
+  /// leggibile finche' non arriva quello nuovo.
+  void markDirty() {
+    _dirty = true;
+    _pages.clear();
+    _changed();
   }
 
-  static void clearVariants() {
-    _variants.clear();
-    _variantsAt.clear();
-    _pricingCache.clear();
+  void clear() {
+    _items = null;
+    _itemsAt = null;
+    _dirty = true;
+    _complete = false;
+    _pages.clear();
+    _changed();
   }
 
-  static void clearAll() {
-    clearProducts();
-    clearVariants();
-  }
-
-  static List<VarianteProductGlobal>? readVariants(
-    int productId,
-    Duration ttl,
-  ) {
-    final cachedAt = _variantsAt[productId];
-    final cached = _variants[productId];
-    if (cachedAt == null || cached == null) return null;
-    if (DateTime.now().difference(cachedAt) > ttl) {
-      removeVariants(productId);
+  /// Pagina letta dal server per la richiesta [requestKey], se ancora valida.
+  PaginatedResult<T>? readPage(String requestKey, {Duration? ttl}) {
+    final cached = _pages[requestKey];
+    if (cached == null) return null;
+    if (ttl != null && DateTime.now().difference(cached.at) > ttl) {
+      _pages.remove(requestKey);
       return null;
     }
-    return List<VarianteProductGlobal>.from(cached);
+    return cached.result;
   }
 
-  /// Vero se esiste una voce in cache per [productId] ancora fresca (TTL),
-  /// senza copiare la lista. Check economico per prefetch/loop.
-  static bool hasVariants(int productId, Duration ttl) {
-    final cachedAt = _variantsAt[productId];
-    if (cachedAt == null || !_variants.containsKey(productId)) return false;
-    if (DateTime.now().difference(cachedAt) > ttl) {
-      removeVariants(productId);
-      return false;
-    }
-    return true;
+  void writePage(String requestKey, PaginatedResult<T> result) {
+    _pages[requestKey] = _CachedPage<T>(result, DateTime.now());
   }
 
-  /// Limita la cache varianti ai soli prodotti in [keepByIds] (finestra
-  /// visibile): rimuove tutte le altre voci, così la RAM resta proporzionata
-  /// alla pagina corrente e non cresce con il numero di pagine visitate.
-  /// Ritorna il numero di voci rimosse.
-  static int pruneVariantsOutside(Set<int> keepByIds) {
-    int rimossi = 0;
-    for (final id in List<int>.from(_variants.keys)) {
-      if (!keepByIds.contains(id)) {
-        removeVariants(id);
-        rimossi++;
-      }
-    }
-    return rimossi;
+  void _changed() {
+    _revision++;
+    notifyListeners();
   }
+}
 
-  /// Conteggio voci varianti in cache (per diagnostica memoria).
-  static int variantsCacheSize() => _variants.length;
+class _CachedPage<T> {
+  final PaginatedResult<T> result;
+  final DateTime at;
 
-  /// Conteggio totale oggetti variante in cache (per diagnostica memoria).
-  static int totalVariantsInCache() {
-    int tot = 0;
-    for (final list in _variants.values) {
-      tot += list.length;
-    }
-    return tot;
-  }
-
-  static void writeVariants(
-    int productId,
-    List<VarianteProductGlobal> variants,
-  ) {
-    _variants[productId] = List<VarianteProductGlobal>.from(variants);
-    _variantsAt[productId] = DateTime.now();
-    // Le varianti sono la fonte autorevole dei prezzi per i prodotti variabili.
-    // Se il pricing era già stato calcolato dal prodotto padre WooCommerce
-    // (che su wc/v3 può esporre solo il prezzo attivo), va scartato prima di
-    // ricalcolare le label della griglia.
-    _pricingCache.remove(productId);
-  }
-
-  static void removeVariants(int productId) {
-    _variants.remove(productId);
-    _variantsAt.remove(productId);
-    _pricingCache.remove(productId);
-  }
-
-  /// Aggiorna la cache varianti, aggancia le varianti a entrambe le liste
-  /// prodotto (allProducts e filteredProducts) con i nuovi oggetti, ricalcola
-  /// il pricing del prodotto toccato e notifica i subscriber.
-  ///
-  /// Sostituisce `_storeVariantsInCache` + `_replaceProductVariantsInLists`
-  /// presenti nel controller prodotti: il merge dei dati aggiornati è
-  /// responsabilità del layer griglia, non del business logic.
-  ///
-  /// Ritorna `true` se ha realmente sostituito almeno un'istanza.
-  static bool replaceVariants(
-    int productId,
-    List<VarianteProductGlobal> variants,
-    List<ProdottoGlobal> allProducts,
-    List<ProdottoGlobal> filteredProducts,
-  ) {
-    writeVariants(productId, variants);
-
-    bool replaced = false;
-    for (int i = 0; i < allProducts.length; i++) {
-      if (allProducts[i].id == productId) {
-        allProducts[i] = allProducts[i].copyWith(varianti: variants);
-        replaced = true;
-      }
-    }
-    for (int i = 0; i < filteredProducts.length; i++) {
-      if (filteredProducts[i].id == productId) {
-        filteredProducts[i] = filteredProducts[i].copyWith(varianti: variants);
-        replaced = true;
-      }
-    }
-
-    if (replaced) {
-      // Ricalcola il pricing dal prodotto aggiornato (che ora ha le varianti).
-      ProdottoGlobal? aggiornato;
-      for (final prodotto in allProducts) {
-        if (prodotto.id == productId) {
-          aggiornato = prodotto;
-          break;
-        }
-      }
-      if (aggiornato == null) {
-        for (final prodotto in filteredProducts) {
-          if (prodotto.id == productId) {
-            aggiornato = prodotto;
-            break;
-          }
-        }
-      }
-      if (aggiornato != null) {
-        _pricingCache[productId] = getPricingInfo(aggiornato);
-      }
-      _onVariantsUpdated.add(productId);
-    }
-    return replaced;
-  }
-
-  /// Calcola informazioni di prezzo/sconto per un prodotto.
-  ///
-  /// Regole (priorità alle varianti quando presenti):
-  /// - varianti caricate con tutte lo stesso prezzo → valore unico;
-  /// - varianti con prezzi o sconti diversi → flag di variabilità;
-  /// - varianti assenti → campi base del prodotto (prezzoNormale/prezzoScontato).
-  static ProdottoPricingInfo getPricingInfo(ProdottoGlobal prodotto) {
-    final productId = prodotto.id;
-    if (productId != null && _pricingCache.containsKey(productId)) {
-      return _pricingCache[productId]!;
-    }
-
-    final info = _computePricingInfo(prodotto);
-    if (productId != null) {
-      _pricingCache[productId] = info;
-    }
-    return info;
-  }
-
-  /// Varianti da usare per il pricing: prima quelle agganciate all'istanza
-  /// prodotto (durante il prefetch), poi la cache condivisa.
-  ///
-  /// La cache condivisa è la fonte autorevole anche quando l'istanza prodotto
-  /// è fresca, cioè priva di varianti agganciate: è il caso della riscrittura
-  /// finale del caricamento (`caricaProdotti` ricrea le istanze da WooCommerce
-  /// e il prefetch successivo salta i prodotti già in cache). Senza questo
-  /// fallback la griglia tornerebbe a mostrare i prezzi del prodotto padre
-  /// (es. €30/€30) invece di quelli reali delle varianti (€120/€30).
-  static List<VarianteProductGlobal> _pricingVariants(ProdottoGlobal prodotto) {
-    final prodotti = prodotto.varianti;
-    if (prodotti != null && prodotti.isNotEmpty) return prodotti;
-    final productId = prodotto.id;
-    if (productId != null) {
-      final cached = _variants[productId];
-      if (cached != null && cached.isNotEmpty) return cached;
-    }
-    return const <VarianteProductGlobal>[];
-  }
-
-  static ProdottoPricingInfo _computePricingInfo(ProdottoGlobal prodotto) {
-    final varianti = _pricingVariants(prodotto);
-    if (varianti.isEmpty) {
-      final prezzoLabel = ClassFormtter.formatPrezzo(
-        prodotto.prezzoNormale ?? 0,
-      );
-      final scontoLabel = prodotto.prezzoScontato != null
-          ? ClassFormtter.formatPrezzo(prodotto.prezzoScontato!)
-          : '-';
-      final percentualeScontoLabel = prodotto.percentualeSconto == null
-          ? '-'
-          : '${prodotto.percentualeSconto!.toStringAsFixed(0)}%';
-      return ProdottoPricingInfo(
-        prezzo: prezzoLabel,
-        sconto: scontoLabel,
-        percentualeSconto: percentualeScontoLabel,
-        hasSconto: prodotto.prezzoScontato != null,
-        prezzoVariabile: false,
-        scontoVariabile: false,
-      );
-    }
-
-    final regularPrices = varianti.map((v) => v.prezzo).toSet();
-    final saleValues = varianti.map((v) => v.prezzoScontato).toSet();
-
-    final prezzoVariabile = regularPrices.length > 1;
-    final scontoVariabile = saleValues.length > 1;
-    final hasSconto = saleValues.any((value) => value != null);
-    final percentualiSconto = varianti
-        .where((variante) => variante.percentualeSconto != null)
-        .map((variante) => variante.percentualeSconto!)
-        .toSet();
-    final percentualeVariabile = percentualiSconto.length > 1;
-    final percentualeScontoLabel = percentualiSconto.isEmpty
-        ? '-'
-        : percentualeVariabile
-        ? ''
-        : '${percentualiSconto.first.toStringAsFixed(0)}%';
-
-    // Nei casi variabili il valore resta vuoto: il testo tradotto lo sceglie
-    // ProdottoPricingInfo in base ai flag.
-    final prezzoLabel = prezzoVariabile
-        ? ''
-        : ClassFormtter.formatPrezzo(regularPrices.first);
-    final scontoLabel = !hasSconto
-        ? '-'
-        : scontoVariabile
-        ? ''
-        : ClassFormtter.formatPrezzo(saleValues.first!);
-
-    return ProdottoPricingInfo(
-      prezzo: prezzoLabel,
-      sconto: scontoLabel,
-      percentualeSconto: percentualeScontoLabel,
-      hasSconto: hasSconto,
-      prezzoVariabile: prezzoVariabile,
-      scontoVariabile: scontoVariabile,
-      percentualeVariabile: percentualeVariabile,
-    );
-  }
+  const _CachedPage(this.result, this.at);
 }

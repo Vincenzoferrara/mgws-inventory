@@ -11493,6 +11493,58 @@
   "@productsSortPriceDesc": {
     "description": "Localized string productsSortPriceDesc"
   },
+  "dataGridSortAscending": "{field} (ascending)",
+  "@dataGridSortAscending": {
+    "description": "Sort option of a list: field in ascending order",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "dataGridSortDescending": "{field} (descending)",
+  "@dataGridSortDescending": {
+    "description": "Sort option of a list: field in descending order",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "dataGridSelectedCount": "{count} selected",
+  "@dataGridSelectedCount": {
+    "description": "Number of checked rows in a list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dataGridSelectItem": "Select a row",
+  "@dataGridSelectItem": {
+    "description": "Empty details panel of a list"
+  },
+  "dataGridNoResults": "No results",
+  "@dataGridNoResults": {
+    "description": "A list with no rows to show"
+  },
+  "dataGridLoadError": "Error loading data: {error}",
+  "@dataGridLoadError": {
+    "description": "A list could not load its data",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dataGridLoadPartial": "Only part of the data was loaded: the server stopped responding.",
+  "@dataGridLoadPartial": {
+    "description": "A list loaded only some pages before an error"
+  },
+  "dataGridLoadErrorUsingCache": "Server unreachable: showing the data loaded earlier.",
+  "@dataGridLoadErrorUsingCache": {
+    "description": "A list could not reload and shows the previous data"
+  },
   "productsSortBy": "Sort by...",
   "@productsSortBy": {
     "description": "Localized string productsSortBy"
