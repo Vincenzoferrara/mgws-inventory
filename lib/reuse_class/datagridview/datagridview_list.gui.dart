@@ -788,7 +788,13 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
         Expanded(
           child: Stack(
             children: [
-              Positioned.fill(child: _buildDataGrid(showDetailsInPage)),
+              // Le colonne salvate arrivano in modo asincrono: senza colonne
+              // `DataTable` non si puo' costruire.
+              Positioned.fill(
+                child: _buildColumns().isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : _buildDataGrid(showDetailsInPage),
+              ),
               if (showEmpty)
                 Center(
                   child: Text(
