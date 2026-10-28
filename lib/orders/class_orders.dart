@@ -3,6 +3,8 @@
 library;
 
 import '../l10n/extensions.dart';
+import '../reuse_class/datagridview/datagridview.code.dart';
+import '../reuse_class/datagridview/datagridview_filters.dart';
 
 /// Enum per gli stati degli ordini
 enum OrdineStatus {
@@ -185,6 +187,98 @@ class OrdiniGlobal {
   final IndirizzoShipping? shipping;
   final List<ProdottoOrdine>? lineItems;
   final String? customerNote;
+
+  /// Stati che un ordine reale puo' avere: `any` e' solo un filtro.
+  static const List<OrdineStatus> statiOrdine = <OrdineStatus>[
+    OrdineStatus.pending,
+    OrdineStatus.processing,
+    OrdineStatus.onHold,
+    OrdineStatus.completed,
+    OrdineStatus.cancelled,
+    OrdineStatus.refunded,
+    OrdineStatus.failed,
+  ];
+
+  /// Nome del cliente dall'indirizzo di fatturazione.
+  String get nomeCliente =>
+      '${billing?.firstName ?? ''} ${billing?.lastName ?? ''}'.trim();
+
+  /// Campi dell'ordine per la lista Ordini. Ricerca libera, stato e
+  /// ordinamento per numero o data li fa il server; gli altri filtri
+  /// lavorano sull'elenco completo.
+  static final List<DataGridField<OrdiniGlobal>> gridFields =
+      <DataGridField<OrdiniGlobal>>[
+        DataGridField<OrdiniGlobal>(
+          name: 'numero',
+          label: (l10n) => l10n.ordersFieldNumber,
+          aliases: const <String>['numero', 'ordine', 'id', 'number'],
+          read: (o) => <Object?>[o.number ?? o.id?.toString()],
+          format: (l10n, o) => '#${o.number ?? o.id ?? ''}',
+          sortable: true,
+          serverSortParam: 'id',
+          width: 100,
+        ),
+        DataGridField<OrdiniGlobal>(
+          name: 'data',
+          label: (l10n) => l10n.ordersFieldDate,
+          aliases: const <String>['data', 'date', 'creato'],
+          type: DataGridFieldType.data,
+          read: (o) => <Object?>[o.dateCreated],
+          sortable: true,
+          serverSortParam: 'date',
+          searchable: false,
+          width: 120,
+        ),
+        DataGridField<OrdiniGlobal>(
+          name: 'cliente',
+          label: (l10n) => l10n.ordersFieldCustomer,
+          aliases: const <String>['cliente', 'customer', 'nome', 'email'],
+          read: (o) => <Object?>[o.nomeCliente, o.billing?.email],
+          format: (l10n, o) =>
+              o.nomeCliente.isNotEmpty ? o.nomeCliente : (o.billing?.email ?? '-'),
+          width: 200,
+          flexible: true,
+        ),
+        DataGridField<OrdiniGlobal>(
+          name: 'stato',
+          label: (l10n) => l10n.ordersFieldStatus,
+          aliases: const <String>['stato', 'status'],
+          type: DataGridFieldType.elenco,
+          read: (o) => <Object?>[o.status?.name],
+          options: [
+            for (final stato in statiOrdine)
+              DataGridFieldOption(
+                stato.name,
+                (l10n) => ordineStatusLabel(l10n, stato),
+              ),
+          ],
+          serverParam: 'status',
+          serverOperators: const <DataGridFilterOperator>{
+            DataGridFilterOperator.uguale,
+            DataGridFilterOperator.inElenco,
+          },
+          width: 150,
+        ),
+        DataGridField<OrdiniGlobal>(
+          name: 'totale',
+          label: (l10n) => l10n.ordersFieldTotal,
+          aliases: const <String>['totale', 'total', 'importo'],
+          type: DataGridFieldType.numero,
+          read: (o) => <Object?>[o.total],
+          format: (l10n, o) =>
+              '${(o.total ?? 0).toStringAsFixed(2)} ${o.currency ?? '€'}',
+          sortable: true,
+          width: 120,
+          numeric: true,
+        ),
+        DataGridField<OrdiniGlobal>(
+          name: 'pagamento',
+          label: (l10n) => l10n.ordersFieldPayment,
+          aliases: const <String>['pagamento', 'payment', 'metodo'],
+          read: (o) => <Object?>[o.paymentMethodTitle ?? o.paymentMethod],
+          width: 170,
+        ),
+      ];
 
   OrdiniGlobal({
     this.id,

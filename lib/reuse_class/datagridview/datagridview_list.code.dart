@@ -190,10 +190,14 @@ class DataGridListController<T> extends ChangeNotifier {
     if (!serverFiltering || localWhere != null) return false;
     if (_search.trim().isNotEmpty && !serverSearch) return false;
     for (final filter in _filters) {
-      if (field(filter.fieldName)?.serverParam == null) return false;
+      final f = field(filter.fieldName);
+      if (f?.serverParam == null ||
+          !f!.serverOperators.contains(filter.operatore)) {
+        return false;
+      }
     }
     final sort = _sort;
-    if (sort != null && field(sort.fieldName)?.serverParam == null) {
+    if (sort != null && field(sort.fieldName)?.serverSortParam == null) {
       return false;
     }
     return true;

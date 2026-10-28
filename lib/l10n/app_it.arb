@@ -11490,6 +11490,166 @@
   "@productsSortPriceDesc": {
     "description": "Localized string productsSortPriceDesc"
   },
+  "customersFieldName": "Nome",
+  "@customersFieldName": {
+    "description": "Customers list field: full name"
+  },
+  "customersFieldEmail": "Email",
+  "@customersFieldEmail": {
+    "description": "Customers list field: email"
+  },
+  "customersFieldPhone": "Telefono",
+  "@customersFieldPhone": {
+    "description": "Customers list field: phone"
+  },
+  "customersFieldCity": "Città",
+  "@customersFieldCity": {
+    "description": "Customers list field: city"
+  },
+  "customersFieldRegistered": "Data di registrazione",
+  "@customersFieldRegistered": {
+    "description": "Customers list field: registration date"
+  },
+  "customersFieldOrders": "Ordini",
+  "@customersFieldOrders": {
+    "description": "Customers list field: number of orders"
+  },
+  "customersFieldTotalSpent": "Totale speso",
+  "@customersFieldTotalSpent": {
+    "description": "Customers list field: total spent"
+  },
+  "ordersFieldNumber": "Numero",
+  "@ordersFieldNumber": {
+    "description": "Orders list field: order number"
+  },
+  "ordersFieldDate": "Data",
+  "@ordersFieldDate": {
+    "description": "Orders list field: order date"
+  },
+  "ordersFieldCustomer": "Cliente",
+  "@ordersFieldCustomer": {
+    "description": "Orders list field: customer"
+  },
+  "ordersFieldStatus": "Stato",
+  "@ordersFieldStatus": {
+    "description": "Orders list field: status"
+  },
+  "ordersFieldTotal": "Totale",
+  "@ordersFieldTotal": {
+    "description": "Orders list field: total"
+  },
+  "ordersFieldPayment": "Pagamento",
+  "@ordersFieldPayment": {
+    "description": "Orders list field: payment method"
+  },
+  "ordersStatusCount": "{status}: {count}",
+  "@ordersStatusCount": {
+    "description": "Orders per status on the whole shop, shown above the orders list",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsFieldCode": "Codice",
+  "@couponsFieldCode": {
+    "description": "Coupons list field: code"
+  },
+  "couponsFieldType": "Tipo",
+  "@couponsFieldType": {
+    "description": "Coupons list field: discount type"
+  },
+  "couponsFieldAmount": "Importo",
+  "@couponsFieldAmount": {
+    "description": "Coupons list field: amount"
+  },
+  "couponsFieldExpiry": "Scadenza",
+  "@couponsFieldExpiry": {
+    "description": "Coupons list field: expiry date"
+  },
+  "couponsFieldUsage": "Utilizzi",
+  "@couponsFieldUsage": {
+    "description": "Coupons list field: usage count"
+  },
+  "couponsFieldStatus": "Stato",
+  "@couponsFieldStatus": {
+    "description": "Coupons list field: status"
+  },
+  "usersFieldUsername": "Username",
+  "@usersFieldUsername": {
+    "description": "Users list field: username"
+  },
+  "usersFieldName": "Nome",
+  "@usersFieldName": {
+    "description": "Users list field: display name"
+  },
+  "usersFieldEmail": "Email",
+  "@usersFieldEmail": {
+    "description": "Users list field: email"
+  },
+  "usersFieldRoles": "Ruoli",
+  "@usersFieldRoles": {
+    "description": "Users list field: roles"
+  },
+  "usersFieldRegistered": "Data di registrazione",
+  "@usersFieldRegistered": {
+    "description": "Users list field: registration date"
+  },
+  "usersRoleAdministrator": "Amministratore",
+  "@usersRoleAdministrator": {
+    "description": "WordPress role name"
+  },
+  "usersRoleShopManager": "Gestore negozio",
+  "@usersRoleShopManager": {
+    "description": "WooCommerce role name"
+  },
+  "usersRoleEditor": "Editore",
+  "@usersRoleEditor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleAuthor": "Autore",
+  "@usersRoleAuthor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleContributor": "Collaboratore",
+  "@usersRoleContributor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleSubscriber": "Sottoscrittore",
+  "@usersRoleSubscriber": {
+    "description": "WordPress role name"
+  },
+  "usersRoleCustomer": "Cliente",
+  "@usersRoleCustomer": {
+    "description": "WooCommerce role name"
+  },
+  "usersSelectUser": "Seleziona un utente",
+  "@usersSelectUser": {
+    "description": "Empty details panel of the users list"
+  },
+  "usersProfile": "Profilo",
+  "@usersProfile": {
+    "description": "Users details section: profile"
+  },
+  "usersCapabilities": "Permessi",
+  "@usersCapabilities": {
+    "description": "Users details section: WordPress capabilities"
+  },
+  "usersPermissionsHint": "I permessi si modificano dal dipendente collegato, in Dipendenti.",
+  "@usersPermissionsHint": {
+    "description": "Users details: where to edit permissions"
+  },
+  "homeTitoloUtenti": "Utenti",
+  "@homeTitoloUtenti": {
+    "description": "Home section title: WordPress users"
+  },
+  "homeSottotitoloUtenti": "Account del sito del negozio",
+  "@homeSottotitoloUtenti": {
+    "description": "Home section subtitle: WordPress users"
+  },
   "dataGridSortAscending": "{field} (crescente)",
   "@dataGridSortAscending": {
     "description": "Sort option of a list: field in ascending order",

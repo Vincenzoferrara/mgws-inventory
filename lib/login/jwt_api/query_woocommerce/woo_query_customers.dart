@@ -1,5 +1,9 @@
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
+import '../../../customers/class_customer.dart';
+import '../../../log_viewer/app_logger.dart';
+import '../../../orders/class_orders.dart';
+import '../../../reuse_class/logic/global_pagination_controller.dart';
 
 /// Query class per la gestione dei clienti WooCommerce
 /// Utilizza WooConnect per l'autenticazione centralizzata
@@ -32,6 +36,126 @@ class WooQueryClienti {
       role: role ?? WooCustomerRole.customer,
       orderBy: orderBy,
       order: order,
+    );
+  }
+
+  /// Pagina di clienti come [ClienteGlobal], con il totale letto da
+  /// `X-WP-Total`.
+  ///
+  /// [orderBy] e' un valore di `orderby` di WooCommerce (`name`,
+  /// `registered_date`, `id`). Ordini e totale speso non esistono nell'API
+  /// clienti: si leggono con una sola richiesta in piu' alle statistiche del
+  /// negozio (`wc-analytics`) per gli id della pagina. Se le statistiche non
+  /// rispondono i clienti arrivano comunque, senza quei due valori.
+  Future<PaginatedResult<ClienteGlobal>> getClientiPaginati({
+    int page = 1,
+    int perPage = 20,
+    String? search,
+    String? email,
+    String orderBy = 'registered_date',
+    bool ascending = false,
+  }) async {
+    final result = await _woo.getCustomers(
+      page: page,
+      perPage: perPage,
+      search: search == null || search.isEmpty ? null : search,
+      email: email,
+      role: WooCustomerRole.customer,
+      orderBy: WooOrderBy.values.firstWhere(
+        (value) => value.value == orderBy,
+        orElse: () => WooOrderBy.registeredDate,
+      ),
+      order: ascending ? WooSort.asc : WooSort.desc,
+    );
+    final clienti = result.items.map(toClienteGlobal).toList();
+    final statistiche = await _statisticheClienti(
+      clienti.map((c) => c.id).whereType<int>().toList(),
+    );
+    return PaginatedResult<ClienteGlobal>(
+      items: [
+        for (final cliente in clienti)
+          if (statistiche[cliente.id] case final s?)
+            cliente.copyWith(ordini: s.$1, totaleSpeso: s.$2)
+          else
+            cliente,
+      ],
+      page: page,
+      perPage: perPage,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+    );
+  }
+
+  /// Ordini e totale speso per utente, da `wc-analytics/reports/customers`.
+  Future<Map<int, (int, double)>> _statisticheClienti(List<int> userIds) async {
+    if (userIds.isEmpty) return const <int, (int, double)>{};
+    try {
+      final siteUrl = _woo.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final response = await _woo.dio.get(
+        '$siteUrl/wp-json/wc-analytics/reports/customers',
+        queryParameters: {
+          'users': userIds.join(','),
+          'per_page': userIds.length,
+        },
+      );
+      final out = <int, (int, double)>{};
+      for (final row in (response.data as List).cast<Map<String, dynamic>>()) {
+        final userId = (row['user_id'] as num?)?.toInt();
+        if (userId == null || userId <= 0) continue;
+        out[userId] = (
+          (row['orders_count'] as num?)?.toInt() ?? 0,
+          (row['total_spend'] as num?)?.toDouble() ?? 0,
+        );
+      }
+      return out;
+    } catch (e) {
+      log.w('Statistiche clienti non disponibili: $e');
+      return const <int, (int, double)>{};
+    }
+  }
+
+  /// Converte il cliente WooCommerce nel modello dell'app.
+  ClienteGlobal toClienteGlobal(WooCustomer c) {
+    final b = c.billing;
+    final s = c.shipping;
+    return ClienteGlobal(
+      id: c.id,
+      username: c.username,
+      nome: c.firstName,
+      cognome: c.lastName,
+      email: c.email,
+      ruolo: c.role?.value,
+      pagante: c.isPayingCustomer ?? false,
+      dataRegistrazione: c.dateCreated,
+      avatarUrl: c.avatarUrl,
+      billing: b == null
+          ? null
+          : IndirizzoBilling(
+              firstName: b.firstName,
+              lastName: b.lastName,
+              company: b.company,
+              address1: b.address1,
+              address2: b.address2,
+              city: b.city,
+              state: b.state,
+              postcode: b.postcode,
+              country: b.country,
+              email: b.email,
+              phone: b.phone,
+            ),
+      shipping: s == null
+          ? null
+          : IndirizzoShipping(
+              firstName: s.firstName,
+              lastName: s.lastName,
+              company: s.company,
+              address1: s.address1,
+              address2: s.address2,
+              city: s.city,
+              state: s.state,
+              postcode: s.postcode,
+              country: s.country,
+            ),
     );
   }
 

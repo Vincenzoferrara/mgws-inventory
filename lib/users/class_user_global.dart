@@ -1,4 +1,6 @@
 import '../log_viewer/app_logger.dart';
+import '../reuse_class/datagridview/datagridview.code.dart';
+import '../reuse_class/datagridview/datagridview_filters.dart';
 
 /// Classe globale per rappresentare un utente con tutti i dati da WordPress
 class UserGlobal {
@@ -18,6 +20,87 @@ class UserGlobal {
   final Map<String, dynamic>? meta;
   final Map<String, dynamic>? capabilities;
   final Map<String, dynamic>? avatarUrls;
+
+  /// Ruoli piu' comuni di un sito WordPress con WooCommerce, con il nome
+  /// tradotto. Un ruolo che non e' qui si mostra con il suo slug.
+  static final List<DataGridFieldOption> ruoliNoti = <DataGridFieldOption>[
+    DataGridFieldOption('administrator', (l10n) => l10n.usersRoleAdministrator),
+    DataGridFieldOption('shop_manager', (l10n) => l10n.usersRoleShopManager),
+    DataGridFieldOption('editor', (l10n) => l10n.usersRoleEditor),
+    DataGridFieldOption('author', (l10n) => l10n.usersRoleAuthor),
+    DataGridFieldOption('contributor', (l10n) => l10n.usersRoleContributor),
+    DataGridFieldOption('subscriber', (l10n) => l10n.usersRoleSubscriber),
+    DataGridFieldOption('customer', (l10n) => l10n.usersRoleCustomer),
+  ];
+
+  /// Campi dell'utente per la lista Utenti. Ricerca libera, ruolo e
+  /// ordinamento per nome, email o data di registrazione li fa il server.
+  static final List<DataGridField<UserGlobal>> gridFields =
+      <DataGridField<UserGlobal>>[
+        DataGridField<UserGlobal>(
+          name: 'id',
+          label: (l10n) => l10n.prodottiFiltroCampo_id,
+          type: DataGridFieldType.numero,
+          read: (u) => <Object?>[u.id],
+          sortable: true,
+          serverSortParam: 'id',
+          width: 80,
+          numeric: true,
+        ),
+        DataGridField<UserGlobal>(
+          name: 'username',
+          label: (l10n) => l10n.usersFieldUsername,
+          aliases: const <String>['username', 'utente', 'login'],
+          read: (u) => <Object?>[u.username],
+          sortable: true,
+          width: 170,
+        ),
+        DataGridField<UserGlobal>(
+          name: 'nome',
+          label: (l10n) => l10n.usersFieldName,
+          aliases: const <String>['nome', 'name', 'cognome'],
+          read: (u) => <Object?>[u.name, u.firstName, u.lastName],
+          format: (l10n, u) => (u.name ?? '').trim().isEmpty ? '-' : u.name!,
+          sortable: true,
+          serverSortParam: 'name',
+          width: 200,
+          flexible: true,
+        ),
+        DataGridField<UserGlobal>(
+          name: 'email',
+          label: (l10n) => l10n.usersFieldEmail,
+          aliases: const <String>['email', 'mail'],
+          read: (u) => <Object?>[u.email],
+          sortable: true,
+          serverSortParam: 'email',
+          width: 220,
+        ),
+        DataGridField<UserGlobal>(
+          name: 'ruoli',
+          label: (l10n) => l10n.usersFieldRoles,
+          aliases: const <String>['ruolo', 'ruoli', 'role', 'roles'],
+          type: DataGridFieldType.elenco,
+          read: (u) => u.roles ?? const <String>[],
+          options: ruoliNoti,
+          serverParam: 'roles',
+          serverOperators: const <DataGridFilterOperator>{
+            DataGridFilterOperator.uguale,
+            DataGridFilterOperator.inElenco,
+          },
+          width: 180,
+        ),
+        DataGridField<UserGlobal>(
+          name: 'dataRegistrazione',
+          label: (l10n) => l10n.usersFieldRegistered,
+          aliases: const <String>['registrato', 'registrazione', 'data'],
+          type: DataGridFieldType.data,
+          read: (u) => <Object?>[u.registeredDate],
+          sortable: true,
+          serverSortParam: 'registered_date',
+          searchable: false,
+          width: 150,
+        ),
+      ];
 
   // Campi modificabili
   final String? password; // Per cambio password

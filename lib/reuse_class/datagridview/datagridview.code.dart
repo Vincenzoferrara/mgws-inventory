@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'datagridview_filters.dart';
 
 class DataGridViewColumn {
   final String id;
@@ -63,6 +64,16 @@ class DataGridViewContextAction<T> {
 /// offrire e come leggere i valori scritti dall'utente.
 enum DataGridFieldType { testo, numero, booleano, data, elenco }
 
+/// Valore ammesso di un campo a elenco (stato di un ordine, tipo di un
+/// coupon): [value] e' quello del modello, [label] quello che l'utente legge
+/// e scrive.
+class DataGridFieldOption {
+  final String value;
+  final String Function(AppLocalizations l10n) label;
+
+  const DataGridFieldOption(this.value, this.label);
+}
+
 /// Un campo del modello mostrato da una lista gestionale.
 ///
 /// La libreria non conosce i modelli: ogni schermata descrive i campi del
@@ -94,10 +105,17 @@ class DataGridField<T> {
   /// null e le stringhe vuote vengono ignorati.
   final Iterable<Object?> Function(T item) read;
 
-  /// Nome del parametro con cui il server filtra o ordina per questo campo.
-  /// Senza, il campo si filtra e si ordina solo sull'elenco completo caricato
-  /// in memoria.
+  /// Nome del parametro con cui il server filtra per questo campo. Senza,
+  /// il campo si filtra solo sull'elenco completo caricato in memoria.
   final String? serverParam;
+
+  /// Operatori che il server sa applicare con [serverParam]: un filtro con
+  /// un altro operatore si applica in memoria.
+  final Set<DataGridFilterOperator> serverOperators;
+
+  /// Valore di `orderby` con cui il server ordina per questo campo. Senza,
+  /// l'ordinamento per questo campo si fa in memoria.
+  final String? serverSortParam;
 
   final bool sortable;
   final bool filterable;
@@ -117,6 +135,10 @@ class DataGridField<T> {
   /// personalizzata. Senza, si uniscono i valori letti da [read].
   final String Function(AppLocalizations l10n, T item)? format;
 
+  /// Valori ammessi per un campo [DataGridFieldType.elenco]. I filtri
+  /// salvano [DataGridFieldOption.value]; l'utente scrive l'etichetta.
+  final List<DataGridFieldOption> options;
+
   const DataGridField({
     required this.name,
     required this.label,
@@ -125,6 +147,11 @@ class DataGridField<T> {
     this.type = DataGridFieldType.testo,
     this.aliases = const <String>[],
     this.serverParam,
+    this.serverOperators = const <DataGridFilterOperator>{
+      DataGridFilterOperator.uguale,
+      DataGridFilterOperator.ugualeEsatto,
+    },
+    this.serverSortParam,
     this.sortable = false,
     this.filterable = true,
     this.searchable = true,
@@ -133,7 +160,30 @@ class DataGridField<T> {
     this.numeric = false,
     this.flexible = false,
     this.format,
+    this.options = const <DataGridFieldOption>[],
   });
+
+  /// Valore del modello per il testo scritto dall'utente: l'etichetta o il
+  /// valore di un'opzione. Senza opzioni, o senza corrispondenza, resta il
+  /// testo scritto.
+  String optionValue(AppLocalizations l10n, String input) {
+    final normalized = input.trim().toLowerCase();
+    for (final option in options) {
+      if (option.value.toLowerCase() == normalized ||
+          option.label(l10n).toLowerCase() == normalized) {
+        return option.value;
+      }
+    }
+    return input.trim();
+  }
+
+  /// Etichetta di un valore del modello, per mostrarlo all'utente.
+  String optionLabel(AppLocalizations l10n, String value) {
+    for (final option in options) {
+      if (option.value == value) return option.label(l10n);
+    }
+    return value;
+  }
 
   /// Vero se [input] (gia' minuscolo e senza spazi ai lati) indica questo
   /// campo: il nome, l'etichetta o uno degli alias.

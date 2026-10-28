@@ -9,6 +9,7 @@ import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
 import '../../../orders/class_orders.dart';
 import '../../../log_viewer/app_logger.dart';
+import '../../../reuse_class/logic/global_pagination_controller.dart';
 
 /// Service per gestire gli ordini WooCommerce
 class WooQueryOrdini {
@@ -287,6 +288,55 @@ class WooQueryOrdini {
       log.e('Errore getOrders: $e');
       rethrow;
     }
+  }
+
+  /// Pagina di ordini con il totale letto da `X-WP-Total`.
+  ///
+  /// Le righe arrivano senza il barcode dei prodotti: recuperarlo costa una
+  /// richiesta per articolo, e una lista ne farebbe centinaia. Il dettaglio
+  /// dell'ordine lo chiede con [getOrderById].
+  ///
+  /// [stati] sono gli stati WooCommerce (`processing`, `on-hold`, ...);
+  /// [orderBy] e' un valore di `orderby` (`date`, `id`).
+  Future<PaginatedResult<OrdiniGlobal>> getOrdiniPaginati({
+    int page = 1,
+    int perPage = 20,
+    String? search,
+    List<String>? stati,
+    int? customer,
+    String orderBy = 'date',
+    bool ascending = false,
+  }) async {
+    final response = await _woo.dio.get(
+      '/orders',
+      queryParameters: {
+        'page': page,
+        'per_page': perPage,
+        'orderby': orderBy,
+        'order': ascending ? 'asc' : 'desc',
+        if (search != null && search.isNotEmpty) 'search': search,
+        if (stati != null && stati.isNotEmpty) 'status': stati.join(','),
+        if (customer != null) 'customer': customer,
+      },
+    );
+    final ordersJson = response.data is List
+        ? (response.data as List).cast<Map<String, dynamic>>()
+        : const <Map<String, dynamic>>[];
+    return PaginatedResult<OrdiniGlobal>(
+      items: ordersJson.map(_fromJsonToOrdiniGlobal).toList(),
+      page: page,
+      perPage: perPage,
+      totalItems: int.tryParse(response.headers.value('x-wp-total') ?? ''),
+      totalPages: int.tryParse(
+        response.headers.value('x-wp-totalpages') ?? '',
+      ),
+    );
+  }
+
+  /// Valore WooCommerce di uno stato ordine (`on-hold`, `processing`, ...).
+  String statoWoo(OrdineStatus status) {
+    final value = _toWooStatus(status).toString().split('.').last;
+    return value == 'onHold' ? 'on-hold' : value;
   }
 
   /// Converte JSON → OrdiniGlobal direttamente (bypassa il bug del package)

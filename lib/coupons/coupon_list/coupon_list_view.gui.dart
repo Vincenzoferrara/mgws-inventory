@@ -74,7 +74,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
     );
   }
 
-  void _showEditDialog(CouponDisplay coupon) {
+  void _showEditDialog(CouponGlobal coupon) {
     showDialog(
       context: context,
       builder: (context) => CouponFormDialog(
@@ -88,7 +88,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
     );
   }
 
-  Future<void> _deleteCoupon(CouponDisplay coupon) async {
+  Future<void> _deleteCoupon(CouponGlobal coupon) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -494,7 +494,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
 
 /// Card per visualizzare un singolo coupon
 class CouponCard extends StatelessWidget {
-  final CouponDisplay coupon;
+  final CouponGlobal coupon;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggleStatus;
@@ -852,7 +852,7 @@ class CouponCard extends StatelessWidget {
 
 /// Dialog per creare/modificare un coupon
 class CouponFormDialog extends StatefulWidget {
-  final CouponDisplay? coupon;
+  final CouponGlobal? coupon;
   final String? userEmail;
   final VoidCallback onSaved;
 

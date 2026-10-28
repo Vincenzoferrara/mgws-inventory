@@ -167,7 +167,9 @@ class _DataGridFiltersBarState<T> extends State<DataGridFiltersBar<T>> {
       );
       return;
     }
-    final valori = DataGridFilterEngine.splitValues(raw);
+    final valori = DataGridFilterEngine.splitValues(
+      raw,
+    ).map((v) => field.optionValue(context.l10n, v)).toList();
     if (valori.isEmpty) return;
     widget.controller.addFilter(
       DataGridFilter(fieldName: field.name, operatore: _operatore, valori: valori),
@@ -412,6 +414,8 @@ class _DataGridFiltersBarState<T> extends State<DataGridFiltersBar<T>> {
             : context.l10n.productsFilterValue,
         hintText: _isRicercaRapida
             ? context.l10n.productsSearchAllFields
+            : _campoField!.options.isNotEmpty
+            ? _campoField!.options.map((o) => o.label(context.l10n)).join(', ')
             : widget.filterValueHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: _valueCtrl.text.isNotEmpty

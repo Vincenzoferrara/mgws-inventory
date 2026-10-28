@@ -11493,6 +11493,166 @@
   "@productsSortPriceDesc": {
     "description": "Localized string productsSortPriceDesc"
   },
+  "customersFieldName": "Name",
+  "@customersFieldName": {
+    "description": "Customers list field: full name"
+  },
+  "customersFieldEmail": "Email",
+  "@customersFieldEmail": {
+    "description": "Customers list field: email"
+  },
+  "customersFieldPhone": "Phone",
+  "@customersFieldPhone": {
+    "description": "Customers list field: phone"
+  },
+  "customersFieldCity": "City",
+  "@customersFieldCity": {
+    "description": "Customers list field: city"
+  },
+  "customersFieldRegistered": "Registered on",
+  "@customersFieldRegistered": {
+    "description": "Customers list field: registration date"
+  },
+  "customersFieldOrders": "Orders",
+  "@customersFieldOrders": {
+    "description": "Customers list field: number of orders"
+  },
+  "customersFieldTotalSpent": "Total spent",
+  "@customersFieldTotalSpent": {
+    "description": "Customers list field: total spent"
+  },
+  "ordersFieldNumber": "Number",
+  "@ordersFieldNumber": {
+    "description": "Orders list field: order number"
+  },
+  "ordersFieldDate": "Date",
+  "@ordersFieldDate": {
+    "description": "Orders list field: order date"
+  },
+  "ordersFieldCustomer": "Customer",
+  "@ordersFieldCustomer": {
+    "description": "Orders list field: customer"
+  },
+  "ordersFieldStatus": "Status",
+  "@ordersFieldStatus": {
+    "description": "Orders list field: status"
+  },
+  "ordersFieldTotal": "Total",
+  "@ordersFieldTotal": {
+    "description": "Orders list field: total"
+  },
+  "ordersFieldPayment": "Payment",
+  "@ordersFieldPayment": {
+    "description": "Orders list field: payment method"
+  },
+  "ordersStatusCount": "{status}: {count}",
+  "@ordersStatusCount": {
+    "description": "Orders per status on the whole shop, shown above the orders list",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsFieldCode": "Code",
+  "@couponsFieldCode": {
+    "description": "Coupons list field: code"
+  },
+  "couponsFieldType": "Type",
+  "@couponsFieldType": {
+    "description": "Coupons list field: discount type"
+  },
+  "couponsFieldAmount": "Amount",
+  "@couponsFieldAmount": {
+    "description": "Coupons list field: amount"
+  },
+  "couponsFieldExpiry": "Expiry",
+  "@couponsFieldExpiry": {
+    "description": "Coupons list field: expiry date"
+  },
+  "couponsFieldUsage": "Uses",
+  "@couponsFieldUsage": {
+    "description": "Coupons list field: usage count"
+  },
+  "couponsFieldStatus": "Status",
+  "@couponsFieldStatus": {
+    "description": "Coupons list field: status"
+  },
+  "usersFieldUsername": "Username",
+  "@usersFieldUsername": {
+    "description": "Users list field: username"
+  },
+  "usersFieldName": "Name",
+  "@usersFieldName": {
+    "description": "Users list field: display name"
+  },
+  "usersFieldEmail": "Email",
+  "@usersFieldEmail": {
+    "description": "Users list field: email"
+  },
+  "usersFieldRoles": "Roles",
+  "@usersFieldRoles": {
+    "description": "Users list field: roles"
+  },
+  "usersFieldRegistered": "Registered on",
+  "@usersFieldRegistered": {
+    "description": "Users list field: registration date"
+  },
+  "usersRoleAdministrator": "Administrator",
+  "@usersRoleAdministrator": {
+    "description": "WordPress role name"
+  },
+  "usersRoleShopManager": "Shop manager",
+  "@usersRoleShopManager": {
+    "description": "WooCommerce role name"
+  },
+  "usersRoleEditor": "Editor",
+  "@usersRoleEditor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleAuthor": "Author",
+  "@usersRoleAuthor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleContributor": "Contributor",
+  "@usersRoleContributor": {
+    "description": "WordPress role name"
+  },
+  "usersRoleSubscriber": "Subscriber",
+  "@usersRoleSubscriber": {
+    "description": "WordPress role name"
+  },
+  "usersRoleCustomer": "Customer",
+  "@usersRoleCustomer": {
+    "description": "WooCommerce role name"
+  },
+  "usersSelectUser": "Select a user",
+  "@usersSelectUser": {
+    "description": "Empty details panel of the users list"
+  },
+  "usersProfile": "Profile",
+  "@usersProfile": {
+    "description": "Users details section: profile"
+  },
+  "usersCapabilities": "Permissions",
+  "@usersCapabilities": {
+    "description": "Users details section: WordPress capabilities"
+  },
+  "usersPermissionsHint": "Permissions are changed from the linked employee, in Employees.",
+  "@usersPermissionsHint": {
+    "description": "Users details: where to edit permissions"
+  },
+  "homeTitoloUtenti": "Users",
+  "@homeTitoloUtenti": {
+    "description": "Home section title: WordPress users"
+  },
+  "homeSottotitoloUtenti": "Store website accounts",
+  "@homeSottotitoloUtenti": {
+    "description": "Home section subtitle: WordPress users"
+  },
   "dataGridSortAscending": "{field} (ascending)",
   "@dataGridSortAscending": {
     "description": "Sort option of a list: field in ascending order",

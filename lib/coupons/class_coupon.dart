@@ -1,9 +1,11 @@
-import '../login/jwt_api/query/coupon_query.dart';
 import '../l10n/extensions.dart';
+import '../reuse_class/datagridview/datagridview.code.dart';
+import '../reuse_class/datagridview/datagridview_filters.dart';
 
-/// Modello di visualizzazione per i coupon.
-/// Converte i dati WooCommerce in un formato più semplice per la UI.
-class CouponDisplay {
+/// Coupon del negozio, indipendente dalla piattaforma: la conversione dal
+/// formato WooCommerce sta nelle query (`coupon_query.dart`,
+/// `woo_query_coupon.dart`).
+class CouponGlobal {
   final int id;
   final String code;
   final String amount;
@@ -28,7 +30,7 @@ class CouponDisplay {
   final String? maximumAmount;
   final List<String> emailRestrictions;
 
-  CouponDisplay({
+  CouponGlobal({
     required this.id,
     required this.code,
     required this.amount,
@@ -54,34 +56,98 @@ class CouponDisplay {
     required this.emailRestrictions,
   });
 
-  /// Crea un CouponDisplay da un WooCoupon
-  factory CouponDisplay.fromWooCoupon(WooCoupon woo) {
-    return CouponDisplay(
-      id: woo.id,
-      code: woo.code,
-      amount: woo.amount,
-      status: woo.status,
-      discountType: woo.discountType,
-      description: woo.description,
-      dateExpires: woo.dateExpires,
-      dateCreated: woo.dateCreated,
-      dateModified: woo.dateModified,
-      usageCount: woo.usageCount,
-      individualUse: woo.individualUse,
-      productIds: woo.productIds,
-      excludedProductIds: woo.excludedProductIds,
-      usageLimit: woo.usageLimit,
-      usageLimitPerUser: woo.usageLimitPerUser,
-      limitUsageToXItems: woo.limitUsageToXItems,
-      freeShipping: woo.freeShipping,
-      productCategories: woo.productCategories,
-      excludedProductCategories: woo.excludedProductCategories,
-      excludeSaleItems: woo.excludeSaleItems,
-      minimumAmount: woo.minimumAmount,
-      maximumAmount: woo.maximumAmount,
-      emailRestrictions: woo.emailRestrictions,
-    );
-  }
+  /// Stato mostrato nella lista: `scaduto` per un coupon pubblicato ma
+  /// oltre la scadenza, altrimenti lo stato del sito (`publish`, `draft`,
+  /// `pending`, `trash`).
+  String get statoLista => status == 'publish' && isExpired ? 'scaduto' : status;
+
+  double get importo => double.tryParse(amount.replaceAll(',', '.')) ?? 0;
+
+  /// Campi del coupon per la lista Coupon. Ricerca libera, codice esatto e
+  /// ordinamento per codice o data li fa il server; gli altri filtri
+  /// lavorano sull'elenco completo.
+  static final List<DataGridField<CouponGlobal>> gridFields =
+      <DataGridField<CouponGlobal>>[
+        DataGridField<CouponGlobal>(
+          name: 'codice',
+          label: (l10n) => l10n.couponsFieldCode,
+          aliases: const <String>['codice', 'code', 'coupon'],
+          read: (c) => <Object?>[c.code],
+          serverParam: 'code',
+          serverOperators: const <DataGridFilterOperator>{
+            DataGridFilterOperator.ugualeEsatto,
+          },
+          sortable: true,
+          serverSortParam: 'title',
+          width: 180,
+          flexible: true,
+        ),
+        DataGridField<CouponGlobal>(
+          name: 'tipo',
+          label: (l10n) => l10n.couponsFieldType,
+          aliases: const <String>['tipo', 'type', 'sconto'],
+          type: DataGridFieldType.elenco,
+          read: (c) => <Object?>[c.discountType],
+          options: [
+            for (final tipo in DiscountType.values)
+              DataGridFieldOption(
+                tipo.value,
+                (l10n) => couponDiscountTypeLabel(l10n, tipo),
+              ),
+          ],
+          width: 150,
+        ),
+        DataGridField<CouponGlobal>(
+          name: 'importo',
+          label: (l10n) => l10n.couponsFieldAmount,
+          aliases: const <String>['importo', 'amount', 'valore'],
+          type: DataGridFieldType.numero,
+          read: (c) => <Object?>[c.importo],
+          format: (l10n, c) => c.discountDisplay,
+          sortable: true,
+          width: 110,
+          numeric: true,
+        ),
+        DataGridField<CouponGlobal>(
+          name: 'scadenza',
+          label: (l10n) => l10n.couponsFieldExpiry,
+          aliases: const <String>['scadenza', 'scade', 'expiry'],
+          type: DataGridFieldType.data,
+          read: (c) => <Object?>[c.dateExpires],
+          format: (l10n, c) => c.expiryDisplay(l10n),
+          sortable: true,
+          searchable: false,
+          width: 150,
+        ),
+        DataGridField<CouponGlobal>(
+          name: 'utilizzi',
+          label: (l10n) => l10n.couponsFieldUsage,
+          aliases: const <String>['utilizzi', 'usi', 'usage'],
+          type: DataGridFieldType.numero,
+          read: (c) => <Object?>[c.usageCount],
+          format: (l10n, c) => c.usageLimit == null
+              ? '${c.usageCount}'
+              : '${c.usageCount}/${c.usageLimit}',
+          sortable: true,
+          searchable: false,
+          width: 100,
+          numeric: true,
+        ),
+        DataGridField<CouponGlobal>(
+          name: 'stato',
+          label: (l10n) => l10n.couponsFieldStatus,
+          aliases: const <String>['stato', 'status'],
+          type: DataGridFieldType.elenco,
+          read: (c) => <Object?>[c.statoLista],
+          options: [
+            DataGridFieldOption('publish', (l10n) => l10n.couponsStatusAttivo),
+            DataGridFieldOption('scaduto', (l10n) => l10n.couponsStatusScaduto),
+            DataGridFieldOption('draft', (l10n) => l10n.couponsStatusBozza),
+            DataGridFieldOption('trash', (l10n) => l10n.couponsStatusCestino),
+          ],
+          width: 120,
+        ),
+      ];
 
   /// Verifica se il coupon è scaduto
   bool get isExpired {
@@ -242,7 +308,7 @@ class CouponDisplay {
   }
 
   /// Crea una copia del coupon con modifiche
-  CouponDisplay copyWith({
+  CouponGlobal copyWith({
     String? code,
     String? amount,
     String? status,
@@ -264,7 +330,7 @@ class CouponDisplay {
     String? maximumAmount,
     List<String>? emailRestrictions,
   }) {
-    return CouponDisplay(
+    return CouponGlobal(
       id: id,
       code: code ?? this.code,
       amount: amount ?? this.amount,
@@ -295,7 +361,7 @@ class CouponDisplay {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CouponDisplay &&
+      other is CouponGlobal &&
           runtimeType == other.runtimeType &&
           id == other.id;
 
@@ -304,7 +370,7 @@ class CouponDisplay {
 
   @override
   String toString() =>
-      'CouponDisplay(id: $id, code: $code, discount: $discountDisplay, status: $status)';
+      'CouponGlobal(id: $id, code: $code, discount: $discountDisplay, status: $status)';
 }
 
 /// Modello di visualizzazione per le statistiche dei coupon
@@ -322,17 +388,6 @@ class CouponStatsDisplay {
     required this.totalDiscount,
     required this.period,
   });
-
-  /// Crea un CouponStatsDisplay da CouponStats
-  factory CouponStatsDisplay.fromCouponStats(CouponStats stats) {
-    return CouponStatsDisplay(
-      totalCoupons: stats.totalCoupons,
-      activeCoupons: stats.activeCoupons,
-      totalUsage: stats.totalUsage,
-      totalDiscount: stats.totalDiscount,
-      period: stats.period,
-    );
-  }
 
   /// Calcola la percentuale di coupon attivi
   double get activePercentage {

@@ -1,6 +1,9 @@
 import '../../../l10n/known_messages.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart';
 import '../woo_connect.dart';
+import '../../../coupons/class_coupon.dart';
+import '../../../log_viewer/app_logger.dart';
+import '../../../reuse_class/logic/global_pagination_controller.dart';
 
 /// Query class per la gestione dei coupon/codici sconto WooCommerce
 /// Utilizza WooConnect per l'autenticazione centralizzata
@@ -29,6 +32,86 @@ class WooQueryCoupon {
       perPage: perPage,
       search: search,
       code: code,
+    );
+  }
+
+  /// Pagina di coupon come [CouponGlobal], con il totale letto da
+  /// `X-WP-Total`.
+  ///
+  /// Legge il JSON invece del modello del pacchetto, che non espone lo stato
+  /// del coupon (pubblicato, bozza, cestino). [orderBy] e' un valore di
+  /// `orderby` di WooCommerce (`date`, `title`, `id`).
+  Future<PaginatedResult<CouponGlobal>> getCouponPaginati({
+    int page = 1,
+    int perPage = 20,
+    String? search,
+    String? code,
+    String orderBy = 'date',
+    bool ascending = false,
+  }) async {
+    final response = await _woo.dio.get(
+      '/coupons',
+      queryParameters: {
+        'page': page,
+        'per_page': perPage,
+        'orderby': orderBy,
+        'order': ascending ? 'asc' : 'desc',
+        if (search != null && search.isNotEmpty) 'search': search,
+        if (code != null && code.isNotEmpty) 'code': code,
+      },
+    );
+    final rows = response.data is List
+        ? (response.data as List).cast<Map<String, dynamic>>()
+        : const <Map<String, dynamic>>[];
+    return PaginatedResult<CouponGlobal>(
+      items: rows.map(couponGlobalFromJson).toList(),
+      page: page,
+      perPage: perPage,
+      totalItems: int.tryParse(response.headers.value('x-wp-total') ?? ''),
+      totalPages: int.tryParse(
+        response.headers.value('x-wp-totalpages') ?? '',
+      ),
+    );
+  }
+
+  /// Converte il JSON di un coupon WooCommerce nel modello dell'app.
+  CouponGlobal couponGlobalFromJson(Map<String, dynamic> json) {
+    List<int> ids(String key) =>
+        (json[key] as List? ?? const []).whereType<num>().map((n) => n.toInt()).toList();
+    DateTime? date(String key) =>
+        json[key] == null ? null : DateTime.tryParse(json[key].toString());
+    int? intOrNull(String key) => (json[key] as num?)?.toInt();
+    String? amountOrNull(String key) {
+      final value = json[key]?.toString();
+      return value == null || value.isEmpty ? null : value;
+    }
+
+    return CouponGlobal(
+      id: intOrNull('id') ?? 0,
+      code: json['code']?.toString() ?? '',
+      amount: json['amount']?.toString() ?? '0',
+      status: json['status']?.toString() ?? 'publish',
+      discountType: json['discount_type']?.toString() ?? 'fixed_cart',
+      description: json['description']?.toString() ?? '',
+      dateExpires: date('date_expires'),
+      dateCreated: date('date_created') ?? DateTime.now(),
+      dateModified: date('date_modified') ?? DateTime.now(),
+      usageCount: intOrNull('usage_count') ?? 0,
+      individualUse: json['individual_use'] == true,
+      productIds: ids('product_ids'),
+      excludedProductIds: ids('excluded_product_ids'),
+      usageLimit: intOrNull('usage_limit'),
+      usageLimitPerUser: intOrNull('usage_limit_per_user'),
+      limitUsageToXItems: intOrNull('limit_usage_to_x_items'),
+      freeShipping: json['free_shipping'] == true,
+      productCategories: ids('product_categories'),
+      excludedProductCategories: ids('excluded_product_categories'),
+      excludeSaleItems: json['exclude_sale_items'] == true,
+      minimumAmount: amountOrNull('minimum_amount'),
+      maximumAmount: amountOrNull('maximum_amount'),
+      emailRestrictions: (json['email_restrictions'] as List? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
     );
   }
 
@@ -298,23 +381,57 @@ class WooQueryCoupon {
     return await woo.getCoupons(search: searchTerm, perPage: 50);
   }
 
-  /// Ottiene statistiche generali coupon
+  /// Statistiche dei coupon su tutto il negozio, non sulla pagina visibile.
+  ///
+  /// Il totale viene da `X-WP-Total`. Attivi, scaduti e utilizzi richiedono
+  /// la data di scadenza e il contatore di ogni coupon, che il server non
+  /// sa contare: si scorrono tutte le pagine (100 coupon per richiesta). Lo
+  /// sconto totale viene dalle statistiche del negozio (`wc-analytics`).
   Future<Map<String, dynamic>> getAllCouponsStats() async {
-    final response = await _woo.dio.get(
-      '/coupons',
-      queryParameters: {'per_page': 1, 'page': 1},
-    );
+    var total = 0;
+    var active = 0;
+    var expired = 0;
+    var usage = 0;
+    final now = DateTime.now();
+    for (var page = 1; page <= 100; page++) {
+      final result = await getCouponPaginati(page: page, perPage: 100);
+      total = result.totalItems ?? total;
+      for (final coupon in result.items) {
+        usage += coupon.usageCount;
+        final scaduto =
+            coupon.dateExpires != null && coupon.dateExpires!.isBefore(now);
+        if (scaduto) {
+          expired++;
+        } else if (coupon.status == 'publish') {
+          active++;
+        }
+      }
+      if (page >= (result.totalPages ?? 1)) break;
+    }
 
-    final totalCoupons =
-        int.tryParse(response.headers.value('x-wp-total') ?? '0') ?? 0;
-
-    final activeCoupons = await getActiveCoupons();
-    final expiredCoupons = await getExpiredCoupons();
+    var discount = 0.0;
+    try {
+      final siteUrl = _woo.baseUrl.replaceAll(RegExp(r'/+$'), '');
+      final response = await _woo.dio.get(
+        '$siteUrl/wp-json/wc-analytics/reports/coupons/stats',
+        queryParameters: {
+          'interval': 'year',
+          'after': '2000-01-01T00:00:00',
+          'before': now.add(const Duration(days: 1)).toIso8601String(),
+        },
+      );
+      final totals = (response.data as Map?)?['totals'] as Map?;
+      discount = (totals?['amount'] as num?)?.toDouble() ?? 0;
+    } catch (e) {
+      log.w('Sconto totale coupon non disponibile: $e');
+    }
 
     return {
-      'total_coupons': totalCoupons,
-      'active_coupons': activeCoupons.length,
-      'expired_coupons': expiredCoupons.length,
+      'total_coupons': total,
+      'active_coupons': active,
+      'expired_coupons': expired,
+      'total_usage': usage,
+      'total_discount': discount,
     };
   }
 }

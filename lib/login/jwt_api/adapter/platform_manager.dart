@@ -18,6 +18,7 @@ import '../../mgws/query/query_mgws_reports.dart';
 import '../../mgws/connection/mgws_auth.dart';
 import '../../mgws/connection/mgws_connection.dart';
 import '../query_wordpress/query_user_wordpress.dart';
+import '../query_wordpress/query_users_wordpress.dart';
 import '../woo_connect.dart';
 import 'loyalty_gateway.dart';
 
@@ -47,6 +48,7 @@ class PlatformManager {
   static QueryMgwsDashboards? _mgwsDashboards;
   static QueryMgwsReports? _mgwsReports;
   static QueryUserWordPress? _permessiUtente;
+  static QueryUsersWordPress? _utenti;
 
   /// Ottiene la piattaforma attualmente attiva
   static PlatformType get currentPlatform => PlatformType.woocommerce;
@@ -139,6 +141,12 @@ class PlatformManager {
   static dynamic get clienti {
     _wooClienti ??= WooQueryClienti();
     return _wooClienti;
+  }
+
+  /// Elenco utenti WordPress del negozio, in sola lettura.
+  static QueryUsersWordPress get utenti {
+    _utenti ??= QueryUsersWordPress();
+    return _utenti!;
   }
 
   /// Query Ordini per la piattaforma corrente

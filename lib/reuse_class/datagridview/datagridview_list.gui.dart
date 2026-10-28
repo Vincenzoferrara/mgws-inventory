@@ -716,7 +716,10 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
   ) {
     final format = field.format;
     if (format != null) return format(l10n, item);
-    final values = DataGridFilterEngine.textValues(field, item);
+    final values = DataGridFilterEngine.textValues(
+      field,
+      item,
+    ).map((v) => field.optionLabel(l10n, v));
     return values.isEmpty ? '-' : values.join(', ');
   }
 

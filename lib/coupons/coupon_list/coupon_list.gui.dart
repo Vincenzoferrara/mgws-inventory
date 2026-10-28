@@ -146,7 +146,7 @@ class CouponStatsCompact extends StatelessWidget {
 
 /// Widget per visualizzare un piccolo badge del coupon
 class CouponBadge extends StatelessWidget {
-  final CouponDisplay coupon;
+  final CouponGlobal coupon;
   final VoidCallback? onTap;
 
   const CouponBadge({super.key, required this.coupon, this.onTap});
@@ -246,9 +246,9 @@ class CouponBadge extends StatelessWidget {
 
 /// Widget per visualizzare la lista dei coupon in modo compatto
 class CouponListCompact extends StatelessWidget {
-  final List<CouponDisplay> coupons;
-  final Function(CouponDisplay)? onCouponTap;
-  final Function(CouponDisplay)? onCouponDelete;
+  final List<CouponGlobal> coupons;
+  final Function(CouponGlobal)? onCouponTap;
+  final Function(CouponGlobal)? onCouponDelete;
 
   const CouponListCompact({
     super.key,
@@ -305,7 +305,7 @@ class CouponListCompact extends StatelessWidget {
 
 /// Widget per visualizzare un singolo coupon in modo compatto
 class CouponListItemCompact extends StatelessWidget {
-  final CouponDisplay coupon;
+  final CouponGlobal coupon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
@@ -631,7 +631,7 @@ class _CouponValidationWidgetState extends State<CouponValidationWidget> {
 
 /// Widget per selezionare un coupon da una lista
 class CouponSelectorDialog extends StatefulWidget {
-  final List<CouponDisplay> coupons;
+  final List<CouponGlobal> coupons;
   final String? selectedCouponId;
 
   const CouponSelectorDialog({
@@ -654,7 +654,7 @@ class _CouponSelectorDialogState extends State<CouponSelectorDialog> {
     _selectedId = widget.selectedCouponId;
   }
 
-  List<CouponDisplay> get filteredCoupons {
+  List<CouponGlobal> get filteredCoupons {
     if (_searchQuery.isEmpty) return widget.coupons;
     return widget.coupons
         .where((c) => c.code.toLowerCase().contains(_searchQuery.toLowerCase()))

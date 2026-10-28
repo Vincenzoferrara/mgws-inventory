@@ -8,12 +8,12 @@ import '../../log_viewer/app_logger.dart';
 class CouponGestisciController extends ChangeNotifier {
   final CouponsService _couponService;
 
-  List<CouponDisplay> _coupons = [];
+  List<CouponGlobal> _coupons = [];
   CouponStatsDisplay? _stats;
   bool _isLoading = false;
   String? _error;
 
-  List<CouponDisplay> get coupons => _coupons;
+  List<CouponGlobal> get coupons => _coupons;
   CouponStatsDisplay? get stats => _stats;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -58,7 +58,7 @@ class CouponGestisciController extends ChangeNotifier {
 
       // Converte in modelli di visualizzazione
       _coupons = filteredCoupons
-          .map((c) => CouponDisplay.fromWooCoupon(c))
+          .map((c) => c.toCouponGlobal())
           .toList();
 
       // Carica le statistiche
@@ -79,7 +79,7 @@ class CouponGestisciController extends ChangeNotifier {
     try {
       final wooStats = await _couponService.couponManagementService
           .getUsageStats();
-      _stats = CouponStatsDisplay.fromCouponStats(wooStats);
+      _stats = wooStats.toCouponStatsDisplay();
       notifyListeners();
     } catch (e) {
       log.d('Errore caricamento statistiche: $e');
@@ -87,7 +87,7 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Crea un nuovo coupon
-  Future<CouponDisplay> createCoupon({
+  Future<CouponGlobal> createCoupon({
     required String code,
     required String discountType,
     required String amount,
@@ -132,7 +132,7 @@ class CouponGestisciController extends ChangeNotifier {
       final wooCoupon = await _couponService.couponManagementService.create(
         createData,
       );
-      final couponDisplay = CouponDisplay.fromWooCoupon(wooCoupon);
+      final couponDisplay = wooCoupon.toCouponGlobal();
 
       // Aggiorna la lista locale
       _coupons.insert(0, couponDisplay);
@@ -145,7 +145,7 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Aggiorna un coupon esistente
-  Future<CouponDisplay> updateCoupon(
+  Future<CouponGlobal> updateCoupon(
     int couponId, {
     String? code,
     String? discountType,
@@ -192,7 +192,7 @@ class CouponGestisciController extends ChangeNotifier {
         couponId,
         updateData,
       );
-      final couponDisplay = CouponDisplay.fromWooCoupon(wooCoupon);
+      final couponDisplay = wooCoupon.toCouponGlobal();
 
       // Aggiorna la lista locale
       final index = _coupons.indexWhere((c) => c.id == couponId);
@@ -224,13 +224,13 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Attiva/disattiva un coupon
-  Future<void> toggleCouponStatus(CouponDisplay coupon) async {
+  Future<void> toggleCouponStatus(CouponGlobal coupon) async {
     final newStatus = coupon.status == 'publish' ? 'draft' : 'publish';
     await updateCoupon(coupon.id, status: newStatus);
   }
 
   /// Duplica un coupon
-  Future<CouponDisplay> duplicateCoupon(CouponDisplay coupon) async {
+  Future<CouponGlobal> duplicateCoupon(CouponGlobal coupon) async {
     return await createCoupon(
       code: '${coupon.code}_COPY',
       discountType: coupon.discountType,
@@ -275,7 +275,7 @@ class CouponGestisciController extends ChangeNotifier {
             ? double.tryParse(validation.discountAmount!)
             : null,
         coupon: validation.coupon != null
-            ? CouponDisplay.fromWooCoupon(validation.coupon!)
+            ? validation.coupon!.toCouponGlobal()
             : null,
       );
     } catch (e) {
@@ -284,19 +284,19 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Ottiene i coupon scaduti
-  List<CouponDisplay> getExpiredCoupons() {
+  List<CouponGlobal> getExpiredCoupons() {
     return _coupons.where((c) => c.isExpired).toList();
   }
 
   /// Ottiene i coupon attivi
-  List<CouponDisplay> getActiveCoupons() {
+  List<CouponGlobal> getActiveCoupons() {
     return _coupons
         .where((c) => c.status == 'publish' && !c.isExpired)
         .toList();
   }
 
   /// Ottiene i coupon per un utente specifico
-  List<CouponDisplay> getCouponsForUser(String email) {
+  List<CouponGlobal> getCouponsForUser(String email) {
     return _coupons
         .where(
           (c) =>
@@ -307,7 +307,7 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Cerca coupon per codice
-  List<CouponDisplay> searchByCode(String query) {
+  List<CouponGlobal> searchByCode(String query) {
     if (query.isEmpty) return _coupons;
     return _coupons
         .where((c) => c.code.toLowerCase().contains(query.toLowerCase()))
@@ -315,27 +315,27 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Filtra coupon per tipo
-  List<CouponDisplay> filterByType(String type) {
+  List<CouponGlobal> filterByType(String type) {
     return _coupons.where((c) => c.discountType == type).toList();
   }
 
   /// Filtra coupon per status
-  List<CouponDisplay> filterByStatus(String status) {
+  List<CouponGlobal> filterByStatus(String status) {
     return _coupons.where((c) => c.status == status).toList();
   }
 
   /// Ottiene coupon con spedizione gratuita
-  List<CouponDisplay> getFreeShippingCoupons() {
+  List<CouponGlobal> getFreeShippingCoupons() {
     return _coupons.where((c) => c.freeShipping).toList();
   }
 
   /// Ottiene coupon con limite di utilizzi
-  List<CouponDisplay> getCouponsWithUsageLimit() {
+  List<CouponGlobal> getCouponsWithUsageLimit() {
     return _coupons.where((c) => c.usageLimit != null).toList();
   }
 
   /// Ottiene coupon quasi esauriti (>80% utilizzi)
-  List<CouponDisplay> getAlmostExpiredByUsage() {
+  List<CouponGlobal> getAlmostExpiredByUsage() {
     return _coupons.where((c) {
       if (c.usageLimit == null || c.usageLimit == 0) return false;
       final usagePercent = (c.usageCount / c.usageLimit!) * 100;
@@ -344,7 +344,7 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Calcola lo sconto per un importo specifico
-  double calculateDiscount(CouponDisplay coupon, double amount) {
+  double calculateDiscount(CouponGlobal coupon, double amount) {
     switch (coupon.discountType) {
       case 'percent':
         final percent = double.tryParse(coupon.amount) ?? 0.0;
@@ -358,7 +358,7 @@ class CouponGestisciController extends ChangeNotifier {
   }
 
   /// Ottiene il miglior coupon per un determinato importo
-  CouponDisplay? getBestCouponForAmount(double amount, {String? userEmail}) {
+  CouponGlobal? getBestCouponForAmount(double amount, {String? userEmail}) {
     var availableCoupons = getActiveCoupons();
 
     // Filtra per utente se specificato
@@ -409,7 +409,7 @@ class CouponValidationResult {
   final bool isValid;
   final String? errorMessage;
   final double? discountAmount;
-  final CouponDisplay? coupon;
+  final CouponGlobal? coupon;
 
   CouponValidationResult({
     required this.isValid,

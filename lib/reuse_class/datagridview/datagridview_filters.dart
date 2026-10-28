@@ -40,8 +40,11 @@ class DataGridFilter {
   String chipLabel<T>(AppLocalizations l10n, List<DataGridField<T>> fields) {
     final field = DataGridFilterEngine.fieldByName(fields, fieldName);
     final campo = field?.label(l10n) ?? fieldName;
+    final testi = field == null
+        ? valori
+        : valori.map((v) => field.optionLabel(l10n, v));
     return '$campo ${DataGridFilterEngine.operatoreLabel(l10n, operatore)} '
-        '${valori.join(', ')}';
+        '${testi.join(', ')}';
   }
 
   /// Forma compatta per i log: slug del campo, simbolo e valori. Le etichette

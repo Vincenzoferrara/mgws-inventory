@@ -9,6 +9,7 @@ import '../../../l10n/known_messages.dart';
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart'
     as woo_lib;
 import '../query_woocommerce/woo_query_coupon.dart';
+import '../../../coupons/class_coupon.dart';
 
 // =======================================================
 // ==              SERVIZIO GESTIONE COUPON             ==
@@ -133,9 +134,11 @@ class CouponManagementService {
     return CouponStats(
       totalCoupons: stats['total_coupons'] ?? 0,
       activeCoupons: stats['active_coupons'] ?? 0,
-      totalUsage: 0,
-      totalDiscount: '0.00',
-      period: period,
+      totalUsage: stats['total_usage'] ?? 0,
+      totalDiscount: ((stats['total_discount'] as num?) ?? 0).toStringAsFixed(
+        2,
+      ),
+      period: 'all',
     );
   }
 
@@ -357,4 +360,43 @@ class CouponsService {
   CouponsService() {
     couponManagementService = CouponManagementService();
   }
+}
+
+/// Conversione del coupon della query nel modello dell'app.
+extension WooCouponToGlobal on WooCoupon {
+  CouponGlobal toCouponGlobal() => CouponGlobal(
+    id: id,
+    code: code,
+    amount: amount,
+    status: status,
+    discountType: discountType,
+    description: description,
+    dateExpires: dateExpires,
+    dateCreated: dateCreated,
+    dateModified: dateModified,
+    usageCount: usageCount,
+    individualUse: individualUse,
+    productIds: productIds,
+    excludedProductIds: excludedProductIds,
+    usageLimit: usageLimit,
+    usageLimitPerUser: usageLimitPerUser,
+    limitUsageToXItems: limitUsageToXItems,
+    freeShipping: freeShipping,
+    productCategories: productCategories,
+    excludedProductCategories: excludedProductCategories,
+    excludeSaleItems: excludeSaleItems,
+    minimumAmount: minimumAmount,
+    maximumAmount: maximumAmount,
+    emailRestrictions: emailRestrictions,
+  );
+}
+
+extension CouponStatsToDisplay on CouponStats {
+  CouponStatsDisplay toCouponStatsDisplay() => CouponStatsDisplay(
+    totalCoupons: totalCoupons,
+    activeCoupons: activeCoupons,
+    totalUsage: totalUsage,
+    totalDiscount: totalDiscount,
+    period: period,
+  );
 }
