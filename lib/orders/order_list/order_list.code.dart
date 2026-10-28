@@ -4,80 +4,63 @@ import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
 import '../class_orders.dart';
 import '../../l10n/extensions.dart';
+import '../../reuse_class/datagridview/datagridview_list.code.dart';
+import '../../reuse_class/datagridview/datagridview_filters.dart';
+import '../../reuse_class/logic/global_pagination_controller.dart';
 
 /// Controller per la gestione degli ordini
 class OrdiniGestioneController {
   // Usa PlatformManager invece di istanza diretta
   dynamic get _ordiniQuery => PlatformManager.ordini;
 
-  List<OrdiniGlobal> _ordini = [];
   OrdiniGlobal? _ordineSelezionato;
-  bool _isLoading = false;
-  LocalizedText? _errorMessage;
-
-  // Filtri
-  OrdineStatus? _filtroStatus;
-  String _searchQuery = '';
 
   // Getters
-  List<OrdiniGlobal> get ordini => _ordiniFiltrati;
   OrdiniGlobal? get ordineSelezionato => _ordineSelezionato;
-  bool get isLoading => _isLoading;
-  LocalizedText? get errorMessage => _errorMessage;
   bool get hasOrdineSelezionato => _ordineSelezionato != null;
-  OrdineStatus? get filtroStatus => _filtroStatus;
-  String get searchQuery => _searchQuery;
 
-  /// Carica gli ordini dal server
-  Future<void> caricaOrdini() async {
-    _isLoading = true;
-    _errorMessage = null;
+  /// Ordini per stato su tutto il negozio, letti da `X-WP-Total`.
+  Map<OrdineStatus, int> _conteggiStati = const <OrdineStatus, int>{};
+  Map<OrdineStatus, int> get conteggiStati => _conteggiStati;
 
-    try {
-      log.i('Caricamento ordini...');
-
-      final ordini = await _ordiniQuery.getOrders(
-        perPage: 100,
-        status: _filtroStatus,
-      );
-
-      _ordini = ordini;
-      log.i('Caricati ${_ordini.length} ordini');
-    } catch (e) {
-      log.e('Errore nel caricamento degli ordini: $e');
-      _errorMessage = (l10n) =>
-          l10n.ordersLoadError(localizedErrorText(l10n, e));
-      _ordini = [];
-    } finally {
-      _isLoading = false;
-    }
+  /// Pagina della lista Ordini: ricerca, stato e ordinamento passano al
+  /// server con i parametri dei campi di [OrdiniGlobal.gridFields].
+  Future<PaginatedResult<OrdiniGlobal>> caricaPagina(
+    DataGridPageRequest request,
+  ) async {
+    final query = PlatformManager.ordini;
+    final statoFiltro = request.filterOn('stato');
+    final sort = request.sort;
+    final sortField = sort == null
+        ? null
+        : DataGridFilterEngine.fieldByName(
+            OrdiniGlobal.gridFields,
+            sort.fieldName,
+          );
+    final result = await query.getOrdiniPaginati(
+      page: request.page,
+      perPage: request.perPage,
+      search: request.search,
+      stati: statoFiltro?.valori
+          .map((name) => OrdineStatus.values.asNameMap()[name])
+          .whereType<OrdineStatus>()
+          .map<String>((stato) => query.statoWoo(stato) as String)
+          .toList(),
+      orderBy: sortField?.serverSortParam ?? 'date',
+      ascending: sort?.ascending ?? false,
+    );
+    return result as PaginatedResult<OrdiniGlobal>;
   }
 
-  /// Filtra gli ordini in base alla ricerca
-  List<OrdiniGlobal> get _ordiniFiltrati {
-    if (_searchQuery.isEmpty) return _ordini;
-
-    return _ordini.where((ordine) {
-      final query = _searchQuery.toLowerCase();
-
-      // Cerca per ID ordine
-      final idMatch = ordine.id.toString().contains(query);
-      final numberMatch = ordine.number?.toLowerCase().contains(query) ?? false;
-
-      // Cerca per nome cliente
-      final firstNameMatch =
-          ordine.billing?.firstName?.toLowerCase().contains(query) ?? false;
-      final lastNameMatch =
-          ordine.billing?.lastName?.toLowerCase().contains(query) ?? false;
-      final emailMatch =
-          ordine.billing?.email?.toLowerCase().contains(query) ?? false;
-
-      return idMatch ||
-          numberMatch ||
-          firstNameMatch ||
-          lastNameMatch ||
-          emailMatch;
-    }).toList();
+  /// Conta gli ordini per stato sul server. Le statistiche non dipendono
+  /// dalla pagina visibile ne' dai filtri della lista.
+  Future<void> caricaConteggiStati() async {
+    final query = PlatformManager.ordini;
+    final perSlug = Map<String, dynamic>.from(await query.getOrderStats());
+    _conteggiStati = <OrdineStatus, int>{
+      for (final stato in OrdiniGlobal.statiOrdine)
+        stato: (perSlug[query.statoWoo(stato)] as num?)?.toInt() ?? 0,
+    };
   }
 
   /// Seleziona un ordine
@@ -96,24 +79,6 @@ class OrdiniGestioneController {
     return _ordineSelezionato?.id == ordine.id;
   }
 
-  /// Imposta il filtro per stato
-  void setFiltroStatus(OrdineStatus? status) {
-    _filtroStatus = status;
-    log.d('Filtro stato impostato: ${status?.name ?? "tutti"}');
-  }
-
-  /// Imposta la query di ricerca
-  void setSearchQuery(String query) {
-    _searchQuery = query;
-  }
-
-  /// Cancella tutti i filtri
-  void cancellaFiltri() {
-    _filtroStatus = null;
-    _searchQuery = '';
-    log.d('Filtri cancellati');
-  }
-
   /// Aggiorna lo stato di un ordine
   Future<bool> aggiornaStatoOrdine(
     int ordineId,
@@ -122,13 +87,12 @@ class OrdiniGestioneController {
     try {
       log.i('Aggiornamento stato ordine #$ordineId a ${nuovoStato.name}');
 
-      final ordine = _ordini.firstWhere((o) => o.id == ordineId);
+      final ordine = _ordineSelezionato!;
+      if (ordine.id != ordineId) return false;
       final ordineAggiornato = ordine.copyWith(status: nuovoStato);
 
       await _ordiniQuery.updateOrder(ordineAggiornato);
-
-      // Ricarica gli ordini per aggiornare la lista
-      await caricaOrdini();
+      _ordineSelezionato = ordineAggiornato;
 
       log.i('Stato ordine #$ordineId aggiornato con successo');
       return true;
@@ -136,26 +100,6 @@ class OrdiniGestioneController {
       log.e('Errore nell\'aggiornamento dello stato ordine: $e');
       return false;
     }
-  }
-
-  /// Ottiene il numero totale di ordini per stato
-  Map<String, int> getStatisticheStati() {
-    final stats = <String, int>{};
-
-    for (final ordine in _ordini) {
-      final stato = ordine.status?.name ?? 'unknown';
-      stats[stato] = (stats[stato] ?? 0) + 1;
-    }
-
-    return stats;
-  }
-
-  /// Calcola il totale delle vendite
-  double getTotaleVendite() {
-    return _ordini.fold(0.0, (sum, ordine) {
-      final total = ordine.total ?? 0.0;
-      return sum + total;
-    });
   }
 
   /// Ottiene i dettagli completi di un ordine
@@ -179,8 +123,7 @@ class OrdiniGestioneController {
       final success = await _ordiniQuery.deleteOrder(ordineId, force: force);
 
       if (success) {
-        // Ricarica gli ordini per aggiornare la lista
-        await caricaOrdini();
+        if (_ordineSelezionato?.id == ordineId) _ordineSelezionato = null;
         log.i('Ordine #$ordineId eliminato con successo');
       }
 
@@ -234,9 +177,6 @@ class OrdiniGestioneController {
 
       final ordine = await _ordiniQuery.createOrder(nuovoOrdine);
 
-      // Ricarica gli ordini per aggiornare la lista
-      await caricaOrdini();
-
       log.i('Ordine creato con successo: #${ordine.number}');
       return ordine;
     } catch (e) {
@@ -251,9 +191,6 @@ class OrdiniGestioneController {
       log.i('Aggiornamento ordine #${ordineAggiornato.id}');
 
       await _ordiniQuery.updateOrder(ordineAggiornato);
-
-      // Ricarica gli ordini per aggiornare la lista
-      await caricaOrdini();
 
       log.i('Ordine #${ordineAggiornato.id} aggiornato con successo');
       return true;

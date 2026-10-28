@@ -5,6 +5,7 @@ import '../class_coupon.dart';
 import '../../theme/theme.dart';
 import 'coupon_list.code.dart';
 import '../../l10n/extensions.dart';
+import '../../reuse_class/datagridview/datagridview_list.gui.dart';
 
 /// Widget principale per la gestione dei coupon.
 /// Supporta la gestione di coupon globali e per singolo utente.
@@ -20,15 +21,15 @@ class CouponGestisciView extends StatefulWidget {
 class _CouponGestisciViewState extends State<CouponGestisciView>
     with AutomaticKeepAliveClientMixin {
   final CouponGestisciController _controller = CouponGestisciController();
+  late final DataGridListController<CouponGlobal> _listController =
+      DataGridListController<CouponGlobal>(
+        fields: CouponGlobal.gridFields,
+        idOf: _idOf,
+        loadPage: _controller.caricaPagina,
+        cacheKey: 'coupon',
+      );
 
-  // Filtri
-  String? _filtroTipo;
-  String? _filtroStatus;
-  String _searchQuery = '';
-
-  // UI State
-  bool _isLoading = true;
-  String? _errorMessage;
+  static String _idOf(CouponGlobal coupon) => '${coupon.id}';
 
   @override
   bool get wantKeepAlive => true;
@@ -36,29 +37,34 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
   @override
   void initState() {
     super.initState();
-    _loadCoupons();
+    _controller.addListener(_onControllerChanged);
+    final email = widget.userEmail;
+    if (email != null) {
+      // Coupon di un cliente: quelli senza restrizioni o riservati a lui. Il
+      // server non sa filtrarli, quindi la lista lavora in memoria.
+      _listController.localWhere = (c) =>
+          c.emailRestrictions.isEmpty || c.emailRestrictions.contains(email);
+    }
+    _controller.loadStats();
   }
 
-  Future<void> _loadCoupons() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
+    _listController.dispose();
+    super.dispose();
+  }
 
-    try {
-      await _controller.loadCoupons(
-        search: _searchQuery.isEmpty ? null : _searchQuery,
-        status: _filtroStatus,
-        type: _filtroTipo,
-        userEmail: widget.userEmail,
-      );
-      setState(() => _isLoading = false);
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString();
-      });
-    }
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Dopo una modifica: lista e statistiche si ricaricano dal server, e il
+  /// dettaglio mostra il coupon aggiornato (o niente, se e' stato eliminato).
+  Future<void> _aggiorna({CouponGlobal? aggiornato}) async {
+    _listController.select(aggiornato);
+    await Future.wait([_listController.reload(force: true), _controller.loadStats()]);
   }
 
   void _showCreateDialog() {
@@ -68,7 +74,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
         userEmail: widget.userEmail,
         onSaved: () {
           Navigator.of(context).pop();
-          _loadCoupons();
+          _aggiorna();
         },
       ),
     );
@@ -82,7 +88,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
         userEmail: widget.userEmail,
         onSaved: () {
           Navigator.of(context).pop();
-          _loadCoupons();
+          _aggiorna();
         },
       ),
     );
@@ -119,7 +125,7 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
           'coupon_gestisci',
           context.l10n.couponsDeleted,
         );
-        _loadCoupons();
+        await _aggiorna();
       } catch (e) {
         if (!mounted) return;
         NotificationService.instance.messageBar(
@@ -131,169 +137,110 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
     }
   }
 
+  Future<void> _toggleStatus(CouponGlobal coupon) async {
+    try {
+      await _controller.toggleCouponStatus(coupon);
+      await _aggiorna();
+    } catch (e) {
+      if (!mounted) return;
+      NotificationService.instance.messageBar(
+        'errore',
+        'coupon_gestisci',
+        context.l10n.couponsErrorDetail(localizedErrorText(context.l10n, e)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Necessario per AutomaticKeepAliveClientMixin
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          widget.userEmail != null
-              ? context.l10n.couponsForCustomer('${widget.userEmail}')
-              : context.l10n.couponsManageTitle,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadCoupons,
-            tooltip: context.l10n.couponRicarica,
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showCreateDialog,
-            tooltip: context.l10n.couponNuovoCoupon,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildFilters(theme),
-          _buildStatisticsCard(theme, customColors),
-          Expanded(child: _buildContent(theme, customColors)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Barra di ricerca
-          TextField(
-            decoration: InputDecoration(
-              hintText: context.l10n.couponSearchByCodeHint,
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: theme.brightness == Brightness.dark
-                  ? theme.colorScheme.surfaceContainerHighest
-                  : theme.colorScheme.surfaceContainerLow,
-            ),
-            onChanged: (value) {
-              _searchQuery = value;
-              _loadCoupons();
-            },
-          ),
-          const SizedBox(height: 12),
-          // Filtri
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdownFilter(
-                  theme,
-                  context.l10n.couponsFilterType,
-                  _filtroTipo,
-                  [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text(context.l10n.couponTutti),
-                    ),
-                    DropdownMenuItem(
-                      value: 'percent',
-                      child: Text(context.l10n.couponTipoconSconto),
-                    ),
-                    DropdownMenuItem(
-                      value: 'fixed_cart',
-                      child: Text(context.l10n.couponFissoCarrello),
-                    ),
-                    DropdownMenuItem(
-                      value: 'fixed_product',
-                      child: Text(context.l10n.couponFissoProdotto),
-                    ),
-                  ],
-                  (value) {
-                    setState(() {
-                      _filtroTipo = value;
-                      _loadCoupons();
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildDropdownFilter(
-                  theme,
-                  context.l10n.couponsFilterStatus,
-                  _filtroStatus,
-                  [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text(context.l10n.couponTutti),
-                    ),
-                    DropdownMenuItem(
-                      value: 'publish',
-                      child: Text(context.l10n.couponPubblicato),
-                    ),
-                    DropdownMenuItem(
-                      value: 'draft',
-                      child: Text(context.l10n.couponBozza),
-                    ),
-                    DropdownMenuItem(
-                      value: 'trash',
-                      child: Text(context.l10n.couponCestino),
-                    ),
-                  ],
-                  (value) {
-                    setState(() {
-                      _filtroStatus = value;
-                      _loadCoupons();
-                    });
-                  },
-                ),
+    return Column(
+      children: [
+        _buildStatisticsCard(theme, customColors),
+        Expanded(
+          child: DataGridListView<CouponGlobal>(
+            controller: _listController,
+            fields: CouponGlobal.gridFields,
+            idOf: _idOf,
+            loadPage: _controller.caricaPagina,
+            cacheKey: 'coupon',
+            localWhere: _listController.localWhere,
+            defaultColumns: const [
+              'codice',
+              'tipo',
+              'importo',
+              'scadenza',
+              'utilizzi',
+              'stato',
+            ],
+            defaultMobileColumns: const ['codice', 'importo', 'stato'],
+            onRefresh: _aggiorna,
+            toolbarActions: [
+              DataGridCommandIconButton(
+                onPressed: _showCreateDialog,
+                icon: Icons.add,
+                tooltip: context.l10n.couponNuovoCoupon,
+                color: theme.colorScheme.primary,
               ),
             ],
+            cellsOf: (context, coupon) => <String, Widget>{
+              'codice': Text(
+                coupon.code.toUpperCase(),
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              'stato': DataGridStatusChip(
+                label: coupon.statusDisplay(context.l10n),
+                color: coupon.isActive
+                    ? customColors.successColor
+                    : coupon.isExpired
+                    ? customColors.errorColorStatus
+                    : customColors.subtitleColor,
+              ),
+            },
+            contextActions: (context) => [
+              DataGridViewContextAction<CouponGlobal>(
+                label: context.l10n.commonNew,
+                icon: Icons.add_circle_outline,
+                onSelected: (_) async => _showCreateDialog(),
+              ),
+              DataGridViewContextAction<CouponGlobal>(
+                label: context.l10n.commonEdit,
+                icon: Icons.edit_outlined,
+                onSelected: (coupon) async => _showEditDialog(coupon),
+              ),
+              DataGridViewContextAction<CouponGlobal>(
+                label: context.l10n.commonDelete,
+                icon: Icons.delete_outline,
+                onSelected: _deleteCoupon,
+              ),
+            ],
+            emptyDetailsIcon: Icons.local_offer_outlined,
+            detailsOf: (context, coupon, inPage) {
+              final card = SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: CouponCard(
+                  coupon: coupon,
+                  onEdit: () => _showEditDialog(coupon),
+                  onDelete: () => _deleteCoupon(coupon),
+                  onToggleStatus: () => _toggleStatus(coupon),
+                ),
+              );
+              return inPage
+                  ? Scaffold(
+                      appBar: AppBar(title: Text(coupon.code.toUpperCase())),
+                      body: card,
+                    )
+                  : card;
+            },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdownFilter<T>(
-    ThemeData theme,
-    String label,
-    T? value,
-    List<DropdownMenuItem<T>> items,
-    ValueChanged<T?> onChanged,
-  ) {
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: theme.brightness == Brightness.dark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surfaceContainerLow,
-      ),
-      items: items,
-      onChanged: onChanged,
+        ),
+      ],
     );
   }
 
@@ -382,114 +329,6 @@ class _CouponGestisciViewState extends State<CouponGestisciView>
     );
   }
 
-  Widget _buildContent(ThemeData theme, AppColorExtension customColors) {
-    if (_isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: theme.primaryColor),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: context.colors.errorColorStatus,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.couponErroreCaricamento,
-              style: theme.textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: theme.textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _loadCoupons,
-              icon: const Icon(Icons.refresh),
-              label: Text(context.l10n.couponRiprova),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_controller.coupons.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.discount_outlined,
-              size: 80,
-              color: theme.iconTheme.color?.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.couponNessunCouponTrovato,
-              style: theme.textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.couponsCreateFirst,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.textTheme.bodyMedium?.color?.withValues(
-                  alpha: 0.7,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _showCreateDialog,
-              icon: const Icon(Icons.add),
-              label: Text(context.l10n.couponNuovoCoupon),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _controller.coupons.length,
-      itemBuilder: (context, index) {
-        final coupon = _controller.coupons[index];
-        return CouponCard(
-          coupon: coupon,
-          onEdit: () => _showEditDialog(coupon),
-          onDelete: () => _deleteCoupon(coupon),
-          onToggleStatus: () async {
-            try {
-              await _controller.toggleCouponStatus(coupon);
-              _loadCoupons();
-            } catch (e) {
-              if (!mounted) return;
-              NotificationService.instance.messageBar(
-                'errore',
-                'coupon_gestisci',
-                context.l10n.couponsErrorDetail(
-                  localizedErrorText(context.l10n, e),
-                ),
-              );
-            }
-          },
-        );
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 }
 
 /// Card per visualizzare un singolo coupon

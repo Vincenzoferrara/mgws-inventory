@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../class_coupon.dart';
 import '../../login/jwt_api/query/coupon_query.dart';
 import '../../log_viewer/app_logger.dart';
+import '../../reuse_class/datagridview/datagridview_filters.dart';
+import '../../reuse_class/datagridview/datagridview_list.code.dart';
+import '../../reuse_class/logic/global_pagination_controller.dart';
 
 /// Controller per la gestione dei coupon.
 /// Gestisce la logica di business e le chiamate API.
@@ -10,68 +13,37 @@ class CouponGestisciController extends ChangeNotifier {
 
   List<CouponGlobal> _coupons = [];
   CouponStatsDisplay? _stats;
-  bool _isLoading = false;
-  String? _error;
 
   List<CouponGlobal> get coupons => _coupons;
   CouponStatsDisplay? get stats => _stats;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
 
   CouponGestisciController({CouponsService? couponService})
     : _couponService = couponService ?? CouponsService();
 
-  /// Carica i coupon con filtri opzionali
-  Future<void> loadCoupons({
-    int page = 1,
-    int perPage = 50,
-    String? search,
-    String? status,
-    String? type,
-    String? userEmail,
-  }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      // Carica i coupon
-      final wooCoupons = await _couponService.couponManagementService.list(
-        page: page,
-        perPage: perPage,
-        search: search,
-        status: status,
-        type: type,
-      );
-
-      // Filtra per email utente se specificato
-      List<WooCoupon> filteredCoupons = wooCoupons;
-      if (userEmail != null) {
-        filteredCoupons = wooCoupons
-            .where(
-              (c) =>
-                  c.emailRestrictions.isEmpty ||
-                  c.emailRestrictions.contains(userEmail),
-            )
-            .toList();
-      }
-
-      // Converte in modelli di visualizzazione
-      _coupons = filteredCoupons
-          .map((c) => c.toCouponGlobal())
-          .toList();
-
-      // Carica le statistiche
-      await loadStats();
-
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      rethrow;
-    }
+  /// Pagina della lista Coupon: ricerca, codice esatto e ordinamento
+  /// passano al server con i parametri dei campi di
+  /// [CouponGlobal.gridFields].
+  Future<PaginatedResult<CouponGlobal>> caricaPagina(
+    DataGridPageRequest request,
+  ) async {
+    final codice = request.filterOn('codice');
+    final sort = request.sort;
+    final sortField = sort == null
+        ? null
+        : DataGridFilterEngine.fieldByName(
+            CouponGlobal.gridFields,
+            sort.fieldName,
+          );
+    final result = await _couponService.couponManagementService.listPaginated(
+      page: request.page,
+      perPage: request.perPage,
+      search: request.search,
+      code: codice?.valori.first,
+      orderBy: sortField?.serverSortParam ?? 'date',
+      ascending: sort?.ascending ?? false,
+    );
+    _coupons = result.items;
+    return result;
   }
 
   /// Carica le statistiche dei coupon

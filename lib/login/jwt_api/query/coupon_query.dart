@@ -10,6 +10,7 @@ import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart'
     as woo_lib;
 import '../query_woocommerce/woo_query_coupon.dart';
 import '../../../coupons/class_coupon.dart';
+import '../../../reuse_class/logic/global_pagination_controller.dart';
 
 // =======================================================
 // ==              SERVIZIO GESTIONE COUPON             ==
@@ -50,6 +51,25 @@ class CouponManagementService {
   Future<WooCoupon> getByCode(String code) async {
     final wooCoupon = await _wooQuery.getCouponByCode(code);
     return _convertFromLibrary(wooCoupon);
+  }
+
+  /// Pagina di coupon con il totale del server, per la lista Coupon.
+  Future<PaginatedResult<CouponGlobal>> listPaginated({
+    int page = 1,
+    int perPage = 20,
+    String? search,
+    String? code,
+    String orderBy = 'date',
+    bool ascending = false,
+  }) {
+    return _wooQuery.getCouponPaginati(
+      page: page,
+      perPage: perPage,
+      search: search,
+      code: code,
+      orderBy: orderBy,
+      ascending: ascending,
+    );
   }
 
   /// Recupera una lista di coupon con filtri opzionali

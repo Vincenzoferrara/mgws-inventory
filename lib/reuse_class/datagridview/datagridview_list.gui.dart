@@ -91,6 +91,8 @@ class DataGridListView<T> extends StatefulWidget {
   final bool Function(T item)? localWhere;
 
   // Barra filtri.
+  /// Pulsante "Aggiorna": senza, ricarica la lista scartando la cache.
+  final Future<void> Function()? onRefresh;
   final List<Widget> toolbarActions;
   final List<Widget> extraFilters;
   final List<Widget> extraActiveChips;
@@ -162,6 +164,7 @@ class DataGridListView<T> extends StatefulWidget {
     this.serverFiltering = true,
     this.serverSearch = true,
     this.localWhere,
+    this.onRefresh,
     this.toolbarActions = const <Widget>[],
     this.extraFilters = const <Widget>[],
     this.extraActiveChips = const <Widget>[],
@@ -648,7 +651,7 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
         DataGridFiltersBar<T>(
           controller: _controller,
           fields: widget.fields,
-          onRefresh: () => _controller.reload(force: true),
+          onRefresh: widget.onRefresh ?? () => _controller.reload(force: true),
           onOpenColumns: _openColumnPicker,
           actions: widget.toolbarActions,
           extraFilters: widget.extraFilters,
@@ -925,6 +928,41 @@ class _BusyOverlay extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Etichetta colorata a pillola per gli stati nelle celle della griglia.
+class DataGridStatusChip extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const DataGridStatusChip({
+    super.key,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color.withValues(alpha: 0.28)),
+        ),
+        child: Text(
+          label,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

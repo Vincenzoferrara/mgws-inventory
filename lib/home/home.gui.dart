@@ -6,6 +6,7 @@ import '../caldav/caldav_gui.dart';
 import '../loyalty_cards/loyalty_cards.gui.dart';
 import '../checkout/checkout.gui.dart';
 import '../customers/customer_list.gui.dart';
+import '../users/users_list.gui.dart';
 import '../coupons/coupon_list/coupon_list_view.gui.dart';
 import '../dashboard/dashboard_customization.dart';
 import '../employees/employees.gui.dart';
@@ -266,6 +267,15 @@ class _HomeScreenState extends State<HomeScreen> {
         id: 'fornitori',
         title: context.l10n.homeTitoloFornitori,
         subtitle: context.l10n.homeSottotitoloFornitori,
+      _HomeSection(
+        id: 'utenti',
+        title: context.l10n.homeTitoloUtenti,
+        subtitle: context.l10n.homeSottotitoloUtenti,
+        icon: Icons.manage_accounts,
+        iconColor: context.colors.infoColor,
+        openMode: HomeTabOpenMode.duplicate,
+        builder: () => const UtentiGestisciPage(),
+      ),
         icon: Icons.local_shipping,
         iconColor: accents.fornitori,
         openMode: HomeTabOpenMode.duplicate,

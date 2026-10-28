@@ -12,8 +12,14 @@ import 'order_list.code.dart';
 import '../order_editor/order_editor.gui.dart';
 import '../class_orders.dart';
 import '../../l10n/extensions.dart';
+import '../../reuse_class/datagridview/datagridview_list.gui.dart';
 
-/// Pagina principale per la gestione degli ordini
+/// Pagina principale per la gestione degli ordini.
+///
+/// E' una [DataGridListView] sui campi di [OrdiniGlobal]: ricerca, stato e
+/// ordinamento vanno al server, che restituisce solo la pagina visibile.
+/// Sopra la griglia i conteggi per stato vengono dal server (`X-WP-Total`)
+/// e non dipendono dalla pagina caricata.
 class OrdiniGestisciPage extends StatefulWidget {
   const OrdiniGestisciPage({super.key});
 
@@ -23,45 +29,140 @@ class OrdiniGestisciPage extends StatefulWidget {
 
 class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
   final OrdiniGestioneController _controller = OrdiniGestioneController();
+  late final DataGridListController<OrdiniGlobal> _listController =
+      DataGridListController<OrdiniGlobal>(
+        fields: OrdiniGlobal.gridFields,
+        idOf: _idOf,
+        loadPage: _controller.caricaPagina,
+        cacheKey: 'ordini',
+      );
+
+  static String _idOf(OrdiniGlobal ordine) => '${ordine.id ?? 0}';
 
   @override
   void initState() {
     super.initState();
-    _caricaOrdini();
+    _caricaConteggi();
   }
 
-  Future<void> _caricaOrdini() async {
-    await _controller.caricaOrdini();
-    if (mounted) {
-      setState(() {});
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _caricaConteggi() async {
+    try {
+      await _controller.caricaConteggiStati();
+    } catch (_) {
+      // I conteggi sono un aiuto: se il server non risponde la lista resta.
     }
+    if (mounted) setState(() {});
   }
 
-  void _updateState() {
-    setState(() {});
+  /// Dopo una modifica: la lista si ricarica dal server, i conteggi pure, e
+  /// il dettaglio mostra l'ordine aggiornato (o niente, se e' stato
+  /// eliminato).
+  Future<void> _aggiorna({OrdiniGlobal? aggiornato}) async {
+    _listController.select(aggiornato);
+    await Future.wait([_listController.reload(force: true), _caricaConteggi()]);
+  }
+
+  void _filtraStato(OrdineStatus stato) {
+    _listController.setFilters([
+      DataGridFilter(
+        fieldName: 'stato',
+        operatore: DataGridFilterOperator.uguale,
+        valori: [stato.name],
+      ),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isSmallScreen = constraints.maxWidth < 800;
-          if (isSmallScreen) {
-            return _buildMobileLayout();
-          } else {
-            return _buildDesktopLayout();
-          }
-        },
+      body: DataGridListView<OrdiniGlobal>(
+        controller: _listController,
+        fields: OrdiniGlobal.gridFields,
+        idOf: _idOf,
+        loadPage: _controller.caricaPagina,
+        cacheKey: 'ordini',
+        defaultColumns: const [
+          'numero',
+          'data',
+          'cliente',
+          'stato',
+          'totale',
+          'pagamento',
+        ],
+        defaultMobileColumns: const ['numero', 'cliente', 'stato'],
+        onRefresh: _aggiorna,
+        onRowSelected: _controller.selezionaOrdine,
+        cellsOf: _buildCells,
+        extraFilters: [
+          for (final stato in OrdiniGlobal.statiOrdine)
+            if ((_controller.conteggiStati[stato] ?? 0) > 0)
+              ActionChip(
+                avatar: CircleAvatar(
+                  backgroundColor: _statusColor(context, stato),
+                  radius: 5,
+                ),
+                label: Text(
+                  l10n.ordersStatusCount(
+                    ordineStatusLabel(l10n, stato),
+                    _controller.conteggiStati[stato] ?? 0,
+                  ),
+                ),
+                onPressed: () => _filtraStato(stato),
+              ),
+        ],
+        emptyDetailsIcon: Icons.receipt_long,
+        emptyDetailsTitle: (context) => context.l10n.ordersSelectOrder,
+        detailsOf: (context, ordine, inPage) => inPage
+            ? _OrdineDettagliPage(
+                ordine: ordine,
+                controller: _controller,
+                onChanged: _aggiorna,
+              )
+            : _OrdineDettagli(
+                ordine: ordine,
+                controller: _controller,
+                onChanged: _aggiorna,
+              ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _mostraDialogCreaOrdine(context),
         icon: const Icon(Icons.add),
-        label: Text(context.l10n.ordiniNuovoOrdine),
+        label: Text(l10n.ordiniNuovoOrdine),
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );
+  }
+
+  Map<String, Widget> _buildCells(BuildContext context, OrdiniGlobal ordine) {
+    final theme = Theme.of(context);
+    final stato = ordine.status;
+    return <String, Widget>{
+      'numero': Text(
+        '#${ordine.number ?? ordine.id ?? ''}',
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      'data': Text(
+        ordine.dateCreated == null
+            ? context.l10n.ordersNotAvailable
+            : DateFormat('dd/MM/yyyy HH:mm').format(ordine.dateCreated!),
+      ),
+      'stato': DataGridStatusChip(
+        label: stato == null
+            ? context.l10n.ordiniStatusSconosciuto
+            : ordineStatusLabel(context.l10n, stato),
+        color: _statusColor(context, stato),
+      ),
+    };
   }
 
   Future<void> _mostraDialogCreaOrdine(BuildContext context) async {
@@ -74,430 +175,52 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
 
     // Ricarica la lista se un ordine è stato creato
     if (ordine != null && mounted) {
-      await _caricaOrdini();
+      await _aggiorna();
     }
-  }
-
-  Widget _buildMobileLayout() {
-    return Column(
-      children: [
-        _FiltriWidget(
-          controller: _controller,
-          onStateChanged: _updateState,
-          onRefresh: _caricaOrdini,
-        ),
-        Expanded(child: _buildListaOrdini(isSmallScreen: true)),
-      ],
-    );
-  }
-
-  Widget _buildDesktopLayout() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Column(
-            children: [
-              _FiltriWidget(
-                controller: _controller,
-                onStateChanged: _updateState,
-                onRefresh: _caricaOrdini,
-              ),
-              Expanded(child: _buildListaOrdini(isSmallScreen: false)),
-            ],
-          ),
-        ),
-        VerticalDivider(width: 1, color: Theme.of(context).dividerColor),
-        Expanded(
-          flex: 2,
-          child: _controller.hasOrdineSelezionato
-              ? _OrdineDettagli(ordine: _controller.ordineSelezionato!)
-              : _buildEmptyState(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 64,
-            color: theme.iconTheme.color?.withValues(alpha: 0.4),
-          ),
-          SizedBox(height: context.spacing.l),
-          Text(
-            context.l10n.ordersSelectOrder,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildListaOrdini({required bool isSmallScreen}) {
-    if (_controller.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_controller.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: context.colors.errorColorStatus,
-            ),
-            SizedBox(height: context.spacing.l),
-            Text(
-              _controller.errorMessage!(context.l10n),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: context.spacing.l),
-            ElevatedButton.icon(
-              onPressed: _caricaOrdini,
-              icon: const Icon(Icons.refresh),
-              label: Text(context.l10n.inventoryRiprova),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_controller.ordini.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.4),
-            ),
-            SizedBox(height: context.spacing.l),
-            Text(
-              context.l10n.ordersNoneFound,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: context.spacing.iS,
-      itemCount: _controller.ordini.length,
-      itemBuilder: (context, index) => _OrdineListItem(
-        ordine: _controller.ordini[index],
-        isSelected: _controller.isOrdineSelezionato(_controller.ordini[index]),
-        onTap: () {
-          final ordine = _controller.ordini[index];
-          if (isSmallScreen) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => _OrdineDettagliPage(ordine: ordine),
-              ),
-            );
-            return;
-          }
-
-          _controller.selezionaOrdine(ordine);
-          _updateState();
-        },
-      ),
-    );
   }
 }
 
+Color _statusColor(BuildContext context, OrdineStatus? status) {
+  final customColors = Theme.of(context).extension<AppColorExtension>()!;
+  switch (status) {
+    case OrdineStatus.completed:
+      return customColors.successColor;
+    case OrdineStatus.processing:
+      return customColors.infoColor;
+    case OrdineStatus.pending:
+    case OrdineStatus.refunded:
+      return customColors.warningColor;
+    case OrdineStatus.cancelled:
+    case OrdineStatus.failed:
+      return customColors.errorColorStatus;
+    default:
+      return customColors.subtitleColor;
+  }
+}
+
+/// Dettaglio ordine a pagina intera, usato su telefono.
 class _OrdineDettagliPage extends StatelessWidget {
   final OrdiniGlobal ordine;
+  final OrdiniGestioneController controller;
+  final Future<void> Function({OrdiniGlobal? aggiornato}) onChanged;
 
-  const _OrdineDettagliPage({required this.ordine});
+  const _OrdineDettagliPage({
+    required this.ordine,
+    required this.controller,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${context.l10n.ordiniOrdineNumero}${ordine.number}'),
+        title: Text(context.l10n.ordersOrderNumber('${ordine.number}')),
       ),
-      body: _OrdineDettagli(ordine: ordine),
-    );
-  }
-}
-
-/// Widget per i filtri e la ricerca
-class _FiltriWidget extends StatefulWidget {
-  final OrdiniGestioneController controller;
-  final VoidCallback onStateChanged;
-  final VoidCallback onRefresh;
-
-  const _FiltriWidget({
-    required this.controller,
-    required this.onStateChanged,
-    required this.onRefresh,
-  });
-
-  @override
-  _FiltriWidgetState createState() => _FiltriWidgetState();
-}
-
-class _FiltriWidgetState extends State<_FiltriWidget> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  String _getStatusText(BuildContext context, OrdineStatus? status) {
-    if (status == null) return context.l10n.ordiniTuttiGliStati;
-    return ordineStatusLabel(context.l10n, status);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: context.spacing.iM,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: context.l10n.ordiniCercaHintTesto,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              widget.controller.setSearchQuery('');
-                              widget.onStateChanged();
-                            },
-                          )
-                        : null,
-                  ),
-                  onChanged: (value) {
-                    widget.controller.setSearchQuery(value);
-                    widget.onStateChanged();
-                  },
-                ),
-              ),
-              SizedBox(width: context.spacing.s),
-              IconButton(
-                onPressed: widget.onRefresh,
-                icon: const Icon(Icons.refresh),
-                tooltip: context.l10n.commonRefresh,
-                style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).primaryColor.withValues(alpha: 0.1),
-                  foregroundColor: Theme.of(context).primaryColor,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: context.spacing.s),
-          Container(
-            padding: context.spacing.hM,
-            decoration: BoxDecoration(
-              color: Theme.of(context).inputDecorationTheme.fillColor,
-              borderRadius: context.shapes.s,
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).inputDecorationTheme.enabledBorder!.borderSide.color,
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<OrdineStatus?>(
-                value: widget.controller.filtroStatus,
-                isExpanded: true,
-                icon: Icon(
-                  Icons.filter_list,
-                  color: Theme.of(context).primaryColor,
-                ),
-                onChanged: (OrdineStatus? newValue) {
-                  widget.controller.setFiltroStatus(newValue);
-                  widget.onRefresh();
-                },
-                items: [
-                  DropdownMenuItem<OrdineStatus?>(
-                    value: null,
-                    child: Text(_getStatusText(context, null)),
-                  ),
-                  ...OrdineStatus.values.map((status) {
-                    return DropdownMenuItem<OrdineStatus?>(
-                      value: status,
-                      child: Text(_getStatusText(context, status)),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Widget per ogni elemento della lista ordini
-class _OrdineListItem extends StatelessWidget {
-  final OrdiniGlobal ordine;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _OrdineListItem({
-    required this.ordine,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  Color _getStatusColor(BuildContext context, OrdineStatus? status) {
-    final customColors = Theme.of(context).extension<AppColorExtension>()!;
-
-    if (status == null) return customColors.subtitleColor;
-
-    switch (status) {
-      case OrdineStatus.completed:
-        return customColors.successColor;
-      case OrdineStatus.processing:
-        return customColors.infoColor;
-      case OrdineStatus.pending:
-        return customColors.warningColor;
-      case OrdineStatus.cancelled:
-      case OrdineStatus.failed:
-        return customColors.errorColorStatus;
-      case OrdineStatus.refunded:
-        return customColors.warningColor;
-      default:
-        return customColors.subtitleColor;
-    }
-  }
-
-  String _getStatusLabel(BuildContext context, OrdineStatus? status) {
-    if (status == null) return context.l10n.ordiniStatusSconosciuto;
-    return ordineStatusLabel(context.l10n, status);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>()!;
-
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-    final dataOrdine = ordine.dateCreated != null
-        ? dateFormat.format(ordine.dateCreated!)
-        : context.l10n.ordersNotAvailable;
-
-    return Card(
-      margin: EdgeInsets.symmetric(
-        vertical: context.spacing.xs,
-        horizontal: context.spacing.s,
-      ),
-      elevation: isSelected ? 8 : 2,
-      shadowColor: isSelected
-          ? theme.primaryColor.withValues(alpha: 0.3)
-          : null,
-      shape: RoundedRectangleBorder(
-        borderRadius: context.shapes.m,
-        side: isSelected
-            ? BorderSide(color: theme.primaryColor, width: 2)
-            : BorderSide.none,
-      ),
-      color: isSelected ? customColors.selectedCardBackground : theme.cardColor,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: context.shapes.m,
-        child: Padding(
-          padding: context.spacing.iM,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.ordersOrderNumber('${ordine.number}'),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? theme.primaryColor : null,
-                          ),
-                        ),
-                        Text(
-                          '${ordine.billing?.firstName ?? ''} ${ordine.billing?.lastName ?? ''}'
-                              .trim(),
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${ordine.total?.toStringAsFixed(2) ?? '0.00'} ${ordine.currency ?? 'EUR'}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: customColors.successColor,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: context.spacing.s),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: customColors.subtitleColor,
-                  ),
-                  SizedBox(width: context.spacing.xs),
-                  Text(dataOrdine, style: theme.textTheme.bodySmall),
-                  const Spacer(),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: context.spacing.s,
-                      vertical: context.spacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(
-                        context,
-                        ordine.status,
-                      ).withValues(alpha: 0.2),
-                      borderRadius: context.shapes.m,
-                      border: Border.all(
-                        color: _getStatusColor(
-                          context,
-                          ordine.status,
-                        ).withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Text(
-                      _getStatusLabel(context, ordine.status),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: _getStatusColor(context, ordine.status),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      body: _OrdineDettagli(
+        ordine: ordine,
+        controller: controller,
+        onChanged: onChanged,
+        onDeleted: () => Navigator.of(context).pop(),
       ),
     );
   }
@@ -506,8 +229,20 @@ class _OrdineListItem extends StatelessWidget {
 /// Widget per visualizzare i dettagli di un ordine
 class _OrdineDettagli extends StatefulWidget {
   final OrdiniGlobal ordine;
+  final OrdiniGestioneController controller;
 
-  const _OrdineDettagli({required this.ordine});
+  /// Dopo cambio stato o eliminazione: la pagina ricarica lista e conteggi.
+  final Future<void> Function({OrdiniGlobal? aggiornato}) onChanged;
+
+  /// Dopo l'eliminazione, per chiudere la pagina di dettaglio su telefono.
+  final VoidCallback? onDeleted;
+
+  const _OrdineDettagli({
+    required this.ordine,
+    required this.controller,
+    required this.onChanged,
+    this.onDeleted,
+  });
 
   @override
   State<_OrdineDettagli> createState() => _OrdineDettagliState();
@@ -517,9 +252,14 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   final Map<int, ProdottoGlobal> _prodottiOrdine = {};
   final Set<int> _productIdsRichiesti = {};
 
+  /// L'ordine della lista arriva senza il barcode dei prodotti, che serve
+  /// alla verifica con lo scanner: il dettaglio rilegge l'ordine completo.
+  late OrdiniGlobal _ordine = widget.ordine;
+
   @override
   void initState() {
     super.initState();
+    _caricaOrdineCompleto();
     _caricaProdottiOrdine();
   }
 
@@ -527,14 +267,24 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   void didUpdateWidget(covariant _OrdineDettagli oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ordine.id != widget.ordine.id ||
-        oldWidget.ordine.lineItems != widget.ordine.lineItems) {
+        oldWidget.ordine.status != widget.ordine.status) {
+      _ordine = widget.ordine;
+      _caricaOrdineCompleto();
       _caricaProdottiOrdine();
     }
   }
 
+  Future<void> _caricaOrdineCompleto() async {
+    final id = widget.ordine.id;
+    if (id == null) return;
+    final completo = await widget.controller.getDettagliOrdine(id);
+    if (!mounted || completo == null || widget.ordine.id != id) return;
+    setState(() => _ordine = completo);
+  }
+
   Future<void> _caricaProdottiOrdine() async {
     final List<int> productIds =
-        widget.ordine.lineItems
+        _ordine.lineItems
             ?.map((item) => item.productId)
             .whereType<int>()
             .where(_productIdsRichiesti.add)
@@ -760,7 +510,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   Widget _buildProdottoRow(BuildContext context, ProdottoOrdine item) {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
-    final currency = widget.ordine.currency ?? 'EUR';
+    final currency = _ordine.currency ?? 'EUR';
     final barcodeInterno = (item.barcodeInterno ?? '').trim();
     final quantita = item.quantity ?? 0;
     final prezzoUnitario = _formatImporto(item.price);
@@ -924,7 +674,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.ordersOrderNumber('${widget.ordine.number}'),
+                      context.l10n.ordersOrderNumber('${_ordine.number}'),
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -932,8 +682,8 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                     SizedBox(height: context.spacing.s),
                     Text(
                       context.l10n.ordersCreatedAt(
-                        widget.ordine.dateCreated != null
-                            ? dateFormat.format(widget.ordine.dateCreated!)
+                        _ordine.dateCreated != null
+                            ? dateFormat.format(_ordine.dateCreated!)
                             : context.l10n.ordersNotAvailable,
                       ),
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -995,18 +745,18 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
             _buildInfoRow(
               context,
               context.l10n.commonName,
-              '${widget.ordine.billing?.firstName ?? ''} ${widget.ordine.billing?.lastName ?? ''}'
+              '${_ordine.billing?.firstName ?? ''} ${_ordine.billing?.lastName ?? ''}'
                   .trim(),
             ),
             _buildInfoRow(
               context,
               'Email',
-              widget.ordine.billing?.email ?? context.l10n.ordersNotAvailable,
+              _ordine.billing?.email ?? context.l10n.ordersNotAvailable,
             ),
             _buildInfoRow(
               context,
               context.l10n.ordersPhone,
-              widget.ordine.billing?.phone ?? context.l10n.ordersNotAvailable,
+              _ordine.billing?.phone ?? context.l10n.ordersNotAvailable,
             ),
           ]),
           SizedBox(height: context.spacing.l),
@@ -1018,18 +768,18 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
               _buildInfoRow(
                 context,
                 context.l10n.ordersAddress,
-                widget.ordine.billing?.address1 ??
+                _ordine.billing?.address1 ??
                     context.l10n.ordersNotAvailable,
               ),
               _buildInfoRow(
                 context,
                 context.l10n.ordersCity,
-                widget.ordine.billing?.city ?? context.l10n.ordersNotAvailable,
+                _ordine.billing?.city ?? context.l10n.ordersNotAvailable,
               ),
               _buildInfoRow(
                 context,
                 context.l10n.ordersPostcode,
-                widget.ordine.billing?.postcode ??
+                _ordine.billing?.postcode ??
                     context.l10n.ordersNotAvailable,
               ),
             ],
@@ -1039,7 +789,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
             context,
             context.l10n.ordersProducts,
             Icons.shopping_bag,
-            widget.ordine.lineItems
+            _ordine.lineItems
                     ?.map((item) => _buildProdottoRow(context, item))
                     .toList() ??
                 [],
@@ -1053,31 +803,31 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   _buildTotaleRow(
                     context,
                     context.l10n.ordersSubtotal,
-                    (widget.ordine.total ??
+                    (_ordine.total ??
                             0 -
-                                (widget.ordine.shippingTotal ?? 0) -
-                                (widget.ordine.totalTax ?? 0))
+                                (_ordine.shippingTotal ?? 0) -
+                                (_ordine.totalTax ?? 0))
                         .toString(),
-                    widget.ordine.currency,
+                    _ordine.currency,
                   ),
                   _buildTotaleRow(
                     context,
                     context.l10n.ordersShipping,
-                    widget.ordine.shippingTotal?.toString() ?? '0',
-                    widget.ordine.currency,
+                    _ordine.shippingTotal?.toString() ?? '0',
+                    _ordine.currency,
                   ),
                   _buildTotaleRow(
                     context,
                     context.l10n.ordersTaxes,
-                    widget.ordine.totalTax?.toString() ?? '0',
-                    widget.ordine.currency,
+                    _ordine.totalTax?.toString() ?? '0',
+                    _ordine.currency,
                   ),
                   const Divider(),
                   _buildTotaleRow(
                     context,
                     context.l10n.commonTotal,
-                    widget.ordine.total?.toString() ?? '0',
-                    widget.ordine.currency,
+                    _ordine.total?.toString() ?? '0',
+                    _ordine.currency,
                     isBold: true,
                   ),
                 ],
@@ -1145,20 +895,18 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   }
 
   Future<void> _mostraDialogCambiaStato(BuildContext context) async {
-    final controller = context
-        .findAncestorStateOfType<OrdiniGestisciPageState>()!
-        ._controller;
+    final controller = widget.controller;
     final nuovoStato = await showDialog<OrdineStatus>(
       context: context,
       builder: (context) => _CambiaStatoDialog(
-        statoCorrente: widget.ordine.status,
+        statoCorrente: _ordine.status,
         controller: controller,
       ),
     );
 
     if (nuovoStato != null && mounted) {
       final success = await controller.aggiornaStatoOrdine(
-        widget.ordine.id!,
+        _ordine.id!,
         nuovoStato,
       );
       if (success && mounted) {
@@ -1167,25 +915,20 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
           'ordini_gestisci',
           context.l10n.ordersStatusUpdated,
         );
-        // Aggiorna la UI del parent
-        context.findAncestorStateOfType<OrdiniGestisciPageState>()?.setState(
-          () {},
-        );
+        await widget.onChanged(aggiornato: controller.ordineSelezionato);
       }
     }
   }
 
   Future<void> _mostraDialogAggiungiNota(BuildContext context) async {
-    final controller = context
-        .findAncestorStateOfType<OrdiniGestisciPageState>()!
-        ._controller;
+    final controller = widget.controller;
     final nota = await showDialog<String>(
       context: context,
       builder: (context) => const _AggiungiNotaDialog(),
     );
 
     if (nota != null && nota.isNotEmpty && mounted) {
-      final success = await controller.aggiungiNota(widget.ordine.id!, nota);
+      final success = await controller.aggiungiNota(_ordine.id!, nota);
       if (success && mounted) {
         NotificationService.instance.messageBar(
           'successo',
@@ -1197,15 +940,13 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   }
 
   Future<void> _mostraDialogElimina(BuildContext context) async {
-    final controller = context
-        .findAncestorStateOfType<OrdiniGestisciPageState>()!
-        ._controller;
+    final controller = widget.controller;
     final conferma = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.l10n.ordiniConfermaEliminazione),
         content: Text(
-          context.l10n.ordersDeleteConfirm('${widget.ordine.number}'),
+          context.l10n.ordersDeleteConfirm('${_ordine.number}'),
         ),
         actions: [
           TextButton(
@@ -1225,7 +966,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
 
     if (conferma == true && mounted) {
       final success = await controller.eliminaOrdine(
-        widget.ordine.id!,
+        _ordine.id!,
         force: true,
       );
       if (success && mounted) {
@@ -1234,11 +975,9 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
           'ordini_gestisci',
           context.l10n.ordersDeleted,
         );
-        // Aggiorna la UI del parent e deseleziona
-        final parentState = context
-            .findAncestorStateOfType<OrdiniGestisciPageState>();
         controller.deselezionaOrdine();
-        parentState?.setState(() {});
+        await widget.onChanged();
+        widget.onDeleted?.call();
       }
     }
   }
