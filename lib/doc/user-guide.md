@@ -37,8 +37,8 @@ What you can do comes in two tiers:
 | Orders, customers and coupons | Inventory: stock in, adjustments, transfers, movement ledger |
 | Dashboard with sales, products and orders figures | Suppliers |
 | Barcode and QR scanner | Loyalty cards |
-| CalDAV calendars and contacts | Employees, permissions and credentials |
-| Optional AI help for product texts | Templates and print (labels, signs, reports) |
+| Optional AI help for product texts | Employees, permissions and credentials |
+| | Templates and print (labels, signs, reports) |
 | | Custom sales reports and shared dashboards |
 | | Settings synced across devices |
 
@@ -98,7 +98,6 @@ the app shows one screen at a time.
 | `Dashboard` | Sales and stock figures, reports and exports | no¹ |
 | `Settings` | App and module preferences | no |
 | `Updates` | Check for new versions | no |
-| `CalDAV` | Calendars and contacts on your CalDAV server | no |
 | `Employees` | Staff registry and permissions | yes |
 
 ¹ Custom reports and shared dashboards need MGWS.

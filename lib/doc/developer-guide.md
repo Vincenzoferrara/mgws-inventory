@@ -209,6 +209,7 @@ Pass them with `--dart-define=NAME=value`:
 |------|---------|--------|
 | `DONATIONS` | `true` | `false` hides the Ko-fi donation button in `Settings > About`. It is always hidden on iOS. |
 | `UPDATE_CHECK` | `true` | `false` turns off the "new version" notice on Android and the Velopack updater on Windows and Linux. Inside a Flatpak the updater is always off. |
+| `CALDAV` | `false` | `true` shows the `CalDAV` section in the home. It is off because the module is not finished (events are not parsed, CardDAV is missing). |
 | `DEBUG_BUILD_NR` | none | Debug build counter, set by `script/run_debug.sh`. |
 
 Recommended values:

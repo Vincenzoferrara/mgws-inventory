@@ -10,7 +10,6 @@
 <li>Scanner di barcode e QR con la fotocamera</li>
 <li>Ordini, clienti e coupon; prima della spedizione scansiona il barcode o il QR di ogni articolo per verificare che sia il prodotto giusto</li>
 <li>Dashboard con vendite, prodotti e ordini, export PDF e CSV</li>
-<li>Calendari e contatti CalDAV</li>
 <li>Aiuto IA facoltativo per le descrizioni dei prodotti, con la tua chiave API o un server Ollama locale</li>
 </ul>
 

@@ -42,7 +42,6 @@ WooCommerce shop, and what it unlocks when you also install the free
   warns you when it does not match.
 - **Dashboard** with sales, products and orders figures, PDF and CSV
   exports.
-- **Calendars and contacts** on your CalDAV server.
 - **Optional AI help** for product descriptions, categories and tags,
   with your own API key (OpenAI, Anthropic, Google, Mistral) or a local
   Ollama server.

@@ -36,6 +36,11 @@ import '../updater/updater_service.dart';
 import 'home.code.dart';
 import 'home_section_requests.dart';
 
+/// CalDAV non e' pronto (eventi senza parsing, CardDAV assente), quindi la sua
+/// card resta nascosta. Il modulo `lib/caldav/` resta nel codice e si riattiva
+/// compilando con `--dart-define=CALDAV=true`.
+const _caldavEnabled = bool.fromEnvironment('CALDAV', defaultValue: false);
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.startGuidedLogin = false});
 
@@ -317,15 +322,16 @@ class _HomeScreenState extends State<HomeScreen> {
         requiresAuth: false,
         builder: () => const UpdaterPage(),
       ),
-      _HomeSection(
-        id: 'caldav',
-        title: context.l10n.homeTitoloCaldav,
-        subtitle: context.l10n.homeSottotitoloCaldav,
-        icon: Icons.calendar_today,
-        iconColor: accents.caldav,
-        openMode: HomeTabOpenMode.singleton,
-        builder: () => const CalDavGui(),
-      ),
+      if (_caldavEnabled)
+        _HomeSection(
+          id: 'caldav',
+          title: context.l10n.homeTitoloCaldav,
+          subtitle: context.l10n.homeSottotitoloCaldav,
+          icon: Icons.calendar_today,
+          iconColor: accents.caldav,
+          openMode: HomeTabOpenMode.singleton,
+          builder: () => const CalDavGui(),
+        ),
       _HomeSection(
         id: 'dipendenti',
         title: context.l10n.homeTitoloDipendenti,

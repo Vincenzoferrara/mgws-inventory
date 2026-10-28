@@ -9,7 +9,6 @@
 | WooCommerce REST API | Products, variants, orders, coupons, customers, taxes | Always |
 | MGWS REST API (`/wp-json/mgws/v1`) | Stock, POS, loyalty, employees, suppliers, print templates, reports, dashboards, user settings | When the plugin is installed |
 | AI providers | Product descriptions, categories, tags | Only if configured; cloud ones after consent |
-| CalDAV | Calendars and contacts | Only if configured |
 | GitHub API | Update check | Desktop and Android builds from GitHub only |
 | Smart card (NFC/USB), RFID | Staff login cards, tag and barcode reading | Only if used |
 
@@ -233,8 +232,10 @@ never required for the shop to work.
 
 ## CalDAV
 
-The `CalDAV` section reads and writes calendars and contacts on the server
-the user enters. Its credentials are kept in secure storage.
+The `CalDAV` module (`lib/caldav/`) is not finished and is hidden: the home
+shows it only in builds made with `--dart-define=CALDAV=true`. When enabled,
+it connects to the server the user enters and keeps the credentials in secure
+storage.
 
 ## Update check
 
