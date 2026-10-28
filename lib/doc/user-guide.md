@@ -385,8 +385,9 @@ figures and say so.
 `Orders` lists the WooCommerce orders. Above the list, one chip per status
 shows how many orders the store has in that status; a click filters the
 list. Selecting an order shows customer, addresses, products and totals,
-and its menu changes the status, adds a note or deletes it. `New order`
-creates one.
+and its menu changes the status, adds a note or deletes it. For now orders
+are only read: new orders come from the shop and from the POS, not from this
+list.
 
 `Coupon` shows on top the totals of the whole store: coupons, active ones,
 uses and discount given. `New coupon` is in the filter panel and in the

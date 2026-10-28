@@ -14,6 +14,14 @@ import '../class_orders.dart';
 import '../../l10n/extensions.dart';
 import '../../reuse_class/datagridview/datagridview_list.gui.dart';
 
+/// Per ora gli ordini si leggono soltanto: il flusso di creazione non e'
+/// completo, quindi il pulsante `Nuovo ordine` compare solo nelle build fatte
+/// con `--dart-define=ORDER_CREATE=true`.
+const _creazioneOrdiniEnabled = bool.fromEnvironment(
+  'ORDER_CREATE',
+  defaultValue: false,
+);
+
 /// Pagina principale per la gestione degli ordini.
 ///
 /// E' una [DataGridListView] sui campi di [OrdiniGlobal]: ricerca, stato e
@@ -132,12 +140,14 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
                 onChanged: _aggiorna,
               ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _mostraDialogCreaOrdine(context),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.ordiniNuovoOrdine),
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
+      floatingActionButton: _creazioneOrdiniEnabled
+          ? FloatingActionButton.extended(
+              onPressed: () => _mostraDialogCreaOrdine(context),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.ordiniNuovoOrdine),
+              backgroundColor: Theme.of(context).primaryColor,
+            )
+          : null,
     );
   }
 

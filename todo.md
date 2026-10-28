@@ -535,8 +535,10 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
 
 - [ ] Ordini: completare flusso creazione ordine con prodotti
   - tipo: bug/app
-  - priorita: high
+  - priorita: low
   - obiettivo: evitare creazione di ordini vuoti o incompleti
+  - stato: per ora gli ordini si leggono soltanto; il pulsante `Nuovo ordine` e' nascosto dietro il flag di build `ORDER_CREATE` (default `false`) in `lib/orders/order_list/order_list.gui.dart`, il codice di `lib/orders/order_editor/` resta
+  - verifica minima: prima di riattivare il flag, un ordine creato dall'app ha prodotti, quantita e totali corretti in WooCommerce
 
 - [ ] Coupon: non simulare sempre validazione positiva
   - tipo: bug/app
