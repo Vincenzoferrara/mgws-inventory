@@ -242,6 +242,8 @@ class ProdottiCache {
         _pricingCache[productId] = getPricingInfo(aggiornato);
       }
       _onVariantsUpdated.add(productId);
+      // La lista Prodotti legge lo stesso elenco: va ridisegnata.
+      prodotti.touch();
     }
     return replaced;
   }

@@ -74,8 +74,11 @@ class DataGridField<T> {
   /// preferenze delle colonne e nei filtri, quindi non va cambiato.
   final String name;
 
-  /// Etichetta tradotta mostrata in colonne, filtri e ordinamento.
+  /// Etichetta tradotta mostrata in filtri, ordinamento e colonne.
   final String Function(AppLocalizations l10n) label;
+
+  /// Intestazione della colonna quando deve essere piu' corta di [label].
+  final String Function(AppLocalizations l10n)? columnLabel;
 
   /// Altri nomi che l'utente puo' scrivere nel campo del filtro. Valgono
   /// anche per risolvere le colonne salvate con un nome precedente.
@@ -118,6 +121,7 @@ class DataGridField<T> {
     required this.name,
     required this.label,
     required this.read,
+    this.columnLabel,
     this.type = DataGridFieldType.testo,
     this.aliases = const <String>[],
     this.serverParam,
@@ -138,9 +142,12 @@ class DataGridField<T> {
       label(l10n).toLowerCase() == input ||
       aliases.any((alias) => alias == input);
 
+  String headerLabel(AppLocalizations l10n) =>
+      (columnLabel ?? label).call(l10n);
+
   DataGridViewColumn toColumn(AppLocalizations l10n) => DataGridViewColumn(
     id: name,
-    label: label(l10n),
+    label: headerLabel(l10n),
     width: width,
     numeric: numeric,
     flexible: flexible,

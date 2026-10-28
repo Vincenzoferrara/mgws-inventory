@@ -77,8 +77,8 @@ class DataGridViewCache<T> extends ChangeNotifier {
     return List<T>.from(items);
   }
 
-  /// Elenco senza copia, per chi lo legge soltanto e subito.
-  List<T> get items => _items ?? const [];
+  /// Elenco senza copia. Chi lo modifica sul posto chiama poi [touch].
+  List<T> get items => _items ??= <T>[];
 
   /// Sostituisce l'elenco. [complete] dice se contiene tutto quello che c'e'
   /// sul server o solo le prime pagine.
@@ -130,6 +130,13 @@ class DataGridViewCache<T> extends ChangeNotifier {
       _changed();
     }
     return removed;
+  }
+
+  /// Avvisa le liste aperte che gli elementi sono stati modificati sul
+  /// posto, attraverso [items].
+  void touch() {
+    _pages.clear();
+    _changed();
   }
 
   /// I dati vanno ricaricati alla prossima apertura: l'elenco resta

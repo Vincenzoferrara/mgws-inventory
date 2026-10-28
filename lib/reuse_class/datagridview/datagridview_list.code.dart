@@ -114,7 +114,9 @@ class DataGridListController<T> extends ChangeNotifier {
   /// prodotti. Se attivo la lista lavora in memoria.
   bool Function(T item)? localWhere;
 
-  final Duration cacheTtl;
+  /// Durata dei dati in cache; null vuol dire finche' qualcuno non li segna
+  /// da ricaricare.
+  final Duration? cacheTtl;
   final int localChunkSize;
   final int localMaxPages;
 
@@ -137,6 +139,7 @@ class DataGridListController<T> extends ChangeNotifier {
   final Set<String> _checkedIds = <String>{};
   List<T> _filtered = <T>[];
   int _requestSeq = 0;
+  int _localLoadSeq = -1;
   bool _loading = false;
   bool _disposed = false;
   bool? _lastModeServer;
@@ -222,6 +225,22 @@ class DataGridListController<T> extends ChangeNotifier {
       ..clear()
       ..addAll(filters);
     _restart();
+  }
+
+  /// Rimette filtri, ricerca e ordinamento ricordati, senza caricare: va
+  /// chiamato prima che la lista parta.
+  void restore({
+    List<DataGridFilter>? filters,
+    String? search,
+    DataGridSort? sort,
+  }) {
+    if (filters != null) {
+      _filters
+        ..clear()
+        ..addAll(filters);
+    }
+    if (search != null) _search = search;
+    if (sort != null) _sort = sort;
   }
 
   void clearFilters() {
@@ -404,12 +423,20 @@ class DataGridListController<T> extends ChangeNotifier {
       _applyLocal(keepPage: true);
       return;
     }
+    // L'elenco sta gia' arrivando: un filtro cambiato nel frattempo si
+    // applica a quello che c'e', e il caricamento in corso continua invece
+    // di ripartire dalla prima pagina.
+    if (!force && _localLoadSeq == _requestSeq && _loading) {
+      _applyLocal(keepPage: true);
+      return;
+    }
     // Un elenco gia' completo e solo "sporco" resta visibile mentre arriva
     // quello nuovo; uno incompleto si mostra comunque per non lasciare la
     // griglia vuota.
     if (cache.hasItems) _applyLocal(keepPage: true);
 
     final seq = ++_requestSeq;
+    _localLoadSeq = seq;
     final previous = cache.read();
     final loaded = <T>[];
     _setLoading(true);
@@ -494,6 +521,9 @@ class DataGridListController<T> extends ChangeNotifier {
         return;
       }
     }
+    // Sparita da un elenco completo: e' stata eliminata. Durante il
+    // caricamento invece potrebbe solo non essere ancora arrivata.
+    if (cache.isComplete) selected.value = null;
   }
 
   void _onCacheChanged() {

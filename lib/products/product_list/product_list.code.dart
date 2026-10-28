@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 
 import '../class_products.dart';
 import '../../reuse_class/class_formtter.dart';
-import '../product_filters.dart';
+import '../../reuse_class/datagridview/datagridview_filters.dart';
 import '../../reuse_class/logic/global_pagination_controller.dart';
 import '../../reuse_class/logic/memory_usage.dart';
 import '../product_cache.dart';
@@ -25,78 +25,6 @@ import '../../login/mgws/query/query_mgws_inventory.dart';
 // Re-export della cache prodotti: consumer della .code.dart accedono a
 // ProdottiCache (pricing) e ProdottoPricingInfo senza import diretti.
 export '../product_cache.dart' show ProdottiCache, ProdottoPricingInfo;
-
-/// Definisce i tipi di ordinamento possibili per la lista dei prodotti.
-enum OrdinamentoProdotti {
-  nessuno, // Ordine predefinito
-  nomeCrescente, // Dalla A alla Z
-  nomeDecrescente, // Dalla Z alla A
-  prezzoCrescente, // Dal più economico
-  prezzoDecrescente, // Dal più costoso
-}
-
-enum ProductGridColumnId {
-  preview,
-  nome,
-  sku,
-  barcode,
-  categoria,
-  prezzo,
-  sconto,
-  disponibilita,
-  quantita,
-  varianti,
-  stato,
-  marca,
-}
-
-extension ProductGridColumnIdX on ProductGridColumnId {
-  String get storageKey => name;
-}
-
-/// Etichetta tradotta di una colonna della griglia prodotti.
-///
-/// Fuori dall'estensione perche' la traduzione ha bisogno delle localizzazioni,
-/// che l'enum non puo' raggiungere.
-String productGridColumnLabel(
-  AppLocalizations l10n,
-  ProductGridColumnId colonna,
-) => switch (colonna) {
-  ProductGridColumnId.preview => l10n.prodottiColonnaAnteprima,
-  ProductGridColumnId.nome => l10n.prodottiColonnaNome,
-  ProductGridColumnId.sku => l10n.prodottiColonnaSkuV,
-  ProductGridColumnId.barcode => l10n.prodottiColonnaBarcodeV,
-  ProductGridColumnId.categoria => l10n.prodottiColonnaCategoria,
-  ProductGridColumnId.prezzo => l10n.prodottiColonnaPrezzo,
-  ProductGridColumnId.sconto => l10n.prodottiColonnaSconto,
-  ProductGridColumnId.disponibilita => l10n.prodottiColonnaDisponibilitaV,
-  ProductGridColumnId.quantita => l10n.prodottiColonnaQuantitaV,
-  ProductGridColumnId.varianti => l10n.prodottiColonnaVarianti,
-  ProductGridColumnId.stato => l10n.prodottiColonnaStatoV,
-  ProductGridColumnId.marca => l10n.prodottiColonnaMarca,
-};
-
-const List<ProductGridColumnId> defaultProductGridColumns =
-    <ProductGridColumnId>[
-      ProductGridColumnId.preview,
-      ProductGridColumnId.nome,
-      ProductGridColumnId.sku,
-      ProductGridColumnId.barcode,
-      ProductGridColumnId.categoria,
-      ProductGridColumnId.prezzo,
-      ProductGridColumnId.sconto,
-      ProductGridColumnId.disponibilita,
-      ProductGridColumnId.quantita,
-      ProductGridColumnId.varianti,
-      ProductGridColumnId.stato,
-    ];
-
-const List<ProductGridColumnId> defaultMobileProductGridColumns =
-    <ProductGridColumnId>[
-      ProductGridColumnId.preview,
-      ProductGridColumnId.nome,
-      ProductGridColumnId.sku,
-    ];
 
 typedef ProductPageLoader =
     Future<List<ProdottoGlobal>> Function({
@@ -119,17 +47,20 @@ typedef ProductLoadProgress = void Function(List<ProdottoGlobal> products);
 
 /// Classe per la gestione della logica dei prodotti
 class ProdottiGestioneController {
-  static List<FiltroProdotto> _sharedFiltriProdotto = <FiltroProdotto>[];
+  /// Filtri avanzati della lista Prodotti ricordati fra un'apertura e
+  /// l'altra, quando l'impostazione "ricorda i filtri" e' attiva.
+  static List<DataGridFilter> sharedFiltriProdotto = <DataGridFilter>[];
   static int _activeInstances = 0;
 
-  List<ProdottoGlobal> _prodotti = [];
+  /// Elenco completo dei prodotti: e' lo stesso della cache condivisa che la
+  /// lista Prodotti filtra e pagina. Le modifiche sul posto finiscono con
+  /// [_publishSharedCache] o [_markSharedDirty], che avvisano la lista.
+  List<ProdottoGlobal> get _prodotti => ProdottiCache.prodotti.items;
   List<ProdottoGlobal> _prodottiFiltrati = [];
   ProdottoGlobal? _prodottoSelezionato;
   final Set<int> _selectedProductIds = <int>{};
   VarianteProductGlobal? _varianteSelezionata;
   String _filtroRicerca = '';
-  final List<FiltroProdotto> _filtriProdottoAttivi = <FiltroProdotto>[];
-  OrdinamentoProdotti _ordinamentoCorrente = OrdinamentoProdotti.nessuno;
 
   final Map<String, String> _filtriVariantiAttivi = {};
   List<VarianteProductGlobal> _variantiFiltrate = [];
@@ -240,22 +171,27 @@ class ProdottiGestioneController {
     ProdottiCache.replaceProducts(_prodotti);
   }
 
+  /// Sostituisce l'elenco; [complete] e' falso mentre arrivano le pagine.
+  void _setProdotti(List<ProdottoGlobal> prodotti, {bool complete = true}) {
+    ProdottiCache.prodotti.replace(prodotti, complete: complete);
+  }
+
+  /// Dopo una modifica fatta qui: la lista aperta si ridisegna subito con
+  /// l'elenco modificato, e alla prossima apertura i prodotti si
+  /// riscaricano dal server.
   void _markSharedDirty() {
     ProdottiCache.markProductsDirty();
-    ProdottiCache.clearProducts();
     ProdottiCache.clearVariants();
   }
 
   /// Se true, mostra solo le varianti con quantità > 0.
   bool _filtraSoloInStock = false;
-  bool _nascondiProdottiEsauriti = false;
 
   // Getters
   List<ProdottoGlobal> get prodotti => _prodottiFiltrati;
   ProdottoGlobal? get prodottoSelezionato => _prodottoSelezionato;
   VarianteProductGlobal? get varianteSelezionata => _varianteSelezionata;
   String get filtroRicerca => _filtroRicerca;
-  OrdinamentoProdotti get ordinamentoCorrente => _ordinamentoCorrente;
   List<VarianteProductGlobal> get variantiFiltrate => _variantiFiltrate;
   bool get hasFiltriVariantiAttivi => _filtriVariantiAttivi.isNotEmpty;
   Map<String, String> get filtriVariantiAttivi =>
@@ -269,17 +205,11 @@ class ProdottiGestioneController {
   }
 
   bool get filtraSoloInStock => _filtraSoloInStock;
-  bool get nascondiProdottiEsauriti => _nascondiProdottiEsauriti;
 
   int get numeroProdotti => _prodottiFiltrati.length;
   bool get hasProdottoSelezionato => _prodottoSelezionato != null;
   bool get hasVarianteSelezionata => _varianteSelezionata != null;
-  bool get hasFiltroAttivo =>
-      _filtroRicerca.isNotEmpty ||
-      _filtriProdottoAttivi.isNotEmpty ||
-      _nascondiProdottiEsauriti;
-  List<FiltroProdotto> get filtriProdottoAttivi =>
-      List.unmodifiable(_filtriProdottoAttivi);
+  bool get hasFiltroAttivo => _filtroRicerca.isNotEmpty;
   Set<int> get selectedProductIds => Set.unmodifiable(_selectedProductIds);
   List<ProdottoGlobal> get selectedProducts => _prodotti
       .where((p) => p.id != null && _selectedProductIds.contains(p.id))
@@ -444,19 +374,25 @@ class ProdottiGestioneController {
   /// alla pulizia della cache: cosi la RAM resta legata alla pagina corrente
   /// e, tornando su una pagina, le varianti vengono riscaricate fresche.
   void staccaVariantiFuori(Set<int> keepIds) {
-    void stacca(List<ProdottoGlobal> lista) {
+    int stacca(List<ProdottoGlobal> lista) {
+      var staccati = 0;
       for (int i = 0; i < lista.length; i++) {
         final prodotto = lista[i];
         final id = prodotto.id;
         if (id == null || keepIds.contains(id)) continue;
         if (prodotto.varianti?.isNotEmpty ?? false) {
           lista[i] = prodotto.copyWith(varianti: const []);
+          staccati++;
         }
       }
+      return staccati;
     }
 
-    stacca(_prodotti);
+    final staccati = stacca(_prodotti);
     stacca(_prodottiFiltrati);
+    // Solo se e' cambiato qualcosa: la lista ridisegnata richiama questo
+    // metodo, e un avviso a vuoto lo farebbe girare all'infinito.
+    if (staccati > 0) ProdottiCache.prodotti.touch();
   }
 
   /// Riscarica dal server i prodotti della pagina visibile e ne invalida le
@@ -774,133 +710,9 @@ class ProdottiGestioneController {
     _applicaFiltroEOrdinamento();
   }
 
-  void addFiltroProdotto({
-    required CampoFiltroProdotto campo,
-    required OperatoreFiltroProdotto operatore,
-    required String valoreInput,
-  }) {
-    final valori = valoreInput
-        .split(RegExp(r'[,;]'))
-        .map((v) => v.trim())
-        .where((v) => v.isNotEmpty)
-        .toList();
-    if (valori.isEmpty) return;
-
-    _resetVariantCache();
-    _filtriProdottoAttivi.add(
-      FiltroProdotto(campo: campo, operatore: operatore, valori: valori),
-    );
-    _sharedFiltriProdotto = List<FiltroProdotto>.from(_filtriProdottoAttivi);
-    _applicaFiltroEOrdinamento();
-    _logAppliedFilters(trigger: 'add');
-  }
-
-  void removeFiltroProdottoAt(int index) {
-    if (index < 0 || index >= _filtriProdottoAttivi.length) return;
-    _resetVariantCache();
-    _filtriProdottoAttivi.removeAt(index);
-    _sharedFiltriProdotto = List<FiltroProdotto>.from(_filtriProdottoAttivi);
-    _applicaFiltroEOrdinamento();
-    _logAppliedFilters(trigger: 'remove');
-  }
-
-  void clearFiltriProdotto() {
-    _resetVariantCache();
-    _filtriProdottoAttivi.clear();
-    _sharedFiltriProdotto = <FiltroProdotto>[];
-    _applicaFiltroEOrdinamento();
-    _logAppliedFilters(trigger: 'clear');
-  }
-
-  void setPersistedAdvancedFiltersEnabled(bool enabled) {
-    _resetVariantCache();
-    if (enabled) {
-      _filtriProdottoAttivi
-        ..clear()
-        ..addAll(_sharedFiltriProdotto);
-    } else {
-      _filtriProdottoAttivi.clear();
-    }
-    _applicaFiltroEOrdinamento();
-  }
-
-  List<String> getFilterValueSuggestions(
-    CampoFiltroProdotto campo,
-    String query, {
-    int limit = 60,
-  }) {
-    return ProdottoFilterEngine.getFilterValueSuggestions(
-      _prodotti,
-      campo,
-      query,
-      limit: limit,
-    );
-  }
-
-  void _logAppliedFilters({required String trigger}) {
-    final expr = _filtriProdottoAttivi.isEmpty
-        ? '(none)'
-        : _filtriProdottoAttivi
-              .map(
-                (f) =>
-                    // nel log vanno gli slug dei campi: le etichette cambiano con la
-                    // lingua e renderebbero i log non confrontabili.
-                    '${f.campo.name}${_opSymbol(f.operatore)}${f.valori.join('|')}',
-              )
-              .join(' AND ');
-    log.d(
-      '[filters] applied trigger=$trigger expr="$expr" matched=${_prodottiFiltrati.length}/${_prodotti.length}',
-    );
-  }
-
-  String _opSymbol(OperatoreFiltroProdotto op) {
-    switch (op) {
-      case OperatoreFiltroProdotto.contiene:
-        return '~';
-      case OperatoreFiltroProdotto.nonContiene:
-        return '!~';
-      case OperatoreFiltroProdotto.contieneSensibile:
-        return '~!';
-      case OperatoreFiltroProdotto.nonContieneSensibile:
-        return '!~!';
-      case OperatoreFiltroProdotto.ugualeEsatto:
-        return '==';
-      case OperatoreFiltroProdotto.diversoEsatto:
-        return '!==';
-      case OperatoreFiltroProdotto.iniziaCon:
-        return '^';
-      case OperatoreFiltroProdotto.finisceCon:
-        return r'$';
-      case OperatoreFiltroProdotto.inElenco:
-        return 'IN';
-      case OperatoreFiltroProdotto.nonInElenco:
-        return 'NOT IN';
-      case OperatoreFiltroProdotto.uguale:
-        return '=';
-      case OperatoreFiltroProdotto.diverso:
-        return '!=';
-      case OperatoreFiltroProdotto.maggioreUguale:
-        return '>=';
-      case OperatoreFiltroProdotto.maggiore:
-        return '>';
-      case OperatoreFiltroProdotto.minoreUguale:
-        return '<=';
-      case OperatoreFiltroProdotto.minore:
-        return '<';
-      case OperatoreFiltroProdotto.tra:
-        return 'BETWEEN';
-    }
-  }
-
   void cancellaFiltro() {
     _resetVariantCache();
     _filtroRicerca = '';
-    _applicaFiltroEOrdinamento();
-  }
-
-  void setOrdinamento(OrdinamentoProdotti nuovoOrdinamento) {
-    _resetVariantCache();
-    _ordinamentoCorrente = nuovoOrdinamento;
     _applicaFiltroEOrdinamento();
   }
 
@@ -948,13 +760,6 @@ class ProdottiGestioneController {
     _applicaFiltriVarianti();
   }
 
-  void setNascondiProdottiEsauriti(bool value) {
-    if (_nascondiProdottiEsauriti == value) return;
-    _resetVariantCache();
-    _nascondiProdottiEsauriti = value;
-    _applicaFiltroEOrdinamento();
-  }
-
   /// Filtra la lista delle varianti in base a TUTTI i filtri attivi (attributi + disponibilità).
   void _applicaFiltriVarianti() {
     if (_prodottoSelezionato == null) {
@@ -995,62 +800,28 @@ class ProdottiGestioneController {
     }
   }
 
-  /// Applica il filtro di ricerca e l'ordinamento alla lista dei prodotti
+  /// Applica la ricerca rapida alla lista dei prodotti. Filtri avanzati e
+  /// ordinamento della lista Prodotti sono della griglia
+  /// (`DataGridListController`); qui resta la ricerca usata da chi riusa il
+  /// controller senza griglia, come il catalogo del carico rapido.
   void _applicaFiltroEOrdinamento() {
-    // 1. Applica il filtro
-    _prodottiFiltrati = _prodotti.where((prodotto) {
-      if (_nascondiProdottiEsauriti && !prodotto.inStock) return false;
-      return _matchesLegacyTextFilter(prodotto) &&
-          _matchesAdvancedFilters(prodotto);
-    }).toList();
-
-    // 2. Applica l'ordinamento
-    switch (_ordinamentoCorrente) {
-      case OrdinamentoProdotti.nomeCrescente:
-        _prodottiFiltrati.sort(
-          (a, b) => (a.nome?.toLowerCase() ?? '').compareTo(
-            b.nome?.toLowerCase() ?? '',
-          ),
-        );
-        break;
-      case OrdinamentoProdotti.nomeDecrescente:
-        _prodottiFiltrati.sort(
-          (a, b) => (b.nome?.toLowerCase() ?? '').compareTo(
-            a.nome?.toLowerCase() ?? '',
-          ),
-        );
-        break;
-      case OrdinamentoProdotti.prezzoCrescente:
-        _prodottiFiltrati.sort(
-          (a, b) => (a.prezzoScontato ?? a.prezzoNormale ?? 0).compareTo(
-            b.prezzoScontato ?? b.prezzoNormale ?? 0,
-          ),
-        );
-        break;
-      case OrdinamentoProdotti.prezzoDecrescente:
-        _prodottiFiltrati.sort(
-          (a, b) => (b.prezzoScontato ?? b.prezzoNormale ?? 0).compareTo(
-            a.prezzoScontato ?? a.prezzoNormale ?? 0,
-          ),
-        );
-        break;
-      case OrdinamentoProdotti.nessuno:
-        break;
-    }
+    _prodottiFiltrati = _filtroRicerca.isEmpty
+        ? List<ProdottoGlobal>.from(_prodotti)
+        : _prodotti
+              .where(
+                (prodotto) => DataGridFilterEngine.matchesQuickSearch(
+                  prodotto,
+                  ProdottoGlobal.gridFields,
+                  _filtroRicerca,
+                ),
+              )
+              .toList();
 
     if (_prodottoSelezionato != null &&
         !_prodottiFiltrati.any((p) => p.id == _prodottoSelezionato!.id)) {
       _prodottoSelezionato = null;
       _varianteSelezionata = null;
     }
-  }
-
-  bool _matchesLegacyTextFilter(ProdottoGlobal prodotto) {
-    return ProdottoFilterEngine.matchesQuickSearch(prodotto, _filtroRicerca);
-  }
-
-  bool _matchesAdvancedFilters(ProdottoGlobal prodotto) {
-    return ProdottoFilterEngine.matchesFilters(prodotto, _filtriProdottoAttivi);
   }
 
   /// Prefetch delle varianti limitato alla finestra richiesta: se
@@ -1083,7 +854,6 @@ class ProdottiGestioneController {
       _lastLoadWarning = null;
 
       if (!forceRefresh && _canUseSharedCache()) {
-        _prodotti = ProdottiCache.readProducts() ?? <ProdottoGlobal>[];
         _riattaccaVariantiDaCache(_prodotti);
         _applicaFiltroEOrdinamento();
         onProgress?.call(List<ProdottoGlobal>.unmodifiable(_prodottiFiltrati));
@@ -1092,7 +862,8 @@ class ProdottiGestioneController {
       }
 
       if (forceRefresh) {
-        ProdottiCache.clearProducts();
+        // L'elenco resta visibile finche' non arriva il primo blocco nuovo.
+        ProdottiCache.markProductsDirty();
         ProdottiCache.clearVariants();
       }
 
@@ -1110,7 +881,7 @@ class ProdottiGestioneController {
           if (chunk.isEmpty) break;
           loaded.addAll(chunk);
           _riattaccaVariantiDaCache(loaded);
-          _prodotti = List<ProdottoGlobal>.from(loaded);
+          _setProdotti(loaded, complete: false);
           _applicaFiltroEOrdinamento();
           onProgress?.call(
             List<ProdottoGlobal>.unmodifiable(_prodottiFiltrati),
@@ -1128,18 +899,17 @@ class ProdottiGestioneController {
 
       if (loaded.isNotEmpty) {
         _riattaccaVariantiDaCache(loaded);
-        _prodotti = List<ProdottoGlobal>.from(loaded);
+        _setProdotti(loaded);
         log.i('✅ Caricati ${_prodotti.length} prodotti da WooCommerce');
         if (partial) {
           _lastLoadWarning = (l10n) => l10n.productsLoadPartial;
         }
         _publishSharedCache();
       } else if (previousLocal.isNotEmpty) {
-        _prodotti = previousLocal;
+        _setProdotti(previousLocal);
         _lastLoadWarning = (l10n) => l10n.productsServerUnreachableUsingLocal;
-        _publishSharedCache();
       } else {
-        _prodotti = <ProdottoGlobal>[];
+        _setProdotti(<ProdottoGlobal>[]);
         _lastLoadWarning = (l10n) => l10n.productsServerUnreachableNone;
       }
 
@@ -1153,81 +923,39 @@ class ProdottiGestioneController {
       log.e('❌ Errore generale caricamento prodotti', e);
       log.e('   Dettagli errore: ${e.toString()}');
       if (previousLocal.isNotEmpty) {
-        _prodotti = previousLocal;
+        _setProdotti(previousLocal);
         _lastLoadWarning = (l10n) => l10n.productsLoadErrorUsingCache;
-        _publishSharedCache();
       } else {
-        _prodotti = <ProdottoGlobal>[];
+        _setProdotti(<ProdottoGlobal>[]);
         _lastLoadWarning = (l10n) => l10n.productsLoadError;
       }
       _applicaFiltroEOrdinamento();
     }
   }
 
-  Future<PaginatedResult<ProdottoGlobal>> caricaProdottiPaginati({
+  /// Una pagina di prodotti dal server, con le varianti gia' in cache
+  /// riattaccate. E' il `loadPage` della lista Prodotti: la griglia chiede le
+  /// pagine una dopo l'altra e tiene l'elenco nella cache condivisa.
+  Future<PaginatedResult<ProdottoGlobal>> caricaPaginaProdotti({
     required int page,
     required int perPage,
-    bool append = false,
+    bool forceRefresh = false,
   }) async {
-    try {
-      _lastLoadWarning = null;
-      final hasLocalProducts =
-          _prodotti.isNotEmpty || ProdottiCache.hasProducts;
-      if (!hasLocalProducts) {
-        await caricaProdotti();
-      }
-      _applicaFiltroEOrdinamento();
-
-      final total = _prodottiFiltrati.length;
-      final totalPages = total == 0 ? 1 : (total / perPage).ceil();
-      final safePage = page < 1
-          ? 1
-          : page > totalPages
-          ? totalPages
-          : page;
-      final start = total == 0 ? 0 : (safePage - 1) * perPage;
-      final end = total == 0 ? 0 : (start + perPage).clamp(0, total);
-      final items = total == 0
-          ? <ProdottoGlobal>[]
-          : _prodottiFiltrati.sublist(start, end);
-
-      return PaginatedResult<ProdottoGlobal>(
-        items: List<ProdottoGlobal>.from(items),
-        page: safePage,
+    if (page == 1 && forceRefresh) ProdottiCache.clearVariants();
+    final chunk = List<ProdottoGlobal>.from(
+      await _productPageLoader(
+        page: page,
         perPage: perPage,
-        totalItems: total,
-        totalPages: totalPages,
-        hasMore: safePage < totalPages,
-      );
-    } catch (e) {
-      log.e('❌ Errore caricamento prodotti paginato', e);
-      if (_prodotti.isNotEmpty) {
-        _lastLoadWarning = (l10n) => l10n.productsServerUnreachableUsingLocal;
-        _applicaFiltroEOrdinamento();
-        final total = _prodottiFiltrati.length;
-        final totalPages = total == 0 ? 1 : (total / perPage).ceil();
-        final safePage = page < 1
-            ? 1
-            : page > totalPages
-            ? totalPages
-            : page;
-        final start = total == 0 ? 0 : (safePage - 1) * perPage;
-        final end = total == 0 ? 0 : (start + perPage).clamp(0, total);
-        return PaginatedResult<ProdottoGlobal>(
-          items: List<ProdottoGlobal>.from(
-            total == 0
-                ? <ProdottoGlobal>[]
-                : _prodottiFiltrati.sublist(start, end),
-          ),
-          page: safePage,
-          perPage: perPage,
-          totalItems: total,
-          totalPages: totalPages,
-          hasMore: safePage < totalPages,
-        );
-      }
-      rethrow;
-    }
+        includeAllStatus: true,
+      ),
+    );
+    _riattaccaVariantiDaCache(chunk);
+    return PaginatedResult<ProdottoGlobal>(
+      items: chunk,
+      page: page,
+      perPage: perPage,
+      hasMore: chunk.length >= perPage,
+    );
   }
 
   Future<bool> eliminaProdotto(int prodottoId) async {

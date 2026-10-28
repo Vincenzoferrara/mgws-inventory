@@ -2,23 +2,18 @@ import '../../l10n/error_text.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:multi_split_view/multi_split_view.dart';
 import 'product_list.code.dart';
 import '../class_products.dart';
-import '../product_filters.dart';
+import '../product_grid_fields.dart';
 import '../product_editor/product_editor.gui.dart';
 import 'product_list_view.gui.dart';
 import '../../theme/theme.dart';
 import '../../notification/notification_service.dart';
 import '../../settings/app_settings.dart';
 import '../../settings/machine_ui_preferences.dart';
-import '../../reuse_class/gui/global_pagination_bar.dart';
-import '../../reuse_class/logic/global_pagination_controller.dart';
 import '../../reuse_class/logic/memory_usage.dart';
-import '../../reuse_class/gui/searchable_checkbox_dialog.dart';
 import '../../reuse_class/gui/notification_recap_dialog.dart';
-import '../../reuse_class/datagridview/datagridview.code.dart';
-import '../../reuse_class/datagridview/datagridview.gui.dart';
+import '../../reuse_class/datagridview/datagridview_list.gui.dart';
 import '../../reuse_class/datagridview/datagridview_image_preview.dart';
 import '../../reuse_class/image_url_resolver.dart';
 import '../../log_viewer/app_logger.dart';
@@ -30,24 +25,7 @@ import '../../report/print_job.dart';
 // Costanti
 // ---------------------------------------------------------------------------
 
-const double _kDesktopBreakpoint = 800;
-const double _kCardRadius = 18;
-const double _kControlGap = 8;
-
-/// Inset orizzontale dei controlli che toccano il bordo dello schermo.
-///
-/// La sezione prodotti e a filo: niente padding esterno, niente cornice. Restano
-/// pero' 6px, perche' `DataTable2` centra la colonna checkbox in
-/// `horizontalMargin / 2`, cioe' 6px: senza questo inset la toolbar del filtro
-/// risulterebbe 6px a sinistra della checkbox e le due cose sembrerebbero
-/// disallineate.
-const double _kEdgeInset = 6;
-
-/// Inset verticale delle barre agganciate al bordo.
-///
-/// Non e' zero perche' la toolbar `Filtro` chiusa e alta quanto un `titleSmall`
-/// (~20px): a zero scenderebbe sotto i 48dp di tap target minimi di Android.
-const double _kEdgeInsetVertical = 4;
+const double _kControlGap = kDataGridControlGap;
 
 // TEST DISATTIVATO 1: field della colonna checkbox nativa.
 // const String _kFieldSelection = '__selection';
@@ -183,16 +161,18 @@ class ProdottiGestisciPage extends StatefulWidget {
   ProdottiGestisciPageState createState() => ProdottiGestisciPageState();
 }
 
+/// La lista Prodotti e' una [DataGridListView] sui campi di [ProdottoGlobal]:
+/// filtri, ricerca, ordinamento, colonne e paginazione sono della libreria.
+/// Qui restano le cose che solo i prodotti hanno: varianti caricate per la
+/// pagina visibile, prezzi calcolati dalle varianti, "nascondi esauriti",
+/// stampa etichette e il selettore della cassa.
 class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     with AutomaticKeepAliveClientMixin<ProdottiGestisciPage> {
   // ── Controller e settings ────────────────────────────────────────────────
   final _controller = ProdottiGestioneController();
   final _appSettings = AppSettings();
   final _machineUiPreferences = MachineUiPreferences();
-  late final MultiSplitViewController _splitViewController;
-  final _paginationController = GlobalPaginationController<ProdottoGlobal>();
-  final _scrollController = ScrollController();
-  final _gridKey = GlobalKey<_ProductsGridState>();
+  late final DataGridListController<ProdottoGlobal> _listController;
   final ValueNotifier<ProdottoGlobal?> _selectedProductNotifier =
       ValueNotifier<ProdottoGlobal?>(null);
   final ValueNotifier<bool> _selectedProductVariantsLoading =
@@ -208,24 +188,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   /// Prodotti semplici selezionati per la cassa (senza varianti).
   final Set<int> _selectedCassaSimpleProductIds = <int>{};
 
-  // ── Stato colonne ────────────────────────────────────────────────────────
-  // Unico stato delle colonne: alimenta sia il preselezionato del selettore
-  // sia le colonne effettivamente renderizzate dalla griglia.
-  Set<ProductGridColumnId> _visibleColumns = defaultProductGridColumns.toSet();
-  double _productPaneRatio =
-      MachineUiPreferences.defaultProductsManageSplitRatio;
-
-  // ── Busy overlay ─────────────────────────────────────────────────────────
-  int _busyDepth = 0;
-
-  /// `null` mostra il testo di caricamento generico.
-  String? _busyMessage;
-  bool _productsLoading = false;
+  bool _settingsReady = false;
+  bool _nascondiEsauriti = false;
   bool _disposed = false;
 
-  bool get _isBusy => _busyDepth > 0;
   bool get _alive => mounted && !_disposed;
-  List<ProdottoGlobal> get _visibleProducts => _paginationController.items;
   int get _selectedCassaVariantsCount =>
       _selectedCassaVariantIdsByProductId.values.fold<int>(
         0,
@@ -233,13 +200,11 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       ) +
       _selectedCassaSimpleProductIds.length;
 
-  StreamSubscription<int>? _variantsUpdateSubscription;
-  Timer? _cacheRefreshDebounce;
   Timer? _prefetchDebounce;
 
-  /// Contatore dei prefetch di finestra in corso: la barra rossa in alto
-  /// mostra il refill "in tempo reale" della cache varianti (cambio pagina,
-  /// filtro, dropdown, apertura iniziale) oltre al caricamento prodotti.
+  /// Contatore dei prefetch di finestra in corso: la barra in alto mostra il
+  /// riempimento "in tempo reale" della cache varianti (cambio pagina,
+  /// filtro, righe per pagina, apertura iniziale) oltre al caricamento.
   int _cacheRefillDepth = 0;
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -247,38 +212,114 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   @override
   void initState() {
     super.initState();
-    _splitViewController = MultiSplitViewController(
-      areas: _splitAreasForRatio(_productPaneRatio),
+    _listController = DataGridListController<ProdottoGlobal>(
+      fields: ProdottoGlobal.gridFields,
+      idOf: _idOf,
+      loadPage: _loadPage,
+      cacheKey: ProdottiCache.cacheKey,
+      // I filtri dei prodotti guardano anche dentro le varianti, che il
+      // server non sa filtrare: la lista lavora sempre sull'elenco completo.
+      serverFiltering: false,
+      // Il controller prodotti segna la cache da ricaricare quando modifica
+      // qualcosa: fino ad allora l'elenco vale senza scadenza, come prima.
+      cacheTtl: null,
     );
-    _scrollController.addListener(_onScroll);
-    // Le varianti agganciate dal datagrid cache cambiano i valori Prezzo/Sconto
-    // della griglia: riallinea lo snapshot paginato e ricompone le righe.
-    // Durante il prefetch la cache emette un evento per ogni chunk: un refresh
-    // immediato per ciascuno comporrebbe la griglia ~86 volte di fila e
-    // riporterebbe l'utente alla prima pagina. Il debounce raggruppa il burst
-    // in un unico refresh a fine caricamento.
-    _variantsUpdateSubscription = ProdottiCache.onVariantsUpdated.listen(
-      (_) => _scheduleCacheRefresh(),
-    );
-    _loadProducts();
-    _initSettings();
+    _listController.addListener(_onListChanged);
+    unawaited(_initSettings());
   }
 
-  void _scheduleCacheRefresh() {
-    if (_disposed) return;
-    // Throttle, non debounce: le varianti arrivano una dopo l'altra a pochi
-    // ms di distanza, e un debounce che riparte a ogni arrivo ridisegnava la
-    // griglia solo dopo l'ultima. Cosi le righe si riempiono man mano, al
-    // massimo ogni 300 ms, e l'ultimo arrivo resta coperto dal timer attivo.
-    if (_cacheRefreshDebounce?.isActive ?? false) return;
-    _cacheRefreshDebounce = Timer(const Duration(milliseconds: 300), _refresh);
+  @override
+  void dispose() {
+    _disposed = true;
+    _prefetchDebounce?.cancel();
+    _listController.removeListener(_onListChanged);
+    _listController.dispose();
+    _selectedProductNotifier.dispose();
+    _selectedProductVariantsLoading.dispose();
+    _cassaSelectionVersion.dispose();
+    _controller.dispose();
+    super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  static String _idOf(ProdottoGlobal product) => '${product.id ?? 0}';
+
+  static bool _soloDisponibili(ProdottoGlobal product) => product.inStock;
+
+  Future<void> _initSettings() async {
+    await _appSettings.init();
+    await _machineUiPreferences.init();
+    if (!_alive) return;
+    _nascondiEsauriti = _appSettings.hideOutOfStockProducts;
+    _listController.localWhere = _nascondiEsauriti ? _soloDisponibili : null;
+    if (_appSettings.persistProductFilters) {
+      _listController.restore(
+        filters: ProdottiGestioneController.sharedFiltriProdotto,
+      );
+    }
+    setState(() => _settingsReady = true);
+  }
+
+  Future<PaginatedResult<ProdottoGlobal>> _loadPage(
+    DataGridPageRequest request,
+  ) {
+    return _controller.caricaPaginaProdotti(
+      page: request.page,
+      perPage: request.perPage,
+      forceRefresh: request.forceRefresh,
+    );
+  }
+
+  /// La lista e' cambiata: la selezione multipla torna al controller prodotti
+  /// (stampa, eliminazione e modifica in massa la leggono da li') e i filtri
+  /// avanzati restano ricordati per la prossima apertura.
+  void _onListChanged() {
+    if (!_alive) return;
+    if (!widget.modalitaCassa) {
+      _controller.setBulkSelectionByIds(
+        _listController.checkedIds.map(int.tryParse).whereType<int>(),
+      );
+    }
+    ProdottiGestioneController.sharedFiltriProdotto = List<DataGridFilter>.of(
+      _listController.filters,
+    );
+    setState(() {});
+  }
+
+  Future<void> _setHideOutOfStockProducts(
+    bool value, {
+    bool persist = true,
+  }) async {
+    setState(() => _nascondiEsauriti = value);
+    _listController.localWhere = value ? _soloDisponibili : null;
+    _listController.refresh();
+    if (persist) await _appSettings.setHideOutOfStockProducts(value);
+  }
+
+  Future<void> _reloadProducts() => _listController.reload(force: true);
+
+  void _onLoadError(BuildContext context, DataGridLoadError error) {
+    final l10n = context.l10n;
+    NotificationService.instance.messageBar(
+      'warning',
+      'prodotti_gestisci',
+      error.partial
+          ? l10n.productsLoadPartial
+          : error.usingCache
+          ? l10n.productsServerUnreachableUsingLocal
+          : l10n.productsServerUnreachableNone,
+    );
+  }
+
+  // ── Varianti della pagina visibile ───────────────────────────────────────
 
   // Pre-fetch varianti della pagina visibile (valore esatto del dropdown),
-  // separato dal debounce di ricomposizione della griglia. Parte da ogni
-  // sincronizzazione di paginazione: caricamento iniziale, cambio pagina,
-  // cambio dropdown, applicazione filtro, scroll infinito.
-  void _schedulePagePrefetch() {
+  // separato dal ridisegno della griglia. Parte da ogni cambio delle righe
+  // visibili: caricamento iniziale, cambio pagina, cambio righe per pagina,
+  // applicazione filtro, scroll infinito.
+  void _schedulePagePrefetch(List<ProdottoGlobal> _) {
     if (_disposed) return;
     _prefetchDebounce?.cancel();
     _prefetchDebounce = Timer(
@@ -293,7 +334,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   void _prefetchCurrentWindow() {
     if (!_alive) return;
-    final items = _paginationController.items;
+    final items = _listController.visibleItems;
     if (items.isEmpty) return;
     // Limita la cache varianti alla sola finestra visibile (come la web GUI
     // di WordPress): le voci fuori pagina vengono rimosse, così la RAM resta
@@ -316,17 +357,14 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     final firma = (keepIds.toList()..sort()).join(',');
     final finestraNuova = firma != _ultimaFinestraAggiornata;
     _ultimaFinestraAggiornata = firma;
-    final aggiornaDalServer = finestraNuova && !_productsLoading;
+    final aggiornaDalServer = finestraNuova && !_listController.isLoading;
 
     _cacheRefillDepth++;
     setState(() {});
     unawaited(
       Future<void>(() async {
         if (aggiornaDalServer) {
-          final aggiornati = await _controller.aggiornaProdottiVisibili(
-            keepIds.toList(),
-          );
-          if (aggiornati && _alive) setState(() => _syncPagination());
+          await _controller.aggiornaProdottiVisibili(keepIds.toList());
         }
         await _controller.prefetchVariantiVisibili(
           items,
@@ -341,218 +379,30 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             'rssMb=${residentMemoryMb()}',
           );
         }
+        final warning = _controller.consumeLastLoadWarning();
+        if (warning != null) {
+          NotificationService.instance.messageBar(
+            'warning',
+            'prodotti_gestisci',
+            warning(context.l10n),
+          );
+        }
         _cacheRefillDepth--;
         setState(() {});
       }),
     );
   }
 
-  @override
-  void dispose() {
-    _disposed = true;
-    _cacheRefreshDebounce?.cancel();
-    _prefetchDebounce?.cancel();
-    _variantsUpdateSubscription?.cancel();
-    _scrollController.dispose();
-    _paginationController.dispose();
-    _splitViewController.dispose();
-    _selectedProductNotifier.dispose();
-    _selectedProductVariantsLoading.dispose();
-    _cassaSelectionVersion.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
-  // ── Busy helpers ─────────────────────────────────────────────────────────
-
-  void _pushBusy(String message) => _setBusy(_busyDepth + 1, message);
-  void _popBusy() {
-    if (_busyDepth <= 0) return;
-    _setBusy(_busyDepth - 1, _busyDepth == 1 ? null : _busyMessage);
-  }
-
-  void _setBusy(int depth, String? message) {
-    if (_disposed) return;
-    _busyDepth = depth;
-    _busyMessage = message;
-    if (mounted) setState(() {});
-  }
-
-  List<Area> _splitAreasForRatio(double ratio) {
-    final normalized = MachineUiPreferences.normalizeProductsManageSplitRatio(
-      ratio,
-    );
-    return [
-      Area(
-        id: 'products',
-        flex: normalized,
-        min: MachineUiPreferences.minProductsManageSplitRatio,
-        max: MachineUiPreferences.maxProductsManageSplitRatio,
-      ),
-      Area(
-        id: 'details',
-        flex: 1 - normalized,
-        min: 1 - MachineUiPreferences.maxProductsManageSplitRatio,
-        max: 1 - MachineUiPreferences.minProductsManageSplitRatio,
-      ),
-    ];
-  }
-
-  void _saveCurrentSplitRatio() {
-    final productFlex = _splitViewController.getArea(0).flex;
-    final detailFlex = _splitViewController.getArea(1).flex;
-    if (productFlex == null || detailFlex == null) return;
-    final totalFlex = productFlex + detailFlex;
-    if (totalFlex <= 0) return;
-    final ratio = MachineUiPreferences.normalizeProductsManageSplitRatio(
-      productFlex / totalFlex,
-    );
-    _productPaneRatio = ratio;
-    unawaited(_machineUiPreferences.setProductsManageSplitRatio(ratio));
-  }
-
-  Future<T> _runBusy<T>(String message, Future<T> Function() action) async {
-    _pushBusy(message);
-    try {
-      return await action();
-    } finally {
-      _popBusy();
-    }
-  }
-
-  // ── Inizializzazione ─────────────────────────────────────────────
-
-  Future<void> _initSettings() async {
-    await _runBusy(context.l10n.productsInitializing, () async {
-      await _appSettings.init();
-      await _machineUiPreferences.init();
-      if (!_alive) return;
-      _productPaneRatio = _machineUiPreferences.productsManageSplitRatio;
-      _splitViewController.areas = _splitAreasForRatio(_productPaneRatio);
-      await _paginationController.loadFromSettings(_appSettings);
-      if (!_alive) return;
-      _controller.setPersistedAdvancedFiltersEnabled(
-        _appSettings.persistProductFilters,
-      );
-      _controller.setNascondiProdottiEsauriti(
-        _appSettings.hideOutOfStockProducts,
-      );
-      _visibleColumns = _initialVisibleColumns();
-      _syncPagination();
-      if (mounted) setState(() {});
-    });
-  }
-
-  Future<void> _setHideOutOfStockProducts(bool value) async {
-    _controller.setNascondiProdottiEsauriti(value);
-    await _appSettings.setHideOutOfStockProducts(value);
-    _refresh();
-  }
-
-  /// Le checkbox del selettore colonne sono l'unica fonte di verita: questo
-  /// set e sia il preselezionato mostrato dal dialog sia le colonne che la
-  /// griglia renderizza. Senza preferenze salvate si parte da un set coerente
-  /// con la larghezza corrente, ma una volta scelto non segue il resize,
-  /// altrimenti le checkbox mostrerebbero colonne diverse da quelle in tabella.
-  Set<ProductGridColumnId> _initialVisibleColumns() {
-    final stored = _appSettings.visibleProductGridColumns;
-    if (stored.isNotEmpty) return _resolveColumns(stored);
-    final isSmall =
-        mounted && MediaQuery.sizeOf(context).width < _kDesktopBreakpoint;
-    return isSmall
-        ? defaultMobileProductGridColumns.toSet()
-        : defaultProductGridColumns.toSet();
-  }
-
-  Set<ProductGridColumnId> _resolveColumns(List<String> keys) {
-    if (keys.isEmpty) return defaultProductGridColumns.toSet();
-    final resolved = <ProductGridColumnId>{};
-    for (final key in keys) {
-      for (final col in ProductGridColumnId.values) {
-        if (col.storageKey == key) {
-          resolved.add(col);
-          break;
-        }
-      }
-    }
-    return resolved.isEmpty ? defaultProductGridColumns.toSet() : resolved;
-  }
-
-  // ── Caricamento prodotti ─────────────────────────────────────────────────
-
-  Future<void> _loadProducts({bool forceRefresh = false}) async {
-    if (_productsLoading) return;
-    setState(() => _productsLoading = true);
-    try {
-      await _controller.caricaProdotti(
-        forceRefresh: forceRefresh,
-        prefetchLimit: _paginationController.pageSize,
-        onProgress: (_) {
-          if (!_alive) return;
-          // Non resettare MAI la pagina durante il caricamento progressivo:
-          // un `goToFirstPage` qui scatta a ogni chunk (decine di volte) e
-          // butta l'utente alla pagina 1 ogni volta che la cache si popola.
-          // `syncLocalItems` riallinea totali/pagine senza cambiare la pagina
-          // corrente (clamp solo se eccede). Il reset esplicito resta solo nei
-          // comandi voluti (prima pagina, cambio filtri/modalità, refresh).
-          _syncPagination();
-          setState(() {});
-        },
-      );
-      if (!_alive) return;
-      // Riparti dalla prima pagina SOLO per i caricamenti espliciti (refresh
-      // utente, cambio filtri): qui `forceRefresh` è il discriminante reale.
-      // I riempimenti progressivi in background (prefetch, chunk paginati)
-      // selezionano il ramo `else` e preservano la pagina corrente.
-      if (forceRefresh) {
-        _paginationController.goToFirstPage();
-        _syncPagination(jumpTop: true);
-      } else {
-        _syncPagination();
-      }
-      _syncSelectedProductDisplay();
-      final warning = _controller.consumeLastLoadWarning();
-      if (mounted && warning != null) {
-        NotificationService.instance.messageBar(
-          'warning',
-          'prodotti_gestisci',
-          warning(context.l10n),
-        );
-      }
-      if (_alive) setState(() {});
-    } finally {
-      if (_alive) setState(() => _productsLoading = false);
-    }
-  }
-
-  void _syncPagination({bool jumpTop = false}) {
-    if (!_alive) return;
-    final p = _paginationController;
-    p.syncLocalItems(_visibleProductsSource);
-    log.d(
-      '[perf-trace] paginazione sync visibili=${p.items.length} '
-      'pagina=${p.currentPage}/${p.totalPages ?? "-"} '
-      'tot=${p.totalItems ?? "-"} perPagina=${p.pageSize} jumpTop=$jumpTop',
-    );
-    _schedulePagePrefetch();
-    if (jumpTop && _scrollController.hasClients) {
-      _scrollController.jumpTo(0);
-    }
-  }
-
-  List<ProdottoGlobal> get _visibleProductsSource => _controller.prodotti;
-
   void _syncSelectedProductDisplay() {
     _selectedProductNotifier.value = _controller.prodottoSelezionato;
     if (_selectedProductNotifier.value == null) {
       _selectedProductVariantsLoading.value = false;
+      _listController.select(null);
     }
   }
 
   void _handleProductSelected(ProdottoGlobal product) {
+    _controller.selezionaProdottoLocal(product);
     _selectedProductNotifier.value = _controller.prodottoSelezionato;
     final needsVariants = product.isVariabile;
     if (!needsVariants || (product.varianti?.isNotEmpty ?? false)) {
@@ -580,71 +430,6 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     _selectedProductVariantsLoading.value = false;
   }
 
-  // ── Scroll infinito ──────────────────────────────────────────────────────
-
-  void _onScroll() {
-    if (!_alive) return;
-    if (_isBusy ||
-        !_paginationController.isInfinite ||
-        !_paginationController.hasMore ||
-        !_scrollController.hasClients) {
-      return;
-    }
-    if (_scrollController.position.extentAfter > 240) return;
-
-    _paginationController.goToNextPage();
-    _syncPagination();
-  }
-
-  // ── Paginazione ──────────────────────────────────────────────────────────
-
-  Future<void> _handlePageSizeOrModeChanged(
-    GlobalPageMode mode,
-    int size,
-  ) async {
-    if (!_alive || _isBusy) return;
-    log.d(
-      '[perf-trace] paginazione action=pageSize/mode -> size=$size '
-      'mode=${mode.name}',
-    );
-    // La cache varianti deve rispecchiare il valore esatto del nuovo dropdown
-    // ("Righe per pagina"): svuotala e lascia che il flusso normale
-    // (_syncPagination → _schedulePagePrefetch → _prefetchCurrentWindow)
-    // rifempia la cache con la sola nuova finestra. Stesso principio dei
-    // filtri (R2): il cambio 100→50 o 50→100 parte dalla cache vuota.
-    ProdottiCache.clearVariants();
-    _syncPagination(jumpTop: true);
-    if (_alive) setState(() {});
-  }
-
-  Future<void> _goFirstPage() async {
-    if (!_alive || _isBusy) return;
-    log.d('[perf-trace] paginazione action=prima');
-    _paginationController.goToFirstPage();
-    _syncPagination(jumpTop: true);
-  }
-
-  Future<void> _goPreviousPage() async {
-    if (!_alive || _isBusy) return;
-    log.d('[perf-trace] paginazione action=precedente');
-    _paginationController.goToPreviousPage();
-    _syncPagination(jumpTop: true);
-  }
-
-  Future<void> _goNextPage() async {
-    if (!_alive || _isBusy) return;
-    log.d('[perf-trace] paginazione action=successiva');
-    _paginationController.goToNextPage();
-    _syncPagination(jumpTop: true);
-  }
-
-  Future<void> _goLastPage() async {
-    if (!_alive || _isBusy) return;
-    log.d('[perf-trace] paginazione action=ultima');
-    _paginationController.goToLastPage();
-    _syncPagination(jumpTop: true);
-  }
-
   // ── Azioni prodotto ──────────────────────────────────────────────────────
 
   Future<void> _handleProductAction(
@@ -654,7 +439,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     switch (action) {
       case _ProductContextAction.crea:
         final created = await openProductEditor(context);
-        if (created == true) await _loadProducts(forceRefresh: true);
+        if (created == true) await _reloadProducts();
 
       case _ProductContextAction.modifica:
         final updated = await openProductEditor(
@@ -662,7 +447,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
           prodottoIdDaModificare: product.id,
           codiceProdotto: product.codiceProdotto,
         );
-        if (updated == true) await _loadProducts(forceRefresh: true);
+        if (updated == true) await _reloadProducts();
 
       case _ProductContextAction.modificaInMassa:
         if (_controller.selectedProductsCount <= 1) return;
@@ -724,17 +509,20 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         ? context.l10n.productsDeletingMany(toDelete.length)
         : context.l10n.productsDeletingOne;
 
-    final (bulkResult, success) = await _runBusy(label, () async {
-      if (useBulk) {
-        final r = await _controller.deleteSelectedProducts(
-          force: _appSettings.forceDelete,
-        );
-        return (r, r.failedCount == 0);
-      } else {
-        final ok = await _controller.eliminaProdotto(anchor.id ?? 0);
-        return (null, ok);
-      }
-    });
+    final (bulkResult, success) = await _listController.runBusy(
+      label,
+      () async {
+        if (useBulk) {
+          final r = await _controller.deleteSelectedProducts(
+            force: _appSettings.forceDelete,
+          );
+          return (r, r.failedCount == 0);
+        } else {
+          final ok = await _controller.eliminaProdotto(anchor.id ?? 0);
+          return (null, ok);
+        }
+      },
+    );
 
     if (!mounted) return;
 
@@ -759,31 +547,22 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       message,
     );
     if (success || (bulkResult?.successCount ?? 0) > 0) {
-      await _loadProducts(forceRefresh: true);
+      _listController.clearChecked();
+      await _reloadProducts();
     }
   }
 
-  Future<void> _deleteSelectedProducts() async {
-    if (_isBusy) return;
-    final selected = _controller.selectedProducts;
-    if (selected.isEmpty) return;
-    await _deleteProducts(selected.first);
-  }
-
+  /// Canc sulla griglia ed "Elimina" della barra di selezione: con righe
+  /// spuntate elimina quelle, altrimenti la riga evidenziata.
   Future<void> _deleteFromGrid(ProdottoGlobal? product) async {
-    if (_isBusy) return;
+    if (_listController.isBusy) return;
     if (_controller.hasSelectedProducts) {
-      await _deleteSelectedProducts();
+      final selected = _controller.selectedProducts;
+      if (selected.isEmpty) return;
+      await _deleteProducts(selected.first);
       return;
     }
     if (product != null) await _deleteProducts(product);
-  }
-
-  void _clearGridSelection() {
-    if (_controller.hasSelectedProducts) {
-      _controller.clearBulkSelection();
-      _refresh();
-    }
   }
 
   Set<int> _selectedCassaVariantIdsFor(ProdottoGlobal prodotto) {
@@ -833,9 +612,9 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   /// Righe spuntate nella griglia del selettore: un prodotto e' spuntato se e'
   /// scelto lui (semplice) o almeno una delle sue varianti.
-  Set<int> get _pickerCheckedProductIds => <int>{
-    ..._selectedCassaSimpleProductIds,
-    ..._selectedCassaVariantIdsByProductId.keys,
+  Set<String> get _pickerCheckedIds => <String>{
+    for (final id in _selectedCassaSimpleProductIds) '$id',
+    for (final id in _selectedCassaVariantIdsByProductId.keys) '$id',
   };
 
   /// Spunta di una riga nel selettore, come la selezione multipla dell'elenco.
@@ -858,7 +637,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       _toggleCassaSimpleProductSelection(product, true);
       return;
     }
-    final loaded = await _runBusy(
+    final loaded = await _listController.runBusy(
       context.l10n.productsLoadingVariants,
       () => _controller.productsWithVariants([product]),
     );
@@ -873,7 +652,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   }
 
   void _clearPickerSelection() {
-    if (_pickerCheckedProductIds.isEmpty) return;
+    if (_pickerCheckedIds.isEmpty) return;
     setState(() {
       _selectedCassaSimpleProductIds.clear();
       _selectedCassaVariantIdsByProductId.clear();
@@ -889,7 +668,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   Future<List<ProdottoGlobal>> _buildCassaSelectedProducts() async {
     final selectedProducts = <ProdottoGlobal>[];
     final productsById = <int, ProdottoGlobal>{
-      for (final product in _controller.prodotti)
+      for (final product in ProdottiCache.prodotti.items)
         if (product.id != null && product.id! > 0) product.id!: product,
       if (_controller.prodottoSelezionato?.id != null &&
           _controller.prodottoSelezionato!.id! > 0)
@@ -931,7 +710,12 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     return selectedProducts;
   }
 
-  List<DataGridViewContextAction<ProdottoGlobal>> _buildContextActions() {
+  List<DataGridViewContextAction<ProdottoGlobal>> _buildContextActions(
+    BuildContext context,
+  ) {
+    if (widget.modalitaCassa) {
+      return const <DataGridViewContextAction<ProdottoGlobal>>[];
+    }
     final actions = <DataGridViewContextAction<ProdottoGlobal>>[
       DataGridViewContextAction<ProdottoGlobal>(
         label: context.l10n.commonNew,
@@ -977,47 +761,12 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     return actions;
   }
 
-  // ── Colonne ──────────────────────────────────────────────────────────────
-
-  Future<void> _openColumnPicker() async {
-    if (_isBusy) return;
-    final allLabels = ProductGridColumnId.values
-        .map((c) => productGridColumnLabel(context.l10n, c))
-        .toList();
-    final selected = await SearchableCheckboxDialog.show(
-      context,
-      title: context.l10n.prodottiColonneVisibili,
-      inputLabel: context.l10n.prodottiCercaColonna,
-      input_list: allLabels,
-      preselected_list: ProductGridColumnId.values
-          .where(_visibleColumns.contains)
-          .map((c) => productGridColumnLabel(context.l10n, c))
-          .toList(),
-    );
-    if (!mounted || selected == null || selected.isEmpty) return;
-
-    final next = ProductGridColumnId.values
-        .where(
-          (c) => selected.contains(productGridColumnLabel(context.l10n, c)),
-        )
-        .toSet();
-    if (next.isEmpty) return;
-
-    await _appSettings.setVisibleProductGridColumns(
-      ProductGridColumnId.values
-          .where(next.contains)
-          .map((c) => c.storageKey)
-          .toList(),
-    );
-    setState(() => _visibleColumns = next);
-  }
-
   // ── Refresh stato ────────────────────────────────────────────────────────
 
   void _refresh() {
     if (!mounted) return;
     _syncSelectedProductDisplay();
-    setState(() => _syncPagination());
+    _listController.refresh();
   }
 
   // ── Build ────────────────────────────────────────────────────────────────
@@ -1025,175 +774,216 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (!_settingsReady) {
+      return const Center(child: CircularProgressIndicator());
+    }
     final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>()!;
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          // La sezione e a filo: senza questo, aperta dalla cassa (rotta senza
-          // AppBar, `checkout.gui.dart`) la card finiva sotto la status bar. Dalla
-          // home l'AppBar esterna ha gia' consumato l'inset, quindi `Scaffold`
-          // passa `padding.top == 0` al body e qui non aggiunge nulla.
-          body: SafeArea(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    customColors.gradientStart.withValues(alpha: 0.72),
-                    theme.colorScheme.surface,
-                    customColors.gradientEnd,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isSmall = constraints.maxWidth < _kDesktopBreakpoint;
-                  return isSmall ? _buildMobileLayout() : _buildDesktopLayout();
-                },
-              ),
-            ),
-          ),
-        ),
-        if (_productsLoading || _cacheRefillDepth > 0)
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: LinearProgressIndicator(minHeight: 3),
-          ),
-        if (_isBusy)
-          Positioned.fill(
-            child: _BusyOverlay(
-              message: _busyMessage ?? context.l10n.commonLoading,
-            ),
+    return DataGridListView<ProdottoGlobal>(
+      controller: _listController,
+      fields: ProdottoGlobal.gridFields,
+      idOf: _idOf,
+      loadPage: _loadPage,
+      cacheKey: ProdottiCache.cacheKey,
+      serverFiltering: false,
+      localWhere: _nascondiEsauriti ? _soloDisponibili : null,
+      detailsOf: _buildDetails,
+      cellsOf: _buildCells,
+      foregroundOf: _rowForeground,
+      backgroundOf: _rowBackground,
+      contextActions: _buildContextActions,
+      defaultColumns: defaultProductGridColumns,
+      defaultMobileColumns: defaultMobileProductGridColumns,
+      initialColumns: _appSettings.visibleProductGridColumns,
+      onColumnsChanged: _appSettings.setVisibleProductGridColumns,
+      initialSplitRatio: _machineUiPreferences.productsManageSplitRatio,
+      onSplitRatioChanged: (ratio) =>
+          unawaited(_machineUiPreferences.setProductsManageSplitRatio(ratio)),
+      minSplitRatio: MachineUiPreferences.minProductsManageSplitRatio,
+      maxSplitRatio: MachineUiPreferences.maxProductsManageSplitRatio,
+      filterValueHint: context.l10n.productsQuickSearchExample,
+      toolbarActions: [
+        if (!widget.modalitaCassa)
+          DataGridCommandIconButton(
+            onPressed: _controller.selectedProductsCount == 0
+                ? null
+                : () => _printLabels(_controller.selectedProducts),
+            icon: Icons.print_outlined,
+            tooltip: _controller.selectedProductsCount == 0
+                ? context.l10n.productsPrintLabelsSelect
+                : context.l10n.productsPrintLabels,
+            color: theme.colorScheme.primary,
           ),
       ],
+      extraFilters: [
+        FilterChip(
+          selected: _nascondiEsauriti,
+          showCheckmark: true,
+          avatar: const Icon(Icons.inventory_2_outlined, size: 18),
+          label: Text(context.l10n.prodottiNonMostrareEsauriti),
+          onSelected: (value) => _setHideOutOfStockProducts(value),
+        ),
+      ],
+      extraActiveChips: [
+        if (_nascondiEsauriti)
+          InputChip(
+            label: Text(context.l10n.prodottiEsauritiNascosti),
+            onDeleted: () => _setHideOutOfStockProducts(false),
+          ),
+      ],
+      hasExtraFilters: _nascondiEsauriti,
+      // "Cancella tutti" spegne il filtro per questa volta senza cambiare
+      // l'impostazione salvata, come prima.
+      onClearExtraFilters: () =>
+          _setHideOutOfStockProducts(false, persist: false),
+      // Nel selettore le spunte non sono la selezione dell'elenco (che serve
+      // a stampare o cancellare) ma quella da restituire: stesse caselle,
+      // stato diverso.
+      checkedIds: widget.modalitaCassa ? _pickerCheckedIds : null,
+      onRowChecked: widget.modalitaCassa
+          ? (product, selected) =>
+                unawaited(_togglePickerRow(product, selected))
+          : null,
+      onClearChecked: widget.modalitaCassa ? _clearPickerSelection : null,
+      checkedLabel: (count) => context.l10n.productsSelectedCount(count),
+      // Il selettore non cancella nulla: Canc li' non ha niente da fare.
+      onDelete: widget.modalitaCassa ? null : _deleteFromGrid,
+      onRowSelected: _handleProductSelected,
+      selectedRowsCount: widget.modalitaCassa
+          ? _selectedCassaVariantsCount
+          : null,
+      bottomBar: widget.modalitaCassa ? _buildPickerActionBar(theme) : null,
+      extraLoading: _cacheRefillDepth > 0,
+      emptyDetailsIcon: Icons.inventory_2_outlined,
+      emptyDetailsTitle: (context) => context.l10n.productsSelectAProduct,
+      emptyDetailsSubtitle: (context) => context.l10n.productsToSeeDetails,
+      onLoadError: _onLoadError,
+      onVisibleItemsChanged: _schedulePagePrefetch,
     );
   }
 
-  Widget _buildMobileLayout() => _buildProductPane(showDetailsInPage: true);
+  /// Dettaglio del prodotto: pannello su desktop, pagina su telefono. Ascolta
+  /// i segnali della selezione: il prodotto arriva senza varianti e le riceve
+  /// dopo il caricamento, e le spunte della cassa cambiano qui.
+  Widget _buildDetails(
+    BuildContext context,
+    ProdottoGlobal product,
+    bool inPage,
+  ) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        _selectedProductNotifier,
+        _selectedProductVariantsLoading,
+        _cassaSelectionVersion,
+      ]),
+      builder: (context, _) {
+        final caricato = _selectedProductNotifier.value;
+        final prodotto = caricato?.id == product.id ? caricato! : product;
+        return ProdottoDettagliView(
+          prodotto: prodotto,
+          varianteSelezionata: _controller.varianteSelezionata,
+          controller: _controller,
+          modalitaSelezioneCassa: widget.modalitaCassa,
+          variantiSelezionateCassa: _selectedCassaVariantIdsFor(prodotto),
+          onVarianteCassaChecked: (variante, selected) =>
+              _toggleCassaVariantSelection(prodotto, variante, selected),
+          prodottoSempliceSelezionatoCassa: _selectedCassaSimpleProductIds
+              .contains(prodotto.id ?? -1),
+          onProdottoSempliceCassaChecked: widget.modalitaCassa
+              ? (selected) =>
+                    _toggleCassaSimpleProductSelection(prodotto, selected)
+              : null,
+          variantsLoading:
+              caricato?.id == product.id &&
+              _selectedProductVariantsLoading.value,
+          shortcutToggleEdit: _appSettings.shortcutToggleEdit,
+          shortcutSave: _appSettings.shortcutSave,
+          shortcutEscape: _appSettings.shortcutEscape,
+          showCloseButton: inPage,
+          onReload: _reloadProducts,
+          onProductDeleted: _refresh,
+          onVariantsChanged: _refresh,
+        );
+      },
+    );
+  }
 
-  Widget _buildDesktopLayout() {
+  Color? _rowForeground(BuildContext context, ProdottoGlobal product) {
+    final customColors = Theme.of(context).extension<AppColorExtension>()!;
+    if (!product.isDisponibile) return Theme.of(context).colorScheme.error;
+    return _isDraft(product) ? customColors.warningColor : null;
+  }
+
+  Color? _rowBackground(BuildContext context, ProdottoGlobal product) {
+    final customColors = Theme.of(context).extension<AppColorExtension>()!;
+    if (!product.isDisponibile) {
+      return customColors.stockUnavailable.withValues(alpha: 0.12);
+    }
+    return _isDraft(product)
+        ? customColors.warningColor.withValues(alpha: 0.12)
+        : null;
+  }
+
+  static bool _isDraft(ProdottoGlobal product) =>
+      product.status.trim().toLowerCase() == 'draft';
+
+  Map<String, Widget> _buildCells(BuildContext context, ProdottoGlobal product) {
     final theme = Theme.of(context);
-    return MultiSplitViewTheme(
-      data: MultiSplitViewThemeData(
-        dividerThickness: 8,
-        dividerPainter: DividerPainters.background(
-          color: Colors.transparent,
-          highlightedColor: theme.dividerColor.withValues(alpha: 0.12),
+    final customColors = theme.extension<AppColorExtension>()!;
+    final info = ProdottoDisplayInfo.fromProdotto(product, context.l10n);
+    final pricing = ProdottoUtils.getPricingInfo(product);
+    final statusColor = switch (product.status.trim()) {
+      'publish' => customColors.successColor,
+      'draft' || 'pending' => customColors.warningColor,
+      'private' => theme.colorScheme.secondary,
+      _ => theme.primaryColor,
+    };
+    return <String, Widget>{
+      'preview': Center(
+        child: DataGridViewImagePreview(
+          imageUrl: product.immagineUrl,
+          semanticLabel: context.l10n.productsPreviewOf(info.nome),
+          size: 56,
+          hoverPreviewSize: 300,
+          muted: !info.inStock,
         ),
       ),
-      child: MultiSplitView(
-        controller: _splitViewController,
-        axis: Axis.horizontal,
-        onDividerDragEnd: (_) => _saveCurrentSplitRatio(),
-        dividerBuilder: (axis, index, resizable, dragging, highlighted, data) {
-          return MouseRegion(
-            cursor: SystemMouseCursors.resizeLeftRight,
-            child: ColoredBox(
-              color: highlighted || dragging
-                  ? theme.dividerColor.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              child: Center(
-                child: Container(
-                  width: 1,
-                  color: theme.dividerColor.withValues(alpha: 0.45),
-                ),
-              ),
-            ),
-          );
-        },
-        builder: (context, area) {
-          if (area.index == 0) return _buildProductPane();
-          // Come il pannello prodotti: a filo, senza cornice. La separazione
-          // fra i due e' solo la linea verticale trascinabile: niente spazio
-          // vuoto tra griglia e dettaglio.
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.84),
-            ),
-            child: ValueListenableBuilder<ProdottoGlobal?>(
-              valueListenable: _selectedProductNotifier,
-              builder: (context, selectedProduct, _) {
-                return Stack(
-                  children: [
-                    selectedProduct != null
-                        ? ValueListenableBuilder<bool>(
-                            valueListenable: _selectedProductVariantsLoading,
-                            builder: (context, isLoading, __) {
-                              return ProdottoDettagliView(
-                                prodotto: selectedProduct,
-                                varianteSelezionata:
-                                    _controller.varianteSelezionata,
-                                controller: _controller,
-                                modalitaSelezioneCassa: widget.modalitaCassa,
-                                variantiSelezionateCassa:
-                                    _selectedCassaVariantIdsFor(
-                                      selectedProduct,
-                                    ),
-                                onVarianteCassaChecked: (variante, selected) =>
-                                    _toggleCassaVariantSelection(
-                                      selectedProduct,
-                                      variante,
-                                      selected,
-                                    ),
-                                prodottoSempliceSelezionatoCassa:
-                                    _selectedCassaSimpleProductIds.contains(
-                                      selectedProduct.id ?? -1,
-                                    ),
-                                onProdottoSempliceCassaChecked:
-                                    widget.modalitaCassa
-                                    ? (selected) =>
-                                          _toggleCassaSimpleProductSelection(
-                                            selectedProduct,
-                                            selected,
-                                          )
-                                    : null,
-                                variantsLoading: isLoading,
-                                shortcutToggleEdit:
-                                    _appSettings.shortcutToggleEdit,
-                                shortcutSave: _appSettings.shortcutSave,
-                                shortcutEscape: _appSettings.shortcutEscape,
-                                onReload: () =>
-                                    _loadProducts(forceRefresh: true),
-                                onProductDeleted: _refresh,
-                                onVariantsChanged: _refresh,
-                              );
-                            },
-                          )
-                        : _buildEmptyState(),
-                  ],
-                );
-              },
-            ),
-          );
-        },
+      // Sotto il nome non ripetiamo il codice articolo: esiste gia' la
+      // colonna dedicata, e la riga resta alta quanto la miniatura.
+      'nome': Text(
+        info.nome,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
       ),
-    );
-  }
-
-  Widget _buildProductPane({bool showDetailsInPage = false}) {
-    final theme = Theme.of(context);
-    // A filo: niente padding, niente cornice, niente ombra. Il raggio di 24px
-    // e l'ombra esistevano per far leggere il pannello come una card galleggiante
-    // sul gradiente; a contatto con il bordo dello schermo diventerebbero angoli
-    // mozzi e un repaint che non si vede.
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.9),
+      'codiceArticolo': Text(
+        info.codiceProdotto.isEmpty ? '-' : info.codiceProdotto,
+        overflow: TextOverflow.ellipsis,
       ),
-      child: Column(
-        children: [
-          Expanded(
-            child: _buildProductList(showDetailsInPage: showDetailsInPage),
-          ),
-          if (widget.modalitaCassa) _buildPickerActionBar(theme),
-        ],
+      'barcode': Text(
+        info.barcodeInterno.isEmpty ? '-' : info.barcodeInterno,
+        overflow: TextOverflow.ellipsis,
       ),
-    );
+      'categoria': Text(info.categoria, overflow: TextOverflow.ellipsis),
+      'prezzo': Text(pricing.prezzoLabel(context.l10n)),
+      'sconto': Text(pricing.scontoLabel(context.l10n)),
+      'disponibilita': _StatusChip(
+        label: info.disponibilita,
+        color: info.inStock
+            ? customColors.stockAvailable
+            : customColors.stockUnavailable,
+      ),
+      'giacenza': _QuantityChip(
+        value: product.quantitaTotaleVarianti,
+        color: product.quantitaTotaleVarianti > 0
+            ? customColors.stockAvailable
+            : customColors.stockUnavailable,
+      ),
+      'varianti': Text('${product.varianti?.length ?? 0}'),
+      'status': _StatusChip(label: info.status, color: statusColor),
+      'marchio': Text(product.marca ?? '-', overflow: TextOverflow.ellipsis),
+    };
   }
 
   /// Barra inferiore della modalità cassa: "Annulla" chiude senza risultato,
@@ -1225,7 +1015,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
               onPressed: selectedCount == 0
                   ? null
                   : () async {
-                      final selected = await _runBusy(
+                      final selected = await _listController.runBusy(
                         context.l10n.productsLoadingVariants,
                         _buildCassaSelectedProducts,
                       );
@@ -1249,572 +1039,6 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildProductList({bool showDetailsInPage = false}) {
-    return Column(
-      children: [
-        _FiltersBar(
-          controller: _controller,
-          selectedCount: _controller.selectedProductsCount,
-          onStateChanged: _refresh,
-          onHideOutOfStockChanged: _setHideOutOfStockProducts,
-          onRefresh: () => _loadProducts(forceRefresh: true),
-          onOpenColumns: _openColumnPicker,
-          onPrintLabels: widget.modalitaCassa
-              ? null
-              : () => _printLabels(_controller.selectedProducts),
-        ),
-        Expanded(
-          child: _ProductsGrid(
-            key: _gridKey,
-            controller: _controller,
-            products: _visibleProducts,
-            scrollController: _scrollController,
-            visibleColumns: _visibleColumns,
-            // Nel selettore le spunte non sono la selezione dell'elenco (che
-            // serve a stampare o cancellare) ma quella da restituire: stesse
-            // caselle, stato diverso.
-            checkedProductIds: widget.modalitaCassa
-                ? _pickerCheckedProductIds
-                : null,
-            onProductChecked: widget.modalitaCassa
-                ? (product, selected) =>
-                      unawaited(_togglePickerRow(product, selected))
-                : null,
-            onStateChanged: _refresh,
-            contextActions: widget.modalitaCassa
-                ? const <DataGridViewContextAction<ProdottoGlobal>>[]
-                : _buildContextActions(),
-            onDeleteSelected: widget.modalitaCassa
-                ? null
-                : _deleteSelectedProducts,
-            onClearSelection: widget.modalitaCassa
-                ? _clearPickerSelection
-                : _clearGridSelection,
-            onDeleteFromGrid: _deleteFromGrid,
-            onProductSelected: _handleProductSelected,
-            selectAllShortcut: _appSettings.shortcutSelectAll,
-            deleteShortcut: _appSettings.shortcutDelete,
-            escapeShortcut: _appSettings.shortcutEscape,
-            onOpenProductDetails: showDetailsInPage
-                ? (product) async {
-                    await Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        // Ascolta gli stessi segnali del pannello desktop: il
-                        // prodotto arriva senza varianti e le riceve dopo il
-                        // caricamento, e le spunte della cassa cambiano qui.
-                        builder: (_) => ListenableBuilder(
-                          listenable: Listenable.merge([
-                            _selectedProductNotifier,
-                            _selectedProductVariantsLoading,
-                            _cassaSelectionVersion,
-                          ]),
-                          builder: (context, _) {
-                            final caricato = _selectedProductNotifier.value;
-                            final prodotto = caricato?.id == product.id
-                                ? caricato!
-                                : product;
-                            return ProdottoDettagliView(
-                              prodotto: prodotto,
-                              varianteSelezionata:
-                                  _controller.varianteSelezionata,
-                              controller: _controller,
-                              modalitaSelezioneCassa: widget.modalitaCassa,
-                              variantiSelezionateCassa:
-                                  _selectedCassaVariantIdsFor(prodotto),
-                              onVarianteCassaChecked: (variante, selected) =>
-                                  _toggleCassaVariantSelection(
-                                    prodotto,
-                                    variante,
-                                    selected,
-                                  ),
-                              prodottoSempliceSelezionatoCassa:
-                                  _selectedCassaSimpleProductIds.contains(
-                                    prodotto.id ?? -1,
-                                  ),
-                              onProdottoSempliceCassaChecked:
-                                  widget.modalitaCassa
-                                  ? (selected) =>
-                                        _toggleCassaSimpleProductSelection(
-                                          prodotto,
-                                          selected,
-                                        )
-                                  : null,
-                              variantsLoading:
-                                  caricato?.id == product.id &&
-                                  _selectedProductVariantsLoading.value,
-                              shortcutToggleEdit:
-                                  _appSettings.shortcutToggleEdit,
-                              shortcutSave: _appSettings.shortcutSave,
-                              shortcutEscape: _appSettings.shortcutEscape,
-                              showCloseButton: true,
-                              onReload: () => _loadProducts(forceRefresh: true),
-                              onProductDeleted: _refresh,
-                              onVariantsChanged: _refresh,
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                    if (mounted) setState(() {});
-                  }
-                : null,
-          ),
-        ),
-        GlobalPaginationBar(
-          settings: _appSettings,
-          controller: _paginationController,
-          totalRows: _controller.hasFiltroAttivo
-              ? _controller.prodotti.length
-              : _paginationController.totalItems ?? _controller.prodotti.length,
-          selectedRows: widget.modalitaCassa
-              ? _selectedCassaVariantsCount
-              : _controller.selectedProductsCount,
-          onFirstPage: _goFirstPage,
-          onPreviousPage: _goPreviousPage,
-          onNextPage: _goNextPage,
-          onLastPage: _goLastPage,
-          onModeOrPageSizeChanged: _handlePageSizeOrModeChanged,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: theme.iconTheme.color?.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.productsSelectAProduct,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-            ),
-          ),
-          Text(
-            context.l10n.productsToSeeDetails,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ===========================================================================
-// _ProductsGrid — griglia riusabile stile DataGridView C#
-// ===========================================================================
-
-class _ProductsGrid extends StatefulWidget {
-  final ProdottiGestioneController controller;
-  final List<ProdottoGlobal> products;
-  final ScrollController scrollController;
-  final Set<ProductGridColumnId> visibleColumns;
-  final VoidCallback onStateChanged;
-  final List<DataGridViewContextAction<ProdottoGlobal>> contextActions;
-  final Future<void> Function(ProdottoGlobal)? onOpenProductDetails;
-  final Future<void> Function()? onDeleteSelected;
-  final VoidCallback onClearSelection;
-  final ValueChanged<ProdottoGlobal?> onDeleteFromGrid;
-  final void Function(ProdottoGlobal product) onProductSelected;
-
-  /// Spunte da mostrare al posto della selezione dell'elenco, con il loro
-  /// [onProductChecked]: e' il selettore prodotti a usarle.
-  final Set<int>? checkedProductIds;
-  final void Function(ProdottoGlobal product, bool selected)? onProductChecked;
-  final String selectAllShortcut;
-  final String deleteShortcut;
-  final String escapeShortcut;
-
-  const _ProductsGrid({
-    super.key,
-    required this.controller,
-    required this.products,
-    required this.scrollController,
-    required this.visibleColumns,
-    required this.onStateChanged,
-    required this.contextActions,
-    required this.onClearSelection,
-    required this.onDeleteFromGrid,
-    required this.onProductSelected,
-    this.checkedProductIds,
-    this.onProductChecked,
-    required this.selectAllShortcut,
-    required this.deleteShortcut,
-    required this.escapeShortcut,
-    this.onOpenProductDetails,
-    this.onDeleteSelected,
-  });
-
-  @override
-  State<_ProductsGrid> createState() => _ProductsGridState();
-}
-
-class _ProductsGridState extends State<_ProductsGrid> {
-  List<DataGridViewColumn> _buildColumns() {
-    return ProductGridColumnId.values
-        .where(widget.visibleColumns.contains)
-        .map(
-          (colId) => DataGridViewColumn(
-            id: colId.storageKey,
-            label: productGridColumnLabel(context.l10n, colId),
-            width: _columnWidth(colId),
-            numeric: _isNumericColumn(colId),
-            // Il nome e' l'unica colonna che guadagna dalla larghezza extra:
-            // e' il testo lungo che merita le decine di pixel rimaste libere,
-            // e su schermi stretti le colonne in piu' restano raggiungibili
-            // con lo scorrimento orizzontale.
-            flexible: colId == ProductGridColumnId.nome,
-          ),
-        )
-        .toList();
-  }
-
-  List<DataGridViewRowData<ProdottoGlobal>> _buildRows() {
-    final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>()!;
-    final errorColor = theme.colorScheme.error;
-    return widget.products.map((product) {
-      final info = ProdottoDisplayInfo.fromProdotto(product, context.l10n);
-      final pricing = ProdottoUtils.getPricingInfo(product);
-      final statusColor = switch (product.status.trim()) {
-        'publish' => customColors.successColor,
-        'draft' || 'pending' => customColors.warningColor,
-        'private' => theme.colorScheme.secondary,
-        _ => theme.primaryColor,
-      };
-      final isDraft = product.status.trim().toLowerCase() == 'draft';
-      return DataGridViewRowData<ProdottoGlobal>(
-        id: '${product.id ?? 0}',
-        value: product,
-        foregroundColor: !info.inStock
-            ? errorColor
-            : (isDraft ? customColors.warningColor : null),
-        backgroundColor: !info.inStock
-            ? customColors.stockUnavailable.withValues(alpha: 0.12)
-            : (isDraft
-                  ? customColors.warningColor.withValues(alpha: 0.12)
-                  : null),
-        cells: <String, Widget>{
-          ProductGridColumnId.preview.storageKey: Center(
-            child: DataGridViewImagePreview(
-              imageUrl: product.immagineUrl,
-              semanticLabel: context.l10n.productsPreviewOf('${info.nome}'),
-              size: 56,
-              hoverPreviewSize: 300,
-              muted: !info.inStock,
-            ),
-          ),
-          // Sotto il nome non ripetiamo piu' il codice articolo: esiste gia'
-          // la colonna dedicata, e la riga resta cosi' alta quanto la
-          // miniatura, non il doppio.
-          ProductGridColumnId.nome.storageKey: Text(
-            info.nome,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          ProductGridColumnId.sku.storageKey: Text(
-            info.codiceProdotto.isEmpty ? '-' : info.codiceProdotto,
-            overflow: TextOverflow.ellipsis,
-          ),
-          ProductGridColumnId.barcode.storageKey: Text(
-            info.barcodeInterno.isEmpty ? '-' : info.barcodeInterno,
-            overflow: TextOverflow.ellipsis,
-          ),
-          ProductGridColumnId.categoria.storageKey: Text(
-            info.categoria,
-            overflow: TextOverflow.ellipsis,
-          ),
-          ProductGridColumnId.prezzo.storageKey: Text(
-            pricing.prezzoLabel(context.l10n),
-          ),
-          ProductGridColumnId.sconto.storageKey: Text(
-            pricing.scontoLabel(context.l10n),
-          ),
-          ProductGridColumnId.disponibilita.storageKey: _StatusChip(
-            label: info.disponibilita,
-            color: info.inStock
-                ? customColors.stockAvailable
-                : customColors.stockUnavailable,
-          ),
-          ProductGridColumnId.quantita.storageKey: _QuantityChip(
-            value: product.quantitaTotaleVarianti,
-            color: product.quantitaTotaleVarianti > 0
-                ? customColors.stockAvailable
-                : customColors.stockUnavailable,
-          ),
-          ProductGridColumnId.varianti.storageKey: Text(
-            '${product.varianti?.length ?? 0}',
-          ),
-          ProductGridColumnId.stato.storageKey: _StatusChip(
-            label: info.status,
-            color: statusColor,
-          ),
-          ProductGridColumnId.marca.storageKey: Text(
-            product.marca ?? '-',
-            overflow: TextOverflow.ellipsis,
-          ),
-        },
-      );
-    }).toList();
-  }
-
-  static double _columnWidth(ProductGridColumnId id) => switch (id) {
-    ProductGridColumnId.preview => 112,
-    ProductGridColumnId.nome => 240,
-    ProductGridColumnId.sku => 150,
-    ProductGridColumnId.barcode => 150,
-    ProductGridColumnId.categoria => 180,
-    ProductGridColumnId.prezzo || ProductGridColumnId.sconto => 120,
-    ProductGridColumnId.disponibilita => 140,
-    ProductGridColumnId.quantita || ProductGridColumnId.varianti => 100,
-    ProductGridColumnId.stato => 120,
-    ProductGridColumnId.marca => 140,
-  };
-
-  static bool _isNumericColumn(ProductGridColumnId id) =>
-      id == ProductGridColumnId.prezzo ||
-      id == ProductGridColumnId.sconto ||
-      id == ProductGridColumnId.quantita ||
-      id == ProductGridColumnId.varianti;
-
-  Future<void> _selectProduct(ProdottoGlobal product) async {
-    widget.controller.selezionaProdottoLocal(product);
-    widget.onProductSelected(product);
-  }
-
-  void _toggleBulkSelection(ProdottoGlobal product, bool selected) {
-    final id = product.id;
-    if (id == null || id <= 0) return;
-    final current = widget.controller.selectedProductIds;
-    final next = <int>{...current};
-    if (selected) {
-      next.add(id);
-    } else {
-      next.remove(id);
-    }
-    widget.controller.setBulkSelectionByIds(next);
-    widget.onStateChanged();
-  }
-
-  void _toggleAllVisible(bool selected) {
-    if (selected) {
-      final ids = widget.products
-          .map((product) => product.id)
-          .whereType<int>()
-          .where((id) => id > 0);
-      widget.controller.setBulkSelectionByIds({
-        ...widget.controller.selectedProductIds,
-        ...ids,
-      });
-    } else {
-      final visibleIds = widget.products
-          .map((product) => product.id)
-          .whereType<int>()
-          .toSet();
-      widget.controller.setBulkSelectionByIds(
-        widget.controller.selectedProductIds.where(
-          (id) => !visibleIds.contains(id),
-        ),
-      );
-    }
-    widget.onStateChanged();
-  }
-
-  Widget _buildDesktopGrid() {
-    return DataGridView<ProdottoGlobal>(
-      columns: _buildColumns(),
-      rows: _buildRows(),
-      // Il pane genitore disegna gia l'unica cornice della sezione: la
-      // griglia non ne aggiunge una seconda sopra.
-      framed: false,
-      verticalScrollController: widget.scrollController,
-      selectedRowId: '${widget.controller.prodottoSelezionato?.id ?? ''}',
-      selectedRowIds:
-          (widget.checkedProductIds ?? widget.controller.selectedProductIds)
-              .map((id) => '$id')
-              .toSet(),
-      showCheckboxes: true,
-      selectAllShortcut: widget.selectAllShortcut,
-      deleteShortcut: widget.deleteShortcut,
-      escapeShortcut: widget.escapeShortcut,
-      onRowChecked: widget.onProductChecked ?? _toggleBulkSelection,
-      onSelectAll: (selected) {
-        if (widget.onProductChecked != null) {
-          widget.onClearSelection();
-        } else {
-          _toggleAllVisible(false);
-        }
-      },
-      // Il selettore non cancella nulla: Canc li' non ha niente da fare.
-      onDeleteShortcut: widget.onProductChecked == null
-          ? widget.onDeleteFromGrid
-          : null,
-      onEscapeShortcut: widget.onClearSelection,
-      onRowSelected: (product) {
-        Future<void>(() => _selectProduct(product));
-      },
-      onRowDoubleTap: _openDetails,
-      // Su telefono il dettaglio non ha un pannello accanto alla tabella:
-      // senza tocco singolo si aprirebbe solo con un doppio tocco, che
-      // nessuno prova. È anche l'unico modo di spuntare le varianti in cassa.
-      onRowTap: widget.onOpenProductDetails == null ? null : _openDetails,
-      contextActions: widget.contextActions,
-    );
-  }
-
-  bool _openingDetails = false;
-
-  void _openDetails(ProdottoGlobal product) {
-    final open = widget.onOpenProductDetails;
-    // Il doppio tocco arriva dopo il tocco singolo: senza guardia la
-    // pagina di dettaglio si aprirebbe due volte.
-    if (open == null || _openingDetails) return;
-    _openingDetails = true;
-    Future<void>(() async {
-      try {
-        await _selectProduct(product);
-        await open(product);
-      } finally {
-        _openingDetails = false;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedCount = widget.controller.selectedProductsCount;
-    final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>()!;
-    // Nessuna card attorno alla tabella: il pane che ci ospita ha gia il suo
-    // bordo, e aggiungerne uno qui produceva due cornici a 12px di distanza
-    // (il "bordo dentro il bordo") tolgendo 25px per lato alle colonne, che
-    // su smartphone sono la larghezza che rende leggibile il nome prodotto.
-    return Column(
-      children: [
-        if (selectedCount > 0) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(
-              _kEdgeInset,
-              _kEdgeInsetVertical,
-              _kEdgeInset,
-              _kEdgeInsetVertical,
-            ),
-            decoration: BoxDecoration(
-              color: customColors.selectedCardBackground,
-              border: Border(
-                bottom: BorderSide(
-                  color: theme.primaryColor.withValues(alpha: 0.22),
-                ),
-              ),
-            ),
-            child: Wrap(
-              spacing: _kControlGap,
-              runSpacing: _kControlGap,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Icon(Icons.checklist_rtl, size: 20, color: theme.primaryColor),
-                Text(
-                  context.l10n.productsSelectedCount(selectedCount),
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.primaryColor,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    widget.controller.clearBulkSelection();
-                    widget.onStateChanged();
-                  },
-                  icon: const Icon(Icons.clear_all),
-                  label: Text(context.l10n.prodottiDeseleziona),
-                ),
-                FilledButton.icon(
-                  onPressed: widget.onDeleteSelected,
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text(context.l10n.commonDelete),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: _kControlGap),
-        ],
-        Expanded(child: _buildDesktopGrid()),
-      ],
-    );
-  }
-}
-
-// ===========================================================================
-// _BusyOverlay
-// ===========================================================================
-
-class _BusyOverlay extends StatelessWidget {
-  final String message;
-  const _BusyOverlay({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AbsorbPointer(
-      child: ColoredBox(
-        color: theme.colorScheme.scrim.withValues(alpha: 0.28),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 340),
-            child: Material(
-              elevation: 12,
-              borderRadius: BorderRadius.circular(18),
-              color: theme.dialogTheme.backgroundColor ?? theme.cardColor,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 22,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: CircularProgressIndicator(strokeWidth: 3),
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      context.l10n.productsOperationRunning,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -1981,568 +1205,3 @@ class _ImageCell extends StatelessWidget {
   );
 }
 
-// ===========================================================================
-// _FiltersBar
-// ===========================================================================
-
-class _FiltersBar extends StatefulWidget {
-  final ProdottiGestioneController controller;
-  final int selectedCount;
-  final VoidCallback onStateChanged;
-  final ValueChanged<bool> onHideOutOfStockChanged;
-  final Future<void> Function()? onRefresh;
-  final VoidCallback? onOpenColumns;
-
-  /// Prints labels for the selected products; null hides the button.
-  final VoidCallback? onPrintLabels;
-
-  const _FiltersBar({
-    required this.controller,
-    required this.selectedCount,
-    required this.onStateChanged,
-    required this.onHideOutOfStockChanged,
-    this.onRefresh,
-    this.onOpenColumns,
-    this.onPrintLabels,
-  });
-
-  @override
-  _FiltersBarState createState() => _FiltersBarState();
-}
-
-class _FiltersBarState extends State<_FiltersBar> {
-  final _valueCtrl = TextEditingController();
-  final _campoCtrl = TextEditingController();
-  Timer? _searchDebounce;
-  CampoFiltroProdotto _campo = CampoFiltroProdotto.ricercaRapida;
-  OperatoreFiltroProdotto _operatore = OperatoreFiltroProdotto.contiene;
-  // null = default automatico (retratto su stretto, espanso su desktop).
-  // Dopo il primo tap manuale il valore resta sotto controllo utente.
-  bool? _espanso;
-
-  @override
-  void initState() {
-    super.initState();
-    _valueCtrl.text = widget.controller.filtroRicerca;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _campoCtrl.text = _campoLabel(context, _campo);
-  }
-
-  @override
-  void dispose() {
-    _searchDebounce?.cancel();
-    _valueCtrl.dispose();
-    _campoCtrl.dispose();
-    super.dispose();
-  }
-
-  String _campoLabel(BuildContext context, CampoFiltroProdotto c) =>
-      ProdottoFilterEngine.campoLabel(context.l10n, c);
-  String _operatoreLabel(BuildContext context, OperatoreFiltroProdotto o) =>
-      ProdottoFilterEngine.operatoreLabel(context.l10n, o);
-  String _operatoreTooltip(BuildContext context, OperatoreFiltroProdotto o) =>
-      ProdottoFilterEngine.operatoreTooltip(context.l10n, o);
-  bool _operatoreDisponibile(OperatoreFiltroProdotto o) =>
-      ProdottoFilterEngine.supportsOperator(_campo, o);
-  List<OperatoreFiltroProdotto> _operators() =>
-      ProdottoFilterEngine.orderedOperators();
-
-  String _ordinamentoLabel(OrdinamentoProdotti o) => switch (o) {
-    OrdinamentoProdotti.nomeCrescente => context.l10n.productsSortNameAsc,
-    OrdinamentoProdotti.nomeDecrescente => context.l10n.productsSortNameDesc,
-    OrdinamentoProdotti.prezzoCrescente => context.l10n.productsSortPriceAsc,
-    OrdinamentoProdotti.prezzoDecrescente => context.l10n.productsSortPriceDesc,
-    OrdinamentoProdotti.nessuno => context.l10n.productsSortBy,
-  };
-
-  void _scheduleQuickSearch(String value) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-      if (!mounted) return;
-      widget.controller.setFiltroRicerca(value);
-      widget.onStateChanged();
-    });
-  }
-
-  void _onCampoChanged(CampoFiltroProdotto value) {
-    final text = _valueCtrl.text;
-    setState(() {
-      if (_campo == CampoFiltroProdotto.ricercaRapida &&
-          value != CampoFiltroProdotto.ricercaRapida) {
-        _searchDebounce?.cancel();
-        widget.controller.cancellaFiltro();
-      }
-      _campo = value;
-      _campoCtrl.text = _campoLabel(context, value);
-      if (!_operatoreDisponibile(_operatore)) {
-        _operatore =
-            ProdottoFilterEngine.isNumericField(value) ||
-                ProdottoFilterEngine.isBooleanField(value)
-            ? OperatoreFiltroProdotto.uguale
-            : OperatoreFiltroProdotto.contiene;
-      }
-      _valueCtrl.text = text;
-      _valueCtrl.selection = TextSelection.collapsed(offset: text.length);
-    });
-    if (value == CampoFiltroProdotto.ricercaRapida) {
-      _searchDebounce?.cancel();
-      widget.controller.setFiltroRicerca(text);
-    }
-    widget.onStateChanged();
-  }
-
-  void _applyFilter() {
-    final raw = _valueCtrl.text.trim();
-    if (raw.isEmpty) return;
-    final resolved =
-        ProdottoFilterEngine.resolveCampoFromInput(
-          context.l10n,
-          _campoCtrl.text,
-        ) ??
-        _campo;
-    if (resolved == CampoFiltroProdotto.ricercaRapida) {
-      _searchDebounce?.cancel();
-      widget.controller.setFiltroRicerca(raw);
-      widget.onStateChanged();
-      return;
-    }
-    if (!_operatoreDisponibile(_operatore)) {
-      NotificationService.instance.messageBar(
-        'warning',
-        'prodotti_gestisci',
-        context.l10n.productsOperatorNotAvailable,
-      );
-      return;
-    }
-    widget.controller.addFiltroProdotto(
-      campo: resolved,
-      operatore: _operatore,
-      valoreInput: raw,
-    );
-    _valueCtrl.clear();
-    widget.onStateChanged();
-  }
-
-  void _clearAll() {
-    _valueCtrl.clear();
-    widget.controller.cancellaFiltro();
-    widget.controller.clearFiltriProdotto();
-    widget.controller.setNascondiProdottiEsauriti(false);
-    widget.onStateChanged();
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final narrow = constraints.maxWidth < 720;
-        final searchWidth = narrow ? constraints.maxWidth : 320.0;
-        // Default automatico solo finche l'utente non sceglie: retratto su
-        // smartphone per lasciare spazio al datagrid, espanso su desktop.
-        // Dopo il primo tap vale solo la scelta manuale.
-        final espanso = _espanso ?? !narrow;
-        void toggleEspanso() => setState(() => _espanso = !espanso);
-        // Chiuso e una toolbar: solo icona, etichetta e freccia, senza riquadro
-        // per non contendere spazio alla griglia. Aperto diventa un pannello con
-        // riempimento tonale, che lo distingue dal fondo del pane senza
-        // aggiungere un secondo bordo accanto a quello del pane stesso.
-        return Container(
-          margin: const EdgeInsets.fromLTRB(
-            _kEdgeInset,
-            _kEdgeInsetVertical,
-            _kEdgeInset,
-            _kEdgeInsetVertical,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: _kEdgeInset,
-            vertical: _kEdgeInsetVertical,
-          ),
-          decoration: BoxDecoration(
-            color: espanso
-                ? theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.55,
-                  )
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(_kCardRadius),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: toggleEspanso,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: EdgeInsets.zero,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.filter_alt_outlined,
-                            color: theme.primaryColor,
-                            size: 18,
-                          ),
-                          const SizedBox(width: _kControlGap),
-                          Text(
-                            context.l10n.productsFilter,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: toggleEspanso,
-                            tooltip: espanso
-                                ? context.l10n.productsCollapseFilters
-                                : context.l10n.productsExpandFilters,
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              espanso ? Icons.expand_less : Icons.expand_more,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  _CommandIconButton(
-                    onPressed: widget.onOpenColumns,
-                    icon: Icons.view_column_outlined,
-                    tooltip: context.l10n.prodottiScegliColonne,
-                    color: theme.primaryColor,
-                  ),
-                ],
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                child: espanso
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: _kControlGap),
-                          Wrap(
-                            spacing: _kControlGap,
-                            runSpacing: _kControlGap,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: searchWidth,
-                                child: TextField(
-                                  controller: _valueCtrl,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        _campo ==
-                                            CampoFiltroProdotto.ricercaRapida
-                                        ? context.l10n.productsQuickSearch
-                                        : context.l10n.productsFilterValue,
-                                    hintText:
-                                        _campo ==
-                                            CampoFiltroProdotto.ricercaRapida
-                                        ? context.l10n.productsSearchAllFields
-                                        : context
-                                              .l10n
-                                              .productsQuickSearchExample,
-                                    prefixIcon: const Icon(Icons.search),
-                                    suffixIcon: _valueCtrl.text.isNotEmpty
-                                        ? IconButton(
-                                            icon: const Icon(Icons.clear),
-                                            onPressed: () {
-                                              _searchDebounce?.cancel();
-                                              setState(
-                                                () => _valueCtrl.clear(),
-                                              );
-                                              if (_campo ==
-                                                  CampoFiltroProdotto
-                                                      .ricercaRapida) {
-                                                widget.controller
-                                                    .cancellaFiltro();
-                                                widget.onStateChanged();
-                                              }
-                                            },
-                                          )
-                                        : null,
-                                  ),
-                                  onChanged: (v) {
-                                    if (_campo ==
-                                        CampoFiltroProdotto.ricercaRapida) {
-                                      _scheduleQuickSearch(v);
-                                    }
-                                    setState(() {});
-                                  },
-                                  onSubmitted: (_) => _applyFilter(),
-                                ),
-                              ),
-                              SizedBox(
-                                width: narrow
-                                    ? (constraints.maxWidth - _kControlGap) / 2
-                                    : 220,
-                                child:
-                                    DropdownButtonFormField<
-                                      CampoFiltroProdotto
-                                    >(
-                                      initialValue: _campo,
-                                      isExpanded: true,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            context.l10n.prodottiCampoFiltro,
-                                        isDense: true,
-                                      ),
-                                      onChanged: (v) {
-                                        if (v != null) _onCampoChanged(v);
-                                      },
-                                      items: CampoFiltroProdotto.values
-                                          .map(
-                                            (c) => DropdownMenuItem(
-                                              value: c,
-                                              child: Text(
-                                                _campoLabel(context, c),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                              ),
-                              SizedBox(
-                                width: narrow
-                                    ? (constraints.maxWidth - _kControlGap) / 2
-                                    : 180,
-                                child:
-                                    DropdownButtonFormField<
-                                      OperatoreFiltroProdotto
-                                    >(
-                                      initialValue: _operatore,
-                                      isExpanded: true,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            context.l10n.prodottiOperatore,
-                                        isDense: true,
-                                      ),
-                                      onChanged: (v) {
-                                        if (v != null)
-                                          setState(() => _operatore = v);
-                                      },
-                                      items: _operators()
-                                          .where(_operatoreDisponibile)
-                                          .map(
-                                            (o) => DropdownMenuItem(
-                                              value: o,
-                                              child: Tooltip(
-                                                waitDuration: const Duration(
-                                                  milliseconds: 850,
-                                                ),
-                                                message: _operatoreTooltip(
-                                                  context,
-                                                  o,
-                                                ),
-                                                child: Text(
-                                                  _operatoreLabel(context, o),
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                              ),
-                              FilledButton.icon(
-                                onPressed: _applyFilter,
-                                icon: const Icon(Icons.add),
-                                label: Text(
-                                  _campo == CampoFiltroProdotto.ricercaRapida
-                                      ? context.l10n.productsApplySearch
-                                      : context.l10n.productsAddFilter,
-                                ),
-                              ),
-                              _CommandIconButton(
-                                onPressed: widget.onRefresh == null
-                                    ? null
-                                    : () => widget.onRefresh!(),
-                                icon: Icons.refresh,
-                                tooltip: context.l10n.prodottiAggiornaCache,
-                                color: theme.colorScheme.secondary,
-                              ),
-                              if (widget.onPrintLabels != null)
-                                _CommandIconButton(
-                                  onPressed: widget.selectedCount == 0
-                                      ? null
-                                      : widget.onPrintLabels,
-                                  icon: Icons.print_outlined,
-                                  tooltip: widget.selectedCount == 0
-                                      ? context.l10n.productsPrintLabelsSelect
-                                      : context.l10n.productsPrintLabels,
-                                  color: theme.colorScheme.primary,
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: _kControlGap),
-                          Wrap(
-                            spacing: _kControlGap,
-                            runSpacing: _kControlGap,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: narrow ? constraints.maxWidth : 260,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: theme.inputDecorationTheme.fillColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: theme.dividerColor.withValues(
-                                        alpha: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: DropdownButtonHideUnderline(
-                                      child:
-                                          DropdownButton<OrdinamentoProdotti>(
-                                            value: widget
-                                                .controller
-                                                .ordinamentoCorrente,
-                                            isExpanded: true,
-                                            icon: Icon(
-                                              Icons.sort,
-                                              color: theme.primaryColor,
-                                            ),
-                                            onChanged: (v) {
-                                              if (v != null) {
-                                                widget.controller
-                                                    .setOrdinamento(v);
-                                                widget.onStateChanged();
-                                              }
-                                            },
-                                            items: OrdinamentoProdotti.values
-                                                .map(
-                                                  (o) => DropdownMenuItem(
-                                                    value: o,
-                                                    child: Text(
-                                                      _ordinamentoLabel(o),
-                                                    ),
-                                                  ),
-                                                )
-                                                .toList(),
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              FilterChip(
-                                selected:
-                                    widget.controller.nascondiProdottiEsauriti,
-                                showCheckmark: true,
-                                avatar: const Icon(
-                                  Icons.inventory_2_outlined,
-                                  size: 18,
-                                ),
-                                label: Text(
-                                  context.l10n.prodottiNonMostrareEsauriti,
-                                ),
-                                onSelected: (value) {
-                                  widget.onHideOutOfStockChanged(value);
-                                  setState(() {});
-                                },
-                              ),
-                              TextButton.icon(
-                                onPressed: widget.controller.hasFiltroAttivo
-                                    ? _clearAll
-                                    : null,
-                                icon: const Icon(Icons.clear_all),
-                                label: Text(context.l10n.prodottiCancellaTutti),
-                              ),
-                            ],
-                          ),
-                          if (widget.controller.nascondiProdottiEsauriti ||
-                              widget
-                                  .controller
-                                  .filtriProdottoAttivi
-                                  .isNotEmpty) ...[
-                            const SizedBox(height: _kControlGap),
-                            Wrap(
-                              spacing: _kControlGap,
-                              runSpacing: _kControlGap,
-                              children: [
-                                if (widget.controller.nascondiProdottiEsauriti)
-                                  InputChip(
-                                    label: Text(
-                                      context.l10n.prodottiEsauritiNascosti,
-                                    ),
-                                    onDeleted: () {
-                                      widget.onHideOutOfStockChanged(false);
-                                      setState(() {});
-                                    },
-                                  ),
-                                for (
-                                  int i = 0;
-                                  i <
-                                      widget
-                                          .controller
-                                          .filtriProdottoAttivi
-                                          .length;
-                                  i++
-                                )
-                                  InputChip(
-                                    label: Text(
-                                      widget.controller.filtriProdottoAttivi[i]
-                                          .chipLabel(context.l10n),
-                                    ),
-                                    onDeleted: () {
-                                      widget.controller.removeFiltroProdottoAt(
-                                        i,
-                                      );
-                                      widget.onStateChanged();
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CommandIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final IconData icon;
-  final String tooltip;
-  final Color color;
-
-  const _CommandIconButton({
-    required this.onPressed,
-    required this.icon,
-    required this.tooltip,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton.filledTonal(
-      onPressed: onPressed,
-      icon: Icon(icon),
-      tooltip: tooltip,
-      style: IconButton.styleFrom(
-        backgroundColor: color.withValues(alpha: 0.10),
-        foregroundColor: color,
-      ),
-    );
-  }
-}

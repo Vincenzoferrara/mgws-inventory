@@ -133,6 +133,10 @@ class DataGridListView<T> extends StatefulWidget {
 
   final void Function(BuildContext context, DataGridLoadError error)?
   onLoadError;
+
+  /// Durata della cache dell'elenco (vedi [DataGridListController.cacheTtl]).
+  /// Vale solo quando la lista crea il proprio controller.
+  final Duration? cacheTtl;
   final ValueChanged<List<T>>? onVisibleItemsChanged;
 
   const DataGridListView({
@@ -179,6 +183,7 @@ class DataGridListView<T> extends StatefulWidget {
     this.emptyDetailsSubtitle,
     this.onLoadError,
     this.onVisibleItemsChanged,
+    this.cacheTtl = const Duration(minutes: 5),
   });
 
   @override
@@ -224,6 +229,7 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
           idOf: widget.idOf,
           loadPage: widget.loadPage,
           cacheKey: widget.cacheKey,
+          cacheTtl: widget.cacheTtl,
         );
     _configureController();
     _controller.addListener(_onControllerChanged);
@@ -371,15 +377,15 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
       context,
       title: l10n.prodottiColonneVisibili,
       inputLabel: l10n.prodottiCercaColonna,
-      input_list: _columnFields.map((f) => f.label(l10n)).toList(),
+      input_list: _columnFields.map((f) => f.headerLabel(l10n)).toList(),
       preselected_list: _columnFields
           .where((f) => current.contains(f.name))
-          .map((f) => f.label(l10n))
+          .map((f) => f.headerLabel(l10n))
           .toList(),
     );
     if (!mounted || selected == null || selected.isEmpty) return;
     final next = _columnFields
-        .where((f) => selected.contains(f.label(l10n)))
+        .where((f) => selected.contains(f.headerLabel(l10n)))
         .map((f) => f.name)
         .toList();
     if (next.isEmpty) return;
@@ -762,7 +768,7 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
                   icon: const Icon(Icons.clear_all),
                   label: Text(context.l10n.prodottiDeseleziona),
                 ),
-                if (widget.onDelete != null && widget.checkedIds == null)
+                if (widget.onDelete != null)
                   FilledButton.icon(
                     onPressed: () => widget.onDelete!(null),
                     icon: const Icon(Icons.delete_outline),
@@ -819,7 +825,7 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
           _controller.setAllVisibleChecked(checked);
         }
       },
-      onDeleteShortcut: widget.onDelete == null || widget.checkedIds != null
+      onDeleteShortcut: widget.onDelete == null
           ? null
           : (item) => widget.onDelete!(_checkedIds.isNotEmpty ? null : item),
       onEscapeShortcut: _clearChecked,

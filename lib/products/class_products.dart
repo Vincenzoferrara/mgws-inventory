@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/localized_text.dart';
+import '../reuse_class/datagridview/datagridview.code.dart';
+import 'product_grid_fields.dart';
 
 // ============================================================================
 // HELPER FUNCTIONS PER GESTIONE NULL
@@ -24,6 +26,11 @@ double doubleNotNull(double? value) => value ?? 0.0;
 // ============================================================================
 
 class ProdottoGlobal {
+  /// Campi del prodotto per le liste gestionali (filtri, colonne,
+  /// ordinamento), descritti in `product_grid_fields.dart`.
+  static List<DataGridField<ProdottoGlobal>> get gridFields =>
+      prodottoGridFields;
+
   final int? id;
   final String? nome;
 
