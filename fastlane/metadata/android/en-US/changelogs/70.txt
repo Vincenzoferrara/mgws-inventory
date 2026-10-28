@@ -1,0 +1,2 @@
+- Drop the dead local package checkouts from the workflows
+- Keep Orders read-only by hiding New order behind ORDER_CREATE
