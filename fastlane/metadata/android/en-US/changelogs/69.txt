@@ -1,0 +1,8 @@
+- Open the log viewer from a home card and make the top-bar button optional
+- Move Loyalty cards and Employees onto DataGridListView
+- Do not build the list grid before its columns are known
+- Document the generic list library and the list screens
+- Move Customers, Orders and Coupons onto DataGridListView and add Users
+- Add list models with grid fields and paginated queries
+- Move the Products list onto the generic DataGridListView
+- Make the datagridview library generic over the list model
