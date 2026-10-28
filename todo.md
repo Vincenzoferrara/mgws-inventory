@@ -62,15 +62,6 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - rischio: senza re-check, l'utente vede l'errore solo quando agisce; con re-check continuo, si aggiunge traffico inutile su una connessione stabile
   - verifica minima: scelta documentata in `lib/doc/architecture.md`
 
-- [ ] Sistemare la suite `flutter test` dopo il push non verificato del 2026-09-29
-  - tipo: test/regressione
-  - priorita: high
-  - obiettivo: riportare verde la suite Flutter dopo l'invio dei commit locali a GitHub
-  - perche: il push e' stato fatto su richiesta esplicita saltando il gate dei test; la suite aveva fallimenti in `test/prodotti/product_visual_refresh_test.dart`, `test/prodotti/filters_bar_layout_test.dart` e `test/woo_variations_e2e_test.dart`
-  - note: il test F-Droid `test/fdroid/barcode_scanner_fdroid_test.dart` e' stato committato insieme al passaggio a `flutter_zxing`; resta da verificare tutta la suite dopo il push saltato
-  - note 2026-10-02: misurata 89 test verdi e 18 rossi, falliti soprattutto in `test/prodotti/filters_bar_layout_test.dart`; i fallimenti non dipendono dal guard del primo frame introdotto in `lib/main.dart`, perche quel file di test non importa `main.dart` ne `reuse_class/gui/viewport_guard.dart`
-  - verifica minima: `flutter test` termina con esito positivo oppure i test live/e2e instabili vengono separati dal gate ordinario con una scelta documentata
-
 - [ ] Collegare i dati reali ai report di stampa
   - tipo: app/plugin/report
   - priorita: high
@@ -348,6 +339,8 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - obiettivo: evitare esposizione di segreti sensibili a utenti non autorizzati
 
 ## Audit esteso 3 - caldav, dashboard, settings, ai
+
+Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV`, default `false`, in `lib/home/home.gui.dart`). Le voci CalDAV qui sotto servono prima di riattivarlo; `CalDavLoginTab` in `lib/login/gui/caldav_login.gui.dart` non e' usato da nessuna schermata.
 
 - [ ] CalDAV: bloccare Basic Auth su HTTP
   - tipo: bug/security
@@ -857,6 +850,8 @@ Piano operativo per pubblicare MGWS Inventory come software libero (GPL-3.0) sos
 
 Gia' fatto (22 ottobre 2026): licenza GPL-3.0 con tab `Info` e licenze open source nell'app; consenso prima dell'invio di dati ai servizi IA cloud; nome "MGWS Inventory" su tutte le piattaforme; opzioni di build `DONATIONS` e `UPDATE_CHECK`; permessi macOS e predisposizione iOS; `report_flutter` da GitHub con versione `1.0.58+58`; `fastlane/` per F-Droid, `PRIVACY.md`, `CONTRIBUTING.md`, `SECURITY.md`; README e `lib/doc` in inglese con funzioni divise tra "solo app" e "con plugin MGWS"; cartelle e file rinominati in inglese; test rimossi; `report_flutter` pronta per pub.dev (dry-run pulito, 12 screenshot, schermate in inglese e italiano).
 
+Gia' fatto (27 ottobre 2026): `report_flutter` pubblicata su pub.dev e usata dall'app come `^1.0.0` (lock da pub.dev, nessun override); release pubbliche fino a `v1.0.67` con installer/zip Windows, AppImage, Flatpak, APK e AAB; push su GitHub con `Flutter Build` verde; 8 screenshot dell'app in `fastlane/metadata/android/en-US/images/phoneScreenshots/` e nel README; ricetta F-Droid `fdroid/it.mgws.mgws_inventory.yml` con build riproducibile verificata, NonFreeNet e `Donate` Ko-fi; modelli issue in `.github/ISSUE_TEMPLATE/`; `.github/FUNDING.yml` con Ko-fi.
+
 Decisioni prese: pulizia di `docker/` dalla cronologia del repo saltata; nessuna email di contatto per gli store (contatto = issue GitHub); iOS e App Store rimandati.
 
 ### Fase 1 - Chiusura del codice
@@ -868,16 +863,18 @@ Decisioni prese: pulizia di `docker/` dalla cronologia del repo saltata; nessuna
   - perche: con l'app in inglese alcune schermate mostrano ancora testi italiani
   - verifica minima: nessuna stringa italiana visibile con lingua inglese; `flutter analyze` pulito
 
-- [ ] Provare l'app completa e fare il push su GitHub
+- [ ] Provare l'app completa sul WordPress locale
   - tipo: verifica/release
   - priorita: high
-  - obiettivo: provare cassa, magazzino, stampa, tab `Info` e consenso IA sul WordPress locale, rileggere i commit e fare `git push origin master`
-  - verifica minima: workflow `Flutter Build` verde su GitHub
+  - obiettivo: provare cassa, magazzino, stampa, tab `Info` e consenso IA sul WordPress locale prima della comunicazione pubblica
+  - stato: push e `Flutter Build` verde fatti; la prova manuale completa non risulta registrata
+  - verifica minima: nessun blocco nei flussi principali con dati di prova
 
 - [ ] Configurare il repository GitHub
   - tipo: process
   - priorita: medium
-  - obiettivo: attivare Private vulnerability reporting (Settings → Security), descrizione, topics (`flutter`, `woocommerce`, `pos`, `inventory`, `open-source`, `retail`), immagine social, modelli per le issue in `.github/ISSUE_TEMPLATE/`
+  - obiettivo: attivare Private vulnerability reporting (Settings → Security), descrizione, topics (`flutter`, `woocommerce`, `pos`, `inventory`, `open-source`, `retail`), immagine social
+  - stato: modelli issue gia' presenti; al 28 ottobre 2026 descrizione vuota, nessun topic, segnalazione privata disattivata
   - perche: il link in `SECURITY.md` non funziona finche' la segnalazione privata non e' attiva
   - verifica minima: "Report a vulnerability" visibile nella scheda Security
 
@@ -906,18 +903,11 @@ Decisioni prese: pulizia di `docker/` dalla cronologia del repo saltata; nessuna
 
 ### Fase 3 - Libreria report_flutter su pub.dev
 
-- [ ] Pubblicare report_flutter su pub.dev
-  - tipo: release
-  - priorita: high
-  - obiettivo: `cd ../../report && flutter pub publish` (login Google)
-  - nota: un pacchetto pubblicato non si cancella, si puo' solo marcare "discontinued"
-  - verifica minima: pagina <https://pub.dev/packages/report_flutter> con README, screenshot e licenza GPL-3.0
-
-- [ ] Passare l'app alla versione pub.dev di report_flutter
-  - tipo: app/dipendenze
-  - priorita: high
-  - obiettivo: sostituire la dipendenza Git con `report_flutter: ^1.0.0`, rigenerare `pubspec.lock` senza `pubspec_overrides.yaml`, aggiornare `lib/doc/developer-guide.md`
-  - verifica minima: `flutter pub get` e `flutter analyze` puliti senza override
+- [ ] Aggiornare `lib/doc/developer-guide.md` dopo il passaggio a pub.dev
+  - tipo: documentazione
+  - priorita: medium
+  - obiettivo: la guida dice ancora che `report_flutter` e' fissata a un commit GitHub e passera' a pub.dev; l'app usa gia' `report_flutter: ^1.0.0` da pub.dev
+  - verifica minima: la guida descrive la dipendenza pub.dev e come usare un override locale solo per sviluppare la libreria
 
 ### Fase 4 - Plugin MGWS su GitHub e wordpress.org
 
@@ -944,18 +934,12 @@ Repository: <https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>
 
 ### Fase 5 - Release su GitHub e Obtainium
 
-- [ ] Creare la prima release pubblica v1.0.58
-  - tipo: release
-  - priorita: high
-  - obiettivo: tag `v1.0.58` (uguale a `version: 1.0.58+58` nel `pubspec.yaml`, necessario per F-Droid) che avvia `Velopack Release`; note di rilascio in inglese
-  - verifica minima: installer e zip Windows, AppImage Linux, APK e AAB firmati presenti e installabili; badge Obtainium funzionante
-
-- [ ] Fare gli screenshot dell'app e un video demo
+- [ ] Fare un video demo dell'app
   - tipo: marketing/docs
-  - priorita: high
-  - obiettivo: screenshot reali (cassa, prodotti, magazzino, stampa, dashboard) dal WordPress locale con dati di prova, per README, F-Droid e Play; video di 1-2 minuti per Reddit e Kickstarter
-  - perche: oggi esistono solo gli screenshot della libreria
-  - verifica minima: screenshot nel README e in `fastlane/metadata/android/*/images/phoneScreenshots/`
+  - priorita: medium
+  - obiettivo: video di 1-2 minuti (cassa, prodotti, magazzino, stampa, dashboard) dal WordPress locale con dati di prova, per Reddit e Kickstarter
+  - perche: gli screenshot ci sono gia', il video no
+  - verifica minima: video linkato nel README
 
 ### Fase 6 - Donazioni
 
@@ -974,17 +958,11 @@ Repository: <https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>
 
 ### Fase 7 - F-Droid
 
-- [ ] Preparare la ricetta di build per fdroiddata
-  - tipo: release/build
-  - priorita: high
-  - obiettivo: `it.mgws.mgws_inventory.yml` con Flutter come srclib, `--dart-define=UPDATE_CHECK=false`, licenza GPL-3.0, anti-feature NonFreeNet (provider IA proprietari), campi donazione
-  - rischio: `velopack_flutter` compila codice Rust: verificare che non entri nella build Android, altrimenti escluderlo su Android o aggiungere Rust alla ricetta
-  - verifica minima: `fdroid build` locale riuscito
-
 - [ ] Inviare la merge request a fdroiddata
   - tipo: release
   - priorita: high
   - obiettivo: account gitlab.com, merge request a `fdroid/fdroiddata`, risposte ai revisori; facoltativo: build riproducibili per pubblicare con la propria firma
+  - stato: ricetta `fdroid/it.mgws.mgws_inventory.yml` pronta, `fdroid build` locale riuscito il 27 ottobre 2026 su `1.0.66`; l'ultima release e' `v1.0.67`, valutare se aggiornare la ricetta prima dell'invio; testo MR in `../fdroid-test/mr-description.md`
   - verifica minima: app su <https://f-droid.org/packages/it.mgws.mgws_inventory/>
 
 - [ ] Fare il backup sicuro della chiave di firma Android
