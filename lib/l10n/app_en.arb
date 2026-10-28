@@ -13833,5 +13833,17 @@
   "feedbackLingue": "Write in English or Italian.",
   "@feedbackLingue": {
     "description": "Hint under the feedback description: the only accepted languages"
+  },
+  "homeSottotitoloLog": "Read the app logs for debugging",
+  "@homeSottotitoloLog": {
+    "description": "Subtitle of the home card and drawer item that open the log viewer"
+  },
+  "settingsLogButtonInAppBar": "Log button in the top bar",
+  "@settingsLogButtonInAppBar": {
+    "description": "Settings switch: also show the log button in the home top bar"
+  },
+  "settingsLogButtonInAppBarDescription": "The log viewer is always available from its card and the side menu. Turn this on to also keep the shortcut at the top of the home.",
+  "@settingsLogButtonInAppBarDescription": {
+    "description": "Description of the switch that shows the log button in the home top bar"
   }
 }

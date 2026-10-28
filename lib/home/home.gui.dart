@@ -28,6 +28,7 @@ import '../products/product_list/product_list.gui.dart';
 import '../report/print_job.dart';
 import '../report/report.gui.dart';
 import '../reuse_class/gui/mgws_unavailable_notice.dart';
+import '../settings/home_ui_settings.dart';
 import '../settings/settings.gui.dart';
 import '../theme/theme.dart';
 import '../notification/notification_bell.gui.dart';
@@ -78,6 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _desktopTabsListener = () => setState(() {});
     _homeLogic.desktopLayout.addListener(_desktopTabsListener);
     homeSectionRequest.addListener(_openRequestedSection);
+    homeUiSettings.addListener(_desktopTabsListener);
+    homeUiSettings.init();
     _initializeAuth();
     NotificationCenter.instance.start();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -184,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _homeLogic.desktopLayout.removeListener(_desktopTabsListener);
     homeSectionRequest.removeListener(_openRequestedSection);
+    homeUiSettings.removeListener(_desktopTabsListener);
     NotificationCenter.instance.stop();
     super.dispose();
   }
@@ -264,10 +268,6 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: () => const ClientiGestisciPage(),
       ),
       _HomeSection(
-        id: 'fornitori',
-        title: context.l10n.homeTitoloFornitori,
-        subtitle: context.l10n.homeSottotitoloFornitori,
-      _HomeSection(
         id: 'utenti',
         title: context.l10n.homeTitoloUtenti,
         subtitle: context.l10n.homeSottotitoloUtenti,
@@ -276,6 +276,10 @@ class _HomeScreenState extends State<HomeScreen> {
         openMode: HomeTabOpenMode.duplicate,
         builder: () => const UtentiGestisciPage(),
       ),
+      _HomeSection(
+        id: 'fornitori',
+        title: context.l10n.homeTitoloFornitori,
+        subtitle: context.l10n.homeSottotitoloFornitori,
         icon: Icons.local_shipping,
         iconColor: accents.fornitori,
         openMode: HomeTabOpenMode.duplicate,
@@ -331,6 +335,16 @@ class _HomeScreenState extends State<HomeScreen> {
         openMode: HomeTabOpenMode.singleton,
         requiresAuth: false,
         builder: () => const UpdaterPage(),
+      ),
+      _HomeSection(
+        id: 'log',
+        title: context.l10n.logTitolo,
+        subtitle: context.l10n.homeSottotitoloLog,
+        icon: Icons.bug_report,
+        iconColor: context.colors.errorColorStatus,
+        openMode: HomeTabOpenMode.singleton,
+        requiresAuth: false,
+        builder: () => const LogViewerScreen(),
       ),
       if (_caldavEnabled)
         _HomeSection(
@@ -707,7 +721,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Bottone log riusato dalla vecchia home (bug_report rosso su cerchio nero).
+  /// Scorciatoia in AppBar al visualizzatore log, mostrata solo se attivata
+  /// nelle impostazioni: di base il log si apre dalla sua card o dal drawer.
   Widget _buildLogButton() {
     return IconButton(
       icon: Container(
@@ -942,7 +957,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onOpenSection: _openSectionById,
           ),
           _buildFeedbackButton(),
-          _buildLogButton(),
+          if (homeUiSettings.logButtonInAppBar) _buildLogButton(),
           _buildAuthAction(),
           const SizedBox(width: 8),
         ],

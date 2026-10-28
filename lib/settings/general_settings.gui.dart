@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'checkout_settings.dart';
+import 'home_ui_settings.dart';
 import '../notification/app_notification.dart';
 import '../notification/notification_bell.gui.dart';
 import '../notification/notification_center.dart';
@@ -84,6 +85,8 @@ class _GeneralSettingsTabState extends State<GeneralSettingsTab> {
             ),
             const SizedBox(height: 28),
             const _SezioneNotifiche(),
+            const SizedBox(height: 20),
+            const _SezioneBottoneLog(),
           ],
         ),
       ),
@@ -205,6 +208,26 @@ class _SezioneNotifiche extends StatelessWidget {
               onChanged: (enabled) => center.setEnabled(kind, enabled),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Interruttore della scorciatoia al visualizzatore log in AppBar della home.
+class _SezioneBottoneLog extends StatelessWidget {
+  const _SezioneBottoneLog();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: homeUiSettings,
+      builder: (context, _) => SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        secondary: const Icon(Icons.bug_report),
+        title: Text(context.l10n.settingsLogButtonInAppBar),
+        subtitle: Text(context.l10n.settingsLogButtonInAppBarDescription),
+        value: homeUiSettings.logButtonInAppBar,
+        onChanged: homeUiSettings.setLogButtonInAppBar,
       ),
     );
   }

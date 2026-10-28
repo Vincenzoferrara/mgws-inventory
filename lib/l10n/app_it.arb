@@ -13830,5 +13830,17 @@
   "feedbackLingue": "Scrivi in italiano o in inglese.",
   "@feedbackLingue": {
     "description": "Suggerimento sotto la descrizione del feedback: le sole lingue accettate"
+  },
+  "homeSottotitoloLog": "Leggi i log dell'app per il debug",
+  "@homeSottotitoloLog": {
+    "description": "Subtitle of the home card and drawer item that open the log viewer"
+  },
+  "settingsLogButtonInAppBar": "Bottone log nella barra in alto",
+  "@settingsLogButtonInAppBar": {
+    "description": "Settings switch: also show the log button in the home top bar"
+  },
+  "settingsLogButtonInAppBarDescription": "Il visualizzatore log è sempre disponibile dalla sua card e dal menu laterale. Attivalo per tenere anche la scorciatoia in alto nella home.",
+  "@settingsLogButtonInAppBarDescription": {
+    "description": "Description of the switch that shows the log button in the home top bar"
   }
 }
