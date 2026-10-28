@@ -11,9 +11,6 @@ on:
 env:
   FLUTTER_VERSION: '3.47.5'
   PROJECT_PATH: src/mgws_inventory
-  REPORT_REPO: ${{ vars.REPORT_REPO || 'Vincenzoferrara/report_flutter' }}
-  REPORT_REF: ${{ vars.REPORT_REF || 'main' }}
-  ADS_CONNECTOR_REPO: ${{ vars.ADS_CONNECTOR_REPO || 'Vincenzoferrara/ads_connector_flutter' }}
 
 jobs:
   check:
@@ -27,30 +24,6 @@ jobs:
             /*
             !/docker/
           sparse-checkout-cone-mode: false
-
-      - name: Checkout local package report
-        uses: actions/checkout@v7
-        with:
-          repository: ${{ env.REPORT_REPO }}
-          ref: ${{ env.REPORT_REF }}
-          path: report
-
-      - name: Checkout local package ads_connector_flutter
-        uses: actions/checkout@v7
-        with:
-          repository: ${{ env.ADS_CONNECTOR_REPO }}
-          path: ads_connector_flutter
-
-      - name: Verify external local packages
-        run: |
-          missing=0
-          for dir in report ads_connector_flutter; do
-            if [ ! -d "$GITHUB_WORKSPACE/$dir" ]; then
-              echo "::error::Missing local package '$dir'. Set repository variable '$([ "$dir" = report ] && printf REPORT_REPO || printf ADS_CONNECTOR_REPO)' to owner/repo or vendor the package into this repository."
-              missing=1
-            fi
-          done
-          exit $missing
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2

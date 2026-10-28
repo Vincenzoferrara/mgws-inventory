@@ -220,9 +220,8 @@ Use `context.text.<style>?.copyWith(...)`. `elevation: 4` is already the
 
 ## Dependencies
 
-- `report_flutter` is pinned to a commit of
-  <https://github.com/Vincenzoferrara/report_flutter> in `pubspec.yaml`, and
-  will move to the pub.dev release once published. To work on the library
+- `report_flutter` comes from pub.dev (`^1.0.0`,
+  <https://github.com/Vincenzoferrara/report_flutter>). To work on the library
   next to the app, create a `pubspec_overrides.yaml` (ignored by git):
 
   ```yaml
@@ -388,9 +387,8 @@ other change to the workflows is needed.
   2. On pub.dev, package Admin → Automated publishing: enable "Publishing from
      GitHub Actions", repository `Vincenzoferrara/report_flutter`, tag pattern
      `v{{version}}`.
-  3. Then bump `version:` in the library, commit, and push the tag `vX.Y.Z`.
-  4. Point the app's `report_flutter` dependency to the pub.dev version
-     instead of the Git commit.
+  3. Then bump `version:` in the library and its `CHANGELOG.md`, commit, and
+     push the tag `vX.Y.Z`. Nothing is published on a push to `main`.
 - **wordpress.org (plugin)**
   1. Submit the zip at <https://wordpress.org/plugins/developers/add/> and
      wait for approval. The slug assigned by the review must be
