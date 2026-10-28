@@ -1,5 +1,3 @@
-import '../../l10n/error_text.dart';
-import '../../l10n/localized_text.dart';
 import '../../login/jwt_api/adapter/platform_manager.dart';
 import '../../log_viewer/app_logger.dart';
 import '../class_orders.dart';

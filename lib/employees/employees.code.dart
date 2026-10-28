@@ -3,6 +3,9 @@ import '../l10n/localized_text.dart';
 import 'package:flutter/foundation.dart';
 
 import '../login/jwt_api/adapter/platform_manager.dart';
+import '../reuse_class/datagridview/datagridview.code.dart';
+import '../reuse_class/datagridview/datagridview_list.code.dart';
+import '../reuse_class/logic/global_pagination_controller.dart';
 
 class Dipendente {
   final int id;
@@ -32,6 +35,65 @@ class Dipendente {
   final List<String>? documenti; // nomi file documenti allegati
   final double? venditeTotali; // per ruoli di vendita
   final int? produzioneTotale; // per ruoli di produzione
+
+  String get nomeCompleto => '$nome $cognome'.trim();
+
+  /// Campi del dipendente per la lista Dipendenti. MGWS restituisce tutti i
+  /// dipendenti in una volta, quindi filtri e ordinamento lavorano in
+  /// memoria.
+  static final List<DataGridField<Dipendente>> gridFields =
+      <DataGridField<Dipendente>>[
+        DataGridField<Dipendente>(
+          name: 'nome',
+          label: (l10n) => l10n.commonName,
+          aliases: const <String>['nome', 'cognome', 'dipendente', 'name'],
+          read: (d) => <Object?>[d.nomeCompleto],
+          sortable: true,
+          width: 200,
+          flexible: true,
+        ),
+        DataGridField<Dipendente>(
+          name: 'email',
+          label: (l10n) => l10n.employeesEmailLabel,
+          aliases: const <String>['email', 'mail'],
+          read: (d) => <Object?>[d.email],
+          sortable: true,
+          width: 220,
+        ),
+        DataGridField<Dipendente>(
+          name: 'ruolo',
+          label: (l10n) => l10n.employeesRoleLabel,
+          aliases: const <String>['ruolo', 'role', 'mansione'],
+          read: (d) => <Object?>[d.ruolo],
+          sortable: true,
+          width: 160,
+        ),
+        DataGridField<Dipendente>(
+          name: 'stipendio',
+          label: (l10n) => l10n.employeesSalaryTitle,
+          aliases: const <String>['stipendio', 'salary'],
+          type: DataGridFieldType.numero,
+          read: (d) => <Object?>[d.stipendio],
+          format: (l10n, d) =>
+              '${d.stipendio.toStringAsFixed(2)} ${d.stipendioValuta}',
+          sortable: true,
+          searchable: false,
+          width: 130,
+          numeric: true,
+        ),
+        DataGridField<Dipendente>(
+          name: 'utenteWordPress',
+          label: (l10n) => l10n.employeesWordPressUser,
+          aliases: const <String>['utente', 'wordpress', 'wp'],
+          type: DataGridFieldType.numero,
+          read: (d) => <Object?>[if (d.wpUserId > 0) d.wpUserId],
+          format: (l10n, d) =>
+              d.wpUserId > 0 ? '#${d.wpUserId}' : l10n.employeesNotLinked,
+          sortable: true,
+          searchable: false,
+          width: 150,
+        ),
+      ];
 
   Dipendente({
     required this.id,
@@ -167,6 +229,30 @@ class DipendentiService extends ChangeNotifier {
   List<Dipendente> get dipendenti => _dipendenti;
   bool get isLoading => _isLoading;
   LocalizedText? get errore => _errore;
+
+  /// Massimo di dipendenti che MGWS restituisce in una richiesta.
+  static const int _limiteMgws = 200;
+
+  /// `loadPage` della lista Dipendenti: MGWS non pagina, quindi la prima
+  /// pagina e' gia' l'elenco completo e la lista lo filtra in memoria.
+  Future<PaginatedResult<Dipendente>> caricaPagina(
+    DataGridPageRequest request,
+  ) async {
+    final rows = await PlatformManager.dipendenti.listEmployees(
+      limit: _limiteMgws,
+    );
+    final dipendenti = (rows as List<Map<String, dynamic>>)
+        .map(Dipendente.fromJson)
+        .toList(growable: false);
+    _dipendenti = dipendenti;
+    return PaginatedResult<Dipendente>(
+      items: dipendenti,
+      page: request.page,
+      perPage: request.perPage,
+      totalItems: dipendenti.length,
+      hasMore: false,
+    );
+  }
 
   Future<void> loadDipendenti() async {
     _isLoading = true;

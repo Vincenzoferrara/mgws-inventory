@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'class_loyalty_card.dart';
 import 'loyalty_cards.code.dart';
+import '../reuse_class/datagridview/datagridview_list.gui.dart';
 import '../notification/notification_service.dart';
 import '../theme/theme.dart';
 import '../reuse_class/barcode/barcode_scanner.dart';
@@ -16,7 +18,18 @@ class CartaFedeltaPage extends StatefulWidget {
 class CartaFedeltaPageState extends State<CartaFedeltaPage>
     with AutomaticKeepAliveClientMixin {
   final CartaFedeltaController _controller = CartaFedeltaController();
-  final TextEditingController _searchController = TextEditingController();
+  late final DataGridListController<CartaFedeltaGlobal> _listController =
+      DataGridListController<CartaFedeltaGlobal>(
+        fields: CartaFedeltaGlobal.gridFields,
+        idOf: _idOf,
+        loadPage: _controller.caricaPagina,
+        cacheKey: 'carte-fedelta',
+        // La ricerca deve trovare anche i numeri di carta, che il server dei
+        // clienti non conosce: si cerca sull'elenco completo.
+        serverSearch: false,
+      );
+
+  static String _idOf(CartaFedeltaGlobal carta) => '${carta.customerId}';
 
   @override
   bool get wantKeepAlive => true;
@@ -24,240 +37,125 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
   @override
   void initState() {
     super.initState();
-    _caricaDati();
-  }
-
-  Future<void> _caricaDati() async {
-    await _controller.caricaClientiConCarta();
-    await _controller.caricaStatistiche();
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _updateState() {
-    setState(() {});
+    _caricaStatistiche();
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _listController.dispose();
     super.dispose();
+  }
+
+  Future<void> _caricaStatistiche() async {
+    await _controller.caricaStatistiche();
+    if (mounted) setState(() {});
+  }
+
+  /// Dopo una modifica di punti, livello o carta: lista e statistiche si
+  /// ricaricano, e il dettaglio resta sullo stesso cliente con i dati nuovi.
+  Future<void> _updateState() async {
+    final selezionato = _listController.selected.value?.customerId;
+    await Future.wait([
+      _listController.reload(force: true),
+      _caricaStatistiche(),
+    ]);
+    if (!mounted || selezionato == null) return;
+    for (final carta in _listController.cache.items.isNotEmpty
+        ? _listController.cache.items
+        : _listController.visibleItems) {
+      if (carta.customerId == selezionato) {
+        _listController.select(carta);
+        return;
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Necessario per AutomaticKeepAliveClientMixin
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isSmallScreen = constraints.maxWidth < 800;
-          if (isSmallScreen) {
-            return _buildMobileLayout();
-          } else {
-            return _buildDesktopLayout();
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _mostraDialogCercaCarta(context),
-        icon: const Icon(Icons.qr_code_scanner),
-        label: Text(context.l10n.loyaltyScanCard),
-      ),
-    );
-  }
-
-  /// Layout per desktop
-  Widget _buildDesktopLayout() {
-    return Row(
-      children: [
-        // LATO SINISTRO - Lista carte (60%)
-        Expanded(flex: 6, child: _buildListaCarteWidget()),
-
-        // Divider verticale
-        VerticalDivider(
-          width: 1,
-          thickness: 1,
-          color: Theme.of(context).dividerColor,
-        ),
-
-        // LATO DESTRO - Dettagli carta (40%)
-        Expanded(flex: 4, child: _buildDettagliCartaWidget()),
-      ],
-    );
-  }
-
-  /// Layout per mobile
-  Widget _buildMobileLayout() {
-    return Column(
-      children: [
-        // Lista carte
-        Expanded(flex: 2, child: _buildListaCarteWidget()),
-
-        Divider(height: 1, color: Theme.of(context).dividerColor),
-
-        // Dettagli carta (collapsible)
-        if (_controller.hasCartaSelezionata)
-          Expanded(flex: 1, child: _buildDettagliCartaWidget()),
-      ],
-    );
-  }
-
-  /// Widget lista carte
-  Widget _buildListaCarteWidget() {
     final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>();
-
+    final customColors = theme.extension<AppColorExtension>()!;
     return Column(
       children: [
-        // Header con ricerca e statistiche
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: customColors != null
-                  ? [
-                      customColors.headerGradientStart,
-                      customColors.headerGradientEnd,
-                    ]
-                  : [AppTheme.primaryColor, AppTheme.primaryColorDark],
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.card_membership,
-                    color: context.colors.onColoredSurface,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      context.l10n.loyaltyCardsTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: context.colors.onColoredSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  // Badge totale carte
-                  if (_controller.statistiche != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.colors.onColoredSurface,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${_controller.statistiche!.cards}',
-                        style: TextStyle(
-                          color: theme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+        // Le statistiche hanno testo chiaro: stanno sul gradiente
+        // dell'intestazione, come prima della lista generica.
+        if (_controller.statistiche != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  customColors.headerGradientStart,
+                  customColors.headerGradientEnd,
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              // Statistiche rapide
-              if (_controller.statistiche != null) _buildStatisticheRapide(),
-
-              const SizedBox(height: 16),
-
-              // Campo di ricerca
-              TextField(
-                controller: _searchController,
-                style: TextStyle(color: context.colors.onColoredSurface),
-                decoration: InputDecoration(
-                  hintText: context.l10n.loyaltySearchHint,
-                  hintStyle: TextStyle(
-                    color: context.colors.onColoredSurface.withValues(
-                      alpha: 0.7,
-                    ),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: context.colors.onColoredSurface,
-                  ),
-                  suffixIcon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_searchController.text.isNotEmpty)
-                        IconButton(
-                          icon: Icon(
-                            Icons.clear,
-                            color: context.colors.onColoredSurface,
-                          ),
-                          onPressed: () {
-                            _searchController.clear();
-                            _controller.setSearchQuery('');
-                            _updateState();
-                          },
-                        ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.qr_code_scanner,
-                          color: context.colors.onColoredSurface,
-                        ),
-                        onPressed: () => _mostraDialogCercaCarta(context),
-                      ),
-                    ],
-                  ),
-                  filled: true,
-                  fillColor: context.colors.onColoredSurface.withValues(
-                    alpha: 0.2,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                onChanged: (value) {
-                  _controller.setSearchQuery(value);
-                  _updateState();
-                },
+            ),
+            child: _buildStatisticheRapide(),
+          ),
+        Expanded(
+          child: DataGridListView<CartaFedeltaGlobal>(
+            controller: _listController,
+            fields: CartaFedeltaGlobal.gridFields,
+            idOf: _idOf,
+            loadPage: _controller.caricaPagina,
+            cacheKey: 'carte-fedelta',
+            serverSearch: false,
+            defaultColumns: const [
+              'nome',
+              'email',
+              'numeroCarta',
+              'livello',
+              'punti',
+            ],
+            defaultMobileColumns: const ['nome', 'numeroCarta', 'punti'],
+            onRefresh: _updateState,
+            toolbarActions: [
+              DataGridCommandIconButton(
+                onPressed: () => _mostraDialogCercaCarta(context),
+                icon: Icons.qr_code_scanner,
+                tooltip: context.l10n.loyaltyScanCard,
+                color: theme.colorScheme.primary,
               ),
             ],
-          ),
-        ),
-
-        // Lista carte
-        Expanded(
-          child: _controller.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _controller.clientiConCarta.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
-                  onRefresh: _caricaDati,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _controller.clientiConCarta.length,
-                    itemBuilder: (context, index) {
-                      final carta = _controller.clientiConCarta[index];
-                      return _buildCardCarta(carta);
-                    },
-                  ),
+            onRowSelected: (carta) => _controller.selezionaCarta(carta.toMap()),
+            cellsOf: (context, carta) => <String, Widget>{
+              'nome': Text(
+                carta.nomeCompleto.isEmpty ? '-' : carta.nomeCompleto,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
+              ),
+              'livello': carta.haCarta
+                  ? DataGridStatusChip(
+                      label: _tierName(carta.livello),
+                      color: _getTierColor(carta.livello),
+                    )
+                  : Text(
+                      '-',
+                      style: TextStyle(color: customColors.subtitleColor),
+                    ),
+            },
+            emptyDetailsIcon: Icons.card_membership_outlined,
+            emptyDetailsTitle: (context) => context.l10n.loyaltySelectCard,
+            detailsOf: (context, carta, inPage) {
+              final dettagli = _buildDettagliCartaWidget(carta.toMap());
+              return inPage
+                  ? Scaffold(
+                      appBar: AppBar(
+                        title: Text(context.l10n.loyaltyCardDetails),
+                      ),
+                      body: dettagli,
+                    )
+                  : dettagli;
+            },
+          ),
         ),
       ],
     );
   }
 
-  /// Statistiche rapide
   Widget _buildStatisticheRapide() {
     final stats = _controller.statistiche!;
     final colors = context.colors;
@@ -331,123 +229,9 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
   }
 
   /// Card per visualizzare una carta fedeltà (o l'assenza di carta)
-  Widget _buildCardCarta(Map<String, dynamic> entry) {
-    final theme = Theme.of(context);
-    final customColors = theme.extension<AppColorExtension>()!;
-
-    final hasCard = entry['has_card'] == true;
-    final hasCardEnabled = entry['card_enabled'] == true;
-    final tier = entry['tier'] as String? ?? 'bronze';
-    final punti = entry['points'] as int? ?? 0;
-
-    final isSelected =
-        _controller.hasCartaSelezionata &&
-        _controller.cartaSelezionata!['customer_id'] == entry['customer_id'];
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      color: isSelected ? customColors.variantSelectedBackground : null,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: hasCard
-              ? _getTierColor(tier)
-              : customColors.neutralColor,
-          child: Icon(
-            hasCard ? Icons.card_membership : Icons.person_outline,
-            color: context.colors.onColoredSurface,
-          ),
-        ),
-        title: Text(
-          '${entry['first_name']} ${entry['last_name']}',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (hasCard) ...[
-              Text(context.l10n.loyaltyCardNumber(entry['card_number'])),
-              Row(
-                children: [
-                  Icon(Icons.stars, size: 16, color: customColors.tierGold),
-                  const SizedBox(width: 4),
-                  Text(
-                    context.l10n.loyaltyPointsValue(punti),
-                    style: TextStyle(
-                      color: customColors.successColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getTierColor(tier),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _tierName(tier),
-                      style: TextStyle(
-                        color: context.colors.onColoredSurface,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  if (!hasCardEnabled) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: customColors.neutralColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        context.l10n.loyaltyNotActive,
-                        style: TextStyle(
-                          color: context.colors.onColoredSurface,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ] else ...[
-              Text(
-                context.l10n.loyaltyNoCardAssociated,
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: customColors.subtitleColor,
-                ),
-              ),
-            ],
-          ],
-        ),
-        trailing: isSelected
-            ? Icon(Icons.check_circle, color: theme.primaryColor)
-            : const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () {
-          if (hasCard) {
-            _controller.selezionaCarta(entry);
-            _updateState();
-          }
-        },
-      ),
-    );
-  }
-
   /// Widget dettagli carta selezionata
-  Widget _buildDettagliCartaWidget() {
-    if (!_controller.hasCartaSelezionata) {
+  Widget _buildDettagliCartaWidget(Map<String, dynamic> carta) {
+    if (carta['has_card'] != true) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -459,8 +243,12 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
             ),
             const SizedBox(height: 16),
             Text(
-              context.l10n.loyaltySelectCard,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              '${carta['first_name']} ${carta['last_name']}'.trim(),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Text(
+              context.l10n.loyaltyNoCardAssociated,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: context.colors.subtitleColor,
               ),
             ),
@@ -469,7 +257,6 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
       );
     }
 
-    final carta = _controller.cartaSelezionata!;
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
 
@@ -478,29 +265,6 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  _controller.deselezionaCarta();
-                  _updateState();
-                },
-              ),
-              Expanded(
-                child: Text(
-                  context.l10n.loyaltyCardDetails,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
           // Card visuale
           _buildVisualCard(carta),
 
@@ -789,40 +553,6 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
   }
 
   /// Empty state
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people_outline,
-            size: 64,
-            color: context.colors.neutralColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.loyaltyNoCustomers,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: context.colors.subtitleColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.loyaltyWooCustomersHint,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: context.colors.subtitleColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // =======================================================
-  // == DIALOGS                                           ==
-  // =======================================================
-
-  /// Dialog per cercare/scansionare carta
   Future<void> _mostraDialogCercaCarta(BuildContext context) async {
     final controller = TextEditingController();
     // Il contesto del dialog viene smontato al pop: le stringhe dei messaggi di
@@ -872,8 +602,14 @@ class CartaFedeltaPageState extends State<CartaFedeltaPage>
               final carta = await _controller.cercaCartaPerNumero(numeroCarta);
 
               if (carta != null && mounted) {
+                final trovata = CartaFedeltaGlobal.daMappa(carta);
                 _controller.selezionaCarta(carta);
-                _updateState();
+                // La ricerca per numero mostra la riga anche su telefono, dove
+                // il dettaglio non ha un pannello accanto alla lista.
+                if (trovata.haCarta) {
+                  _listController.setSearch(trovata.numeroCarta!);
+                }
+                _listController.select(trovata);
 
                 if (mounted) {
                   NotificationService.instance.messageBar(

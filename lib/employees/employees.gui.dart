@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../login/jwt_api/query_wordpress/query_user_wordpress.dart';
 import '../login/mgws/query/query_mgws_site.dart';
 import '../theme/theme.dart';
 import 'employees.code.dart'; // Import the code file for logic
 import '../l10n/extensions.dart';
+import '../reuse_class/datagridview/datagridview_list.gui.dart';
 
 class DipendentiGui extends StatefulWidget {
   const DipendentiGui({super.key});
@@ -15,248 +15,118 @@ class DipendentiGui extends StatefulWidget {
   _DipendentiGuiState createState() => _DipendentiGuiState();
 }
 
+/// Elenco dipendenti su [DataGridListView]: MGWS restituisce tutti i
+/// dipendenti in una volta, e la lista li filtra e pagina in memoria.
 class _DipendentiGuiState extends State<DipendentiGui> {
   final DipendentiService _service = DipendentiService();
-  String _searchQuery = '';
+  late final DataGridListController<Dipendente> _listController =
+      DataGridListController<Dipendente>(
+        fields: Dipendente.gridFields,
+        idOf: _idOf,
+        loadPage: _service.caricaPagina,
+        cacheKey: 'dipendenti',
+        serverFiltering: false,
+      );
+
+  static String _idOf(Dipendente dipendente) => '${dipendente.id}';
 
   @override
   void initState() {
     super.initState();
     // La sede di un dipendente e' quella in uso del suo utente WordPress: se
     // l'utente collegato la cambia, la sua riga in elenco va riletta.
-    QueryMgwsSite.changes.addListener(_service.loadDipendenti);
-    _service.loadDipendenti();
+    QueryMgwsSite.changes.addListener(_ricarica);
   }
 
   @override
   void dispose() {
-    QueryMgwsSite.changes.removeListener(_service.loadDipendenti);
+    QueryMgwsSite.changes.removeListener(_ricarica);
+    _listController.dispose();
     super.dispose();
+  }
+
+  /// Ricarica da MGWS e rimette nel dettaglio il dipendente aggiornato (o
+  /// niente, se non c'e' piu').
+  Future<void> _ricarica() async {
+    final selezionato = _listController.selected.value?.id;
+    await _listController.reload(force: true);
+    if (!mounted) return;
+    Dipendente? aggiornato;
+    for (final dipendente in _listController.cache.items) {
+      if (dipendente.id == selezionato) aggiornato = dipendente;
+    }
+    _listController.select(aggiornato);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.employeesTitle),
-        backgroundColor: Theme.of(context).primaryColor,
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addDipendente,
         tooltip: context.l10n.employeesAddTooltip,
         child: const Icon(Icons.add),
       ),
-      body: ChangeNotifierProvider.value(
-        value: _service,
-        child: Consumer<DipendentiService>(
-          builder: (context, service, child) {
-            if (service.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return Column(
-              children: [
-                if (service.errore != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: MaterialBanner(
-                      content: Text(service.errore!(context.l10n)),
-                      leading: const Icon(Icons.warning_amber),
-                      actions: [
-                        TextButton(
-                          onPressed: service.loadDipendenti,
-                          child: Text(context.l10n.employeesRetry),
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: context.l10n.employeesSearchHint,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value.toLowerCase();
-                      });
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: service.dipendenti
-                        .where(
-                          (d) =>
-                              '${d.nome} ${d.cognome}'.toLowerCase().contains(
-                                _searchQuery,
-                              ) ||
-                              d.email.toLowerCase().contains(_searchQuery) ||
-                              d.ruolo.toLowerCase().contains(_searchQuery),
-                        )
-                        .toList()
-                        .length,
-                    itemBuilder: (context, index) {
-                      final filteredDipendenti = service.dipendenti
-                          .where(
-                            (d) =>
-                                '${d.nome} ${d.cognome}'.toLowerCase().contains(
-                                  _searchQuery,
-                                ) ||
-                                d.email.toLowerCase().contains(_searchQuery) ||
-                                d.ruolo.toLowerCase().contains(_searchQuery),
-                          )
-                          .toList();
-                      final dipendente = filteredDipendenti[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).primaryColor.withAlpha(51),
-                                child: Text(
-                                  '${dipendente.nome.isNotEmpty ? dipendente.nome[0] : '?'}${dipendente.cognome.isNotEmpty ? dipendente.cognome[0] : '?'}',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${dipendente.nome} ${dipendente.cognome}',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.l10n.employeesRoleValue(
-                                        dipendente.ruolo,
-                                      ),
-                                      style: TextStyle(
-                                        color: context.colors.subtitleColor,
-                                      ),
-                                    ),
-                                    Text(
-                                      context.l10n.employeesEmailValue(
-                                        dipendente.email,
-                                      ),
-                                      style: TextStyle(
-                                        color: context.colors.subtitleColor,
-                                      ),
-                                    ),
-                                    Text(
-                                      context.l10n.employeesSalaryValue(
-                                        dipendente.stipendio.toStringAsFixed(2),
-                                      ),
-                                      style: TextStyle(
-                                        color: context.colors.subtitleColor,
-                                      ),
-                                    ),
-                                    if (dipendente.venditeTotali != null)
-                                      Text(
-                                        context.l10n.employeesTotalSalesValue(
-                                          dipendente.venditeTotali!
-                                              .toStringAsFixed(2),
-                                        ),
-                                        style: TextStyle(
-                                          color: context.colors.successColor,
-                                        ),
-                                      ),
-                                    if (dipendente.produzioneTotale != null)
-                                      Text(
-                                        context.l10n
-                                            .employeesTotalProductionValue(
-                                              dipendente.produzioneTotale!,
-                                            ),
-                                        style: TextStyle(
-                                          color: context.colors.infoColor,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.info,
-                                      color: context.colors.successColor,
-                                    ),
-                                    onPressed: () =>
-                                        _viewDipendenteDetails(dipendente),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.edit,
-                                      color: context.colors.infoColor,
-                                    ),
-                                    onPressed: () =>
-                                        _editDipendente(dipendente),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.delete,
-                                      color: context.colors.errorColorStatus,
-                                    ),
-                                    onPressed: () =>
-                                        _deleteDipendente(dipendente.id),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+      body: DataGridListView<Dipendente>(
+        controller: _listController,
+        fields: Dipendente.gridFields,
+        idOf: _idOf,
+        loadPage: _service.caricaPagina,
+        cacheKey: 'dipendenti',
+        serverFiltering: false,
+        defaultColumns: const [
+          'nome',
+          'email',
+          'ruolo',
+          'stipendio',
+          'utenteWordPress',
+        ],
+        defaultMobileColumns: const ['nome', 'ruolo'],
+        onRefresh: _ricarica,
+        cellsOf: (context, dipendente) => <String, Widget>{
+          'nome': Text(
+            dipendente.nomeCompleto.isEmpty ? '-' : dipendente.nomeCompleto,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        },
+        contextActions: (context) => [
+          DataGridViewContextAction<Dipendente>(
+            label: context.l10n.commonNew,
+            icon: Icons.add_circle_outline,
+            onSelected: (_) async => _addDipendente(),
+          ),
+          DataGridViewContextAction<Dipendente>(
+            label: context.l10n.commonEdit,
+            icon: Icons.edit_outlined,
+            onSelected: (dipendente) async => _editDipendente(dipendente),
+          ),
+          DataGridViewContextAction<Dipendente>(
+            label: context.l10n.commonDelete,
+            icon: Icons.delete_outline,
+            onSelected: (dipendente) async => _deleteDipendente(dipendente.id),
+          ),
+        ],
+        onRowActivated: _editDipendente,
+        emptyDetailsIcon: Icons.badge_outlined,
+        // Il dettaglio ha gia' il suo Scaffold: va bene sia nel pannello sia
+        // come pagina su telefono.
+        detailsOf: (context, dipendente, inPage) =>
+            DipendenteDetailScreen(dipendente: dipendente),
       ),
     );
   }
 
   void _addDipendente() {
-    // Navigate to add/edit screen
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
             DipendenteFormScreen(isEdit: false, service: _service),
       ),
-    ).then((_) => _service.loadDipendenti());
-  }
-
-  void _viewDipendenteDetails(Dipendente dipendente) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DipendenteDetailScreen(dipendente: dipendente),
-      ),
-    );
+    ).then((_) => _ricarica());
   }
 
   void _editDipendente(Dipendente dipendente) {
@@ -269,7 +139,7 @@ class _DipendentiGuiState extends State<DipendentiGui> {
           service: _service,
         ),
       ),
-    ).then((_) => _service.loadDipendenti());
+    ).then((_) => _ricarica());
   }
 
   void _deleteDipendente(int id) {
@@ -284,9 +154,10 @@ class _DipendentiGuiState extends State<DipendentiGui> {
             child: Text(context.l10n.commonCancel),
           ),
           TextButton(
-            onPressed: () {
-              _service.deleteDipendente(id);
+            onPressed: () async {
               Navigator.pop(context);
+              await _service.deleteDipendente(id);
+              await _ricarica();
             },
             child: Text(context.l10n.commonDelete),
           ),

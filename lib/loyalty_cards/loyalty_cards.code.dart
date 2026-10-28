@@ -1,5 +1,8 @@
 import '../l10n/localized_text.dart';
 import '../customers/customer_list.code.dart';
+import '../reuse_class/datagridview/datagridview_list.code.dart';
+import '../reuse_class/logic/global_pagination_controller.dart';
+import 'class_loyalty_card.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../log_viewer/app_logger.dart';
 import 'loyalty_stats.dart';
@@ -14,113 +17,57 @@ class CartaFedeltaController {
   Future<bool> _mgwsDisponibile() => PlatformManager.refreshCanUseMgws();
 
   // Stato
-  List<Map<String, dynamic>> _clientiConCarta = [];
   Map<String, dynamic>? _cartaSelezionata;
   LoyaltyStats? _statistiche;
-  bool _isLoading = false;
   LocalizedText? _errorMessage;
-  String _searchQuery = '';
+
+  /// Carte MGWS per cliente, lette una volta per caricamento della lista.
+  Map<int, Map<String, dynamic>> _cartePerCliente = const {};
 
   // Getters
-  List<Map<String, dynamic>> get clientiConCarta => _clientiFiltrati;
   Map<String, dynamic>? get cartaSelezionata => _cartaSelezionata;
   LoyaltyStats? get statistiche => _statistiche;
-  bool get isLoading => _isLoading;
   LocalizedText? get errorMessage => _errorMessage;
   bool get hasCartaSelezionata => _cartaSelezionata != null;
-  String get searchQuery => _searchQuery;
 
-  /// Carica tutti i clienti arricchendoli con la carta fedeltà, se presente.
+  /// Pagina della lista Carte fedelta': i clienti arrivano dal negozio con i
+  /// parametri dei clienti (nome, email), le carte da MGWS. Le carte si
+  /// rileggono alla prima pagina di ogni caricamento.
   ///
-  /// I clienti WooCommerce e le carte MGWS vengono caricati in parallelo
-  /// con un'unica chiamata per backend. Se MGWS non è disponibile i
-  /// clienti vengono comunque mostrati senza dati carta, senza bloccare
-  /// la lista e senza azzerare quanto caricato.
-  Future<void> caricaClientiConCarta() async {
-    _isLoading = true;
-    _errorMessage = null;
-
-    try {
-      log.i('Caricamento clienti e carte fedeltà in parallelo...');
-
-      // Usa la lista clienti globale (stessa della sezione Clienti):
-      // niente chiamate WooCommerce dirette da qui.
-      final clientiGlobali = ClientiGestioneController();
-      final Future<void> clientiFuture =
-          clientiGlobali.clienti.isEmpty && !clientiGlobali.isLoading
-          ? clientiGlobali.caricaClienti()
-          : Future.value();
-      // Le carte sono opzionali: se MGWS fallisce, i clienti vengono
-      // comunque mostrati senza dati carta.
-      final Future<List<Map<String, dynamic>>> carteFuture = PlatformManager
-          .cartaFedelta
-          .listAllCards()
-          .catchError((Object e) {
-            log.w('Carte fedeltà non caricate, mostro solo clienti: $e');
-            return <Map<String, dynamic>>[];
-          });
-      await Future.wait([clientiFuture, carteFuture]);
-
-      final clienti = clientiGlobali.clienti.map((c) => c.toJson()).toList();
-      final carte = await carteFuture;
-
-      // Mappa delle carte per customer_id
-      final cartePerCliente = <int, Map<String, dynamic>>{};
-      for (final carta in carte) {
-        final id = (carta['customer_id'] as num?)?.toInt();
-        if (id != null) {
-          cartePerCliente[id] = carta;
-        }
-      }
-
-      // Unisce i dati: ogni cliente porta la propria carta, se presente
-      _clientiConCarta = clienti.map((cliente) {
-        final id = (cliente['id'] as num?)?.toInt();
-        final carta = id != null ? cartePerCliente[id] : null;
-        return {
-          ...cliente,
-          // Il dettaglio e le azioni sui punti leggono 'customer_id', mentre
-          // il cliente globale espone solo 'id': lo riporto qui.
-          'customer_id': id,
-          'has_card': carta != null,
-          if (carta != null) ...{
-            'card_number': carta['card_number'] ?? '',
-            'tier': carta['tier'] ?? 'bronze',
-            'points': carta['points'] ?? 0,
-            'card_id': carta['id'] ?? 0,
-            'card_enabled': carta['enabled'] ?? false,
-          },
-        };
-      }).toList();
-
-      log.i('Caricati ${_clientiConCarta.length} clienti');
-    } catch (e) {
-      log.e('Errore nel caricamento clienti con carta: $e');
-      _errorMessage = (l10n) => l10n.loyaltyLoadError('$e');
-      // Non azzero la lista: se i clienti erano arrivati, restano visibili.
-      // L'errore è informativo, non bloccante.
-    } finally {
-      _isLoading = false;
+  /// Se MGWS non risponde i clienti si vedono comunque, senza carta.
+  Future<PaginatedResult<CartaFedeltaGlobal>> caricaPagina(
+    DataGridPageRequest request,
+  ) async {
+    final clientiFuture = ClientiGestioneController().caricaPagina(request);
+    if (request.page == 1 || _cartePerCliente.isEmpty) {
+      _cartePerCliente = await _caricaCarte();
     }
+    final clienti = await clientiFuture;
+    return PaginatedResult<CartaFedeltaGlobal>(
+      items: [
+        for (final cliente in clienti.items)
+          CartaFedeltaGlobal.daCliente(cliente, _cartePerCliente[cliente.id]),
+      ],
+      page: clienti.page,
+      perPage: clienti.perPage,
+      totalItems: clienti.totalItems,
+      totalPages: clienti.totalPages,
+      hasMore: clienti.hasMore,
+    );
   }
 
-  /// Filtra i clienti in base alla ricerca
-  List<Map<String, dynamic>> get _clientiFiltrati {
-    if (_searchQuery.isEmpty) return _clientiConCarta;
-
-    return _clientiConCarta.where((carta) {
-      final query = _searchQuery.toLowerCase();
-
-      final cardNumber = carta['card_number']?.toString().toLowerCase() ?? '';
-      final firstName = carta['first_name']?.toString().toLowerCase() ?? '';
-      final lastName = carta['last_name']?.toString().toLowerCase() ?? '';
-      final email = carta['email']?.toString().toLowerCase() ?? '';
-
-      return cardNumber.contains(query) ||
-          firstName.contains(query) ||
-          lastName.contains(query) ||
-          email.contains(query);
-    }).toList();
+  Future<Map<int, Map<String, dynamic>>> _caricaCarte() async {
+    try {
+      final carte = await _cartaFedeltaQuery.listAllCards()
+          as List<Map<String, dynamic>>;
+      return <int, Map<String, dynamic>>{
+        for (final carta in carte)
+          if ((carta['customer_id'] as num?)?.toInt() case final id?) id: carta,
+      };
+    } catch (e) {
+      log.w('Carte fedeltà non caricate, mostro solo clienti: $e');
+      return const <int, Map<String, dynamic>>{};
+    }
   }
 
   /// Cerca una carta per numero
@@ -155,16 +102,6 @@ class CartaFedeltaController {
   /// Deseleziona la carta corrente
   void deselezionaCarta() {
     _cartaSelezionata = null;
-  }
-
-  /// Imposta la query di ricerca
-  void setSearchQuery(String query) {
-    _searchQuery = query;
-  }
-
-  /// Cancella i filtri
-  void cancellaFiltri() {
-    _searchQuery = '';
   }
 
   /// Ottiene i punti di un cliente
@@ -205,8 +142,6 @@ class CartaFedeltaController {
           _cartaSelezionata!['points'] = nuoviPunti;
         }
 
-        // Ricarica la lista
-        await caricaClientiConCarta();
       }
 
       return success;
@@ -243,8 +178,6 @@ class CartaFedeltaController {
           _cartaSelezionata!['points'] = nuoviPunti;
         }
 
-        // Ricarica la lista
-        await caricaClientiConCarta();
       }
 
       return success;
@@ -280,7 +213,6 @@ class CartaFedeltaController {
 
       if (success) {
         log.i('Carta fedeltà creata con successo');
-        await caricaClientiConCarta();
       }
 
       return success;
@@ -316,7 +248,6 @@ class CartaFedeltaController {
           _cartaSelezionata!['tier'] = nuovoTier;
         }
 
-        await caricaClientiConCarta();
       }
 
       return success;
@@ -343,7 +274,6 @@ class CartaFedeltaController {
           deselezionaCarta();
         }
 
-        await caricaClientiConCarta();
       }
 
       return success;

@@ -167,7 +167,8 @@ open.
 
 ## Lists
 
-`Products`, `Customers`, `Orders`, `Coupon` and `Users` share the same list:
+`Products`, `Customers`, `Orders`, `Coupon`, `Users`, `Loyalty Cards` and
+`Employees` share the same list:
 
 - The `Filter` panel has a quick search over every field, filters by field,
   operator and value, and sorting. The quick search starts when you stop
@@ -420,8 +421,10 @@ the linked employee in `Employees`.
 
 ## Loyalty cards
 
-1. Open `Loyalty Cards` and find the customer by ID, card or email. The
-   camera scanner reads the card.
+1. Open `Loyalty Cards` and find the customer by name, card number or
+   email in the filter panel, or read the card with the scanner button next
+   to `Refresh`. Columns show card number, tier and points; the totals of
+   the programme stay on top.
 2. Add or remove points, with a reference and a note if useful. You cannot
    remove more points than the balance.
 3. The history lists every change, newest first.

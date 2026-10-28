@@ -162,7 +162,8 @@ Use `context.text.<style>?.copyWith(...)`. `elevation: 4` is already the
 
 - Operational lists use `DataGridView` (`lib/reuse_class/datagridview/`);
   do not build bespoke tables.
-- A management list (Products, Customers, Orders, Coupons, Users) is a
+- A management list (Products, Customers, Orders, Coupons, Users, Loyalty
+  cards, Employees) is a
   `DataGridListView<T>`, generic on the model. The screen passes:
   - `fields`: the `DataGridField<T>`s of the model, declared on the model as
     `static gridFields` (`ProdottoGlobal.gridFields`, `ClienteGlobal`,
