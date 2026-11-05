@@ -1,0 +1,1 @@
+- Replace the com.example placeholders in the Windows and macOS metadata
