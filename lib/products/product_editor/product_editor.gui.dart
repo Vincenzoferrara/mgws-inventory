@@ -96,6 +96,23 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   final _mgwsSiteController = TextEditingController();
   final _mgwsReasonController = TextEditingController();
 
+  /// Costo unitario dichiarato, come testo digitato.
+  ///
+  /// Vuoto significa "non noto", non zero: una dichiarazione vuota su un
+  /// prodotto che ne aveva una e' un ritiro, e su uno che non ne aveva e' il
+  /// silenzio. Il campo non e' obbligatorio in nessuno dei due casi.
+  final _costoController = TextEditingController();
+
+  /// Testo del costo letto dal server, normalizzato: serve a non riscrivere una
+  /// dichiarazione identica a ogni salvataggio, perche' la dichiarazione e'
+  /// append-only e ogni scrittura aggiunge una riga alla storia.
+  String? _costoSalvato;
+
+  /// Vero quando la lettura del costo non e' riuscita: il campo resta vuoto e
+  /// non si dichiara nulla, perche' assenza di risposta non e' assenza di costo.
+  bool _costoNonDisponibile = false;
+  bool _rivalutaStockAlSalvataggio = false;
+
   // Animazioni
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -408,6 +425,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _mgwsReasonController.text = _defaultMgwsInventoryReason();
       _mgwsInventoryFeedbackText = null;
       _mgwsInventoryFeedbackSuccess = null;
+      _costoController.clear();
+      _costoSalvato = null;
+      _costoNonDisponibile = false;
+      _rivalutaStockAlSalvataggio = false;
       _productStatus = _normalizeProductStatus(prodotto.status);
       _tags = prodotto.tag?.map((t) => t.nome).toList() ?? [];
       _applyDefaultImageConfig(_mainImageConfig);
@@ -436,12 +457,37 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _selectedVarianteIndex = _varianti.isEmpty ? null : 0;
     });
 
+    await _caricaCostoProdotto(productId);
+
     NotificationService.instance.messageBar(
       'successo',
       'prodotti_crea',
       context.l10n.productsDataLoadedForEdit(prodotto.nome ?? ''),
     );
     log.d('PCREA_LOAD_EXISTING_DONE productId=$productId');
+  }
+
+  /// Legge il costo dichiarato e lo mette nel campo.
+  ///
+  /// Se la lettura non riesce il campo resta vuoto e `_costoNonDisponibile`
+  /// diventa vero: senza sapere qual e' il costo non si dichiara nulla, perche'
+  /// una risposta mancante non e' un costo mancante.
+  Future<void> _caricaCostoProdotto(int productId) async {
+    if (productId <= 0 || _prodottiController == null) return;
+    final result = await _prodottiController!.readItemCost(productId);
+    if (!mounted) return;
+    setState(() {
+      if (result == null || !result.success || result.data == null) {
+        _costoNonDisponibile = true;
+        _costoSalvato = null;
+        return;
+      }
+      final cost = result.data!.cost?.trim() ?? '';
+      _costoNonDisponibile = false;
+      _costoController.text = cost;
+      _costoSalvato = cost.isEmpty ? null : cost;
+      _rivalutaStockAlSalvataggio = false;
+    });
   }
 
   void _resetForm() {
@@ -475,6 +521,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _mgwsInventoryEnabled = false;
       _mgwsInventoryFeedbackText = null;
       _mgwsInventoryFeedbackSuccess = null;
+      _costoController.clear();
+      _costoSalvato = null;
+      _costoNonDisponibile = false;
+      _rivalutaStockAlSalvataggio = false;
       for (final attributo in _attributiProdottoSelezionati) {
         attributo.dispose();
       }
@@ -523,6 +573,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     _mgwsStockController.dispose();
     _mgwsSiteController.dispose();
     _mgwsReasonController.dispose();
+    _costoController.dispose();
     for (final attributo in _attributiProdottoSelezionati) {
       attributo.dispose();
     }
@@ -1228,6 +1279,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           ),
         ],
         const SizedBox(height: 16),
+        _buildCostoProdotto(),
+        const SizedBox(height: 16),
         if (_productType == ProductTypeSelection.simple)
           Row(
             children: [
@@ -1276,6 +1329,85 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         const SizedBox(height: 16),
         _buildMgwsInventorySection(),
       ],
+    );
+  }
+
+  /// Costo unitario dichiarato del prodotto, e la scelta di rivalutare lo stock.
+  ///
+  /// Una domanda sola per prodotto: su un prodotto variabile il costo si
+  /// dichiara sul padre e le varianti lo ereditano, perche' chiedere un costo
+  /// per taglia e' un lavoro che nessuno fa e che lascia il catalogo mezzo
+  /// valorizzato.
+  Widget _buildCostoProdotto() {
+    final theme = Theme.of(context);
+    final customColors = theme.extension<AppColorExtension>();
+    final warningColor = customColors?.warningColor ?? theme.colorScheme.error;
+    final canRevalue = _isUpdatingExisting && _costoNormalizzato() != null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.productsCost,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildSmartTextFormField(
+              fieldKey: const ValueKey('productCostField'),
+              controller: _costoController,
+              label: context.l10n.productsCost,
+              icon: Icons.euro_outlined,
+              suffix: '€',
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              validator: _validateCosto,
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              context.l10n.productsCostHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+              ),
+            ),
+            if (_costoNonDisponibile) ...[
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_outlined, color: warningColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      context.l10n.productsCostReadFailed,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (canRevalue) ...[
+              const SizedBox(height: 8),
+              SwitchListTile(
+                key: const ValueKey('productRevalueStockSwitch'),
+                contentPadding: EdgeInsets.zero,
+                value: _rivalutaStockAlSalvataggio,
+                onChanged: (value) =>
+                    setState(() => _rivalutaStockAlSalvataggio = value),
+                title: Text(context.l10n.productsRevalueStock),
+                subtitle: Text(context.l10n.productsRevalueStockHint),
+                secondary: const Icon(Icons.price_change_outlined),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -1452,6 +1584,41 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       enabled: _mgwsInventoryEnabled,
       value: value,
     );
+  }
+
+  /// Costo come testo normalizzato, o null quando il campo e' vuoto.
+  ///
+  /// Vuoto e' un valore legittimo e diverso da zero: significa che il costo non
+  /// si conosce. La virgola viene convertita, l'arrotondamento no: la scala e'
+  /// quella fissata dal plugin all'installazione.
+  String? _costoNormalizzato() {
+    final text = _costoController.text.trim().replaceAll(',', '.');
+    return text.isEmpty ? null : text;
+  }
+
+  /// Vero quando il costo digitato dice qualcosa di diverso da quello salvato.
+  ///
+  /// Il confronto e' numerico, non testuale: "12.5" e "12.50" sono lo stesso
+  /// costo, e riscriverlo aggiungerebbe una riga alla storia per niente. Un
+  /// campo svuotato dopo una dichiarazione e' un cambiamento: e' un ritiro.
+  bool _costoCambiato() {
+    final current = _costoNormalizzato();
+    if (current == null) return _costoSalvato != null;
+    if (_costoSalvato == null) return true;
+    final currentValue = double.tryParse(current);
+    final savedValue = double.tryParse(_costoSalvato!);
+    if (currentValue == null || savedValue == null) {
+      return current != _costoSalvato;
+    }
+    return currentValue != savedValue;
+  }
+
+  String? _validateCosto(String? value) {
+    final text = (value ?? '').trim().replaceAll(',', '.');
+    if (text.isEmpty) return null;
+    final parsed = double.tryParse(text);
+    if (parsed == null || parsed < 0) return context.l10n.productsCostInvalid;
+    return null;
   }
 
   ProductMgwsStockInput _buildMgwsStockInput() {
@@ -4743,6 +4910,43 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         );
       }
 
+      // Il costo si dichiara dopo lo stock: la rivalutazione legge la quantita'
+      // definitiva, non quella di prima del salvataggio.
+      String? costMessage;
+      var costOk = true;
+      if (_costoCambiato()) {
+        _updateSaveProgress(0.85, context.l10n.productsSaveStepCost);
+        final cost = _costoNormalizzato();
+        final revalue =
+            _isUpdatingExisting && cost != null && _rivalutaStockAlSalvataggio;
+        final result = await _prodottiController!.declareItemCost(
+          productId: savedProductId,
+          cost: cost,
+          revalueStock: revalue,
+        );
+        if (result == null) {
+          costOk = false;
+          costMessage = context.l10n.productsCostNotSaved;
+        } else if (!result.success) {
+          costOk = false;
+          costMessage =
+              '${context.l10n.productsCostNotSaved}: ${result.message}';
+        } else if (cost == null) {
+          costMessage = context.l10n.productsCostWithdrawn;
+        } else if (revalue && (result.data?.revalueQty ?? 0) == 0) {
+          // Rivalutazione chiesta e nessun pezzo in stock: il costo e'
+          // salvato, il valore non e' cambiato perche' non c'era nulla da
+          // valorizzare.
+          costMessage =
+              '${context.l10n.productsCostSaved} · ${context.l10n.productsCostNoStock}';
+        } else {
+          costMessage = context.l10n.productsCostSaved;
+        }
+        log.d(
+          'PCREA_COST_DECLARE_DONE ok=$costOk revalued=${result?.data?.revalued} withdrawal=${cost == null}',
+        );
+      }
+
       final verify = await _verificaPersistenzaProdotto(
         expected: prodotto,
         saved: savedProduct,
@@ -4751,12 +4955,13 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
       if (mounted) {
         final isFullSuccess = verify.productExists && verify.variantsComplete;
-        final mgwsOk = mgwsFeedback?.success ?? true;
+        final mgwsOk = (mgwsFeedback?.success ?? true) && costOk;
         final message = [
           _buildVerifyMessage(verify),
           if (mgwsFeedback != null) mgwsFeedback.message,
           if (mgwsFeedback != null && mgwsFeedback.details.isNotEmpty)
             mgwsFeedback.details.join(' '),
+          if (costMessage != null) costMessage,
         ].join(' ');
         NotificationService.instance.messageBar(
           isFullSuccess && mgwsOk ? 'successo' : 'partial',

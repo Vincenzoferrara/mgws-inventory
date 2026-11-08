@@ -289,6 +289,64 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
   );
 
   @override
+  Future<MgwsRestockResult<MgwsItemCost>> getItemCost(
+    int productId, {
+    int variationId = 0,
+  }) => _object(
+    () => _transport.get(
+      '$_inventoryPath/costs/product/${Uri.encodeComponent(productId.toString())}',
+      queryParameters: _query({'variation_id': variationId}),
+    ),
+    MgwsItemCost.fromMap,
+  );
+
+  @override
+  Future<MgwsRestockResult<MgwsCostDeclaration>> declareCost({
+    required int productId,
+    int variationId = 0,
+    required String? cost,
+    String? note,
+    bool revalueStock = false,
+  }) => _object(
+    () => _transport.post(
+      '$_inventoryPath/costs',
+      data: {
+        'product_id': productId,
+        'variation_id': variationId,
+        // Null is meaningful here: it withdraws the declaration. Filtering it
+        // out like the other optional fields would make a withdrawal a 400.
+        'cost': cost,
+        'note': note,
+        'revalue_stock': revalueStock,
+      },
+    ),
+    MgwsCostDeclaration.fromMap,
+  );
+
+  @override
+  Future<MgwsRestockResult<List<MgwsMissingCostItem>>> getMissingCostItems({
+    int limit = 100,
+  }) => _objects(
+    () => _transport.get(
+      '$_inventoryPath/costs/missing',
+      queryParameters: _query({'limit': limit}),
+    ),
+    MgwsMissingCostItem.fromMap,
+  );
+
+  @override
+  Future<MgwsRestockResult<List<MgwsStockDivergence>>> getStockDivergences({
+    int limit = 100,
+    int offset = 0,
+  }) => _objects(
+    () => _transport.get(
+      '$_inventoryPath/stock/divergences',
+      queryParameters: _query({'limit': limit, 'offset': offset}),
+    ),
+    MgwsStockDivergence.fromMap,
+  );
+
+  @override
   Future<MgwsRestockResult<List<MgwsInventorySite>>> listSites() => _objects(
     () => _transport.get('$_inventoryPath/sites'),
     MgwsInventorySite.fromMap,

@@ -31,6 +31,8 @@ class UserGlobal {
     DataGridFieldOption('contributor', (l10n) => l10n.usersRoleContributor),
     DataGridFieldOption('subscriber', (l10n) => l10n.usersRoleSubscriber),
     DataGridFieldOption('customer', (l10n) => l10n.usersRoleCustomer),
+    DataGridFieldOption('mgws_warehouse', (l10n) => l10n.usersRoleMgwsWarehouse),
+    DataGridFieldOption('mgws_cashier', (l10n) => l10n.usersRoleMgwsCashier),
   ];
 
   /// Campi dell'utente per la lista Utenti. Ricerca libera, ruolo e

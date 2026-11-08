@@ -240,6 +240,7 @@ class DashboardReportQueryEditor extends StatelessWidget {
         ReportArea.products => l10n.dashboardReportAreaProducts,
         ReportArea.customers => l10n.dashboardReportAreaCustomers,
         ReportArea.cash => l10n.dashboardReportAreaCash,
+        ReportArea.stock => l10n.dashboardReportAreaStock,
       };
 }
 
@@ -275,6 +276,10 @@ String reportPresetLabel(AppLocalizations l10n, ReportPreset preset) =>
         l10n.dashboardReportPresetSalesByPaymentMethod,
       ReportPreset.salesByChannel => l10n.dashboardReportPresetSalesByChannel,
       ReportPreset.cashDifferences => l10n.dashboardReportPresetCashDifferences,
+      ReportPreset.margin => l10n.dashboardReportPresetMargin,
+      ReportPreset.deadStock => l10n.dashboardReportPresetDeadStock,
+      ReportPreset.abcCurve => l10n.dashboardReportPresetAbcCurve,
+      ReportPreset.stockValue => l10n.dashboardReportPresetStockValue,
     };
 
 /// Searchable multi-select list of products, customers, categories...

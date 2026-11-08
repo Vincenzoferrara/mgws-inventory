@@ -164,11 +164,11 @@
   "@inventoryHintChooseModule": {
     "description": "Suggerimento mostrato quando nessun modulo è selezionato"
   },
-  "inventoryEmptyStateTitle": "Scegli un modulo dalla barra in alto",
+  "inventoryEmptyStateTitle": "Scegli cosa fare dalla barra in alto",
   "@inventoryEmptyStateTitle": {
     "description": "Titolo mostrato nello stato vuoto del selettore modulo"
   },
-  "inventoryEmptyStateDescription": "Aggiungi per inserire pezzi, Rettifica per correggere, Sposta per trasferire",
+  "inventoryEmptyStateDescription": "Aggiungi per caricare pezzi, Rettifica per correggere, Sposta subito per passare pezzi fra magazzini, Movimenti per lo storico",
   "@inventoryEmptyStateDescription": {
     "description": "Descrizione mostrata nello stato vuoto che spiega le azioni disponibili"
   },
@@ -176,11 +176,11 @@
   "@inventoryLabelSede": {
     "description": "Etichetta del campo selezione sede (obbligatorio)"
   },
-  "inventoryLabelDettagli": "Dettagli",
+  "inventoryLabelDettagli": "Nota (facoltativa)",
   "@inventoryLabelDettagli": {
     "description": "Etichetta del campo dettagli"
   },
-  "inventoryHintNotaMovimento": "Nota operativa del movimento (facoltativa)",
+  "inventoryHintNotaMovimento": "Es. merce arrivata con il corriere, pezzo danneggiato…",
   "@inventoryHintNotaMovimento": {
     "description": "Suggerimento mostrato nel campo note del movimento"
   },
@@ -1968,11 +1968,11 @@
   "@inventoryRettificaTitolo": {
     "description": "Titolo della schermata di rettifica inventario"
   },
-  "inventoryRettificaSottotitolo": "Regola i livelli di stock scansionando o inserendo le quantita",
+  "inventoryRettificaSottotitolo": "Scansiona o cerca i prodotti, poi indica la correzione o la quantità contata.",
   "@inventoryRettificaSottotitolo": {
     "description": "Sottotitolo che spiega lo scopo della schermata di rettifica"
   },
-  "inventoryRettificaScegliQuanti": "Quanti?",
+  "inventoryRettificaScegliQuanti": "1 pezzo per ogni scansione",
   "@inventoryRettificaScegliQuanti": {
     "description": "Etichetta per il selettore di quantita nella rettifica"
   },
@@ -3096,7 +3096,7 @@
   "@inventoryAzioneAggiungi5": {
     "description": "Localized string inventoryAzioneAggiungi5"
   },
-  "inventoryBarcodeNonTrovatoCatalogo": "Barcode {code} non trovato nel catalogo prodotti",
+  "inventoryBarcodeNonTrovatoCatalogo": "Nessun prodotto con barcode o codice {code}",
   "@inventoryBarcodeNonTrovatoCatalogo": {
     "description": "Localized string inventoryBarcodeNonTrovatoCatalogo",
     "placeholders": {
@@ -3368,7 +3368,7 @@
   "@inventoryHelperSedeObbligatoria": {
     "description": "Localized string inventoryHelperSedeObbligatoria"
   },
-  "inventoryHintInserisciOscansionaBarcode": "Inserisci o scansiona barcode...",
+  "inventoryHintInserisciOscansionaBarcode": "Scansiona il barcode o scrivi il codice articolo",
   "@inventoryHintInserisciOscansionaBarcode": {
     "description": "Localized string inventoryHintInserisciOscansionaBarcode"
   },
@@ -3396,11 +3396,11 @@
   "@inventoryModuleDescMovimenti": {
     "description": "Localized string inventoryModuleDescMovimenti"
   },
-  "inventoryModuleDescRettifica": "Porta la quantità reale del magazzino al valore che hai contato.",
+  "inventoryModuleDescRettifica": "Correggi la giacenza: aumenta o diminuisci i pezzi, oppure scrivi quanti ne hai contati.",
   "@inventoryModuleDescRettifica": {
     "description": "Localized string inventoryModuleDescRettifica"
   },
-  "inventoryModuleDescSposta": "Trasferisci pezzi da una sede/magazzino a un altro.",
+  "inventoryModuleDescSposta": "Sposta i pezzi da un magazzino a un altro in un passo solo: la giacenza cambia appena confermi. Per merce che viaggia fra sedi usa \"Trasferimenti con spedizione\" in Altri strumenti.",
   "@inventoryModuleDescSposta": {
     "description": "Localized string inventoryModuleDescSposta"
   },
@@ -3416,7 +3416,7 @@
   "@inventoryModuleScegli": {
     "description": "Localized string inventoryModuleScegli"
   },
-  "inventoryModuleSposta": "Sposta",
+  "inventoryModuleSposta": "Sposta subito",
   "@inventoryModuleSposta": {
     "description": "Localized string inventoryModuleSposta"
   },
@@ -3463,11 +3463,11 @@
   "@inventoryNotaConConvalida": {
     "description": "Localized string inventoryNotaConConvalida"
   },
-  "inventoryNotaConfermaCarico": "MGWS riceve un carico per ogni riga, in sequenza. Se alcune righe falliscono, potrai riprovare solo quelle.",
+  "inventoryNotaConfermaCarico": "Ogni riga viene caricata a parte: se qualcuna non va a buon fine, potrai riprovare solo quella.",
   "@inventoryNotaConfermaCarico": {
     "description": "Localized string inventoryNotaConfermaCarico"
   },
-  "inventoryNotaConfermaOrdine": "MGWS riceve un carico per ogni riga e registra le stesse righe sull ordine. Aggiungere il fornitore non cambia la quantità in magazzino.",
+  "inventoryNotaConfermaOrdine": "Ogni riga entra in magazzino e viene registrata sull'ordine. Il fornitore non cambia le quantità in magazzino.",
   "@inventoryNotaConfermaOrdine": {
     "description": "Localized string inventoryNotaConfermaOrdine"
   },
@@ -3640,7 +3640,7 @@
   "@inventorySpostaServonoPartenzaArrivoPezzi": {
     "description": "Localized string inventorySpostaServonoPartenzaArrivoPezzi"
   },
-  "inventorySpostaSottotitolo": "Trasferisci pezzi da un magazzino a un altro. Lo stock totale del prodotto non cambia.",
+  "inventorySpostaSottotitolo": "I pezzi passano da un magazzino a un altro appena confermi. Lo stock totale del prodotto non cambia.",
   "@inventorySpostaSottotitolo": {
     "description": "Localized string inventorySpostaSottotitolo"
   },
@@ -3648,7 +3648,7 @@
   "@inventorySpostaStockNonDisponibile": {
     "description": "Localized string inventorySpostaStockNonDisponibile"
   },
-  "inventorySpostaTitolo": "Sposta tra sedi",
+  "inventorySpostaTitolo": "Sposta subito",
   "@inventorySpostaTitolo": {
     "description": "Localized string inventorySpostaTitolo"
   },
@@ -4513,7 +4513,7 @@
   "@inventoryModalitaOrdine": {
     "description": "Localized string inventoryModalitaOrdine"
   },
-  "inventoryModalitaOrdineDescrizione": "Indica il fornitore e genera un ordine con le stesse righe. Con la spunta Verifica la ricezione resta bloccata fino all'approvazione.",
+  "inventoryModalitaOrdineDescrizione": "Crea anche un ordine al fornitore con le stesse righe. Con Verifica la ricezione aspetta l'approvazione.",
   "@inventoryModalitaOrdineDescrizione": {
     "description": "Localized string inventoryModalitaOrdineDescrizione"
   },
@@ -4521,7 +4521,7 @@
   "@inventoryModalitaSemplice": {
     "description": "Localized string inventoryModalitaSemplice"
   },
-  "inventoryModalitaSempliceDescrizione": "Solo aggiunta: i pezzi entrano in magazzino senza aprire documenti.",
+  "inventoryModalitaSempliceDescrizione": "I pezzi entrano in magazzino, senza documenti.",
   "@inventoryModalitaSempliceDescrizione": {
     "description": "Localized string inventoryModalitaSempliceDescrizione"
   },
@@ -4753,7 +4753,7 @@
   "@cassaVoceVendita": {
     "description": "Localized string cassaVoceVendita"
   },
-  "cassaTitoloVincolato": "{tipo} vincolato - {nome}",
+  "cassaTitoloVincolato": "{tipo} di {nome}",
   "@cassaTitoloVincolato": {
     "description": "Localized string cassaTitoloVincolato",
     "placeholders": {
@@ -4782,7 +4782,7 @@
       "giornata": {}
     }
   },
-  "cassaEtichettaTurno": "Turno: {turno}",
+  "cassaEtichettaTurno": "Turno aperto: {turno}",
   "@cassaEtichettaTurno": {
     "description": "Localized string cassaEtichettaTurno",
     "placeholders": {
@@ -6674,6 +6674,10 @@
   "@reportSignatureCountedBy": {
     "description": "Signature line label"
   },
+  "reportSignatureCustomer": "Firma cliente",
+  "@reportSignatureCustomer": {
+    "description": "Signature line label"
+  },
   "reportFigureTakings": "Incasso totale",
   "@reportFigureTakings": {
     "description": "Report summary figure"
@@ -6965,6 +6969,14 @@
   "dashboardWidgetMetricLowStockProducts": "Prodotti in esaurimento",
   "@dashboardWidgetMetricLowStockProducts": {
     "description": "Dashboard: dashboardWidgetMetricLowStockProducts"
+  },
+  "dashboardWidgetMetricStockDivergences": "Divergenze magazzino",
+  "@dashboardWidgetMetricStockDivergences": {
+    "description": "Dashboard: dashboardWidgetMetricStockDivergences"
+  },
+  "dashboardWidgetStockDivergencesCaveat": "Confronta solo gli articoli con un totale WooCommerce: «0 divergenze» vuol dire che tutto ciò che ha due numeri è allineato.",
+  "@dashboardWidgetStockDivergencesCaveat": {
+    "description": "Dashboard: what a zero in the stock divergences card means"
   },
   "dashboardWidgetChartNumber": "Numero",
   "@dashboardWidgetChartNumber": {
@@ -7439,6 +7451,10 @@
   "@dashboardReportAreaCash": {
     "description": "Dashboard report: dashboardReportAreaCash"
   },
+  "dashboardReportAreaStock": "Magazzino",
+  "@dashboardReportAreaStock": {
+    "description": "Dashboard report: dashboardReportAreaStock"
+  },
   "dashboardReportMeasureRevenue": "Incasso",
   "@dashboardReportMeasureRevenue": {
     "description": "Dashboard report: dashboardReportMeasureRevenue"
@@ -7571,6 +7587,65 @@
   "@dashboardReportMeasureClosings": {
     "description": "Dashboard report: dashboardReportMeasureClosings"
   },
+  "dashboardReportMeasureCost": "Costo del venduto",
+  "@dashboardReportMeasureCost": {
+    "description": "Dashboard report: dashboardReportMeasureCost"
+  },
+  "dashboardReportMeasureMargin": "Margine",
+  "@dashboardReportMeasureMargin": {
+    "description": "Dashboard report: dashboardReportMeasureMargin"
+  },
+  "dashboardReportMeasureMarginRate": "Margine %",
+  "@dashboardReportMeasureMarginRate": {
+    "description": "Dashboard report: dashboardReportMeasureMarginRate"
+  },
+  "dashboardReportMeasureCostCoverage": "Copertura del costo",
+  "@dashboardReportMeasureCostCoverage": {
+    "description": "Dashboard report: dashboardReportMeasureCostCoverage"
+  },
+  "dashboardReportMeasureRevenueShare": "Quota di ricavo %",
+  "@dashboardReportMeasureRevenueShare": {
+    "description": "Dashboard report: dashboardReportMeasureRevenueShare"
+  },
+  "dashboardReportMeasureQtyOnHand": "Pezzi in magazzino",
+  "@dashboardReportMeasureQtyOnHand": {
+    "description": "Dashboard report: dashboardReportMeasureQtyOnHand"
+  },
+  "dashboardReportMeasureStockValue": "Valore del magazzino",
+  "@dashboardReportMeasureStockValue": {
+    "description": "Dashboard report: dashboardReportMeasureStockValue"
+  },
+  "dashboardReportMeasureUnvaluedQty": "Pezzi senza valore",
+  "@dashboardReportMeasureUnvaluedQty": {
+    "description": "Dashboard report: dashboardReportMeasureUnvaluedQty"
+  },
+  "dashboardReportMeasureStockCostCoverage": "Copertura del valore",
+  "@dashboardReportMeasureStockCostCoverage": {
+    "description": "Dashboard report: dashboardReportMeasureStockCostCoverage"
+  },
+  "dashboardReportMeasureSoldQty": "Pezzi venduti nel periodo",
+  "@dashboardReportMeasureSoldQty": {
+    "description": "Dashboard report: dashboardReportMeasureSoldQty"
+  },
+  "dashboardReportMeasureRotation": "Rotazione (venduto/giacenza)",
+  "@dashboardReportMeasureRotation": {
+    "description": "Dashboard report: dashboardReportMeasureRotation"
+  },
+  "dashboardReportMeasureDaysWithoutSale": "Giorni senza vendita",
+  "@dashboardReportMeasureDaysWithoutSale": {
+    "description": "Dashboard report: dashboardReportMeasureDaysWithoutSale"
+  },
+  "dashboardReportCostCoveragePartial": "Copertura del costo {percent}%",
+  "@dashboardReportCostCoveragePartial": {
+    "description": "Dashboard report: margin is only partly covered by known costs",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "dashboardReportNeverSold": "mai venduto",
+  "@dashboardReportNeverSold": {
+    "description": "Dashboard report: a stock row with no sale in its history"
+  },
   "dashboardReportDimensionHour": "Ora",
   "@dashboardReportDimensionHour": {
     "description": "Dashboard report: dashboardReportDimensionHour"
@@ -7635,6 +7710,14 @@
   "@dashboardReportDimensionPaymentMethod": {
     "description": "Dashboard report: dashboardReportDimensionPaymentMethod"
   },
+  "dashboardReportDimensionSite": "Sede",
+  "@dashboardReportDimensionSite": {
+    "description": "Dashboard report: dashboardReportDimensionSite"
+  },
+  "dashboardReportDimensionWarehouse": "Magazzino",
+  "@dashboardReportDimensionWarehouse": {
+    "description": "Dashboard report: dashboardReportDimensionWarehouse"
+  },
   "dashboardReportPresetProductSales": "Pezzi venduti di un prodotto",
   "@dashboardReportPresetProductSales": {
     "description": "Dashboard report: dashboardReportPresetProductSales"
@@ -7687,94 +7770,21 @@
   "@dashboardReportPresetCashDifferences": {
     "description": "Dashboard report: dashboardReportPresetCashDifferences"
   },
-  "notificationsTitle": "Notifiche",
-  "@notificationsTitle": {
-    "description": "Notification bell panel title"
+  "dashboardReportPresetMargin": "Margine per prodotto",
+  "@dashboardReportPresetMargin": {
+    "description": "Dashboard report: dashboardReportPresetMargin"
   },
-  "notificationsTooltip": "Notifiche",
-  "@notificationsTooltip": {
-    "description": "Tooltip of the notification bell"
+  "dashboardReportPresetDeadStock": "Prodotti invenduti",
+  "@dashboardReportPresetDeadStock": {
+    "description": "Dashboard report: dashboardReportPresetDeadStock"
   },
-  "notificationsMarkAllRead": "Segna tutte come lette",
-  "@notificationsMarkAllRead": {
-    "description": "Notification panel button"
+  "dashboardReportPresetAbcCurve": "Curva ABC del ricavo",
+  "@dashboardReportPresetAbcCurve": {
+    "description": "Dashboard report: dashboardReportPresetAbcCurve"
   },
-  "notificationsEmpty": "Nessuna notifica",
-  "@notificationsEmpty": {
-    "description": "Notification panel empty state"
-  },
-  "notificationsUpdateTitle": "Aggiornamento disponibile",
-  "@notificationsUpdateTitle": {
-    "description": "Notification: new app version"
-  },
-  "notificationsUpdateMessage": "È disponibile la versione {version} dell'app.",
-  "@notificationsUpdateMessage": {
-    "description": "Notification: new app version",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsOrdersToFulfilTitle": "Ordini da evadere",
-  "@notificationsOrdersToFulfilTitle": {
-    "description": "Notification: paid orders to prepare"
-  },
-  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 ordine pagato da evadere.} other{{count} ordini pagati da evadere.}}",
-  "@notificationsOrdersToFulfilMessage": {
-    "description": "Notification: paid orders to prepare",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsOrdersUnpaidTitle": "Ordini non pagati",
-  "@notificationsOrdersUnpaidTitle": {
-    "description": "Notification: orders pending payment or on hold"
-  },
-  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 ordine non ancora pagato: non spedirlo finché il pagamento non risulta incassato.} other{{count} ordini non ancora pagati: non spedirli finché il pagamento non risulta incassato.}}",
-  "@notificationsOrdersUnpaidMessage": {
-    "description": "Notification: orders pending payment or on hold",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsLowStockTitle": "Scorte basse",
-  "@notificationsLowStockTitle": {
-    "description": "Notification: products under their low stock threshold"
-  },
-  "notificationsLowStockMessage": "{count, plural, =1{1 prodotto è sotto la sua soglia di scorta minima.} other{{count} prodotti sono sotto la loro soglia di scorta minima.}}",
-  "@notificationsLowStockMessage": {
-    "description": "Notification: products under their low stock threshold",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsFiscalRegisterTitle": "Registratore di cassa",
-  "@notificationsFiscalRegisterTitle": {
-    "description": "Notification: fiscal register unreachable"
-  },
-  "notificationsFiscalRegisterMessage": "Il registratore della cassa {name} non risponde.",
-  "@notificationsFiscalRegisterMessage": {
-    "description": "Notification: fiscal register unreachable",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsSettingsTitle": "Notifiche",
-  "@notificationsSettingsTitle": {
-    "description": "Settings section for the notification bell"
-  },
-  "notificationsSettingsDescription": "Scegli cosa segnala la campanella in alto. Le scorte basse riguardano solo i prodotti con una soglia propria in WooCommerce; il registratore solo se è impostato il nome/numero cassa.",
-  "@notificationsSettingsDescription": {
-    "description": "Settings section for the notification bell"
+  "dashboardReportPresetStockValue": "Valore del magazzino per categoria",
+  "@dashboardReportPresetStockValue": {
+    "description": "Dashboard report: dashboardReportPresetStockValue"
   },
   "reportSeparatorQuestion": "Cosa mettere tra colore e taglia?",
   "@reportSeparatorQuestion": {
@@ -8204,14 +8214,6 @@
       }
     }
   },
-  "notificationSourceMedia": "Libreria media",
-  "@notificationSourceMedia": {
-    "description": "Title of message bars raised by the media picker"
-  },
-  "notificationSourceLogs": "Log",
-  "@notificationSourceLogs": {
-    "description": "Title of message bars raised by the log viewer"
-  },
   "cassaErrorShiftAlreadyOpen": "Esiste già un turno aperto per questa cassa. Chiudilo prima di aprirne un altro.",
   "@cassaErrorShiftAlreadyOpen": {
     "description": "Localized string cassaErrorShiftAlreadyOpen"
@@ -8488,7 +8490,7 @@
   "@cassaNoProductSelected": {
     "description": "Localized string cassaNoProductSelected"
   },
-  "cassaProductsAdded": "{count} prodotti aggiunti alla cassa",
+  "cassaProductsAdded": "{count, plural, =1{1 prodotto aggiunto alla cassa} other{{count} prodotti aggiunti alla cassa}}",
   "@cassaProductsAdded": {
     "description": "Localized string cassaProductsAdded",
     "placeholders": {
@@ -8497,7 +8499,7 @@
       }
     }
   },
-  "cassaProductsPartlyAdded": "{added} prodotti aggiunti. {failed} non aggiunti per stock insufficiente.",
+  "cassaProductsPartlyAdded": "{added, plural, =1{1 prodotto aggiunto} other{{added} prodotti aggiunti}}. {failed, plural, =1{1 non aggiunto} other{{failed} non aggiunti}} per giacenza insufficiente.",
   "@cassaProductsPartlyAdded": {
     "description": "Localized string cassaProductsPartlyAdded",
     "placeholders": {
@@ -8551,7 +8553,7 @@
   "@cassaNoCoupon": {
     "description": "Localized string cassaNoCoupon"
   },
-  "cassaSuspendedCount": "{count} sospesi",
+  "cassaSuspendedCount": "{count, plural, =1{1 scontrino sospeso} other{{count} scontrini sospesi}}",
   "@cassaSuspendedCount": {
     "description": "Localized string cassaSuspendedCount",
     "placeholders": {
@@ -8841,7 +8843,7 @@
   "@cassaAdd": {
     "description": "Localized string cassaAdd"
   },
-  "cassaHistoryCount": "{count} scontrini POS (canale pos, separati dagli ordini Woo)",
+  "cassaHistoryCount": "{count, plural, =1{1 scontrino} other{{count} scontrini}}",
   "@cassaHistoryCount": {
     "description": "Localized string cassaHistoryCount",
     "placeholders": {
@@ -8885,7 +8887,7 @@
       }
     }
   },
-  "cassaLinkedOrder": "Ordine Woo/MGWS collegato: {id} (solo riferimento, ciclo separato)",
+  "cassaLinkedOrder": "Ordine collegato: {id}",
   "@cassaLinkedOrder": {
     "description": "Localized string cassaLinkedOrder",
     "placeholders": {
@@ -8898,7 +8900,7 @@
   "@cassaSoldLinesTitle": {
     "description": "Localized string cassaSoldLinesTitle"
   },
-  "cassaReturnableLine": "Barcode interno {barcode} · venduti {sold} · già resi {returned} · rendibili {returnable}",
+  "cassaReturnableLine": "Codice {barcode} · venduti: {sold} · già resi: {returned} · rendibili: {returnable}",
   "@cassaReturnableLine": {
     "description": "Localized string cassaReturnableLine",
     "placeholders": {
@@ -8916,7 +8918,7 @@
       }
     }
   },
-  "cassaRecordedLinesTitle": "Righe registrate",
+  "cassaRecordedLinesTitle": "Righe dello scontrino",
   "@cassaRecordedLinesTitle": {
     "description": "Localized string cassaRecordedLinesTitle"
   },
@@ -8946,11 +8948,11 @@
       }
     }
   },
-  "cassaExchangePrepared": "Cambio preparato: aggiungi il prodotto sostitutivo e completa il checkout.",
+  "cassaExchangePrepared": "Cambio nel carrello: aggiungi il prodotto sostitutivo e premi PAGA.",
   "@cassaExchangePrepared": {
     "description": "Localized string cassaExchangePrepared"
   },
-  "cassaReturnPrepared": "Reso preparato nel carrello: completa il checkout per registrarlo.",
+  "cassaReturnPrepared": "Reso nel carrello: premi RIMBORSA per registrarlo.",
   "@cassaReturnPrepared": {
     "description": "Localized string cassaReturnPrepared"
   },
@@ -11626,6 +11628,14 @@
   "@usersRoleCustomer": {
     "description": "WooCommerce role name"
   },
+  "usersRoleMgwsWarehouse": "Operatore magazzino",
+  "@usersRoleMgwsWarehouse": {
+    "description": "MGWS role name"
+  },
+  "usersRoleMgwsCashier": "Cassiere",
+  "@usersRoleMgwsCashier": {
+    "description": "MGWS role name"
+  },
   "usersSelectUser": "Seleziona un utente",
   "@usersSelectUser": {
     "description": "Empty details panel of the users list"
@@ -13293,6 +13303,34 @@
   "@loginNeedsApplicationPassword": {
     "description": "Localized string loginNeedsApplicationPassword"
   },
+  "loginWpAuthorizeHint": "Nel browser l'accesso passa dal tuo sito WordPress: il pulsante apre la sua pagina, dove inserisci la password di sempre e approvi l'app. Poi torni qui già collegato.",
+  "@loginWpAuthorizeHint": {
+    "description": "Localized string loginWpAuthorizeHint"
+  },
+  "loginWpAuthorizeButton": "Accedi con WordPress",
+  "@loginWpAuthorizeButton": {
+    "description": "Localized string loginWpAuthorizeButton"
+  },
+  "loginWpAuthorizeRejected": "Accesso annullato: l'app non è stata approvata su WordPress.",
+  "@loginWpAuthorizeRejected": {
+    "description": "Localized string loginWpAuthorizeRejected"
+  },
+  "loginWpAuthorizeUnexpected": "WordPress ha inviato una risposta che questo browser non aveva chiesto. Rifai l'accesso.",
+  "@loginWpAuthorizeUnexpected": {
+    "description": "Localized string loginWpAuthorizeUnexpected"
+  },
+  "loginWpUseAppPassword": "Ho già una password applicazione",
+  "@loginWpUseAppPassword": {
+    "description": "Localized string loginWpUseAppPassword"
+  },
+  "loginWpUseWordPressPage": "Accedi dalla pagina di WordPress",
+  "@loginWpUseWordPressPage": {
+    "description": "Localized string loginWpUseWordPressPage"
+  },
+  "loginAppPasswordLabel": "Password applicazione",
+  "@loginAppPasswordLabel": {
+    "description": "Localized string loginAppPasswordLabel"
+  },
   "loginInvalidCredentialsOrServer": "Credenziali non valide o errore del server.",
   "@loginInvalidCredentialsOrServer": {
     "description": "Localized string loginInvalidCredentialsOrServer"
@@ -13842,5 +13880,582 @@
   "settingsLogButtonInAppBarDescription": "Il visualizzatore log è sempre disponibile dalla sua card e dal menu laterale. Attivalo per tenere anche la scorciatoia in alto nella home.",
   "@settingsLogButtonInAppBarDescription": {
     "description": "Description of the switch that shows the log button in the home top bar"
-  }
+  },
+  "inventoryQuickLoadUnitCost": "Costo unitario",
+  "@inventoryQuickLoadUnitCost": {
+    "description": "MGWS costs: inventoryQuickLoadUnitCost"
+  },
+  "inventoryQuickLoadUnitCostHint": "Facoltativo. Vuoto significa costo non noto, non zero: il valore dello stock resta com’è.",
+  "@inventoryQuickLoadUnitCostHint": {
+    "description": "MGWS costs: inventoryQuickLoadUnitCostHint"
+  },
+  "productsCost": "Costo",
+  "@productsCost": {
+    "description": "MGWS costs: productsCost"
+  },
+  "productsCostHint": "Facoltativo. Vuoto significa costo non noto, non zero. Su un prodotto variabile si dichiara una volta e le varianti lo ereditano.",
+  "@productsCostHint": {
+    "description": "MGWS costs: productsCostHint"
+  },
+  "productsRevalueStock": "Rivaluta lo stock a questo costo",
+  "@productsRevalueStock": {
+    "description": "MGWS costs: productsRevalueStock"
+  },
+  "productsRevalueStockHint": "Porta il valore dei pezzi già in magazzino a questo costo. Non muove quantità e non scrive movimenti.",
+  "@productsRevalueStockHint": {
+    "description": "MGWS costs: productsRevalueStockHint"
+  },
+  "productsCostSaved": "Costo salvato",
+  "@productsCostSaved": {
+    "description": "MGWS costs: productsCostSaved"
+  },
+  "productsCostWithdrawn": "Costo ritirato",
+  "@productsCostWithdrawn": {
+    "description": "MGWS costs: productsCostWithdrawn"
+  },
+  "productsCostNoStock": "Nessuno stock da rivalutare",
+  "@productsCostNoStock": {
+    "description": "MGWS costs: productsCostNoStock"
+  },
+  "productsCostReadFailed": "Costo non disponibile: il servizio di magazzino non ha risposto. Il campo resta vuoto e non viene dichiarato alcun costo.",
+  "@productsCostReadFailed": {
+    "description": "MGWS costs: productsCostReadFailed"
+  },
+  "dashboardWidgetMetricProductsWithoutCost": "Prodotti senza costo",
+  "@dashboardWidgetMetricProductsWithoutCost": {
+    "description": "MGWS costs: dashboardWidgetMetricProductsWithoutCost"
+  },
+  "productsCostInvalid": "Costo non valido",
+  "@productsCostInvalid": {
+    "description": "MGWS costs: productsCostInvalid"
+  },
+  "productsCostNotSaved": "Costo non salvato",
+  "@productsCostNotSaved": {
+    "description": "MGWS costs: productsCostNotSaved"
+  },
+  "productsSaveStepCost": "Registrazione costo...",
+  "@productsSaveStepCost": {
+    "description": "MGWS costs: productsSaveStepCost"
+  },
+  "permissionSetsTitle": "Ruoli e permessi",
+  "permissionSetsSubtitle": "Set di permessi applicati come ruoli WordPress.",
+  "permissionSetsNew": "Nuovo set",
+  "permissionSetsEdit": "Modifica set",
+  "permissionSetsDelete": "Elimina set",
+  "permissionSetsDeleteConfirm": "Eliminare il set «{label}»?",
+  "permissionSetsInUse": "In uso da {count} utenti: non modificabile.",
+  "permissionSetsReadOnly": "Sola lettura",
+  "permissionSetsEmpty": "Nessun set di permessi.",
+  "permissionSetsForbidden": "Permessi insufficienti per gestire i ruoli.",
+  "permissionSetsLoadError": "Errore nel caricamento: {error}",
+  "permissionSetsSaveError": "Errore nel salvataggio: {error}",
+  "permissionSetsCreated": "Set creato",
+  "permissionSetsUpdated": "Set aggiornato",
+  "permissionSetsDeleted": "Set eliminato",
+  "permissionSetsSlug": "Slug (nome tecnico)",
+  "permissionSetsLabel": "Etichetta",
+  "permissionSetsCapabilities": "Capability",
+  "permissionSetsSlugInvalid": "Slug non valido: 2-32 caratteri, minuscole, cifre, trattino o underscore.",
+  "permissionSetsLabelRequired": "Etichetta obbligatoria.",
+  "permissionSetsAtLeastOneCapability": "Seleziona almeno una capability.",
+  "permissionSetsCapabilityEscalation": "Non puoi concedere una capability che non possiedi.",
+  "permissionSetsRoleExists": "Esiste già un set o un ruolo con questo slug.",
+  "permissionSetsInUseDetail": "Il set è assegnato a {count} utenti e non si può modificare.",
+  "permissionSetsToolbarTooltip": "Gestisci i ruoli",
+  "permissionSetsCanManageHint": "I set in uso si modificano solo quando nessun utente li ha assegnati.",
+  "capRead": "Accesso al back office",
+  "capEditProducts": "Modifica prodotti",
+  "capEditShopOrders": "Modifica ordini",
+  "capMgwsStockRead": "Lettura stock",
+  "capMgwsStockMove": "Movimento stock",
+  "capMgwsOrderAccept": "Accettazione ordini",
+  "capMgwsSupplierManage": "Gestione fornitori",
+  "capMgwsPurchaseApprove": "Approvazione acquisti",
+  "capMgwsManageEmployees": "Gestione dipendenti",
+  "capMgwsManageUserPermissions": "Gestione permessi utente",
+  "capMgwsManageCredentials": "Gestione credenziali",
+  "capMgwsReportsRead": "Lettura report",
+  "capMgwsCostsRead": "Lettura costi",
+  "capMgwsCostsManage": "Gestione costi",
+  "capMgwsRolesRead": "Lettura set di permessi",
+  "capMgwsRolesManage": "Gestione set di permessi",
+  "lotsTitle": "Lotti",
+  "lotsEmpty": "Nessun lotto per questo articolo.",
+  "lotsNew": "Nuovo lotto",
+  "lotsEdit": "Modifica lotto",
+  "lotsDelete": "Elimina lotto",
+  "lotsDeleteConfirm": "Eliminare il lotto «{code}»?",
+  "lotsCreated": "Lotto creato",
+  "lotsUpdated": "Lotto aggiornato",
+  "lotsDeleted": "Lotto eliminato",
+  "lotsLoadError": "Errore nel caricamento: {error}",
+  "lotsSaveError": "Errore nel salvataggio: {error}",
+  "lotsForbidden": "Permessi insufficienti per gestire i lotti.",
+  "lotsCode": "Codice lotto",
+  "lotsSupplier": "Fornitore",
+  "lotsExpiresAt": "Scadenza",
+  "lotsReceivedAt": "Ricevuto il",
+  "lotsNote": "Nota",
+  "lotsNoSupplier": "Fornitore sconosciuto",
+  "lotsExpired": "Scaduto",
+  "lotsExpiringSoon": "In scadenza",
+  "lotsLevelQuantity": "Quantità su livello",
+  "lotsAddLevel": "Aggiungi livello",
+  "lotsLevelAdded": "Livello aggiornato",
+  "lotsAtLeastCode": "Inserisci almeno il codice lotto.",
+  "transfersTitle": "Trasferimenti con spedizione",
+  "transfersEmpty": "Nessun trasferimento.",
+  "transfersNew": "Nuovo trasferimento",
+  "transfersCreated": "Trasferimento creato",
+  "transfersSent": "Trasferimento inviato",
+  "transfersReceived": "Trasferimento ricevuto",
+  "transfersCancelled": "Trasferimento annullato",
+  "transfersLoadError": "Errore nel caricamento: {error}",
+  "transfersSaveError": "Errore nel salvataggio: {error}",
+  "transfersForbidden": "Permessi insufficienti per gestire i trasferimenti.",
+  "transfersStatusDraft": "Bozza",
+  "transfersStatusSent": "Inviato",
+  "transfersStatusReceived": "Ricevuto",
+  "transfersStatusCancelled": "Annullato",
+  "transfersFrom": "Da",
+  "transfersTo": "A",
+  "transfersSend": "Invia",
+  "transfersReceive": "Ricevi",
+  "transfersCancel": "Annulla",
+  "transfersSendConfirm": "Inviare il trasferimento? La merce uscirà dal magazzino di origine.",
+  "transfersReceiveConfirm": "Ricevere il trasferimento? La merce entrerà nel magazzino di destinazione.",
+  "transfersCancelConfirm": "Annullare il trasferimento?",
+  "priceListsTitle": "Listini prezzi",
+  "priceListsEmpty": "Nessun listino.",
+  "priceListsNew": "Nuovo listino",
+  "priceListsCreated": "Listino creato",
+  "priceListsUpdated": "Listino aggiornato",
+  "priceListsDeleted": "Listino eliminato",
+  "priceListsLoadError": "Errore nel caricamento: {error}",
+  "priceListsSaveError": "Errore nel salvataggio: {error}",
+  "priceListsForbidden": "Permessi insufficienti per gestire i listini.",
+  "priceListsName": "Nome listino",
+  "priceListsCustomer": "Cliente",
+  "priceListsSupplier": "Fornitore",
+  "priceListsCurrency": "Valuta",
+  "priceListsValidFrom": "Valido dal",
+  "priceListsValidTo": "Valido fino al",
+  "priceListsAddItem": "Aggiungi articolo",
+  "priceListsItemAdded": "Articolo aggiornato",
+  "priceListsItemRemoved": "Articolo rimosso",
+  "priceListsPrice": "Prezzo",
+  "priceListsMinQty": "Quantità minima",
+  "priceListsNoName": "Inserisci il nome del listino.",
+  "approvalRulesTitle": "Regole di approvazione",
+  "approvalRulesEmpty": "Nessuna regola di approvazione.",
+  "approvalRulesNew": "Nuova regola",
+  "approvalRulesCreated": "Regola creata",
+  "approvalRulesUpdated": "Regola aggiornata",
+  "approvalRulesDeleted": "Regola eliminata",
+  "approvalRulesLoadError": "Errore nel caricamento: {error}",
+  "approvalRulesSaveError": "Errore nel salvataggio: {error}",
+  "approvalRulesForbidden": "Permessi insufficienti per gestire le regole.",
+  "approvalRulesDocumentType": "Tipo documento",
+  "approvalRulesThreshold": "Soglia",
+  "approvalRulesCapability": "Capability richiesta",
+  "approvalRulesActive": "Attiva",
+  "approvalRulesNoType": "Inserisci il tipo di documento.",
+  "approvalRulesNoCapability": "Inserisci la capability richiesta.",
+  "approvalRulesCheckTitle": "Verifica approvazione",
+  "approvalRulesCheckAmount": "Importo",
+  "approvalRulesCheckButton": "Verifica",
+  "approvalRulesCheckRequired": "Approvazione richiesta: {capability}",
+  "approvalRulesCheckNotRequired": "Nessuna approvazione richiesta.",
+  "notificationsTitle": "Notifiche",
+  "notificationsEmpty": "Nessuna notifica",
+  "notificationsMarkAllRead": "Segna tutte come lette",
+  "notificationsSettingsTitle": "Notifiche",
+  "notificationsSettingsDescription": "Scegli cosa segnala la campanella in alto. Le scorte basse riguardano solo i prodotti con una soglia propria in WooCommerce; il registratore solo se è impostato il nome/numero cassa.",
+  "notificationsTooltip": "Notifiche",
+  "@notificationsTitle": {
+    "description": "Notification bell panel title"
+  },
+  "@notificationsTooltip": {
+    "description": "Tooltip of the notification bell"
+  },
+  "@notificationsMarkAllRead": {
+    "description": "Notification panel button"
+  },
+  "@notificationsEmpty": {
+    "description": "Notification panel empty state"
+  },
+  "notificationsUpdateTitle": "Aggiornamento disponibile",
+  "@notificationsUpdateTitle": {
+    "description": "Notification: new app version"
+  },
+  "notificationsUpdateMessage": "È disponibile la versione {version} dell'app.",
+  "@notificationsUpdateMessage": {
+    "description": "Notification: new app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsOrdersToFulfilTitle": "Ordini da evadere",
+  "@notificationsOrdersToFulfilTitle": {
+    "description": "Notification: paid orders to prepare"
+  },
+  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 ordine pagato da evadere.} other{{count} ordini pagati da evadere.}}",
+  "@notificationsOrdersToFulfilMessage": {
+    "description": "Notification: paid orders to prepare",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsOrdersUnpaidTitle": "Ordini non pagati",
+  "@notificationsOrdersUnpaidTitle": {
+    "description": "Notification: orders pending payment or on hold"
+  },
+  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 ordine non ancora pagato: non spedirlo finché il pagamento non risulta incassato.} other{{count} ordini non ancora pagati: non spedirli finché il pagamento non risulta incassato.}}",
+  "@notificationsOrdersUnpaidMessage": {
+    "description": "Notification: orders pending payment or on hold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsLowStockTitle": "Scorte basse",
+  "@notificationsLowStockTitle": {
+    "description": "Notification: products under their low stock threshold"
+  },
+  "notificationsLowStockMessage": "{count, plural, =1{1 prodotto è sotto la sua soglia di scorta minima.} other{{count} prodotti sono sotto la loro soglia di scorta minima.}}",
+  "@notificationsLowStockMessage": {
+    "description": "Notification: products under their low stock threshold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsFiscalRegisterTitle": "Registratore di cassa",
+  "@notificationsFiscalRegisterTitle": {
+    "description": "Notification: fiscal register unreachable"
+  },
+  "notificationsFiscalRegisterMessage": "Il registratore della cassa {name} non risponde.",
+  "@notificationsFiscalRegisterMessage": {
+    "description": "Notification: fiscal register unreachable",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsSettingsTitle": {
+    "description": "Settings section for the notification bell"
+  },
+  "@notificationsSettingsDescription": {
+    "description": "Settings section for the notification bell"
+  },
+  "notificationSourceMedia": "Libreria media",
+  "@notificationSourceMedia": {
+    "description": "Title of message bars raised by the media picker"
+  },
+  "notificationSourceLogs": "Log",
+  "@notificationSourceLogs": {
+    "description": "Title of message bars raised by the log viewer"
+  },
+  "returnsTitle": "Resi",
+  "returnsEmpty": "Nessun reso.",
+  "returnsLoadError": "Errore nel caricamento: {error}",
+  "returnsSaveError": "Errore nel salvataggio: {error}",
+  "returnsForbidden": "Permessi insufficienti per gestire i resi.",
+  "returnsFilterAll": "Tutti",
+  "returnsStatusRequested": "Richiesto",
+  "returnsStatusApproved": "Approvato",
+  "returnsStatusReceived": "Ricevuto",
+  "returnsStatusRefunded": "Rimborsato",
+  "returnsStatusRejected": "Rifiutato",
+  "returnsOrder": "Ordine",
+  "returnsNoLines": "Nessuna riga.",
+  "returnsLineProduct": "Articolo",
+  "returnsApprove": "Approva",
+  "returnsReceive": "Ricevi",
+  "returnsReject": "Rifiuta",
+  "returnsClose": "Chiudi",
+  "returnsApproved": "Reso approvato",
+  "returnsReceived": "Reso segnato come ricevuto",
+  "returnsRejected": "Reso rifiutato",
+  "returnsClosed": "Reso chiuso come rimborsato",
+  "returnsApproveConfirm": "Approvare il reso?",
+  "returnsReceiveConfirm": "Segnare il reso come ricevuto? Il rientro stock va registrato in WooCommerce (rimborso/ordine).",
+  "returnsRejectConfirm": "Rifiutare il reso?",
+  "returnsCloseConfirm": "Chiudere il reso come rimborsato? Il rimborso va fatto a mano.",
+  "homeTitoloTrasferimenti": "Trasferimenti",
+  "homeSottotitoloTrasferimenti": "Sposta merce tra magazzini",
+  "homeTitoloListini": "Listini prezzi",
+  "homeSottotitoloListini": "Prezzi per cliente e fornitore",
+  "homeTitoloApprovazioni": "Regole di approvazione",
+  "homeSottotitoloApprovazioni": "Soglie e permessi",
+  "homeTitoloResi": "Resi",
+  "homeSottotitoloResi": "Resi legati agli ordini",
+  "capMgwsLotsManage": "Gestione lotti",
+  "capMgwsTransfersManage": "Gestione trasferimenti",
+  "capMgwsPriceListsManage": "Gestione listini",
+  "capMgwsApprovalRulesManage": "Gestione regole di approvazione",
+  "capMgwsReturnsManage": "Gestione resi",
+  "capMgwsStockResetManage": "Reset massivo stock",
+  "capMgwsCountSchedulesManage": "Gestione conteggi programmati",
+  "capMgwsKitsManage": "Gestione kit",
+  "capMgwsReservationsManage": "Gestione prenotazioni",
+  "capMgwsShipmentsManage": "Gestione spedizioni",
+  "capMgwsProductBarcodesManage": "Gestione barcode prodotti",
+  "capMgwsSupplierPricesManage": "Gestione prezzi fornitori",
+  "capMgwsDocumentsManage": "Gestione documenti",
+  "capMgwsPaymentsManage": "Gestione pagamenti",
+  "mgwsSupplierPricesTitle": "Storico prezzi fornitori",
+  "mgwsSupplierPriceNew": "Nuovo prezzo fornitore",
+  "mgwsSupplierId": "ID fornitore",
+  "mgwsProductId": "ID prodotto",
+  "mgwsPriceCents": "Prezzo (centesimi)",
+  "mgwsCancel": "Annulla",
+  "mgwsCreate": "Crea",
+  "mgwsSupplierProductLine": "Fornitore {supplier} · Prodotto {product}",
+  "mgwsPriceCentsLine": "Prezzo: {cents} cent",
+  "mgwsCountSchedulesTitle": "Conteggi programmati",
+  "mgwsCountScheduleNew": "Nuovo conteggio programmato",
+  "mgwsSiteId": "ID sede",
+  "mgwsWarehouseId": "ID magazzino",
+  "mgwsFrequencyDays": "Frequenza (giorni)",
+  "mgwsRunDue": "Esegui dovuti",
+  "mgwsAdvancedCount": "Avanzati: {count}",
+  "mgwsScheduleLine": "Schedula {id}",
+  "mgwsScheduleSubtitle": "Sede {site} · Magazzino {warehouse} · ogni {days} gg",
+  "mgwsShipmentsTitle": "Spedizioni",
+  "mgwsShipmentNew": "Nuova spedizione",
+  "mgwsReferenceType": "Tipo riferimento",
+  "mgwsReferenceId": "ID riferimento",
+  "mgwsCarrier": "Vettore",
+  "mgwsTracking": "Tracking",
+  "mgwsShipmentStatusTitle": "Stato spedizione",
+  "mgwsStatusPendingSentDelivered": "Stato (pending/sent/delivered)",
+  "mgwsUpdate": "Aggiorna",
+  "mgwsShipmentLine": "{type} #{id}",
+  "mgwsShipmentSubtitle": "Stato: {status} · {carrier} {tracking}",
+  "mgwsReservationsTitle": "Prenotazioni",
+  "mgwsReservationNew": "Nuova prenotazione",
+  "mgwsQuantity": "Quantità",
+  "mgwsReservationLine": "Prenotazione {id} · Prodotto {product}",
+  "mgwsReservationSubtitle": "Qty {qty} · Stato {status}",
+  "mgwsConsume": "Consuma",
+  "mgwsRelease": "Rilascia",
+  "mgwsPaymentsTitle": "Pagamenti",
+  "mgwsPaymentNew": "Nuovo pagamento",
+  "mgwsAmountCents": "Importo (centesimi)",
+  "mgwsAgingLine": "Aging: {value}",
+  "mgwsPaymentLine": "{type} #{id}",
+  "mgwsPaymentSubtitle": "Importo: {cents} cent",
+  "mgwsDocumentsTitle": "Documenti",
+  "mgwsDocumentNew": "Nuovo documento",
+  "mgwsDocumentTypeLabel": "Tipo (ddt/invoice/credit_note)",
+  "mgwsDocumentNumber": "Numero",
+  "mgwsDocumentStatusTitle": "Stato documento",
+  "mgwsStatusDraftIssuedSentCancelled": "Stato (draft/issued/sent/cancelled)",
+  "mgwsDocumentLine": "{type} {number}",
+  "mgwsDocumentSubtitle": "Stato: {status}",
+  "mgwsProductBarcodesTitle": "Barcode prodotti",
+  "mgwsBarcode": "Barcode",
+  "mgwsSearch": "Cerca",
+  "mgwsSave": "Salva",
+  "mgwsResultLine": "Risultato: {value}",
+  "mgwsStockResetTitle": "Reset massivo stock",
+  "mgwsInvalidWarehouse": "Magazzino non valido",
+  "mgwsResetResult": "Reset: {reset} righe, {failed} fallite",
+  "mgwsRunReset": "Esegui reset",
+  "mgwsTargetQuantity": "Quantità target",
+  "mgwsResetTargetRequired": "Scrivi la quantità target (anche 0)",
+  "mgwsResetError": "Reset non riuscito",
+  "mgwsResetNothingToChange": "Nessun livello da cambiare: il magazzino è già al target",
+  "mgwsResetConfirmTitle": "Confermi il reset?",
+  "mgwsResetConfirmBody": "Magazzino {warehouse}: {levels} livelli passano a {target} pezzi ({pieces} pezzi cambiano in totale). L'operazione scrive un movimento per livello e aggiorna WooCommerce.",
+  "mgwsResetWooFailed": "Attenzione: WooCommerce non ha accettato {count} prodotti; la riconciliazione chiuderà la differenza",
+  "mgwsResetWarehouse": "Magazzino",
+  "mgwsResetWarehousesUnavailable": "Impossibile caricare i magazzini",
+  "mgwsKitDeductionTitle": "Deduzione kit",
+  "mgwsKitDeductionTitleWithName": "Deduzione kit: {name}",
+  "mgwsEnterKitProductId": "Inserisci un ID prodotto kit",
+  "mgwsKitProductId": "ID prodotto kit:",
+  "mgwsKitQuantity": "Quantità kit:",
+  "mgwsRefresh": "Aggiorna",
+  "mgwsSelectSite": "Seleziona una sede",
+  "mgwsDeductionOkShortfall": "Deduzione OK: {shortfall} pezzi mancanti",
+  "mgwsPhysicalSitesAvailable": "Sedi fisiche disponibili",
+  "mgwsSiteFallbackName": "Sede {id}",
+  "mgwsKitsAvailable": "Disponibili: {count} kit",
+  "mgwsNotAvailableInSite": "Non disponibile in questa sede",
+  "mgwsRoom": "Stanza {value}",
+  "mgwsRack": "Scaffale {value}",
+  "mgwsShelf": "Ripiano {value}",
+  "mgwsComponentLine": "Componente {id}: {available} disp. (serve {needed}/kit){location}",
+  "mgwsDeductFromSelectedSite": "Dedurre componenti dalla sede scelta",
+  "mgwsToolReservations": "Prenotazioni",
+  "mgwsToolCountSchedules": "Conteggi programmati",
+  "mgwsToolKitDeduction": "Deduzione kit",
+  "mgwsToolProductBarcodes": "Barcode prodotti",
+  "mgwsToolShipments": "Spedizioni",
+  "mgwsToolPayments": "Pagamenti",
+  "mgwsToolDocuments": "Documenti",
+  "mgwsToolStockReset": "Reset stock",
+  "mgwsToolTransfers": "Trasferimenti con spedizione",
+  "mgwsToolApprovalRules": "Regole approvazione",
+  "mgwsKitAvailabilityAdvisoryTitle": "Disponibilità kit (avviso)",
+  "mgwsKitAvailabilityNoSite": "Kit \"{name}\": nessuna sede può evadere {qty}.",
+  "@mgwsKitAvailabilityNoSite": {"placeholders": {"name": {"type": "String"}, "qty": {"type": "String"}}},
+  "mgwsKitAvailabilityPartial": "Kit \"{name}\": {ok} sedi disponibili, {short} in carenza (il server deduce dalla sede del registro).",
+  "@mgwsKitAvailabilityPartial": {"placeholders": {"name": {"type": "String"}, "ok": {"type": "String"}, "short": {"type": "String"}}},
+  "mgwsContinueAnyway": "Continua comunque",
+  "mgwsOpenSkuBarcodePatterns": "Pattern SKU/barcode",
+  "mgwsOpenProductBarcodesMgws": "Barcode prodotti MGWS",
+  "transfersPickFrom": "Magazzino di origine",
+  "transfersPickTo": "Magazzino di destinazione",
+  "transfersNoLines": "Nessuna riga: aggiungi gli articoli prima di inviare.",
+  "transfersAddLines": "Aggiungi articoli",
+  "transfersRemoveLine": "Rimuovi riga",
+  "transfersLinesFailed": "{count} righe non salvate",
+  "returnsNew": "Nuovo reso",
+  "returnsOrderOptional": "Numero ordine (facoltativo)",
+  "returnsReason": "Motivo",
+  "priceListsNoItems": "Nessun articolo nel listino.",
+  "priceListsInvalidPrice": "Prezzo non valido",
+  "kitsTitle": "Kit",
+  "kitsNew": "Nuovo kit",
+  "kitsEmpty": "Nessun kit definito.",
+  "kitsCreated": "Kit creato: ora aggiungi i componenti",
+  "kitsSaveError": "Kit non salvato",
+  "kitsForbidden": "Permessi insufficienti per gestire i kit.",
+  "kitsNoComponents": "Nessun componente: la vendita del kit non scala nulla.",
+  "kitsAddComponents": "Aggiungi componenti",
+  "kitsDeleteConfirm": "Eliminare il kit {name}?",
+  "mgwsToolKits": "Kit",
+  "approvalRulesCheckType": "Tipo documento",
+  "employeesAccessTitle": "Accesso all'app",
+  "employeesAccessCreate": "Crea utente",
+  "employeesAccessLink": "Collega esistente",
+  "employeesPermissionSet": "Set di permessi",
+  "employeesPermissionSetNone": "Nessuno per ora",
+  "employeesSendInvite": "Invia email per scegliere la password",
+  "employeesSendInviteHelper": "La password non passa dall'app: il dipendente la imposta dal link ricevuto.",
+  "employeesLinkChoose": "Scegli utente",
+  "employeesLinkNoneChosen": "Scegli l'utente WordPress da collegare",
+  "employeesLinkSearch": "Cerca per nome, login o email",
+  "employeesLinkSearchHint": "Scrivi almeno 2 caratteri. Compaiono solo gli utenti non ancora collegati.",
+  "employeesWorkEmail": "Email aziendale",
+  "employeesWorkEmailHelper": "È l'email di accesso all'app: il nome utente nasce da qui.",
+  "employeesWorkEmailRequired": "Serve l'email aziendale per creare l'utente",
+  "employeesPersonalEmail": "Email personale",
+  "employeesLoginWillBe": "Accesso: {email}",
+  "employeesContractTitle": "Contratto",
+  "employeesContractTypeNone": "Non indicato",
+  "employeesContractPermanent": "Tempo indeterminato",
+  "employeesContractFixedTerm": "Tempo determinato",
+  "employeesContractApprenticeship": "Apprendistato",
+  "employeesContractInternship": "Tirocinio",
+  "employeesContractOther": "Altro",
+  "employeesContractLevel": "Livello",
+  "employeesContractStart": "Inizio contratto",
+  "employeesContractEnd": "Fine contratto",
+  "employeesContractEndBeforeStart": "La fine è prima dell'inizio",
+  "employeesContractHours": "Ore settimanali da contratto",
+  "employeesContractHoursHelper": "Per esempio 40 o 38:30",
+  "employeesContractHoursInvalid": "Scrivi le ore come 40 o 38:30",
+  "employeesScheduleTitle": "Settimana tipo",
+  "employeesScheduleHelper": "Gli orari di ogni giorno. Da qui si copiano i turni.",
+  "employeesScheduleAddSlot": "Aggiungi fascia",
+  "employeesScheduleDayOff": "Riposo",
+  "employeesScheduleTotal": "Totale settimana: {hours}",
+  "@employeesScheduleVsContract": {"placeholders": {"planned": {"type": "String"}, "contract": {"type": "String"}}},
+  "employeesScheduleVsContract": "Settimana tipo {planned} · contratto {contract}",
+  "employeesScheduleOverlap": "Le fasce di {day} si sovrappongono",
+  "employeesScheduleSlotInvalid": "Una fascia di {day} finisce prima di iniziare",
+  "employeesShiftsTitle": "Turni",
+  "employeesShiftsOpen": "Apri turni",
+  "employeesShiftsPlanned": "Pianificate",
+  "employeesShiftsContract": "Contratto",
+  "employeesShiftsDifference": "Differenza",
+  "employeesShiftsCopyWeek": "Copia settimana tipo",
+  "employeesShiftsCopyDone": "Turni creati: {count}",
+  "employeesShiftsReplaceTitle": "Alcuni giorni hanno già dei turni",
+  "employeesShiftsReplaceBody": "Vuoi sostituirli con la settimana tipo o riempire solo i giorni vuoti?",
+  "employeesShiftsReplace": "Sostituisci",
+  "employeesShiftsKeep": "Solo giorni vuoti",
+  "employeesShiftsNoSchedule": "Il dipendente non ha una settimana tipo: impostala nella scheda.",
+  "employeesShiftsPrevWeek": "Settimana precedente",
+  "employeesShiftsNextWeek": "Settimana successiva",
+  "employeesShiftsWeekOf": "Settimana dal {from} al {to}",
+  "employeesShiftsError": "Turni non disponibili: {error}",
+  "employeesShiftAdd": "Aggiungi turno",
+  "employeesShiftEdit": "Modifica turno",
+  "employeesShiftStart": "Inizio",
+  "employeesShiftEnd": "Fine",
+  "employeesShiftBreak": "Pausa (minuti)",
+  "employeesShiftBreakInvalid": "La pausa deve essere più corta del turno",
+  "employeesShiftNote": "Nota",
+  "employeesShiftNone": "Nessun turno",
+  "employeesShiftDeleteTitle": "Eliminare il turno?",
+  "employeesShiftSaveError": "Turno non salvato: {error}",
+  "employeesDocumentsEmpty": "Nessun documento caricato.",
+  "employeesDocumentsAfterSave": "Documenti e turni si aggiungono dalla scheda, dopo aver salvato il dipendente.",
+  "employeesDocumentUpload": "Carica documento",
+  "employeesDocumentKind": "Tipo di documento",
+  "employeesDocumentContract": "Contratto",
+  "employeesDocumentIdCard": "Documento d'identità",
+  "employeesDocumentOther": "Altro",
+  "employeesDocumentTitle": "Titolo",
+  "employeesDocumentChooseFile": "Scegli file (PDF o immagine)",
+  "employeesDocumentTooLarge": "Il file supera i 10 MB",
+  "employeesDocumentSaved": "Salvato: {path}",
+  "employeesDocumentDeleteTitle": "Eliminare il documento {title}?",
+  "employeesDocumentsError": "Documenti non disponibili: {error}",
+  "employeesDocumentDownload": "Scarica",
+  "employeesPersonalInfo": "Dati del dipendente",
+  "employeesErrShiftOverlap": "Il turno si sovrappone a un altro turno dello stesso dipendente",
+  "employeesErrEmailExists": "Esiste già un utente WordPress con questa email: usa «Collega esistente»",
+  "employeesErrUsernameExists": "Il nome utente è già preso",
+  "employeesErrAccountRequired": "Il dipendente deve avere un utente WordPress",
+  "employeesErrBadFileType": "Sono accettati solo PDF, JPEG, PNG e WebP",
+  "employeesErrForbidden": "Non hai i permessi per questa operazione",
+  "employeesErrEscalation": "Non puoi assegnare permessi che non hai",
+  "employeesPermissionSetNoneWarning": "Senza set il dipendente entra nell'app ma non può fare nulla",
+  "employeesScheduleMismatch": "Non coincide con il contratto ({diff})",
+  "employeesScheduleCopyMonday": "Copia il lunedì da martedì a venerdì",
+  "employeesShiftTimeInvalid": "Scrivi inizio e fine come 9:00, 930 o 9",
+  "employeesEmailLinkedTo": "Questa email è già l'accesso di {name}",
+  "employeesCreated": "Dipendente {name} creato",
+  "employeesChangesSaved": "Modifiche salvate",
+  "permissionSetCashier": "Cassa",
+  "permissionSetWarehouse": "Magazzino",
+  "inventoryToolsMenu": "Altri strumenti",
+  "inventoryToolsGroupDocuments": "Documenti e consegne",
+  "inventoryToolsGroupCatalog": "Catalogo",
+  "inventoryToolsGroupControl": "Controllo magazzino",
+  "inventoryWarehouseAuto": "Automatico",
+  "inventoryWarehouseAutoHelper": "Dove il prodotto è già, altrimenti nel predefinito della sede.",
+  "@inventoryRighePezzi": {"placeholders": {"righe": {"type": "int"}, "pezzi": {"type": "int"}}},
+  "inventoryRighePezzi": "{righe, plural, =1{1 riga} other{{righe} righe}} · {pezzi, plural, =1{1 pezzo} other{{pezzi} pezzi}}",
+  "inventoryWarehouseChosenHelper": "Tutto il carico va in {name}.",
+  "@inventoryRettificaConfermaTitolo": {"placeholders": {"count": {"type": "int"}}},
+  "inventoryRettificaConfermaTitolo": "{count, plural, =1{Conferma rettifica di 1 prodotto} other{Conferma rettifica di {count} prodotti}}",
+  "inventoryWarehouseUnassigned": "Non assegnato",
+  "inventorySpostaArrivoUgualePartenza": "Partenza e arrivo sono lo stesso magazzino: scegline un altro.",
+  "@inventorySpostaConfermaTitolo": {"placeholders": {"count": {"type": "int"}}},
+  "inventorySpostaConfermaTitolo": "{count, plural, =1{Conferma spostamento di 1 prodotto} other{Conferma spostamento di {count} prodotti}}",
+  "@inventoryStepStockChangedNome": {"placeholders": {"name": {"type": "String"}, "before": {"type": "String"}, "after": {"type": "int"}}},
+  "inventoryStepStockChangedNome": "{name}: giacenza {before} → {after}",
+  "@inventoryPezziCount": {"placeholders": {"count": {"type": "int"}}},
+  "inventoryPezziCount": "{count, plural, =1{1 pezzo} other{{count} pezzi}}",
+  "transfersIntro": "La merce esce dal magazzino di partenza quando invii e entra in quello di arrivo quando ricevi: nel frattempo è in viaggio. Per spostare pezzi subito usa \"Sposta subito\" nella pagina Inventario.",
+  "cassaRimuoviRiga": "Togli dallo scontrino",
+  "@cassaMetricsSummary": {"placeholders": {"sales": {"type": "int"}, "returns": {"type": "int"}, "net": {"type": "String"}}},
+  "cassaMetricsSummary": "Riepilogo: {sales, plural, =1{1 vendita} other{{sales} vendite}} · {returns, plural, =1{1 reso} other{{returns} resi}} · saldo {net}",
+  "cassaRefundButton": "RIMBORSA",
+  "@cassaExpectedCash": {"placeholders": {"amount": {"type": "String"}}},
+  "cassaExpectedCash": "Contanti attesi in cassa: {amount}"
 }

@@ -59,7 +59,7 @@ class ShopPrintDataProvider extends PrintDataProvider {
   Future<PrintJob?> pickRows(BuildContext context) async {
     final l10n = context.l10n;
     final localeName = l10n.localeName;
-    final picked = await openProdottoPicker(context);
+    final picked = await openProdottoPicker(context, segnalaEsauriti: false);
     if (picked == null || picked.isEmpty) return null;
     final job = labelJobFromProducts(picked, localeName);
     if (job.rows.isEmpty) {

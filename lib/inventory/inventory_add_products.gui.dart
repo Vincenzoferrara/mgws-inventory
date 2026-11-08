@@ -31,6 +31,12 @@ import 'inventory_suppliers.gui.dart';
 typedef InventoryAddProductsBarcodeLauncher =
     Future<String?> Function(BuildContext context);
 
+/// Reads the warehouses of a site; tests pass a fake one.
+typedef InventoryAddProductsWarehouseLoader =
+    Future<MgwsRestockResult<List<MgwsInventoryWarehouse>>> Function({
+      int? siteId,
+    });
+
 /// Numero di documento proposto per l'ordine, calcolato sull'orario corrente.
 ///
 /// Serve a non costringere l'operatore a inventare un codice a mano: resta
@@ -48,8 +54,10 @@ String inventoryAddProductsDocumentNumber([DateTime? now]) {
 /// Le parole sono le stesse in tutto il modulo, quindi stanno nelle traduzioni
 /// e la coppia resta leggibile anche in inglese.
 String _righeEPezzi(BuildContext context, int righe, int pezzi) =>
-    '${righe} ${context.l10n.inventoryParolaRighe} · '
-    '${pezzi} ${context.l10n.inventoryParolaPezzi}';
+    context.l10n.inventoryRighePezzi(righe, pezzi);
+
+/// Width from which the "Modalita'" and "Posizione" steps share one row.
+const inventoryAddSetupRowMinWidth = 720.0;
 
 class InventoryAddProductsPanel extends StatefulWidget {
   const InventoryAddProductsPanel({
@@ -61,6 +69,7 @@ class InventoryAddProductsPanel extends StatefulWidget {
     this.barcodeLauncher,
     this.detailsController,
     this.siteController,
+    this.warehouseLoader,
   });
 
   final InventoryAddProductsController? controller;
@@ -79,6 +88,8 @@ class InventoryAddProductsPanel extends StatefulWidget {
   /// scrive: se la pagina la cambia, il pannello ricarica da solo.
   final TextEditingController? siteController;
 
+  final InventoryAddProductsWarehouseLoader? warehouseLoader;
+
   @override
   State<InventoryAddProductsPanel> createState() =>
       _InventoryAddProductsPanelState();
@@ -91,7 +102,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   late final InventorySupplierController _supplierController;
   late final InventoryQuickLoadCatalogController _catalogController;
   late final InventoryQuickLoadSettings _settings;
-  late final QueryMgwsInventory _mgwsInventory;
+  late final InventoryAddProductsWarehouseLoader _listWarehouses;
   late final bool _ownsCatalog;
 
   final _documentController = TextEditingController(
@@ -125,7 +136,8 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     _ownsCatalog = widget.catalogController == null;
     _catalogController =
         widget.catalogController ?? InventoryQuickLoadCatalogController();
-    _mgwsInventory = QueryMgwsInventory();
+    _listWarehouses =
+        widget.warehouseLoader ?? QueryMgwsInventory().listWarehouses;
     _settings = widget.settings ?? inventoryQuickLoadSettings;
     // La sede e' della pagina: quando cambia, i magazzini vanno ricaricati
     // perche' la lista e' quella della sede dichiarata.
@@ -174,7 +186,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       _feedback = null;
       _masterLoading = true;
     });
-    final warehouses = await _mgwsInventory.listWarehouses(
+    final warehouses = await _listWarehouses(
       siteId: siteId > 0 ? siteId : null,
     );
     if (!mounted) return;
@@ -189,7 +201,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
 
   Future<void> _loadMasterData() async {
     setState(() => _masterLoading = true);
-    final warehouses = await _mgwsInventory.listWarehouses(
+    final warehouses = await _listWarehouses(
       siteId: _currentSiteId > 0 ? _currentSiteId : null,
     );
     if (!mounted) return;
@@ -260,7 +272,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   /// La spunta vale anche qui: con la spunta spuntata ogni prodotto scelto
   /// entra con un pezzo, senza spunta l'operatore dice quanti sono.
   Future<void> _openExistingProducts() async {
-    final selected = await openProdottoPicker(context);
+    final selected = await openProdottoPicker(context, segnalaEsauriti: false);
     if (!mounted || selected == null || selected.isEmpty) return;
     final units = expandSelectedProducts(selected);
     final incoming = <InventoryQuickLoadLineDraft>[];
@@ -394,7 +406,9 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       // I dettagli sono uno solo per tutta la pagina e Aggiungi ha il campo
       // `note` dedicato sul backend: ci vanno dentro come arrivano.
       note: widget.detailsController?.text ?? '',
-      warehouseId: _settings.warehouseEnabled
+      // The site's own warehouses come first; the local list in the settings
+      // is only for sites that do not publish them.
+      warehouseId: _warehouses.isNotEmpty || _settings.warehouseEnabled
           ? int.tryParse(_warehouse ?? '')
           : null,
       room: _settings.roomEnabled ? _room : null,
@@ -479,33 +493,57 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                 Icons.playlist_add_check,
                 color: theme.colorScheme.primary,
               ),
+              // No subtitle: the module bar already describes "Aggiungi",
+              // and every line here pushes the barcode field further down.
+              dense: true,
               title: Text(
                 context.l10n.inventoryAggiungiTitolo,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              subtitle: Text(
-                context.l10n.inventoryAggiungiSottotitolo,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.subtitleColor,
-                ),
-              ),
             ),
-            const SizedBox(height: 10),
-            _buildModeCard(),
-            const SizedBox(height: 10),
-            if (_mode == InventoryAddMode.order) ...[
-              _buildOrderCard(),
-              const SizedBox(height: 10),
-            ],
-            // La card di posizione serve solo se le impostazioni hanno
-            // qualcosa da far scegliere: i dettagli stanno a pagina, quindi
-            // una card vuota non avrebbe piu' niente dentro.
-            if (_showLocationCard) ...[
-              _buildLocationCard(),
-              const SizedBox(height: 10),
-            ],
+            const SizedBox(height: 6),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // On wide screens mode and location sit side by side, so the
+                // barcode field is not at half the screen. The order card,
+                // when there is one, comes after both and is numbered so.
+                final wide =
+                    _showLocationCard &&
+                    constraints.maxWidth >= inventoryAddSetupRowMinWidth;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (wide)
+                      Row(
+                        key: const ValueKey('inventory-add-setup-row'),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _buildModeCard()),
+                          const SizedBox(width: 16),
+                          Expanded(child: _buildLocationCard(sideBySide: true)),
+                        ],
+                      )
+                    else
+                      _buildModeCard(),
+                    const SizedBox(height: 10),
+                    if (_mode == InventoryAddMode.order) ...[
+                      _buildOrderCard(sideBySide: wide),
+                      const SizedBox(height: 10),
+                    ],
+                    // La card di posizione serve solo se le impostazioni
+                    // hanno qualcosa da far scegliere: i dettagli stanno a
+                    // pagina, quindi una card vuota non avrebbe piu' niente
+                    // dentro.
+                    if (_showLocationCard && !wide) ...[
+                      _buildLocationCard(sideBySide: false),
+                      const SizedBox(height: 10),
+                    ],
+                  ],
+                );
+              },
+            ),
             _buildSelectionCard(),
             const SizedBox(height: 10),
             InventoryAddProductsDeltaPanel(plan: _plan()),
@@ -607,12 +645,15 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     );
   }
 
-  Widget _buildOrderCard() {
+  Widget _buildOrderCard({required bool sideBySide}) {
     final colors = Theme.of(context).extension<AppColorExtension>()!;
     final suppliers = _supplierController.suppliers;
     return InventorySectionCard(
       icon: Icons.storefront_outlined,
-      title: context.l10n.inventorySezioneFornitoreConvalida,
+      title: _titoloPasso(
+        _passoOrdine(sideBySide),
+        context.l10n.inventorySezioneFornitoreConvalida,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -702,8 +743,13 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     );
   }
 
-  bool get _showLocationCard =>
-      _settings.warehouseEnabled || _settings.roomEnabled;
+  /// Where the pieces go. Shown as soon as the site has warehouses: before,
+  /// it appeared only with a list typed in the app settings, so the server
+  /// chose the warehouse and the operator never saw which one.
+  bool get _showWarehouse =>
+      _warehouses.isNotEmpty || _settings.warehouseEnabled;
+
+  bool get _showLocationCard => _showWarehouse || _settings.roomEnabled;
 
   /// Numera le sezioni in base a quelle davvero mostrate: fornitore e
   /// posizione compaiono solo in certi casi, e un numero fisso saltava da
@@ -712,27 +758,37 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   String _titoloPasso(int numero, String titolo) =>
       titolo.replaceFirst(RegExp(r'^\d+\.\s*'), '$numero. ');
 
-  int get _passoPosizione => _mode == InventoryAddMode.order ? 3 : 2;
+  /// With mode and location side by side, location is step 2 and the order
+  /// card, below them, step 3.
+  int _passoPosizione(bool sideBySide) =>
+      _mode == InventoryAddMode.order && !sideBySide ? 3 : 2;
 
-  int get _passoProdotti => _passoPosizione + (_showLocationCard ? 1 : 0);
+  int _passoOrdine(bool sideBySide) => sideBySide ? 3 : 2;
 
-  Widget _buildLocationCard() {
+  int get _passoProdotti =>
+      2 +
+      (_mode == InventoryAddMode.order ? 1 : 0) +
+      (_showLocationCard ? 1 : 0);
+
+  Widget _buildLocationCard({required bool sideBySide}) {
     return InventorySectionCard(
       icon: Icons.location_on_outlined,
       title: _titoloPasso(
-        _passoPosizione,
+        _passoPosizione(sideBySide),
         context.l10n.inventorySezionePosizione2,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final width = constraints.maxWidth >= 540
+          // Beside the mode card the half is already narrow: one field per
+          // line there.
+          final width = constraints.maxWidth >= 540 && !sideBySide
               ? (constraints.maxWidth - 12) / 2
               : constraints.maxWidth;
           return Wrap(
             spacing: 12,
             runSpacing: 12,
             children: [
-              if (_settings.warehouseEnabled)
+              if (_showWarehouse)
                 SizedBox(
                   width: width,
                   child: _warehouses.isEmpty
@@ -757,6 +813,19 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                           isExpanded: true,
                           decoration: InputDecoration(
                             labelText: context.l10n.inventoryEtichettaMagazzino,
+                            // Always a line under the field, so picking a
+                            // warehouse does not move everything below.
+                            helperText: _warehouse == null
+                                ? context.l10n.inventoryWarehouseAutoHelper
+                                : context.l10n.inventoryWarehouseChosenHelper(
+                                    _warehouses
+                                        .firstWhere(
+                                          (w) => w.id.toString() == _warehouse,
+                                          orElse: () => _warehouses.first,
+                                        )
+                                        .name,
+                                  ),
+                            helperMaxLines: 2,
                             prefixIcon: const Icon(Icons.warehouse_outlined),
                             suffixIcon: _masterLoading
                                 ? const Padding(
@@ -771,6 +840,10 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                                 : null,
                           ),
                           items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text(context.l10n.inventoryWarehouseAuto),
+                            ),
                             for (final warehouse in _warehouses)
                               DropdownMenuItem<String>(
                                 value: warehouse.id.toString(),
@@ -1134,11 +1207,14 @@ Future<bool?> showInventoryAddProductsConfirmDialog({
             Text(
               '${context.l10n.inventoryEtichettaMotivo} ${context.l10n.inventoryStockInReason}',
             ),
-            if (plan.warehouseId != null || (plan.room ?? '').isNotEmpty)
-              Text(
-                '${context.l10n.inventoryEtichettaPosizione} '
-                '${[if (plan.warehouseId != null) places.warehouseLabel(context.l10n, plan.warehouseId!), if ((plan.room ?? '').isNotEmpty) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
-              ),
+            // Always said, also when automatic: the operator confirms where
+            // the pieces go, not only how many.
+            Text(
+              '${context.l10n.inventoryEtichettaPosizione} '
+              '${[plan.warehouseId != null ? places.warehouseLabel(context.l10n, plan.warehouseId!) : context.l10n.inventoryWarehouseAuto, if ((plan.room ?? '').isNotEmpty) '${context.l10n.inventoryEtichettaStanza} ${plan.room}'].join(' · ')}',
+              key: const ValueKey('inventory-add-confirm-destination'),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             if (plan.note.trim().isNotEmpty)
               Text('${context.l10n.inventoryLabelDettagli}: ${plan.note}'),
             if (plan.isOrder) ...[

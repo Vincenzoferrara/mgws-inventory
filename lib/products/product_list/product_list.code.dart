@@ -848,8 +848,7 @@ class ProdottiGestioneController {
     int? prefetchLimit,
   }) async {
     final previousLocal =
-        ProdottiCache.readProducts() ??
-        List<ProdottoGlobal>.from(_prodotti);
+        ProdottiCache.readProducts() ?? List<ProdottoGlobal>.from(_prodotti);
     try {
       _lastLoadWarning = null;
 

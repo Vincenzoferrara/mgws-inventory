@@ -90,6 +90,10 @@ Map<String, dynamic> buildMgwsCheckoutPayload({
       'totale_resi': scontrino.totaleResi,
       'saldo_operazione': scontrino.saldoOperazione,
       'resto': scontrino.resto,
+      // Contanti dati dal cliente: senza, MGWS li ricostruisce da totale e
+      // resto.
+      if (scontrino.importoRicevuto > 0)
+        'importo_ricevuto': scontrino.importoRicevuto,
     },
     'meta_data': metadata,
   };
@@ -144,5 +148,44 @@ Map<String, dynamic> _serializeCheckoutLine(RigaScontrino line) {
       'source_line_key': line.riferimentoChiaveRiga,
     if (line.motivoReso != null) 'return_reason': line.motivoReso,
     if (line.esitoMerce != null) 'return_outcome': line.esitoMerce,
+  };
+}
+
+/// Perche' una riga e' uscita dal carrello senza essere venduta.
+enum MotivoAnnullamento {
+  rigaRimossa('line_removed'),
+  quantitaRidotta('quantity_reduced'),
+  carrelloSvuotato('cart_cleared');
+
+  const MotivoAnnullamento(this.value);
+  final String value;
+}
+
+/// Corpo di `POST /pos/voids`: le righe tolte dal carrello, che MGWS scrive
+/// nel libro movimenti e mai sullo scontrino.
+Map<String, dynamic> buildMgwsVoidPayload({
+  required Scontrino scontrino,
+  required MotivoAnnullamento motivo,
+  required List<({RigaScontrino riga, int quantita})> righe,
+  int siteId = 0,
+}) {
+  return <String, dynamic>{
+    'reason': motivo.value,
+    'receipt_key': scontrino.id,
+    if ((scontrino.turnoId ?? '').isNotEmpty) 'shift_id': scontrino.turnoId,
+    if ((scontrino.cassaNome ?? '').isNotEmpty)
+      'register_name': scontrino.cassaNome,
+    if (siteId > 0) 'site_id': siteId,
+    'lines': [
+      for (final r in righe)
+        {
+          if (r.riga.prodotto.id != null) 'product_id': r.riga.prodotto.id,
+          if (r.riga.variante != null) 'variation_id': r.riga.variante!.id,
+          'quantity': r.quantita,
+          'unit_price': r.riga.prezzoUnitario,
+          'name': r.riga.nomeCompleto,
+          'movement_type': r.riga.tipoMovimento.value,
+        },
+    ],
   };
 }

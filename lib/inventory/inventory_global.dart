@@ -70,7 +70,6 @@ class UnifiedInventoryItem {
   final String stockStatus;
   final bool isLowStock;
   final double? wooPrice;
-  final double? mgwsPurchasePrice;
   final DateTime? wooLastUpdated;
   final DateTime? mgwsLastUpdated;
   final bool hasDiscrepancy;
@@ -86,7 +85,6 @@ class UnifiedInventoryItem {
     required this.stockStatus,
     this.isLowStock = false,
     this.wooPrice,
-    this.mgwsPurchasePrice,
     this.wooLastUpdated,
     this.mgwsLastUpdated,
     this.hasDiscrepancy = false,
@@ -315,7 +313,6 @@ class InventoryGlobal {
               ),
               isLowStock: mgwsStock['is_low_stock'] ?? false,
               wooPrice: wooProduct.prezzoNormale,
-              mgwsPurchasePrice: mgwsStock['purchase_price'],
               wooLastUpdated: wooProduct.dataModifica,
               mgwsLastUpdated: mgwsStock['last_updated'] != null
                   ? DateTime.tryParse(mgwsStock['last_updated'])
@@ -421,7 +418,6 @@ class InventoryGlobal {
             stockStatus: 'outofstock',
             isLowStock: true,
             wooPrice: wooProduct.prezzoNormale,
-            mgwsPurchasePrice: mgwsStock['purchase_price'],
             wooLastUpdated: wooProduct.dataModifica,
             mgwsLastUpdated: mgwsStock['last_updated'] != null
                 ? DateTime.tryParse(mgwsStock['last_updated'])

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'class_receipt.dart';
 import 'checkout.code.dart';
+import 'checkout_barcode_field.dart';
 import 'checkout_failure_text.dart';
 import 'checkout_history.gui.dart';
 import '../products/class_products.dart';
@@ -26,7 +27,6 @@ class CassaPage extends StatefulWidget {
 class CassaPageState extends State<CassaPage>
     with AutomaticKeepAliveClientMixin {
   final CassaController _controller = CassaController();
-  final TextEditingController _searchController = TextEditingController();
   bool _mostraStorico = false;
 
   @override
@@ -54,8 +54,7 @@ class CassaPageState extends State<CassaPage>
     if (mounted) setState(() {});
   }
 
-  double _parseEuro(String value) =>
-      double.tryParse(value.replaceAll(',', '.').trim()) ?? 0;
+  double _parseEuro(String value) => parseImportoCassa(value) ?? 0;
 
   Future<void> _dialogApriTurno() async {
     final fondoController = TextEditingController();
@@ -151,91 +150,126 @@ class CassaPageState extends State<CassaPage>
     final cartaController = TextEditingController();
     final causaleController = TextEditingController();
     final noteController = TextEditingController();
+    final atteso = contantiAttesiTurno(turno.fondoIniziale, totali);
+    String? erroreCausale;
     final conferma = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.cassaChiudiTurnoCassa),
-        content: SizedBox(
-          width: 460,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.l10n.cassaEtichettaTurno('${turno.id}')),
-                Text(
-                  context.l10n.cassaEtichettaOperatore(
-                    turno.operatoreLabel ??
-                        context.l10n.cassaOperatorUnassigned,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(context.l10n.cassaChiudiTurnoCassa),
+          content: SizedBox(
+            width: 460,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.cassaEtichettaTurno(
+                      formatAperturaTurno(turno.dataApertura, DateTime.now()),
+                    ),
                   ),
-                ),
-                Text(
-                  context.l10n.cassaInitialFloatValue(
-                    '€${turno.fondoIniziale.toStringAsFixed(2)}',
+                  Text(
+                    context.l10n.cassaEtichettaOperatore(
+                      turno.operatoreLabel ??
+                          context.l10n.cassaOperatorUnassigned,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.cassaShiftTakings(
-                    '€${(totali['contanti'] ?? 0).toStringAsFixed(2)}',
-                    '€${(totali['carta'] ?? 0).toStringAsFixed(2)}',
-                    '€${(totali['altri'] ?? 0).toStringAsFixed(2)}',
-                    '€${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                  Text(
+                    context.l10n.cassaInitialFloatValue(
+                      '€${turno.fondoIniziale.toStringAsFixed(2)}',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: contantiController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  const SizedBox(height: 8),
+                  Text(
+                    context.l10n.cassaShiftTakings(
+                      '€${(totali['contanti'] ?? 0).toStringAsFixed(2)}',
+                      '€${(totali['carta'] ?? 0).toStringAsFixed(2)}',
+                      '€${(totali['altri'] ?? 0).toStringAsFixed(2)}',
+                      '€${(totali['rimborsi'] ?? 0).toStringAsFixed(2)}',
+                    ),
                   ),
-                  decoration: InputDecoration(
-                    labelText: context.l10n.cassaContantiContati,
-                    border: OutlineInputBorder(),
+                  // What the drawer should hold: without it the operator
+                  // could not tell why a reason was required.
+                  Text(
+                    context.l10n.cassaExpectedCash(
+                      '€${atteso.toStringAsFixed(2)}',
+                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: cartaController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: contantiController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.cassaContantiContati,
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                  decoration: InputDecoration(
-                    labelText: context.l10n.cassaCartaPosContato,
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: cartaController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.cassaCartaPosContato,
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: causaleController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.cassaCausaleDifferenza,
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: causaleController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.cassaCausaleDifferenza,
+                      border: OutlineInputBorder(),
+                      errorText: erroreCausale,
+                      errorMaxLines: 3,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: noteController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.cassaNote,
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: noteController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.cassaNote,
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(context.l10n.commonAnnulla),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                // Checked here, before anything reaches the server: the
+                // dialog stays open with what was typed.
+                if (causaleController.text.trim().isEmpty &&
+                    serveCausaleChiusura(
+                      fondo: turno.fondoIniziale,
+                      totali: totali,
+                      contanti: _parseEuro(contantiController.text),
+                      carta: _parseEuro(cartaController.text),
+                    )) {
+                  setDialogState(
+                    () => erroreCausale =
+                        context.l10n.cassaErrorDifferenceReasonRequired,
+                  );
+                  return;
+                }
+                Navigator.pop(context, true);
+              },
+              icon: const Icon(Icons.lock),
+              label: Text(context.l10n.cassaChiudiTurno),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.commonAnnulla),
-          ),
-          FilledButton.icon(
-            onPressed: () => Navigator.pop(context, true),
-            icon: const Icon(Icons.lock),
-            label: Text(context.l10n.cassaChiudiTurno),
-          ),
-        ],
       ),
     );
     if (conferma != true || !mounted) return;
@@ -264,7 +298,6 @@ class CassaPageState extends State<CassaPage>
   @override
   void dispose() {
     QueryMgwsSite.changes.removeListener(_aggiornaSede);
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -349,7 +382,6 @@ class CassaPageState extends State<CassaPage>
           flex: 6,
           child: _LatoSinistroWidget(
             controller: _controller,
-            searchController: _searchController,
             onStateChanged: _updateState,
           ),
         ),
@@ -380,7 +412,6 @@ class CassaPageState extends State<CassaPage>
         Expanded(
           child: _LatoSinistroWidget(
             controller: _controller,
-            searchController: _searchController,
             onStateChanged: _updateState,
           ),
         ),
@@ -410,9 +441,11 @@ class CassaPageState extends State<CassaPage>
             style: const TextStyle(fontSize: 12),
           ),
         ),
-        if (cassaSettings.turnoObbligatorio) ...[
+        // Open/close stay available when the shift is optional: the setting
+        // only decides whether a missing shift blocks the sale.
+        ...[
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 170),
+            constraints: const BoxConstraints(maxWidth: 230),
             child: Tooltip(
               message: _controller.hasTurnoAperto
                   ? context.l10n.cassaShiftOpenedAt(
@@ -497,12 +530,10 @@ class CassaPageState extends State<CassaPage>
 /// Widget lato sinistro - Ricerca e selezione prodotti
 class _LatoSinistroWidget extends StatelessWidget {
   final CassaController controller;
-  final TextEditingController searchController;
   final VoidCallback onStateChanged;
 
   const _LatoSinistroWidget({
     required this.controller,
-    required this.searchController,
     required this.onStateChanged,
   });
 
@@ -571,12 +602,12 @@ class _LatoSinistroWidget extends StatelessWidget {
     }
   }
 
-  Future<void> _aggiungiBarcodeDiretto(BuildContext context) async {
-    final barcode = searchController.text.trim();
-    if (barcode.isEmpty) return;
-
+  Future<bool> _aggiungiBarcodeDiretto(
+    BuildContext context,
+    String barcode,
+  ) async {
     final elemento = await controller.ricercaPerBarcode(barcode);
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
 
     if (elemento == null) {
       NotificationService.instance.messageBar(
@@ -584,21 +615,19 @@ class _LatoSinistroWidget extends StatelessWidget {
         'cassa',
         context.l10n.cassaBarcodeNotFound,
       );
-      return;
+      return false;
     }
 
-    if (elemento.quantitaStock <= 0 || !elemento.isDisponibile) {
+    if (controller.bloccaEsauritoScansionato(elemento)) {
       NotificationService.instance.messageBar(
         'errore',
         'cassa',
         context.l10n.cassaProductNoLongerAvailable,
       );
-      return;
+      return false;
     }
 
-    final aggiunto = await _aggiungiElementoContestuale(context, elemento);
-    if (!context.mounted) return;
-    if (aggiunto) searchController.clear();
+    return _aggiungiElementoContestuale(context, elemento);
   }
 
   Future<void> _aggiungiProdottiManualmente(
@@ -692,75 +721,9 @@ class _LatoSinistroWidget extends StatelessWidget {
 
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final barcodeField = TextField(
-                    controller: searchController,
-                    style: TextStyle(color: context.colors.onColoredSurface),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      hintText:
-                          context.l10n.inventoryHintInserisciOscansionaBarcode,
-                      hintStyle: TextStyle(
-                        color: context.colors.onColoredSurface.withValues(
-                          alpha: 0.7,
-                        ),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.qr_code,
-                        color: context.colors.onColoredSurface,
-                      ),
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: context.l10n.cassaAggiungiBarcode,
-                            icon: Icon(
-                              Icons.add_shopping_cart,
-                              color: context.colors.onColoredSurface,
-                            ),
-                            onPressed: () => _aggiungiBarcodeDiretto(context),
-                          ),
-                          IconButton(
-                            tooltip: context.l10n.cassaCancellaBarcode,
-                            icon: Icon(
-                              Icons.clear,
-                              color: context.colors.onColoredSurface,
-                            ),
-                            onPressed: () => searchController.clear(),
-                          ),
-                          IconButton(
-                            tooltip: context.l10n.cassaScansiona,
-                            icon: Icon(
-                              Icons.qr_code_scanner,
-                              color: context.colors.onColoredSurface,
-                            ),
-                            onPressed: () async {
-                              final scannedCode = await showBarcodeScanner(
-                                context,
-                              );
-                              if (scannedCode != null &&
-                                  scannedCode.isNotEmpty) {
-                                searchController.text = scannedCode;
-                                await _aggiungiBarcodeDiretto(context);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      filled: true,
-                      fillColor: context.colors.onColoredSurface.withValues(
-                        alpha: 0.2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    onSubmitted: (_) => _aggiungiBarcodeDiretto(context),
+                  final barcodeField = CassaBarcodeField(
+                    onCodice: (codice) =>
+                        _aggiungiBarcodeDiretto(context, codice),
                   );
                   final manualButton = FilledButton.tonalIcon(
                     onPressed: () async {
@@ -1012,7 +975,9 @@ class _MobileCheckoutBar extends StatelessWidget {
                             ),
                       icon: const Icon(Icons.payment),
                       label: Text(
-                        context.l10n.cassaPaga,
+                        receipt.totale < 0
+                            ? context.l10n.cassaRefundButton
+                            : context.l10n.cassaPaga,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -1123,215 +1088,16 @@ class _LatoDestroWidget extends StatelessWidget {
             ),
           ),
 
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<TipoOperazioneCassa>(
-                  segments: [
-                    ButtonSegment<TipoOperazioneCassa>(
-                      value: TipoOperazioneCassa.vendita,
-                      icon: Icon(Icons.point_of_sale),
-                      label: Text(context.l10n.cassaVendita),
-                    ),
-                    ButtonSegment<TipoOperazioneCassa>(
-                      value: TipoOperazioneCassa.reso,
-                      icon: Icon(Icons.assignment_return),
-                      label: Text(context.l10n.cassaReso),
-                    ),
-                    ButtonSegment<TipoOperazioneCassa>(
-                      value: TipoOperazioneCassa.cambio,
-                      icon: Icon(Icons.swap_horiz),
-                      label: Text(context.l10n.cassaCambio),
-                    ),
-                  ],
-                  selected: {controller.tipoOperazioneCorrente},
-                  onSelectionChanged: (selection) {
-                    controller.setTipoOperazione(selection.first);
-                    onStateChanged();
-                  },
-                ),
-              ),
-              const SizedBox(height: 12),
-              _MetricheCassaCard(controller: controller),
-            ],
-          ),
-        ),
-
-        // Spazio riepilogo: la lista carrello è mostrata nel lato sinistro.
-        if (fillAvailableSpace) const Expanded(child: SizedBox.shrink()),
-
-        // Sezione cliente (TODO: solo UI)
-        if (!scontrino.isVuoto) ...[
-          Divider(height: 1, color: theme.dividerColor),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Icon(Icons.person_outline, color: theme.primaryColor, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    controller.hasCliente
-                        ? controller.clienteNome!
-                        : context.l10n.cassaNoCustomer,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () async {
-                    await _dialogSelezionaCliente(
-                      context,
-                      controller,
-                      onStateChanged,
-                    );
-                  },
-                  icon: Icon(controller.hasCliente ? Icons.edit : Icons.add),
-                  label: Text(
-                    controller.hasCliente
-                        ? context.l10n.commonEdit
-                        : context.l10n.cassaAdd,
-                  ),
-                ),
-              ],
+        // The middle scrolls and the totals with PAGA stay at the bottom: on
+        // a 800 px high screen the sections used to push PAGA out of sight.
+        if (fillAvailableSpace)
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(children: _sezioniCentrali(context)),
             ),
-          ),
-
-          Divider(height: 1, color: theme.dividerColor),
-
-          // Sezione Carta Fedeltà
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.card_membership,
-                  color: theme.primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    context.l10n.cassaCartaFedelta,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () async {
-                    await _dialogCartaFedelta(
-                      context,
-                      controller,
-                      onStateChanged,
-                    );
-                  },
-                  icon: const Icon(Icons.qr_code_scanner),
-                  label: Text(context.l10n.cassaScansiona),
-                ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: theme.dividerColor),
-
-          // Sezione Coupon
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Icon(Icons.local_offer, color: theme.primaryColor, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    scontrino.couponCode != null
-                        ? context.l10n.cassaCouponLabel(scontrino.couponCode!)
-                        : context.l10n.cassaNoCoupon,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
-                if (scontrino.couponCode != null)
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      color: customColors.errorColorStatus,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      controller.rimuoviCoupon();
-                      onStateChanged();
-                    },
-                  )
-                else
-                  TextButton.icon(
-                    onPressed: () => _dialogApplicaCoupon(
-                      context,
-                      controller,
-                      onStateChanged,
-                    ),
-                    icon: const Icon(Icons.add),
-                    label: Text(context.l10n.cassaApplica),
-                  ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: theme.dividerColor),
-
-          // Sezione Sospendi/Riprendi
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.pause_circle_outline,
-                  color: theme.primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    controller.hasScontriniSospesi
-                        ? context.l10n.cassaSuspendedCount(
-                            controller.numeroScontriniSospesi,
-                          )
-                        : context.l10n.cassaNoneSuspended,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
-                if (controller.hasScontriniSospesi)
-                  TextButton.icon(
-                    onPressed: () => _dialogScontriniSospesi(
-                      context,
-                      controller,
-                      onStateChanged,
-                    ),
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text(context.l10n.cassaRiprendi),
-                  ),
-                if (!scontrino.isVuoto)
-                  TextButton.icon(
-                    onPressed: () {
-                      controller.sospendiScontrino();
-                      onStateChanged();
-                      NotificationService.instance.messageBar(
-                        'successo',
-                        'cassa',
-                        context.l10n.cassaReceiptSuspended,
-                      );
-                    },
-                    icon: const Icon(Icons.pause),
-                    label: Text(context.l10n.cassaSospendi),
-                  ),
-              ],
-            ),
-          ),
-
-          Divider(height: 1, color: theme.dividerColor),
-        ],
+          )
+        else
+          ..._sezioniCentrali(context),
 
         // Totali e azioni
         if (showTotals)
@@ -1465,7 +1231,9 @@ class _LatoDestroWidget extends StatelessWidget {
                               },
                         icon: const Icon(Icons.payment, size: 24),
                         label: Text(
-                          context.l10n.cassaPayButton,
+                          scontrino.totale < 0
+                              ? context.l10n.cassaRefundButton
+                              : context.l10n.cassaPayButton,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1485,6 +1253,213 @@ class _LatoDestroWidget extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  List<Widget> _sezioniCentrali(BuildContext context) {
+    final theme = Theme.of(context);
+    final customColors = theme.extension<AppColorExtension>()!;
+    final scontrino = controller.scontrinoCorrente;
+    return [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+        child: Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<TipoOperazioneCassa>(
+                segments: [
+                  ButtonSegment<TipoOperazioneCassa>(
+                    value: TipoOperazioneCassa.vendita,
+                    icon: Icon(Icons.point_of_sale),
+                    label: Text(context.l10n.cassaVendita),
+                  ),
+                  ButtonSegment<TipoOperazioneCassa>(
+                    value: TipoOperazioneCassa.reso,
+                    icon: Icon(Icons.assignment_return),
+                    label: Text(context.l10n.cassaReso),
+                  ),
+                  ButtonSegment<TipoOperazioneCassa>(
+                    value: TipoOperazioneCassa.cambio,
+                    icon: Icon(Icons.swap_horiz),
+                    label: Text(context.l10n.cassaCambio),
+                  ),
+                ],
+                selected: {controller.tipoOperazioneCorrente},
+                onSelectionChanged: (selection) {
+                  controller.setTipoOperazione(selection.first);
+                  onStateChanged();
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+            _MetricheCassaCard(controller: controller),
+          ],
+        ),
+      ),
+
+      // Sezione cliente (TODO: solo UI)
+      if (!scontrino.isVuoto) ...[
+        Divider(height: 1, color: theme.dividerColor),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.person_outline, color: theme.primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  controller.hasCliente
+                      ? controller.clienteNome!
+                      : context.l10n.cassaNoCustomer,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  await _dialogSelezionaCliente(
+                    context,
+                    controller,
+                    onStateChanged,
+                  );
+                },
+                icon: Icon(controller.hasCliente ? Icons.edit : Icons.add),
+                label: Text(
+                  controller.hasCliente
+                      ? context.l10n.commonEdit
+                      : context.l10n.cassaAdd,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Divider(height: 1, color: theme.dividerColor),
+
+        // Sezione Carta Fedeltà
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.card_membership, color: theme.primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.l10n.cassaCartaFedelta,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  await _dialogCartaFedelta(
+                    context,
+                    controller,
+                    onStateChanged,
+                  );
+                },
+                icon: const Icon(Icons.qr_code_scanner),
+                label: Text(context.l10n.cassaScansiona),
+              ),
+            ],
+          ),
+        ),
+
+        Divider(height: 1, color: theme.dividerColor),
+
+        // Sezione Coupon
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(Icons.local_offer, color: theme.primaryColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  scontrino.couponCode != null
+                      ? context.l10n.cassaCouponLabel(scontrino.couponCode!)
+                      : context.l10n.cassaNoCoupon,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              if (scontrino.couponCode != null)
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: customColors.errorColorStatus,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    controller.rimuoviCoupon();
+                    onStateChanged();
+                  },
+                )
+              else
+                TextButton.icon(
+                  onPressed: () =>
+                      _dialogApplicaCoupon(context, controller, onStateChanged),
+                  icon: const Icon(Icons.add),
+                  label: Text(context.l10n.cassaApplica),
+                ),
+            ],
+          ),
+        ),
+
+        Divider(height: 1, color: theme.dividerColor),
+
+        // Sezione Sospendi/Riprendi
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.pause_circle_outline,
+                color: theme.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  controller.hasScontriniSospesi
+                      ? context.l10n.cassaSuspendedCount(
+                          controller.numeroScontriniSospesi,
+                        )
+                      : context.l10n.cassaNoneSuspended,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              if (controller.hasScontriniSospesi)
+                TextButton.icon(
+                  onPressed: () => _dialogScontriniSospesi(
+                    context,
+                    controller,
+                    onStateChanged,
+                  ),
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text(context.l10n.cassaRiprendi),
+                ),
+              if (!scontrino.isVuoto)
+                TextButton.icon(
+                  onPressed: () {
+                    controller.sospendiScontrino();
+                    onStateChanged();
+                    NotificationService.instance.messageBar(
+                      'successo',
+                      'cassa',
+                      context.l10n.cassaReceiptSuspended,
+                    );
+                  },
+                  icon: const Icon(Icons.pause),
+                  label: Text(context.l10n.cassaSospendi),
+                ),
+            ],
+          ),
+        ),
+
+        Divider(height: 1, color: theme.dividerColor),
+      ],
+    ];
   }
 
   void _confermaVuotaCarrello(
@@ -1647,6 +1622,8 @@ class _LatoDestroWidget extends StatelessWidget {
     final importoController = TextEditingController();
     double importoRicevuto = 0;
     double resto = 0;
+    // A second tap while the server answers would send the sale twice.
+    bool inCorso = false;
     final totale = controller.scontrinoCorrente.totale;
     final absTotale = totale.abs();
     final tipoOperazione = controller.tipoOperazioneEffettivaCorrente;
@@ -1794,7 +1771,7 @@ class _LatoDestroWidget extends StatelessWidget {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          importoRicevuto = double.tryParse(value) ?? 0;
+                          importoRicevuto = parseImportoCassa(value) ?? 0;
                           resto = importoRicevuto > totale
                               ? importoRicevuto - totale
                               : 0;
@@ -1895,62 +1872,101 @@ class _LatoDestroWidget extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed:
-                    (!isRimborso &&
-                        !isCambioPari &&
-                        metodoPagamento == 'contanti' &&
-                        importoRicevuto > 0 &&
-                        importoRicevuto < totale)
+                    inCorso ||
+                        (!isRimborso &&
+                            !isCambioPari &&
+                            metodoPagamento == 'contanti' &&
+                            importoRicevuto > 0 &&
+                            importoRicevuto < totale)
                     ? null
                     : () async {
-                        // Imposta il metodo di pagamento e l'importo ricevuto
-                        controller.setMetodoPagamento(metodoPagamento);
-                        if (!isRimborso &&
-                            !isCambioPari &&
-                            metodoPagamento == 'contanti') {
-                          controller.setImportoRicevuto(
-                            importoRicevuto > 0 ? importoRicevuto : totale,
-                          );
-                        }
+                        setState(() => inCorso = true);
+                        try {
+                          // Imposta il metodo di pagamento e l'importo ricevuto
+                          controller.setMetodoPagamento(metodoPagamento);
+                          if (!isRimborso &&
+                              !isCambioPari &&
+                              metodoPagamento == 'contanti') {
+                            controller.setImportoRicevuto(
+                              importoRicevuto > 0 ? importoRicevuto : totale,
+                            );
+                          }
 
-                        final success = await controller.completaOperazione();
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          if (success) {
-                            String message = isCambioPari
-                                ? l10n.cassaExchangeRecorded
-                                : isCambio
-                                ? isRimborso
-                                      ? l10n.cassaExchangeCustomerCredit(
-                                          '€${absTotale.toStringAsFixed(2)}',
-                                        )
-                                      : l10n.cassaExchangeBalanceDue(
-                                          '€${absTotale.toStringAsFixed(2)}',
-                                        )
-                                : isRimborso
-                                ? l10n.cassaReturnRecorded(
-                                    '€${absTotale.toStringAsFixed(2)}',
-                                  )
-                                : l10n.cassaSaleCompleted;
-                            if (!isRimborso &&
-                                !isCambioPari &&
-                                metodoPagamento == 'contanti' &&
-                                resto > 0) {
-                              message = l10n.cassaSaleCompletedChange(
-                                '€${resto.toStringAsFixed(2)}',
+                          final kitWarnings = await controller
+                              .kitAvailabilityAdvisories(l10n);
+                          if (kitWarnings.isNotEmpty && context.mounted) {
+                            final proceed =
+                                await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text(
+                                      l10n.mgwsKitAvailabilityAdvisoryTitle,
+                                    ),
+                                    content: SingleChildScrollView(
+                                      child: Text(kitWarnings.join('\n')),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: Text(l10n.commonAnnulla),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
+                                        child: Text(l10n.mgwsContinueAnyway),
+                                      ),
+                                    ],
+                                  ),
+                                ) ??
+                                false;
+                            if (!proceed || !context.mounted) return;
+                          }
+
+                          final success = await controller.completaOperazione();
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            if (success) {
+                              String message = isCambioPari
+                                  ? l10n.cassaExchangeRecorded
+                                  : isCambio
+                                  ? isRimborso
+                                        ? l10n.cassaExchangeCustomerCredit(
+                                            '€${absTotale.toStringAsFixed(2)}',
+                                          )
+                                        : l10n.cassaExchangeBalanceDue(
+                                            '€${absTotale.toStringAsFixed(2)}',
+                                          )
+                                  : isRimborso
+                                  ? l10n.cassaReturnRecorded(
+                                      '€${absTotale.toStringAsFixed(2)}',
+                                    )
+                                  : l10n.cassaSaleCompleted;
+                              if (!isRimborso &&
+                                  !isCambioPari &&
+                                  metodoPagamento == 'contanti' &&
+                                  resto > 0) {
+                                message = l10n.cassaSaleCompletedChange(
+                                  '€${resto.toStringAsFixed(2)}',
+                                );
+                              }
+                              NotificationService.instance.messageBar(
+                                'successo',
+                                'cassa',
+                                message,
+                              );
+                              onStateChanged();
+                            } else {
+                              NotificationService.instance.messageBar(
+                                'errore',
+                                'cassa',
+                                l10n.cassaSaleFailed,
                               );
                             }
-                            NotificationService.instance.messageBar(
-                              'successo',
-                              'cassa',
-                              message,
-                            );
-                            onStateChanged();
-                          } else {
-                            NotificationService.instance.messageBar(
-                              'errore',
-                              'cassa',
-                              l10n.cassaSaleFailed,
-                            );
+                          }
+                        } finally {
+                          if (context.mounted) {
+                            setState(() => inCorso = false);
                           }
                         }
                       },
@@ -2239,9 +2255,13 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
     _lastValidQuantita = riga.quantita;
     _quantitaController = TextEditingController(text: '$_lastValidQuantita');
     _quantitaFocusNode = FocusNode();
+    // The typed quantity applies on Enter or when the field loses focus,
+    // not at every key: going from 12 to 15 passes through "1", which would
+    // record 11 voided pieces.
     _quantitaFocusNode.addListener(() {
       if (!_quantitaFocusNode.hasFocus) {
         _ripristinaSeVuoto();
+        _applicaQuantitaManuale(_quantitaController.text);
       }
     });
   }
@@ -2289,7 +2309,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
   }
 
   void _applicaQuantitaManuale(String rawValue) {
-    if (_isInternalUpdate) return;
+    if (_isInternalUpdate || !mounted) return;
     final trimmed = rawValue.trim();
     if (trimmed.isEmpty) {
       return;
@@ -2309,6 +2329,7 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
       return;
     }
 
+    if (nuovaQuantita == riga.quantita) return;
     final errore = controller.aggiornaQuantitaRiga(index, nuovaQuantita);
     if (errore == null) {
       _lastValidQuantita = nuovaQuantita;
@@ -2450,7 +2471,6 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                                         ),
                                         border: InputBorder.none,
                                       ),
-                                      onChanged: _applicaQuantitaManuale,
                                       onFieldSubmitted: _applicaQuantitaManuale,
                                       onTapOutside: (_) {
                                         _ripristinaSeVuoto();
@@ -2520,16 +2540,35 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
                         builder: (context) {
                           final customColors = theme
                               .extension<AppColorExtension>()!;
-                          return InkWell(
-                            onTap: () {
-                              controller.rimuoviRiga(index);
-                              onStateChanged();
-                            },
-                            child: Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: customColors.errorColorStatus,
-                            ),
+                          // The discount was reachable only with a long
+                          // press, which nobody finds with a mouse.
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                tooltip: context.l10n.cassaScontoSullaRiga,
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(
+                                  Icons.percent,
+                                  size: 20,
+                                  color: theme.primaryColor,
+                                ),
+                                onPressed: () => _showScontoRigaDialog(context),
+                              ),
+                              IconButton(
+                                tooltip: context.l10n.cassaRimuoviRiga,
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                  color: customColors.errorColorStatus,
+                                ),
+                                onPressed: () {
+                                  controller.rimuoviRiga(index);
+                                  onStateChanged();
+                                },
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -2639,8 +2678,8 @@ class _RigaScontrinoWidgetState extends State<_RigaScontrinoWidget> {
           ElevatedButton(
             onPressed: () {
               final percentuale =
-                  double.tryParse(percentualeController.text) ?? 0;
-              final fisso = double.tryParse(fissoController.text) ?? 0;
+                  parseImportoCassa(percentualeController.text) ?? 0;
+              final fisso = parseImportoCassa(fissoController.text) ?? 0;
 
               if (percentuale > 0) {
                 controller.applicaScontoRigaPercentuale(index, percentuale);
@@ -2669,57 +2708,74 @@ class _MetricheCassaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final metriche = controller.metricheSnapshot;
     final theme = Theme.of(context);
+    // Closed by default: eight chips took the room of the totals and PAGA.
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.dividerColor),
       ),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
+      child: ExpansionTile(
+        dense: true,
+        shape: const Border(),
+        collapsedShape: const Border(),
+        leading: Icon(Icons.analytics_outlined, color: theme.primaryColor),
+        title: Text(
+          context.l10n.cassaMetricsSummary(
+            metriche.numeroVendite,
+            metriche.numeroResi,
+            '€${metriche.saldoNetto.toStringAsFixed(2)}',
+          ),
+          style: theme.textTheme.bodyMedium,
+        ),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         children: [
-          _MetricChip(
-            label: context.l10n.cassaMetricSales,
-            value: metriche.numeroVendite.toString(),
-            icon: Icons.point_of_sale,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricReturns,
-            value: metriche.numeroResi.toString(),
-            icon: Icons.assignment_return,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricExchanges,
-            value: metriche.numeroCambi.toString(),
-            icon: Icons.swap_horiz,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricSalesValue,
-            value: '€${metriche.valoreVendite.toStringAsFixed(2)}',
-            icon: Icons.trending_up,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricReturnsValue,
-            value: '€${metriche.valoreResi.toStringAsFixed(2)}',
-            icon: Icons.undo,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricNetBalance,
-            value: '€${metriche.saldoNetto.toStringAsFixed(2)}',
-            icon: Icons.analytics_outlined,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricBalancesCollected,
-            value: '€${metriche.conguagliPositivi.toStringAsFixed(2)}',
-            icon: Icons.arrow_circle_up,
-          ),
-          _MetricChip(
-            label: context.l10n.cassaMetricBalancesRefunded,
-            value: '€${metriche.conguagliNegativi.toStringAsFixed(2)}',
-            icon: Icons.arrow_circle_down,
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _MetricChip(
+                label: context.l10n.cassaMetricSales,
+                value: metriche.numeroVendite.toString(),
+                icon: Icons.point_of_sale,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricReturns,
+                value: metriche.numeroResi.toString(),
+                icon: Icons.assignment_return,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricExchanges,
+                value: metriche.numeroCambi.toString(),
+                icon: Icons.swap_horiz,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricSalesValue,
+                value: '€${metriche.valoreVendite.toStringAsFixed(2)}',
+                icon: Icons.trending_up,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricReturnsValue,
+                value: '€${metriche.valoreResi.toStringAsFixed(2)}',
+                icon: Icons.undo,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricNetBalance,
+                value: '€${metriche.saldoNetto.toStringAsFixed(2)}',
+                icon: Icons.analytics_outlined,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricBalancesCollected,
+                value: '€${metriche.conguagliPositivi.toStringAsFixed(2)}',
+                icon: Icons.arrow_circle_up,
+              ),
+              _MetricChip(
+                label: context.l10n.cassaMetricBalancesRefunded,
+                value: '€${metriche.conguagliNegativi.toStringAsFixed(2)}',
+                icon: Icons.arrow_circle_down,
+              ),
+            ],
           ),
         ],
       ),

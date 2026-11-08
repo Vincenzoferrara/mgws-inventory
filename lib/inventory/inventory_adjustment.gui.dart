@@ -33,6 +33,7 @@ class InventoryRettificaPanel extends StatefulWidget {
     this.barcodeLauncher,
     this.detailsController,
     this.siteController,
+    this.siteName,
     this.seed,
   });
 
@@ -46,6 +47,10 @@ class InventoryRettificaPanel extends StatefulWidget {
   /// pagina la sede e' gia' decisa, perche' il backend accetta solo quella
   /// per l'operatore.
   final TextEditingController? siteController;
+
+  /// Name of the site in use, so the confirmation reads "fabbrica" and not
+  /// the site's number.
+  final String? siteName;
 
   /// Dettagli del movimento, di proprieta' della pagina: il pannello li legge
   /// per costruire il piano e non li tocca.
@@ -304,6 +309,16 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
     final existing = _rows.where(
       (row) => row.key == '$productId:${match.variationId}',
     );
+    // With "1 piece per scan" every scan is one more piece in the chosen
+    // direction, as in Add: scanning the same item twice used to say
+    // "already in the list" and count nothing.
+    if (existing.isNotEmpty && _autoAdd && !existing.first.useCounted) {
+      setState(() {
+        existing.first.delta++;
+        _feedback = null;
+      });
+      return existing.first;
+    }
     if (existing.isNotEmpty) {
       _showFeedback(
         InventoryActionFeedback(
@@ -327,6 +342,8 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       // l'operatore crede di aver scritto.
       direction: _direction,
     );
+    // The first scan is already the first piece.
+    if (_autoAdd) row.delta = 1;
     setState(() {
       _rows.add(row);
       _feedback = null;
@@ -366,7 +383,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
   }
 
   Future<void> _openExistingProducts() async {
-    final selected = await openProdottoPicker(context);
+    final selected = await openProdottoPicker(context, segnalaEsauriti: false);
     if (!mounted || selected == null || selected.isEmpty) return;
     for (final unita in expandSelectedProducts(selected)) {
       if (!unita.isValid) continue;
@@ -543,6 +560,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
     final confirmed = await showInventoryRettificaConfirmDialog(
       context: context,
       plan: plan,
+      siteName: widget.siteName,
     );
     if (confirmed != true || !mounted) return;
     final feedback = await _controller.submit(context.l10n, plan);
@@ -663,7 +681,7 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
     final l10n = context.l10n;
     return '${l10n.inventoryRettificaConfermaProdotti(plan.lineCount.toString())}'
         '${restores.isEmpty ? '' : ' ${l10n.inventoryRettificaERipristini(restores.length.toString())}'}'
-        '${plan.siteId > 0 ? ' ${l10n.inventoryRettificaInSede(plan.siteId.toString())}' : ''}';
+        '${plan.siteId > 0 ? ' ${l10n.inventoryRettificaInSede((widget.siteName ?? '').trim().isNotEmpty ? widget.siteName!.trim() : plan.siteId.toString())}' : ''}';
   }
 
   /// Le due radio del verso, accanto alla spunta.
@@ -963,14 +981,20 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
 Future<bool?> showInventoryRettificaConfirmDialog({
   required BuildContext context,
   required InventoryRettificaPlan plan,
+  String? siteName,
 }) {
+  final sede = (siteName ?? '').trim().isNotEmpty
+      ? siteName!.trim()
+      : '${plan.siteId}';
   return showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
+      // Was built from a plural message used without its number, which
+      // printed Dart code in the title.
       title: Text(
-        '${context.l10n.inventoryConfermaRettifica} — '
-        '${context.l10n.inventoryConfermaRettificaSede(plan.siteId.toString())} '
-        '(${context.l10n.inventoryParolaProdotti})',
+        context.l10n.inventoryRettificaConfermaTitolo(
+          plan.lines.length + plan.restores.length,
+        ),
       ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
@@ -1014,7 +1038,7 @@ Future<bool?> showInventoryRettificaConfirmDialog({
               // qui sotto: leggere "3 -> 5" senza sapere di quale sede si parla
               // mostrerebbe un conto che non torna da nessuna parte.
               Text(
-                '${context.l10n.inventoryEtichettaSede}: ${plan.siteId}',
+                '${context.l10n.inventoryEtichettaSede}: $sede',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),

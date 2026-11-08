@@ -6,6 +6,8 @@ import 'product_list.code.dart';
 import '../class_products.dart';
 import '../product_grid_fields.dart';
 import '../product_editor/product_editor.gui.dart';
+import '../sku_barcode_screen.gui.dart';
+import '../product_lots.gui.dart';
 import 'product_list_view.gui.dart';
 import '../../theme/theme.dart';
 import '../../notification/notification_service.dart';
@@ -44,6 +46,7 @@ enum _ProductContextAction {
   modifica,
   modificaInMassa,
   printLabels,
+  lotti,
   elimina,
 }
 
@@ -151,10 +154,17 @@ class ProdottiGestisciPage extends StatefulWidget {
   /// restituire il risultato al Navigator (pop con la lista selezionata).
   final ValueChanged<List<ProdottoGlobal>>? onAggiungiProdotti;
 
+  /// Out-of-stock rows in red. Right for the till, which cannot sell them;
+  /// wrong for loading or adjusting stock, where an empty item is exactly
+  /// what one looks for and red reads as an error. The stock column still
+  /// says how many pieces there are.
+  final bool segnalaEsauriti;
+
   const ProdottiGestisciPage({
     super.key,
     this.modalitaCassa = false,
     this.onAggiungiProdotti,
+    this.segnalaEsauriti = true,
   });
 
   @override
@@ -459,6 +469,15 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
         final useSelection = selected.any((entry) => entry.id == product.id);
         await _printLabels(useSelection ? selected : [product]);
 
+      case _ProductContextAction.lotti:
+        final productId = product.id;
+        if (productId == null || productId <= 0) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => ProductLotsScreen(productId: productId),
+          ),
+        );
+
       case _ProductContextAction.elimina:
         await _deleteProducts(product);
     }
@@ -752,6 +771,14 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     );
     actions.add(
       DataGridViewContextAction<ProdottoGlobal>(
+        label: context.l10n.lotsTitle,
+        icon: Icons.qr_code_2_outlined,
+        onSelected: (product) =>
+            _handleProductAction(_ProductContextAction.lotti, product),
+      ),
+    );
+    actions.add(
+      DataGridViewContextAction<ProdottoGlobal>(
         label: context.l10n.commonDelete,
         icon: Icons.delete_outline,
         onSelected: (product) =>
@@ -802,6 +829,14 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
       maxSplitRatio: MachineUiPreferences.maxProductsManageSplitRatio,
       filterValueHint: context.l10n.productsQuickSearchExample,
       toolbarActions: [
+        DataGridCommandIconButton(
+          onPressed: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const SkuBarcodeScreen())),
+          icon: Icons.qr_code,
+          tooltip: 'Pattern SKU e codici a barre',
+          color: theme.colorScheme.primary,
+        ),
         if (!widget.modalitaCassa)
           DataGridCommandIconButton(
             onPressed: _controller.selectedProductsCount == 0
@@ -909,13 +944,15 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
 
   Color? _rowForeground(BuildContext context, ProdottoGlobal product) {
     final customColors = Theme.of(context).extension<AppColorExtension>()!;
-    if (!product.isDisponibile) return Theme.of(context).colorScheme.error;
+    if (!product.isDisponibile && widget.segnalaEsauriti) {
+      return Theme.of(context).colorScheme.error;
+    }
     return _isDraft(product) ? customColors.warningColor : null;
   }
 
   Color? _rowBackground(BuildContext context, ProdottoGlobal product) {
     final customColors = Theme.of(context).extension<AppColorExtension>()!;
-    if (!product.isDisponibile) {
+    if (!product.isDisponibile && widget.segnalaEsauriti) {
       return customColors.stockUnavailable.withValues(alpha: 0.12);
     }
     return _isDraft(product)
@@ -926,7 +963,10 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   static bool _isDraft(ProdottoGlobal product) =>
       product.status.trim().toLowerCase() == 'draft';
 
-  Map<String, Widget> _buildCells(BuildContext context, ProdottoGlobal product) {
+  Map<String, Widget> _buildCells(
+    BuildContext context,
+    ProdottoGlobal product,
+  ) {
     final theme = Theme.of(context);
     final customColors = theme.extension<AppColorExtension>()!;
     final info = ProdottoDisplayInfo.fromProdotto(product, context.l10n);
@@ -1204,4 +1244,3 @@ class _ImageCell extends StatelessWidget {
     semanticLabel: semanticLabel,
   );
 }
-

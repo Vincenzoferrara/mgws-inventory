@@ -68,6 +68,15 @@ enum DashboardMetric {
   ),
   lowStockProducts(DashboardMetricShape.categories, DashboardValueFormat.count),
 
+  /// Items in stock whose value is unknown. Read from MGWS, not from
+  /// WooCommerce: it is a property of the stock levels, not of the product.
+  productsWithoutCost(DashboardMetricShape.single, DashboardValueFormat.count),
+
+  /// Products the WooCommerce stock does not agree with the ledger on. Read
+  /// from MGWS through the read-only comparison route; the correction stays a
+  /// separate decision.
+  stockDivergences(DashboardMetricShape.categories, DashboardValueFormat.count),
+
   /// Free question answered by the MGWS report engine. Its real shape and
   /// format come from the question, see [DashboardWidgetConfig.shape].
   report(DashboardMetricShape.single, DashboardValueFormat.currency);
@@ -99,6 +108,8 @@ enum DashboardMetric {
     DashboardMetric.stockStatus ||
     DashboardMetric.customersActivity ||
     DashboardMetric.lowStockProducts ||
+    DashboardMetric.productsWithoutCost ||
+    DashboardMetric.stockDivergences ||
     DashboardMetric.ordersToProcess => true,
     _ => false,
   };
@@ -712,9 +723,21 @@ class DashboardLayout {
             medium,
           ),
           (
+            DashboardMetric.productsWithoutCost,
+            DashboardChartType.number,
+            third,
+            medium,
+          ),
+          (
+            DashboardMetric.stockDivergences,
+            DashboardChartType.horizontalBar,
+            third,
+            medium,
+          ),
+          (
             DashboardMetric.lowStockProducts,
             DashboardChartType.table,
-            DashboardWidgetWidth.full,
+            DashboardWidgetWidth.twoThirds,
             medium,
           ),
         ];
@@ -771,6 +794,15 @@ DashboardWidgetConfig dashboardReportPresetWidget(ReportPreset preset) {
     ),
     ReportPreset.salesByPaymentMethod || ReportPreset.salesByChannel =>
       widget.copyWith(chartType: DashboardChartType.donut),
+    // The stock questions are rankings: what is worth the most, what sold the
+    // biggest share, what has gone unsold the longest.
+    ReportPreset.deadStock ||
+    ReportPreset.abcCurve ||
+    ReportPreset.stockValue => widget.copyWith(
+      chartType: DashboardChartType.horizontalBar,
+      sortOrder: DashboardSortOrder.valueDesc,
+      itemLimit: 10,
+    ),
     _ => widget,
   };
 }

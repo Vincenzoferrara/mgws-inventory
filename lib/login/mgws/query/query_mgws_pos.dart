@@ -318,6 +318,25 @@ class QueryMgwsPos {
     };
   }
 
+  /// Scrive nel libro movimenti le righe annullate in cassa
+  /// (`POST /pos/voids`). La giacenza non cambia.
+  /// Records the lines voided at the till; stock does not change.
+  Future<Map<String, dynamic>> recordVoids(Map<String, dynamic> payload) async {
+    final response = await _base.post(
+      '/wp-json/mgws/v1/pos/voids',
+      data: payload,
+    );
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+    return <String, dynamic>{
+      'ok':
+          (response.statusCode ?? 500) >= 200 &&
+          (response.statusCode ?? 500) < 300,
+      'status_code': response.statusCode,
+    };
+  }
+
   /// Turni registrati sul server, dal piu' recente.
   ///
   /// La cassa legge da qui il turno aperto: dopo una reinstallazione il

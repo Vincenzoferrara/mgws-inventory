@@ -327,6 +327,50 @@ class ProdottiCreaController {
     }
   }
 
+  /// Reads the declared cost and the stock value of one item.
+  ///
+  /// Returns null when the inventory service is unreachable. That is not the
+  /// same as "no cost declared": the caller must leave the field alone instead
+  /// of reading the silence as an empty cost.
+  Future<MgwsRestockResult<MgwsItemCost>?> readItemCost(
+    int productId, {
+    int variationId = 0,
+  }) async {
+    if (!await _availability.ensureConnected()) return null;
+    try {
+      return await _inventoryGateway.getItemCost(
+        productId,
+        variationId: variationId,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Appends a declared cost, and optionally revalues the stock in hand.
+  ///
+  /// Returns null when the inventory service is unreachable, so a save can tell
+  /// "not sent" from "rejected".
+  Future<MgwsRestockResult<MgwsCostDeclaration>?> declareItemCost({
+    required int productId,
+    int variationId = 0,
+    required String? cost,
+    bool revalueStock = false,
+  }) async {
+    if (productId <= 0) return null;
+    if (!await _availability.ensureConnected()) return null;
+    try {
+      return await _inventoryGateway.declareCost(
+        productId: productId,
+        variationId: variationId,
+        cost: cost,
+        revalueStock: revalueStock,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Pulisce la cache
   void clearCache() {
     _categoriesCache = null;

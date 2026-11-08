@@ -28,6 +28,16 @@ import '../theme/theme.dart';
 import '../login/mgws/query/query_mgws_site.dart';
 import '../l10n/extensions.dart';
 import 'inventory_site_panel.gui.dart';
+import 'reservations.gui.dart';
+import 'count_schedules.gui.dart';
+import 'kits.gui.dart';
+import 'product_barcodes.gui.dart';
+import 'documents.gui.dart';
+import '../approvals/approval_rules.gui.dart';
+import 'transfers.gui.dart';
+import 'stock_reset.gui.dart';
+import 'payments.gui.dart';
+import 'shipments.gui.dart';
 import 'inventory.code.dart';
 import 'inventory_add_products.gui.dart';
 import 'inventory_module.code.dart';
@@ -229,19 +239,26 @@ class _InventoryPageState extends State<InventoryPage> {
                         ),
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _BackendStatus(controller: _controller),
-                          const SizedBox(height: 10),
+                          // Solo quando c'e' qualcosa da dire: "MGWS
+                          // disponibile" sempre in vista occupava spazio senza
+                          // dare informazioni.
+                          if (_controller.isMgwsAvailable != true) ...[
+                            _BackendStatus(controller: _controller),
+                            const SizedBox(height: 10),
+                          ],
                           // La sede e' obbligatoria: senza, i moduli non
                           // compaiono e il pannello dice perche'.
                           InventorySitePanel(onStatusChanged: _onSiteStatus),
                           if (_site != null) ...[
                             const SizedBox(height: 10),
-                            // Selettore modulo: mostra solo il pannello
-                            // selezionato, le operazioni non sono mai visibili
-                            // insieme.
+                            // I quattro moduli sempre in vista, gli strumenti
+                            // meno frequenti in un menu accanto: prima erano
+                            // dieci pulsanti sopra il lavoro di tutti i giorni,
+                            // e i moduli stavano chiusi in una tendina.
                             _ModuleSelector(
                               activeModule: _activeModule,
                               onModuleChanged: _setModule,
+                              tools: const _ToolsMenu(),
                             ),
                             // I dettagli stanno sopra il pannello, non dentro:
                             // valgono per il movimento qualunque modulo sia attivo.
@@ -268,6 +285,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                 catalogController: _catalogController,
                                 detailsController: _detailsController,
                                 siteController: _siteController,
+                                siteName: _site?.siteName,
                                 seed: _pendingSeed,
                               ),
                             if (_activeModule == InventoryModule.move)
@@ -303,22 +321,35 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 }
 
-/// Selettore a barra piatta del modulo attivo.
-/// Quando l'operatore sceglie, solo quel pannello appare
-/// sotto — le due operazioni non sono mai visibili insieme.
+/// Barra dei moduli: Aggiungi, Rettifica, Sposta e Movimenti sempre visibili,
+/// un tocco per passare dall'uno all'altro. Solo il pannello scelto appare
+/// sotto: le operazioni non sono mai visibili insieme.
 class _ModuleSelector extends StatelessWidget {
   const _ModuleSelector({
     required this.activeModule,
     required this.onModuleChanged,
+    required this.tools,
   });
 
   final InventoryModule? activeModule;
   final ValueChanged<InventoryModule?> onModuleChanged;
+  final Widget tools;
+
+  static const _modules = <InventoryModule>[
+    InventoryModule.add,
+    InventoryModule.fix,
+    InventoryModule.move,
+    InventoryModule.ledger,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final selected =
+        activeModule == null || activeModule == InventoryModule.choose
+        ? const <InventoryModule>{}
+        : <InventoryModule>{activeModule!};
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -328,57 +359,45 @@ class _ModuleSelector extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              // Etichetta
-              Text(
-                context.l10n.inventoryModuleModulo,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: scheme.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Dropdown
-              Expanded(
-                child: DropdownButtonFormField<InventoryModule>(
-                  initialValue: activeModule,
-                  isExpanded: true,
-                  hint: Text(context.l10n.inventoryHintChooseModule),
-                  style: theme.textTheme.bodyLarge,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Sotto i 600 px le etichette non ci stanno tutte: restano le
+              // icone, con il nome nel tooltip.
+              final compact = constraints.maxWidth < 600;
+              final bar = SegmentedButton<InventoryModule>(
+                key: const ValueKey('inventory-module-bar'),
+                segments: [
+                  for (final module in _modules)
+                    ButtonSegment<InventoryModule>(
+                      value: module,
+                      icon: Icon(_moduleIcons[module], size: 18),
+                      label: compact
+                          ? null
+                          : Text(inventoryModuleLabel(context.l10n, module)),
+                      tooltip: inventoryModuleLabel(context.l10n, module),
+                    ),
+                ],
+                selected: selected,
+                emptySelectionAllowed: true,
+                showSelectedIcon: false,
+                onSelectionChanged: (value) =>
+                    onModuleChanged(value.isEmpty ? null : value.first),
+              );
+              return Row(
+                children: [
+                  Expanded(
+                    child: Align(alignment: Alignment.centerLeft, child: bar),
                   ),
-                  items: [
-                    for (final module in InventoryModule.values)
-                      DropdownMenuItem<InventoryModule>(
-                        value: module,
-                        child: Row(
-                          children: [
-                            Icon(_moduleIcons[module], size: 18),
-                            const SizedBox(width: 10),
-                            Text(inventoryModuleLabel(context.l10n, module)),
-                          ],
-                        ),
-                      ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null && value != InventoryModule.choose) {
-                      onModuleChanged(value);
-                    } else if (value == InventoryModule.choose) {
-                      onModuleChanged(null);
-                    }
-                  },
-                ),
-              ),
-            ],
+                  const SizedBox(width: 8),
+                  tools,
+                ],
+              );
+            },
           ),
           // Descrizione del modulo selezionato, sotto la barra: resta in
           // piccolo perche' ripete quello che la scelta del modulo ha gia'
           // detto.
-          if (activeModule != null &&
-              activeModule != InventoryModule.choose) ...[
+          if (selected.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
               inventoryModuleDescription(context.l10n, activeModule!) ?? '',
@@ -388,6 +407,101 @@ class _ModuleSelector extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Strumenti MGWS meno frequenti, in un menu solo e divisi per argomento.
+/// Il reset dello stock sta in fondo, separato e in colore di avviso: e'
+/// l'unico che cambia le quantita' di molti prodotti in un colpo.
+class _ToolsMenu extends StatelessWidget {
+  const _ToolsMenu();
+
+  void _open(BuildContext context, Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = Theme.of(context).extension<AppColorExtension>()!;
+    MenuItemButton item(String label, IconData icon, Widget screen) =>
+        MenuItemButton(
+          leadingIcon: Icon(icon, size: 18),
+          onPressed: () => _open(context, screen),
+          child: Text(label),
+        );
+    Widget header(String text) => Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: colors.subtitleColor,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+    return MenuAnchor(
+      menuChildren: [
+        header(l10n.inventoryToolsGroupDocuments),
+        item(
+          l10n.mgwsToolDocuments,
+          Icons.description,
+          const DocumentsScreen(),
+        ),
+        item(
+          l10n.mgwsToolShipments,
+          Icons.local_shipping,
+          const ShipmentsScreen(),
+        ),
+        item(l10n.mgwsToolPayments, Icons.payments, const PaymentsScreen()),
+        item(
+          l10n.mgwsToolReservations,
+          Icons.bookmark,
+          const ReservationsScreen(),
+        ),
+        const Divider(height: 1),
+        header(l10n.inventoryToolsGroupCatalog),
+        item(l10n.mgwsToolKits, Icons.inventory, const KitsScreen()),
+        item(
+          l10n.mgwsToolProductBarcodes,
+          Icons.qr_code,
+          const ProductBarcodesScreen(),
+        ),
+        const Divider(height: 1),
+        header(l10n.inventoryToolsGroupControl),
+        item(l10n.mgwsToolTransfers, Icons.swap_horiz, const TransfersScreen()),
+        item(
+          l10n.mgwsToolCountSchedules,
+          Icons.event_repeat,
+          const CountSchedulesScreen(),
+        ),
+        item(
+          l10n.mgwsToolApprovalRules,
+          Icons.rule,
+          const ApprovalRulesScreen(),
+        ),
+        const Divider(height: 1),
+        MenuItemButton(
+          leadingIcon: Icon(
+            Icons.restart_alt,
+            size: 18,
+            color: colors.warningColor,
+          ),
+          onPressed: () => _open(context, const StockResetScreen()),
+          child: Text(
+            l10n.mgwsToolStockReset,
+            style: TextStyle(color: colors.warningColor),
+          ),
+        ),
+      ],
+      builder: (context, controller, _) => OutlinedButton.icon(
+        key: const ValueKey('inventory-tools-menu'),
+        onPressed: () =>
+            controller.isOpen ? controller.close() : controller.open(),
+        icon: const Icon(Icons.more_horiz, size: 18),
+        label: Text(l10n.inventoryToolsMenu),
       ),
     );
   }
@@ -411,7 +525,8 @@ class _ModuleDetailsCard extends StatelessWidget {
       child: TextField(
         key: const ValueKey('inventory-details-field'),
         controller: controller,
-        maxLines: 2,
+        minLines: 1,
+        maxLines: 3,
         decoration: InputDecoration(
           labelText: context.l10n.inventoryLabelDettagli,
           hintText: context.l10n.inventoryHintNotaMovimento,

@@ -26,6 +26,7 @@ class InventoryQuickLoadLineDraft {
     this.imageUrl,
     this.rack,
     this.shelf,
+    this.unitCost,
   });
 
   final int productId;
@@ -39,6 +40,14 @@ class InventoryQuickLoadLineDraft {
   final int quantity;
   final String idempotencyKey;
 
+  /// Cost of one piece as typed. Empty means "not known", which is not zero:
+  /// a load without a cost leaves the stock value as it was instead of valuing
+  /// the pieces at nothing.
+  final String? unitCost;
+
+  /// Cost as typed, normalized for the backend, or null when empty.
+  String? get normalizedUnitCost => _normalizedCost(unitCost);
+
   String get key => '$productId:$variationId';
   bool get isVariant => variationId > 0;
 
@@ -47,6 +56,7 @@ class InventoryQuickLoadLineDraft {
     String? idempotencyKey,
     String? rack,
     String? shelf,
+    String? unitCost,
   }) {
     return InventoryQuickLoadLineDraft(
       productId: productId,
@@ -59,6 +69,7 @@ class InventoryQuickLoadLineDraft {
       shelf: shelf ?? this.shelf,
       quantity: quantity ?? this.quantity,
       idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      unitCost: unitCost ?? this.unitCost,
     );
   }
 }
@@ -110,6 +121,13 @@ class InventoryQuickLoadSubmissionPlan {
           (l10n) => l10n.inventoryInvalidQuantityFor(line.label),
         );
       }
+      final unitCost = line.normalizedUnitCost;
+      if (unitCost != null) {
+        final parsedCost = double.tryParse(unitCost);
+        if (parsedCost == null || parsedCost < 0) {
+          return InventoryFormInvalid((l10n) => l10n.inventoryInvalidCost);
+        }
+      }
     }
     return InventoryFormValid(
       lines
@@ -126,6 +144,7 @@ class InventoryQuickLoadSubmissionPlan {
               room: _optional(room ?? ''),
               rack: _optional(line.rack ?? ''),
               shelf: _optional(line.shelf ?? ''),
+              unitCost: line.normalizedUnitCost,
               idempotencyKey: line.idempotencyKey,
               movementKey: movementKey,
             ),
@@ -163,6 +182,7 @@ class InventoryQuickLoadForm {
     this.roomText = '',
     this.rackText = '',
     this.shelfText = '',
+    this.unitCostText = '',
     this.idempotencyKeyText = '',
   });
 
@@ -176,6 +196,7 @@ class InventoryQuickLoadForm {
   final String roomText;
   final String rackText;
   final String shelfText;
+  final String unitCostText;
   final String idempotencyKeyText;
 
   InventoryFormParse<MgwsQuickLoadRequest> parse() {
@@ -200,6 +221,13 @@ class InventoryQuickLoadForm {
     if (warehouseIdText.trim().isNotEmpty && warehouseId == null) {
       return InventoryFormInvalid(invalidFieldText('warehouse_id'));
     }
+    final unitCost = _normalizedCost(unitCostText);
+    if (unitCost != null) {
+      final parsedCost = double.tryParse(unitCost);
+      if (parsedCost == null || parsedCost < 0) {
+        return InventoryFormInvalid((l10n) => l10n.inventoryInvalidCost);
+      }
+    }
     return InventoryFormValid(
       MgwsQuickLoadRequest(
         productId: productId,
@@ -213,6 +241,7 @@ class InventoryQuickLoadForm {
         room: _optional(roomText),
         rack: _optional(rackText),
         shelf: _optional(shelfText),
+        unitCost: unitCost,
         idempotencyKey: _optional(idempotencyKeyText),
       ),
     );
@@ -336,5 +365,15 @@ class InventoryQuickLoadController with InventoryFeedbackController {
 
 String? _optional(String value) {
   final trimmed = value.trim();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
+/// Cost as typed, with a comma turned into a dot, or null when empty.
+///
+/// Only the separator is normalized: the app never rounds, because the plugin
+/// converts to minor units with the scale fixed at installation and two
+/// different roundings would produce two different costs.
+String? _normalizedCost(String? value) {
+  final trimmed = (value ?? '').trim().replaceAll(',', '.');
   return trimmed.isEmpty ? null : trimmed;
 }

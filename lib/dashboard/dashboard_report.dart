@@ -9,16 +9,17 @@ import 'package:dio/dio.dart';
 
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
+import '../login/mgws/query/query_mgws_inventory.dart';
 import 'dashboard.code.dart';
 
 /// Where a measure comes from. Measures of different sources cannot be mixed.
-enum ReportSource { sales, closings }
+enum ReportSource { sales, closings, stock }
 
 /// How a report value is formatted.
 enum ReportValueFormat { currency, count, percent, decimal, days }
 
 /// Business area of a measure, used to group the editor list.
-enum ReportArea { sales, products, customers, cash }
+enum ReportArea { sales, products, customers, cash, stock }
 
 /// A measure the report engine can compute.
 class ReportMeasure {
@@ -230,6 +231,81 @@ const reportMeasures = <ReportMeasure>[
     ReportValueFormat.count,
     ReportArea.cash,
   ),
+  // Margin, on the cost snapshot of the sales fact: `cost` and `margin` are
+  // nullable, because a missing value means "unknown", never "free".
+  ReportMeasure(
+    'cost',
+    ReportSource.sales,
+    ReportValueFormat.currency,
+    ReportArea.sales,
+  ),
+  ReportMeasure(
+    'margin',
+    ReportSource.sales,
+    ReportValueFormat.currency,
+    ReportArea.sales,
+  ),
+  ReportMeasure(
+    'margin_rate',
+    ReportSource.sales,
+    ReportValueFormat.percent,
+    ReportArea.sales,
+  ),
+  ReportMeasure(
+    'cost_coverage',
+    ReportSource.sales,
+    ReportValueFormat.percent,
+    ReportArea.sales,
+  ),
+  ReportMeasure(
+    'revenue_share',
+    ReportSource.sales,
+    ReportValueFormat.percent,
+    ReportArea.products,
+  ),
+  // Stock source: a current state of the ledger, not an interval of time.
+  ReportMeasure(
+    'qty_on_hand',
+    ReportSource.stock,
+    ReportValueFormat.count,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'stock_value',
+    ReportSource.stock,
+    ReportValueFormat.currency,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'unvalued_qty',
+    ReportSource.stock,
+    ReportValueFormat.count,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'stock_cost_coverage',
+    ReportSource.stock,
+    ReportValueFormat.percent,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'sold_qty',
+    ReportSource.stock,
+    ReportValueFormat.count,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'rotation',
+    ReportSource.stock,
+    ReportValueFormat.decimal,
+    ReportArea.stock,
+  ),
+  ReportMeasure(
+    'days_without_sale',
+    ReportSource.stock,
+    ReportValueFormat.days,
+    ReportArea.stock,
+  ),
 ];
 
 ReportMeasure reportMeasureByKey(String key) => reportMeasures.firstWhere(
@@ -246,15 +322,17 @@ enum ReportDimension {
   month(true, {ReportSource.sales, ReportSource.closings}),
   quarter(true, {ReportSource.sales, ReportSource.closings}),
   year(true, {ReportSource.sales, ReportSource.closings}),
-  product(false, {ReportSource.sales}),
-  variation(false, {ReportSource.sales}),
-  category(false, {ReportSource.sales}),
-  brand(false, {ReportSource.sales}),
+  product(false, {ReportSource.sales, ReportSource.stock}),
+  variation(false, {ReportSource.sales, ReportSource.stock}),
+  category(false, {ReportSource.sales, ReportSource.stock}),
+  brand(false, {ReportSource.sales, ReportSource.stock}),
   customer(false, {ReportSource.sales}),
   channel(false, {ReportSource.sales}),
   register(false, {ReportSource.sales, ReportSource.closings}),
   operator(false, {ReportSource.sales, ReportSource.closings}),
-  paymentMethod(false, {ReportSource.sales});
+  paymentMethod(false, {ReportSource.sales}),
+  site(false, {ReportSource.stock}),
+  warehouse(false, {ReportSource.stock});
 
   const ReportDimension(this.isTime, this.sources);
 
@@ -281,7 +359,9 @@ enum ReportFilterKind {
   channel(ReportSource.sales, 'channels'),
   register(null, 'registers'),
   operator(null, 'operator_ids'),
-  paymentMethod(ReportSource.sales, 'payment_methods');
+  paymentMethod(ReportSource.sales, 'payment_methods'),
+  site(ReportSource.stock, 'site_ids'),
+  warehouse(ReportSource.stock, 'warehouse_ids');
 
   const ReportFilterKind(this.onlySource, this.requestKey);
 
@@ -294,7 +374,7 @@ enum ReportFilterKind {
 
   /// True when MGWS expects numeric ids.
   bool get numeric => switch (this) {
-    product || category || brand || operator => true,
+    product || category || brand || operator || site || warehouse => true,
     _ => false,
   };
 }
@@ -420,7 +500,12 @@ class DashboardReportQuery {
       grouped.putIfAbsent(filter.kind.requestKey, () => []).add(value);
     }
     return {
-      'measures': [measure],
+      // A margin is only as trustworthy as the costs behind it, so the same
+      // query also asks how much of the revenue has a known cost.
+      'measures': [
+        measure,
+        if (measure == 'margin' || measure == 'margin_rate') 'cost_coverage',
+      ],
       if (dimension != null) 'dimension': dimension!.key,
       'date_from': day(period.dataInizio),
       'date_to': day(period.dataFine),
@@ -450,6 +535,7 @@ class DashboardReportResult {
     required this.dateTo,
     this.total,
     this.compareTotal,
+    this.costCoverage,
     this.rows = const [],
   });
 
@@ -457,9 +543,9 @@ class DashboardReportResult {
     Map<String, dynamic> raw,
     DashboardReportQuery query,
   ) {
-    double? valueOf(Object? values) {
+    double? valueOf(Object? values, [String? measure]) {
       if (values is! Map) return null;
-      final value = values[query.measure];
+      final value = values[measure ?? query.measure];
       if (value is num) return value.toDouble();
       return double.tryParse(value?.toString() ?? '');
     }
@@ -490,6 +576,10 @@ class DashboardReportResult {
                   : null,
             )
           : null,
+      costCoverage: valueOf(
+        totals is Map ? totals['values'] : null,
+        'cost_coverage',
+      ),
       rows: rowsOf(raw['rows']),
     );
   }
@@ -500,6 +590,10 @@ class DashboardReportResult {
   final DateTime? dateTo;
   final double? total;
   final double? compareTotal;
+
+  /// Share of the revenue whose cost is known, when the query asked for it.
+  /// 100 means the margin is fully grounded, anything less is partial.
+  final double? costCoverage;
   final List<ReportRow> rows;
 }
 
@@ -685,6 +779,25 @@ class DashboardReportService {
             if (_matches(method, text))
               ReportFilterValue(kind: kind, id: method, label: method),
         ];
+      case ReportFilterKind.site:
+        final result = await QueryMgwsInventory().listSites();
+        return [
+          for (final site in result.data ?? const <MgwsInventorySite>[])
+            if (_matches(site.name, text))
+              ReportFilterValue(kind: kind, id: '${site.id}', label: site.name),
+        ];
+      case ReportFilterKind.warehouse:
+        final result = await QueryMgwsInventory().listWarehouses();
+        return [
+          for (final warehouse
+              in result.data ?? const <MgwsInventoryWarehouse>[])
+            if (_matches(warehouse.name, text))
+              ReportFilterValue(
+                kind: kind,
+                id: '${warehouse.id}',
+                label: warehouse.name,
+              ),
+        ];
     }
   }
 
@@ -718,7 +831,11 @@ enum ReportPreset {
   salesByOperator,
   salesByPaymentMethod,
   salesByChannel,
-  cashDifferences;
+  cashDifferences,
+  margin,
+  deadStock,
+  abcCurve,
+  stockValue;
 
   DashboardReportQuery get query => switch (this) {
     productSales => const DashboardReportQuery(measure: 'quantity_sold'),
@@ -757,6 +874,19 @@ enum ReportPreset {
     cashDifferences => const DashboardReportQuery(
       measure: 'cash_difference',
       dimension: ReportDimension.day,
+    ),
+    margin => const DashboardReportQuery(measure: 'margin'),
+    deadStock => const DashboardReportQuery(
+      measure: 'days_without_sale',
+      dimension: ReportDimension.product,
+    ),
+    abcCurve => const DashboardReportQuery(
+      measure: 'revenue_share',
+      dimension: ReportDimension.product,
+    ),
+    stockValue => const DashboardReportQuery(
+      measure: 'stock_value',
+      dimension: ReportDimension.category,
     ),
   };
 

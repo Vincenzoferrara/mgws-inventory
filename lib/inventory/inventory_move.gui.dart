@@ -401,7 +401,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
   }
 
   Future<void> _openExistingProducts() async {
-    final selected = await openProdottoPicker(context);
+    final selected = await openProdottoPicker(context, segnalaEsauriti: false);
     if (!mounted || selected == null || selected.isEmpty) return;
     for (final unita in expandSelectedProducts(selected)) {
       if (!unita.isValid) continue;
@@ -451,6 +451,15 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       // magazzino da cui si parte.
       row.quantity = row.quantity.clamp(1, available <= 0 ? 1 : available);
       row.syncQuantityField();
+      // A new source equal to the destination would move pieces onto
+      // themselves: the destination is chosen again among the others.
+      final source = row.source;
+      if (source != null &&
+          '${source.warehouseId}' == row.toWarehouseController.text.trim() &&
+          '${source.siteId}' == row.toSiteController.text.trim()) {
+        row.toWarehouseController.clear();
+        _prefillDestination(row);
+      }
       _feedback = null;
     });
   }
@@ -655,8 +664,8 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
                 value: i,
                 child: Text(
                   '${_places.siteLabel(context.l10n, levels[i].siteId)} · '
-                  '${_places.warehouseLabel(context.l10n, levels[i].warehouseId)} · '
-                  '${levels[i].qty} ${context.l10n.inventoryParolaPezzi}',
+                  '${_places.levelWarehouseLabel(context.l10n, levels[i])} · '
+                  '${context.l10n.inventoryPezziCount(levels[i].qty)}',
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -882,7 +891,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
       final l10n = context.l10n;
       summary =
           '${_places.siteLabel(l10n, source.siteId)} / '
-          '${_places.warehouseLabel(l10n, source.warehouseId)} '
+          '${_places.levelWarehouseLabel(l10n, source)} '
           '${source.qty} -> ${line.remainingInSource}  ·  '
           '${_places.siteLabel(l10n, destination)} / '
           '${_places.warehouseLabel(l10n, line.destinationWarehouseId)} '
@@ -966,7 +975,7 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
                     : null,
               ),
               'warehouse': Text(
-                _places.warehouseLabel(context.l10n, level.warehouseId),
+                _places.levelWarehouseLabel(context.l10n, level),
                 overflow: TextOverflow.ellipsis,
               ),
               'site': Text(
@@ -1026,8 +1035,12 @@ class _InventoryMovePanelState extends State<InventoryMovePanel> {
         if (plan.lineCount > 0)
           Text(
             ready
-                ? '${context.l10n.inventorySpostaRiepilogoInvio(plan.totalQuantity)}'
-                      ' ${context.l10n.inventoryParolaProdotti(plan.lineCount)}'
+                ? context.l10n.inventoryRighePezzi(
+                    plan.lineCount,
+                    plan.totalQuantity,
+                  )
+                : plan.lines.any((line) => line.isSameLocation)
+                ? context.l10n.inventorySpostaArrivoUgualePartenza
                 : context.l10n.inventorySpostaServonoPartenzaArrivoPezzi,
             style: Theme.of(context).textTheme.titleSmall,
           ),
@@ -1064,9 +1077,7 @@ Future<bool?> showInventoryMoveConfirmDialog({
   return showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: Text(
-        context.l10n.inventoryConfermaSpostamentoTitolo(plan.lineCount),
-      ),
+      title: Text(context.l10n.inventorySpostaConfermaTitolo(plan.lineCount)),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: SingleChildScrollView(
@@ -1085,8 +1096,8 @@ Future<bool?> showInventoryMoveConfirmDialog({
                   Text(
                     '${l10n.inventoryEtichettaPartenza}: '
                     '${places.siteLabel(l10n, line.source!.siteId)} · '
-                    '${places.warehouseLabel(l10n, line.source!.warehouseId)} '
-                    '(${line.source!.qty} ${context.l10n.inventoryParolaPezzi})',
+                    '${places.levelWarehouseLabel(l10n, line.source!)} '
+                    '(${context.l10n.inventoryPezziCount(line.source!.qty)})',
                   ),
                 Text(
                   '${l10n.inventoryEtichettaArrivo}: '

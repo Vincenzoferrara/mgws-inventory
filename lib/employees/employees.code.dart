@@ -1,42 +1,47 @@
 import '../l10n/error_text.dart';
 import '../l10n/localized_text.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview_list.code.dart';
 import '../reuse_class/logic/global_pagination_controller.dart';
+import 'employee_hr.code.dart';
+
+export 'employee_hr.code.dart';
 
 class Dipendente {
   final int id;
   final int wpUserId;
 
+  /// Login dell'utente WordPress collegato ('' = nessuno).
+  final String wpUserLogin;
+
   /// Sede dell'utente WordPress collegato (0 = nessuna assegnata).
   final int siteId;
   final String nome;
   final String cognome;
+
+  /// Email personale: resta nella scheda, per i contatti.
   final String email;
+
+  /// Email aziendale: e' l'email di accesso dell'utente WordPress.
+  final String emailAziendale;
+  final String telefono;
   final String ruolo;
   final double stipendio;
   final String stipendioValuta;
-  final DateTime? dataNascita;
-  final DateTime? dataAssunzione;
-  final String?
-  tipoContratto; // full-time, part-time, contratto a tempo determinato, etc.
-  final String? orarioLavoro; // es. "9:00-18:00"
-  final int giorniFerieDisponibili;
-  final int giorniFerieUsati;
-  final int giorniMalattia;
-  final List<Map<String, dynamic>>?
-  storicoPagamenti; // lista di mappe con data, importo, etc.
-  final List<String>? benefici; // lista di benefici
-  final List<String>? formazione; // corsi di formazione
-  final List<Map<String, dynamic>>? valutazioni; // valutazioni performance
-  final List<String>? documenti; // nomi file documenti allegati
-  final double? venditeTotali; // per ruoli di vendita
-  final int? produzioneTotale; // per ruoli di produzione
+
+  /// Settimana tipo: per ogni giorno ('mon'..'sun') le fasce di lavoro.
+  final Map<String, List<FasciaOraria>> settimanaTipo;
+  final Contratto contratto;
 
   String get nomeCompleto => '$nome $cognome'.trim();
+
+  int get minutiSettimanaTipo => settimanaTipo.values
+      .expand((fasce) => fasce)
+      .fold<int>(0, (sum, fascia) => sum + fascia.minuti);
 
   /// Campi del dipendente per la lista Dipendenti. MGWS restituisce tutti i
   /// dipendenti in una volta, quindi filtri e ordinamento lavorano in
@@ -53,12 +58,20 @@ class Dipendente {
           flexible: true,
         ),
         DataGridField<Dipendente>(
-          name: 'email',
-          label: (l10n) => l10n.employeesEmailLabel,
-          aliases: const <String>['email', 'mail'],
-          read: (d) => <Object?>[d.email],
+          name: 'emailAziendale',
+          label: (l10n) => l10n.employeesWorkEmail,
+          aliases: const <String>['email', 'mail', 'aziendale'],
+          read: (d) => <Object?>[d.emailAziendale],
           sortable: true,
           width: 220,
+        ),
+        DataGridField<Dipendente>(
+          name: 'telefono',
+          label: (l10n) => l10n.employeesPhone,
+          aliases: const <String>['telefono', 'phone', 'cellulare'],
+          read: (d) => <Object?>[d.telefono],
+          sortable: true,
+          width: 140,
         ),
         DataGridField<Dipendente>(
           name: 'ruolo',
@@ -87,8 +100,9 @@ class Dipendente {
           aliases: const <String>['utente', 'wordpress', 'wp'],
           type: DataGridFieldType.numero,
           read: (d) => <Object?>[if (d.wpUserId > 0) d.wpUserId],
-          format: (l10n, d) =>
-              d.wpUserId > 0 ? '#${d.wpUserId}' : l10n.employeesNotLinked,
+          format: (l10n, d) => d.wpUserId <= 0
+              ? l10n.employeesNotLinked
+              : (d.wpUserLogin.isNotEmpty ? d.wpUserLogin : '#${d.wpUserId}'),
           sortable: true,
           searchable: false,
           width: 150,
@@ -98,28 +112,19 @@ class Dipendente {
   Dipendente({
     required this.id,
     this.wpUserId = 0,
+    this.wpUserLogin = '',
     this.siteId = 0,
     required this.nome,
     required this.cognome,
     required this.email,
+    this.emailAziendale = '',
+    this.telefono = '',
     required this.ruolo,
     required this.stipendio,
     this.stipendioValuta = 'EUR',
-    this.dataNascita,
-    this.dataAssunzione,
-    this.tipoContratto,
-    this.orarioLavoro,
-    this.giorniFerieDisponibili = 0,
-    this.giorniFerieUsati = 0,
-    this.giorniMalattia = 0,
-    this.storicoPagamenti,
-    this.benefici,
-    this.formazione,
-    this.valutazioni,
-    this.documenti,
-    this.venditeTotali,
-    this.produzioneTotale,
-  });
+    Map<String, List<FasciaOraria>>? settimanaTipo,
+    this.contratto = const Contratto(),
+  }) : settimanaTipo = settimanaTipo ?? FasciaOraria.settimanaVuota();
 
   factory Dipendente.fromJson(Map<String, dynamic> json) {
     final firstName = (json['first_name'] ?? json['nome'] ?? '').toString();
@@ -128,70 +133,19 @@ class Dipendente {
     return Dipendente(
       id: (json['id'] as num?)?.toInt() ?? 0,
       wpUserId: (json['wp_user_id'] as num?)?.toInt() ?? 0,
+      wpUserLogin: (json['wp_user_login'] ?? '').toString(),
       siteId: (json['site_id'] as num?)?.toInt() ?? 0,
       nome: firstName,
       cognome: lastName,
       email: (json['email'] ?? '').toString(),
+      emailAziendale: (json['work_email'] ?? '').toString(),
+      telefono: (json['phone'] ?? '').toString(),
       ruolo: role,
       stipendio: _salaryFromJson(json),
       stipendioValuta: (json['salary_currency'] ?? 'EUR').toString(),
-      dataNascita: json['dataNascita'] != null
-          ? DateTime.parse(json['dataNascita'])
-          : null,
-      dataAssunzione: json['dataAssunzione'] != null
-          ? DateTime.parse(json['dataAssunzione'])
-          : null,
-      tipoContratto: json['tipoContratto'],
-      orarioLavoro: json['orarioLavoro'],
-      giorniFerieDisponibili: json['giorniFerieDisponibili'] ?? 0,
-      giorniFerieUsati: json['giorniFerieUsati'] ?? 0,
-      giorniMalattia: json['giorniMalattia'] ?? 0,
-      storicoPagamenti: json['storicoPagamenti'] != null
-          ? List<Map<String, dynamic>>.from(json['storicoPagamenti'])
-          : null,
-      benefici: json['benefici'] != null
-          ? List<String>.from(json['benefici'])
-          : null,
-      formazione: json['formazione'] != null
-          ? List<String>.from(json['formazione'])
-          : null,
-      valutazioni: json['valutazioni'] != null
-          ? List<Map<String, dynamic>>.from(json['valutazioni'])
-          : null,
-      documenti: json['documenti'] != null
-          ? List<String>.from(json['documenti'])
-          : null,
-      venditeTotali: json['venditeTotali']?.toDouble(),
-      produzioneTotale: json['produzioneTotale']?.toInt(),
+      settimanaTipo: FasciaOraria.settimanaFromJson(json['weekly_schedule']),
+      contratto: Contratto.fromJson(json),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'wp_user_id': wpUserId,
-      'site_id': siteId,
-      'nome': nome,
-      'cognome': cognome,
-      'email': email,
-      'ruolo': ruolo,
-      'stipendio': stipendio,
-      'stipendioValuta': stipendioValuta,
-      'dataNascita': dataNascita?.toIso8601String(),
-      'dataAssunzione': dataAssunzione?.toIso8601String(),
-      'tipoContratto': tipoContratto,
-      'orarioLavoro': orarioLavoro,
-      'giorniFerieDisponibili': giorniFerieDisponibili,
-      'giorniFerieUsati': giorniFerieUsati,
-      'giorniMalattia': giorniMalattia,
-      'storicoPagamenti': storicoPagamenti,
-      'benefici': benefici,
-      'formazione': formazione,
-      'valutazioni': valutazioni,
-      'documenti': documenti,
-      'venditeTotali': venditeTotali,
-      'produzioneTotale': produzioneTotale,
-    };
   }
 
   Map<String, dynamic> toMgwsPayload() {
@@ -199,6 +153,8 @@ class Dipendente {
       'first_name': nome.trim(),
       'last_name': cognome.trim(),
       'email': email.trim(),
+      'work_email': emailAziendale.trim(),
+      'phone': telefono.trim(),
       'wp_user_id': wpUserId,
       // La sede vive sull'utente WordPress: senza utente collegato non c'e'
       // nessuno a cui assegnarla.
@@ -209,6 +165,8 @@ class Dipendente {
           ? 'EUR'
           : stipendioValuta.trim().toUpperCase(),
       'status': 'active',
+      'weekly_schedule': FasciaOraria.settimanaToJson(settimanaTipo),
+      ...contratto.toMgwsPayload(),
     };
   }
 
@@ -221,10 +179,74 @@ class Dipendente {
   }
 }
 
+/// Tipi di contratto che il server accetta, nell'ordine del menu.
+enum TipoContratto { permanent, fixedTerm, apprenticeship, internship, other }
+
+extension TipoContrattoMgws on TipoContratto {
+  String get mgws => switch (this) {
+    TipoContratto.permanent => 'permanent',
+    TipoContratto.fixedTerm => 'fixed_term',
+    TipoContratto.apprenticeship => 'apprenticeship',
+    TipoContratto.internship => 'internship',
+    TipoContratto.other => 'other',
+  };
+
+  static TipoContratto? parse(String value) {
+    for (final tipo in TipoContratto.values) {
+      if (tipo.mgws == value) return tipo;
+    }
+    return null;
+  }
+}
+
+/// Dati del contratto: tipo, livello, periodo e ore settimanali.
+class Contratto {
+  final TipoContratto? tipo;
+  final String livello;
+  final DateTime? inizio;
+  final DateTime? fine;
+
+  /// Ore settimanali del contratto, in minuti (0 = non indicate).
+  final int minutiSettimana;
+
+  const Contratto({
+    this.tipo,
+    this.livello = '',
+    this.inizio,
+    this.fine,
+    this.minutiSettimana = 0,
+  });
+
+  factory Contratto.fromJson(Map<String, dynamic> json) {
+    return Contratto(
+      tipo: TipoContrattoMgws.parse((json['contract_type'] ?? '').toString()),
+      livello: (json['contract_level'] ?? '').toString(),
+      inizio: DateTime.tryParse((json['contract_start'] ?? '').toString()),
+      fine: DateTime.tryParse((json['contract_end'] ?? '').toString()),
+      minutiSettimana: (json['contract_minutes_week'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  static String? _data(DateTime? value) =>
+      value == null ? null : DateFormat('yyyy-MM-dd').format(value);
+
+  Map<String, dynamic> toMgwsPayload() => <String, dynamic>{
+    'contract_type': tipo?.mgws ?? '',
+    'contract_level': livello.trim(),
+    'contract_start': _data(inizio),
+    'contract_end': _data(fine),
+    'contract_minutes_week': minutiSettimana,
+  };
+}
+
 class DipendentiService extends ChangeNotifier {
   List<Dipendente> _dipendenti = [];
   bool _isLoading = false;
   LocalizedText? _errore;
+
+  /// Ultimo errore di creazione o modifica, per chi deve capire quale campo
+  /// mostrare (es. email aziendale gia' usata).
+  Object? ultimaEccezione;
 
   List<Dipendente> get dipendenti => _dipendenti;
   bool get isLoading => _isLoading;
@@ -271,30 +293,40 @@ class DipendentiService extends ChangeNotifier {
     }
   }
 
-  Future<bool> addDipendente(Dipendente dipendente) async {
+  /// [account] chiede al server di creare anche l'utente WordPress
+  /// (`create_wp_user`, set di permessi, sede, invito): il login nasce
+  /// dall'email aziendale.
+  Future<bool> addDipendente(
+    Dipendente dipendente, {
+    Map<String, dynamic>? account,
+  }) async {
     _errore = null;
     try {
       final response = await PlatformManager.dipendenti.createEmployee(
-        dipendente.toMgwsPayload(),
+        <String, dynamic>{...dipendente.toMgwsPayload(), ...?account},
       );
       final created = Dipendente.fromJson(response);
       _dipendenti = <Dipendente>[..._dipendenti, created];
       notifyListeners();
       return true;
     } catch (error) {
+      ultimaEccezione = error;
       _errore = (l10n) =>
-          l10n.employeesCreateError(localizedErrorText(l10n, error));
+          l10n.employeesCreateError(employeeErrorText(l10n, error));
       notifyListeners();
       return false;
     }
   }
 
-  Future<bool> updateDipendente(Dipendente dipendente) async {
+  Future<bool> updateDipendente(
+    Dipendente dipendente, {
+    Map<String, dynamic>? account,
+  }) async {
     _errore = null;
     try {
       final response = await PlatformManager.dipendenti.updateEmployee(
         dipendente.id,
-        dipendente.toMgwsPayload(),
+        <String, dynamic>{...dipendente.toMgwsPayload(), ...?account},
       );
       final updated = Dipendente.fromJson(response);
       final index = _dipendenti.indexWhere((d) => d.id == dipendente.id);
@@ -306,8 +338,9 @@ class DipendentiService extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (error) {
+      ultimaEccezione = error;
       _errore = (l10n) =>
-          l10n.employeesUpdateError(localizedErrorText(l10n, error));
+          l10n.employeesUpdateError(employeeErrorText(l10n, error));
       notifyListeners();
       return false;
     }

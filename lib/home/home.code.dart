@@ -125,7 +125,10 @@ class HomeLogic extends ChangeNotifier {
     _emit();
     try {
       await loadAppVersion();
-      final success = await loginCode.tryAutoLogin();
+      // Web: back from the WordPress approval page with a new password.
+      final success =
+          await loginCode.completeWpAuthorizeReturn() ||
+          await loginCode.tryAutoLogin();
       if (success) {
         final connectionWorking = await loginCode.testConnection();
         if (!connectionWorking) {

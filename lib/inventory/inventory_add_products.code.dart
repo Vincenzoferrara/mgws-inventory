@@ -208,9 +208,11 @@ class InventoryAddProductsController with InventoryFeedbackController {
                   purchaseOrderIdText: order!.id.toString(),
                   productIdText: line.productId.toString(),
                   orderedQuantityText: line.quantity.toString(),
-                  // Costo unitario non gestito: i costi vivono su WooCommerce,
-                  // l'ordine MGWS serve come tracciatura del ricevuto.
-                  unitCostText: '0',
+                  // The order line is the only carrier of the cost: a receipt
+                  // has no cost field of its own and copies this value down to
+                  // the movement and the stock value. Zero means "not filled":
+                  // the receipt treats it as unknown, not as a free item.
+                  unitCostText: line.normalizedUnitCost ?? '0',
                   variationIdText: line.variationId.toString(),
                   barcodeText: line.barcode ?? '',
                 ),

@@ -194,6 +194,18 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
     });
   }
 
+  void _changeUnitCost(InventoryQuickLoadLineDraft line, String unitCost) {
+    setState(() {
+      _lines = _lines
+          .map(
+            (item) =>
+                item.key == line.key ? item.copyWith(unitCost: unitCost) : item,
+          )
+          .toList(growable: false);
+      _feedback = null;
+    });
+  }
+
   void _showFeedback(InventoryActionFeedback feedback) {
     setState(() => _feedback = feedback);
     _snack(feedback.message(context.l10n), success: feedback.success);
@@ -354,7 +366,17 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
       child: _lines.isEmpty
           ? const _EmptySelection()
           : Column(
-              children: [for (final line in _lines) _buildSelectedLine(line)],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    context.l10n.inventoryQuickLoadUnitCostHint,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                for (final line in _lines) _buildSelectedLine(line),
+              ],
             ),
     );
   }
@@ -423,6 +445,23 @@ class _InventoryQuickLoadPanelState extends State<InventoryQuickLoadPanel> {
                 spacing: 10,
                 runSpacing: 8,
                 children: [
+                  SizedBox(
+                    width: fieldWidth,
+                    child: TextFormField(
+                      key: ValueKey(
+                        'inventory-quick-load-unit-cost-${line.key}',
+                      ),
+                      initialValue: line.unitCost,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.inventoryQuickLoadUnitCost,
+                        prefixIcon: const Icon(Icons.euro_outlined),
+                      ),
+                      onChanged: (value) => _changeUnitCost(line, value),
+                    ),
+                  ),
                   if (widget.settings.rackEnabled)
                     SizedBox(
                       width: fieldWidth,

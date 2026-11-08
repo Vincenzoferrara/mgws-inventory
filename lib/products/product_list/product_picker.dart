@@ -17,10 +17,19 @@ import 'product_list.gui.dart';
 ///
 /// Restituisce null se l'operatore preme "Annulla" o chiude col gesture:
 /// per il chiamante null e "nessuna scelta" sono la stessa cosa.
-Future<List<ProdottoGlobal>?> openProdottoPicker(BuildContext context) {
+///
+/// [segnalaEsauriti] colora di rosso gli articoli esauriti: serve alla cassa,
+/// non al magazzino, dove un articolo esaurito e' proprio quello da caricare.
+Future<List<ProdottoGlobal>?> openProdottoPicker(
+  BuildContext context, {
+  bool segnalaEsauriti = true,
+}) {
   return Navigator.of(context).push<List<ProdottoGlobal>>(
     MaterialPageRoute(
-      builder: (_) => const ProdottiGestisciPage(modalitaCassa: true),
+      builder: (_) => ProdottiGestisciPage(
+        modalitaCassa: true,
+        segnalaEsauriti: segnalaEsauriti,
+      ),
     ),
   );
 }

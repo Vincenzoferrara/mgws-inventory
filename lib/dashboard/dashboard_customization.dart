@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
+import '../login/mgws/query/query_mgws_inventory.dart';
 import '../notification/notification_service.dart';
 import '../l10n/extensions.dart';
 import 'dashboard.code.dart';
@@ -39,6 +40,7 @@ class CustomizableDashboardPage extends StatefulWidget {
     this.layoutStore,
     this.reportRunner,
     this.reportSearch,
+    this.inventoryGateway,
   });
 
   final DashboardReportGateway? reportGateway;
@@ -46,6 +48,9 @@ class CustomizableDashboardPage extends StatefulWidget {
   final DashboardLayoutStore? layoutStore;
   final DashboardReportRunner? reportRunner;
   final DashboardReportSearch? reportSearch;
+
+  /// Source of the stock levels. Injected in tests; the real one talks to MGWS.
+  final MgwsInventoryGateway? inventoryGateway;
 
   @override
   State<CustomizableDashboardPage> createState() =>
@@ -63,6 +68,8 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
       widget.reportRunner ?? DashboardReportService.instance.run;
   late final DashboardReportSearch _searchReport =
       widget.reportSearch ?? DashboardReportService.instance.search;
+  late final MgwsInventoryGateway _inventory =
+      widget.inventoryGateway ?? QueryMgwsInventory();
 
   DashboardCatalog? _catalog;
 
@@ -173,6 +180,12 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
       if (widget.metric.hasStockThreshold) widget.stockThreshold,
   };
 
+  bool get _needsMissingCosts =>
+      _metrics.contains(DashboardMetric.productsWithoutCost);
+
+  bool get _needsStockDivergences =>
+      _metrics.contains(DashboardMetric.stockDivergences);
+
   /// Loads everything the widgets need. With [refresh] every source is read
   /// again; otherwise only the sources not loaded yet.
   Future<void> _loadData({bool refresh = false}) async {
@@ -278,6 +291,64 @@ class _CustomizableDashboardPageState extends State<CustomizableDashboardPage> {
                 () => _bundle = _bundle.copyWith(
                   lowStockFailed: {..._bundle.lowStockFailed, threshold},
                 ),
+              );
+            }
+          });
+    }
+    if (_needsMissingCosts &&
+        _bundle.missingCostItems == null &&
+        !_bundle.missingCostFailed) {
+      // A failure is reported as "unavailable", never as zero: an unreachable
+      // inventory service does not mean every product has a cost.
+      _inventory
+          .getMissingCostItems()
+          .then((result) {
+            if (!current()) return;
+            if (!result.success || result.data == null) {
+              log.w('Dashboard missing costs not available: ${result.message}');
+              setState(
+                () => _bundle = _bundle.copyWith(missingCostFailed: true),
+              );
+              return;
+            }
+            setState(
+              () => _bundle = _bundle.copyWith(missingCostItems: result.data),
+            );
+          })
+          .catchError((Object error) {
+            log.w('Dashboard missing costs not available: $error');
+            if (current()) {
+              setState(
+                () => _bundle = _bundle.copyWith(missingCostFailed: true),
+              );
+            }
+          });
+    }
+    if (_needsStockDivergences &&
+        _bundle.divergences == null &&
+        !_bundle.divergencesFailed) {
+      // Same rule as the missing costs: an unreachable inventory service is
+      // reported as unavailable, never as zero aligned.
+      _inventory
+          .getStockDivergences()
+          .then((result) {
+            if (!current()) return;
+            if (!result.success || result.data == null) {
+              log.w('Dashboard stock divergences not available: ${result.message}');
+              setState(
+                () => _bundle = _bundle.copyWith(divergencesFailed: true),
+              );
+              return;
+            }
+            setState(
+              () => _bundle = _bundle.copyWith(divergences: result.data),
+            );
+          })
+          .catchError((Object error) {
+            log.w('Dashboard stock divergences not available: $error');
+            if (current()) {
+              setState(
+                () => _bundle = _bundle.copyWith(divergencesFailed: true),
               );
             }
           });

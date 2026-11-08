@@ -10,6 +10,7 @@ import '../../reuse_class/image_url_resolver.dart';
 import '../../theme/theme.dart';
 import 'order_list.code.dart';
 import '../order_editor/order_editor.gui.dart';
+import '../../returns/returns.gui.dart';
 import '../class_orders.dart';
 import '../../l10n/extensions.dart';
 import '../../reuse_class/datagridview/datagridview_list.gui.dart';
@@ -97,6 +98,14 @@ class OrdiniGestisciPageState extends State<OrdiniGestisciPage> {
         idOf: _idOf,
         loadPage: _controller.caricaPagina,
         cacheKey: 'ordini',
+        toolbarActions: [
+          DataGridCommandIconButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ReturnsScreen())),
+            icon: Icons.assignment_return_outlined,
+            tooltip: 'Resi (RMA)',
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
         defaultColumns: const [
           'numero',
           'data',

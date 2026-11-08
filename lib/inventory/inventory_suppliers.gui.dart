@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'supplier_prices.gui.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../theme/theme.dart';
@@ -203,6 +204,14 @@ class _InventorySupplierPanelState extends State<InventorySupplierPanel>
               ),
               onChanged: (_) => setState(() {}),
             ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            tooltip: 'Storico prezzi',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SupplierPricesScreen()),
+            ),
+            icon: const Icon(Icons.price_change),
           ),
           const SizedBox(width: 8),
           IconButton(

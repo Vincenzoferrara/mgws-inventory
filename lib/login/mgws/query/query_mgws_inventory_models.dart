@@ -70,6 +70,46 @@ abstract class MgwsInventoryGateway {
     /// Variant of a variable product being moved; 0 for simple products.
     int variationId = 0,
   });
+
+  /// Declared cost, stock value and declared history of one item.
+  ///
+  /// The cost of a variation without a declaration of its own is the parent's;
+  /// [MgwsItemCost.costInheritedFromParent] says so instead of leaving the app
+  /// to guess where the number came from.
+  Future<MgwsRestockResult<MgwsItemCost>> getItemCost(
+    int productId, {
+    int variationId = 0,
+  });
+
+  /// Appends a declared cost. A correction is a new declaration, never an edit.
+  ///
+  /// [cost] is the amount as typed ("12.50"), or null to withdraw the
+  /// declaration. [revalueStock] also sets the value of the stock in hand to
+  /// this cost: it changes no quantity and writes no movement.
+  Future<MgwsRestockResult<MgwsCostDeclaration>> declareCost({
+    required int productId,
+    int variationId = 0,
+    required String? cost,
+    String? note,
+    bool revalueStock = false,
+  });
+
+  /// Items holding stock whose value is unknown, worst first.
+  ///
+  /// "Without cost" means "without value": an item valued by real receipts is
+  /// not listed, because its margin is computable.
+  Future<MgwsRestockResult<List<MgwsMissingCostItem>>> getMissingCostItems({
+    int limit = 100,
+  });
+
+  /// Items the WooCommerce stock and the ledger disagree on, read-only.
+  ///
+  /// The comparison is a read: the operator decides what to do with the
+  /// difference, the backend never corrects from a listing.
+  Future<MgwsRestockResult<List<MgwsStockDivergence>>> getStockDivergences({
+    int limit = 100,
+    int offset = 0,
+  });
 }
 
 class MgwsStockSyncResult {
@@ -717,6 +757,7 @@ class MgwsQuickLoadRequest {
     this.shelf,
     this.idempotencyKey,
     this.movementKey,
+    this.unitCost,
   });
   final int productId;
   final int quantityDelta;
@@ -730,6 +771,11 @@ class MgwsQuickLoadRequest {
   final String? rack;
   final String? shelf;
   final String? idempotencyKey;
+
+  /// Cost of one piece as typed ("12.50"), or null when the cost is unknown.
+  /// Null is not zero: a load without a cost leaves the stock value alone
+  /// instead of valuing the pieces at nothing.
+  final String? unitCost;
 
   /// Stessa chiave su tutte le righe di un carico: e' cosi' che il backend
   /// le riconosce come una sola operazione invece di una per prodotto.
@@ -748,6 +794,7 @@ class MgwsQuickLoadRequest {
     'shelf': shelf,
     'idempotency_key': idempotencyKey,
     'movement_key': movementKey,
+    'unit_cost': unitCost,
   });
 }
 
@@ -2279,6 +2326,274 @@ class MgwsCountSession {
       createdAtGmt: strings[3]!,
       updatedAtGmt: strings[4]!,
       lines: lines.cast<MgwsCountLine>(),
+    );
+  }
+}
+
+/// A declared cost, as returned by the API.
+///
+/// Also used for the rows of the declaration history, which carry only the
+/// first fields: a row without [projected], [revalued] and [valueCents] is a
+/// past declaration, not a fresh one.
+class MgwsCostDeclaration {
+  const MgwsCostDeclaration({
+    required this.id,
+    required this.costCents,
+    required this.cost,
+    required this.validFromGmt,
+    required this.source,
+    this.note,
+    this.projected = false,
+    this.cogsEnabled = false,
+    this.revalued = 0,
+    this.revalueQty = 0,
+    this.previousValueCents,
+    this.valueCents,
+    this.revalueSkipped,
+  });
+
+  final int id;
+
+  /// Null means the declaration was withdrawn, which is a decision, not a gap.
+  final int? costCents;
+  final String? cost;
+  final String validFromGmt;
+  final String source;
+  final String? note;
+  final bool projected;
+  final bool cogsEnabled;
+
+  /// Levels whose stock value was set to this cost. Zero when the declaration
+  /// did not ask for a revaluation.
+  final int revalued;
+
+  /// Pieces revalued, and what the item was worth before and after.
+  final int revalueQty;
+  final int? previousValueCents;
+  final int? valueCents;
+
+  /// Why a requested revaluation did not run; `cost_missing` on a withdrawal.
+  final String? revalueSkipped;
+
+  bool get isWithdrawal => costCents == null;
+
+  static MgwsCostDeclaration? fromMap(Map<String, Object?> value) {
+    final id = MgwsRestockParser.integer(value['id']);
+    final validFrom = MgwsRestockParser.string(value['valid_from_gmt']);
+    final source = MgwsRestockParser.string(value['source']);
+    if (id == null || validFrom == null || source == null) return null;
+    return MgwsCostDeclaration(
+      id: id,
+      costCents: MgwsRestockParser.integer(value['cost_cents']),
+      cost: MgwsRestockParser.string(value['cost']),
+      validFromGmt: validFrom,
+      source: source,
+      note: MgwsRestockParser.string(value['note']),
+      projected: MgwsRestockParser.boolean(value['projected']) ?? false,
+      cogsEnabled: MgwsRestockParser.boolean(value['cogs_enabled']) ?? false,
+      revalued: MgwsRestockParser.integer(value['revalued']) ?? 0,
+      revalueQty: MgwsRestockParser.integer(value['revalue_qty']) ?? 0,
+      previousValueCents: MgwsRestockParser.integer(
+        value['previous_value_cents'],
+      ),
+      valueCents: MgwsRestockParser.integer(value['value_cents']),
+      revalueSkipped: MgwsRestockParser.string(value['revalue_skipped']),
+    );
+  }
+}
+
+/// Declared cost, stock value and declaration history of one item.
+///
+/// The two numbers answer different questions on purpose: [cost] is what the
+/// shop says one piece costs, [unitCost] is what the pieces in stock are
+/// actually worth per piece after the weighted average.
+class MgwsItemCost {
+  const MgwsItemCost({
+    required this.productId,
+    required this.variationId,
+    required this.minorUnit,
+    required this.costCents,
+    required this.cost,
+    required this.costSource,
+    required this.costValidFromGmt,
+    required this.costInheritedFromParent,
+    required this.history,
+    required this.qty,
+    required this.valueCents,
+    required this.value,
+    required this.unitCostCents,
+    required this.unitCost,
+    required this.unvaluedQty,
+    required this.cogsEnabled,
+  });
+
+  final int productId;
+  final int variationId;
+
+  /// Decimal places the plugin stores money with, fixed at installation.
+  final int minorUnit;
+
+  /// Latest declaration. Null means there is no declaration at all, which is
+  /// not the same as a withdrawal: a withdrawal is a row with a null cost.
+  final int? costCents;
+  final String? cost;
+  final String? costSource;
+  final String? costValidFromGmt;
+
+  /// True when this variation has no declaration of its own and is showing the
+  /// parent's cost.
+  final bool costInheritedFromParent;
+  final List<MgwsCostDeclaration> history;
+
+  final int qty;
+
+  /// Null when at least one level of the item has no value: a partial sum would
+  /// hide the gap instead of reporting it.
+  final int? valueCents;
+  final String? value;
+  final int? unitCostCents;
+  final String? unitCost;
+
+  /// Pieces whose level has no value yet.
+  final int unvaluedQty;
+  final bool cogsEnabled;
+
+  bool get hasUnvaluedStock => unvaluedQty > 0;
+
+  static MgwsItemCost? fromMap(Map<String, Object?> value) {
+    final productId = MgwsRestockParser.integer(value['product_id']);
+    final variationId = MgwsRestockParser.integer(value['variation_id']);
+    final stock = MgwsRestockParser.map(value['stock']);
+    final qty = MgwsRestockParser.integer(stock['qty']);
+    if (productId == null || variationId == null || qty == null) return null;
+    final history = <MgwsCostDeclaration>[];
+    for (final row in MgwsRestockParser.list(value['history'])) {
+      final entry = MgwsCostDeclaration.fromMap(row);
+      if (entry != null) history.add(entry);
+    }
+    return MgwsItemCost(
+      productId: productId,
+      variationId: variationId,
+      minorUnit: MgwsRestockParser.integer(value['minor_unit']) ?? 2,
+      costCents: MgwsRestockParser.integer(value['cost_cents']),
+      cost: MgwsRestockParser.string(value['cost']),
+      costSource: MgwsRestockParser.string(value['cost_source']),
+      costValidFromGmt: MgwsRestockParser.string(value['cost_valid_from_gmt']),
+      costInheritedFromParent:
+          MgwsRestockParser.boolean(value['cost_inherited_from_parent']) ??
+          false,
+      history: history,
+      qty: qty,
+      valueCents: MgwsRestockParser.integer(stock['value_cents']),
+      value: MgwsRestockParser.string(stock['value']),
+      unitCostCents: MgwsRestockParser.integer(stock['unit_cost_cents']),
+      unitCost: MgwsRestockParser.string(stock['unit_cost']),
+      unvaluedQty: MgwsRestockParser.integer(stock['unvalued_qty']) ?? 0,
+      cogsEnabled: MgwsRestockParser.boolean(value['cogs_enabled']) ?? false,
+    );
+  }
+}
+
+/// An item holding stock whose value is unknown, worst first.
+///
+/// "Without cost" means "without value": an item valued by real receipts is not
+/// listed, because its margin is already computable.
+class MgwsMissingCostItem {
+  const MgwsMissingCostItem({
+    required this.productId,
+    required this.variationId,
+    required this.qty,
+    required this.unvaluedQty,
+    required this.name,
+    required this.sku,
+    required this.declaredCostCents,
+    required this.declaredCost,
+  });
+
+  final int productId;
+  final int variationId;
+  final int qty;
+  final int unvaluedQty;
+
+  /// Empty when the product no longer exists: the stock is still real.
+  final String name;
+  final String sku;
+
+  /// Latest declaration, including one inherited from the parent. Null when
+  /// there is none, or when the last declaration was a withdrawal.
+  final int? declaredCostCents;
+  final String? declaredCost;
+
+  String get label => name.isNotEmpty ? name : sku;
+
+  static MgwsMissingCostItem? fromMap(Map<String, Object?> value) {
+    final productId = MgwsRestockParser.integer(value['product_id']);
+    final variationId = MgwsRestockParser.integer(value['variation_id']);
+    if (productId == null || variationId == null) return null;
+    return MgwsMissingCostItem(
+      productId: productId,
+      variationId: variationId,
+      qty: MgwsRestockParser.integer(value['qty']) ?? 0,
+      unvaluedQty: MgwsRestockParser.integer(value['unvalued_qty']) ?? 0,
+      name: MgwsRestockParser.string(value['name']) ?? '',
+      sku: MgwsRestockParser.string(value['sku']) ?? '',
+      declaredCostCents: MgwsRestockParser.integer(
+        value['declared_cost_cents'],
+      ),
+      declaredCost: MgwsRestockParser.string(value['declared_cost']),
+    );
+  }
+}
+
+/// One item of the WooCommerce ↔ ledger stock difference, read-only.
+///
+/// A difference is the distance between the authoritative total and the
+/// ledger: positive means WooCommerce holds more than the ledger, negative the
+/// other way. Zero is not listed, so an empty answer means "everything that
+/// has two totals agrees".
+class MgwsStockDivergence {
+  const MgwsStockDivergence({
+    required this.productId,
+    required this.variationId,
+    required this.name,
+    required this.sku,
+    required this.wooStock,
+    required this.mgwsStock,
+    required this.difference,
+    this.siteId,
+  });
+
+  final int productId;
+  final int variationId;
+  final String name;
+  final String sku;
+
+  /// The total WooCommerce holds right now; null territory is skipped by the
+  /// backend, so a listed item always has a number on both sides.
+  final int wooStock;
+  final int mgwsStock;
+
+  /// WooCommerce minus ledger, in WooCommerce direction.
+  final int difference;
+
+  /// Sede della differenza, quando il negozio ha più sedi.
+  final int? siteId;
+
+  String get label => name.isNotEmpty ? name : sku;
+
+  static MgwsStockDivergence? fromMap(Map<String, Object?> value) {
+    final productId = MgwsRestockParser.integer(value['product_id']);
+    final variationId = MgwsRestockParser.integer(value['variation_id']);
+    if (productId == null || variationId == null) return null;
+    return MgwsStockDivergence(
+      productId: productId,
+      variationId: variationId,
+      name: MgwsRestockParser.string(value['name']) ?? '',
+      sku: MgwsRestockParser.string(value['sku']) ?? '',
+      wooStock: MgwsRestockParser.integer(value['woo_stock']) ?? 0,
+      mgwsStock: MgwsRestockParser.integer(value['mgws_stock']) ?? 0,
+      difference: MgwsRestockParser.integer(value['difference']) ?? 0,
+      siteId: MgwsRestockParser.integer(value['site_id']),
     );
   }
 }

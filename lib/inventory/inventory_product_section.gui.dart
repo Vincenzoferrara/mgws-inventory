@@ -115,6 +115,11 @@ class InventoryProductSection extends StatefulWidget {
 
 class _InventoryProductSectionState extends State<InventoryProductSection> {
   final _barcodeController = TextEditingController();
+
+  /// Keeps the field focused across scans: a scanner types the next code
+  /// right after the Enter of the previous one, and Flutter drops the focus
+  /// on submit.
+  final _barcodeFocus = FocusNode();
   bool _scanning = false;
 
   // Chiavi dei widget interni. Ogni modulo ha il proprio anticipo, cosi'
@@ -142,6 +147,7 @@ class _InventoryProductSectionState extends State<InventoryProductSection> {
   @override
   void dispose() {
     _barcodeController.dispose();
+    _barcodeFocus.dispose();
     super.dispose();
   }
 
@@ -172,6 +178,7 @@ class _InventoryProductSectionState extends State<InventoryProductSection> {
   Future<void> _add(String code) async {
     final added = await widget.onBarcodeEntered(code);
     if (added) _barcodeController.clear();
+    if (mounted) _barcodeFocus.requestFocus();
   }
 
   @override
@@ -215,8 +222,10 @@ class _InventoryProductSectionState extends State<InventoryProductSection> {
         final field = TextField(
           key: ValueKey(_barcodeFieldKey),
           controller: _barcodeController,
+          focusNode: _barcodeFocus,
           style: Theme.of(context).textTheme.bodyMedium,
-          keyboardType: TextInputType.number,
+          // Text, not number: article codes have letters and dashes.
+          keyboardType: TextInputType.text,
           decoration: InputDecoration(
             hintText: context.l10n.inventoryHintInserisciOscansionaBarcode,
             prefixIcon: const Icon(Icons.qr_code),

@@ -194,8 +194,10 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
   String _metodoLabel(BuildContext context, String metodo) {
     switch (metodo) {
       case 'contanti':
+      case 'cash':
         return context.l10n.cassaContanti;
       case 'carta':
+      case 'card':
         return context.l10n.cassaCarta;
       case 'bancomat':
         return context.l10n.cassaBancomat;
@@ -204,8 +206,12 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
     }
   }
 
+  /// "Operatore: Mario", or just "Operatore non assegnato" (never
+  /// "Operatore: Operatore non assegnato").
   String _operatore(BuildContext context, String? label) =>
-      label ?? context.l10n.cassaOperatorUnassigned;
+      label == null || label.trim().isEmpty
+      ? context.l10n.cassaOperatorUnassigned
+      : context.l10n.cassaEtichettaOperatore(label);
 
   Widget _cardScontrino(BuildContext context, Scontrino s) {
     final theme = Theme.of(context);
@@ -234,7 +240,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
           ),
         ),
         subtitle: Text(
-          '${s.data} · ${_operatore(context, s.operatoreLabel)}'
+          '${formatDataCassa(s.data)} · ${_operatore(context, s.operatoreLabel)}'
           '${s.cassaNome != null ? ' · ${s.cassaNome}' : ''}'
           '${s.wooOrderId != null ? ' · ${context.l10n.cassaHistoryOrderRef('${s.wooOrderId}')}' : ''}'
           '${s.clienteNome != null ? ' · ${s.clienteNome}' : ''}',
@@ -265,7 +271,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'POS · ${s.data} · ${_metodoLabel(context, s.metodoPagamento)} · €${s.totale.toStringAsFixed(2)}',
+                  '${formatDataCassa(s.data)} · ${_metodoLabel(context, s.metodoPagamento)} · €${s.totale.toStringAsFixed(2)}',
                   style: theme.textTheme.bodySmall,
                 ),
                 if (s.stato == 'annullato')
@@ -277,9 +283,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                     ),
                   ),
                 Text(
-                  '${context.l10n.cassaEtichettaOperatore(_operatore(context, s.operatoreLabel))}'
-                  '${s.cassaNome != null ? ' · ${context.l10n.cassaRegisterRef(s.cassaNome!)}' : ''}'
-                  '${s.sede != null ? ' · ${s.sede}' : ''}',
+                  _operatore(context, s.operatoreLabel) +
+                      '${s.cassaNome != null ? ' · ${context.l10n.cassaRegisterRef(s.cassaNome!)}' : ''}'
+                          '${s.sede != null ? ' · ${s.sede}' : ''}',
                   style: theme.textTheme.bodySmall,
                 ),
                 if (s.wooOrderId != null)
@@ -305,7 +311,9 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                     ),
                     subtitle: Text(
                       context.l10n.cassaReturnableLine(
-                        '${r.barcodeInterno}',
+                        r.barcodeInterno.trim().isEmpty
+                            ? '-'
+                            : r.barcodeInterno,
                         r.quantitaVenduta,
                         r.quantitaGiaResa,
                         r.quantitaRendibile,
@@ -321,7 +329,10 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                                     ? null
                                     : () {
                                         Navigator.pop(context);
-                                        _dialogNuovoReso(context, s.id, r);
+                                        // The page's context: this dialog's
+                                        // is gone after the pop, and the
+                                        // return dialog never opened.
+                                        _dialogNuovoReso(this.context, s.id, r);
                                       },
                                 child: Text(context.l10n.cassaReso),
                               ),
@@ -331,7 +342,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                                     : () {
                                         Navigator.pop(context);
                                         _dialogNuovoReso(
-                                          context,
+                                          this.context,
                                           s.id,
                                           r,
                                           cambio: true,
@@ -342,20 +353,22 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                             ],
                           ),
                   ),
-                const Divider(),
-                Text(
-                  context.l10n.cassaRecordedLinesTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                for (final riga in s.righe)
+                if (s.righe.isNotEmpty) ...[
+                  const Divider(),
                   Text(
-                    '${riga.isReso ? '${context.l10n.cassaReturnLinePrefix} ' : ''}${riga.nomeCompleto} x${riga.quantita} '
-                    '- €${riga.subtotale.toStringAsFixed(2)}'
-                    '${riga.motivoReso != null ? ' (${riga.motivoReso})' : ''}',
-                    style: theme.textTheme.bodySmall,
+                    context.l10n.cassaRecordedLinesTitle,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
+                  for (final riga in s.righe)
+                    Text(
+                      '${riga.isReso ? '${context.l10n.cassaReturnLinePrefix} ' : ''}${riga.nomeCompleto} x${riga.quantita} '
+                      '- €${riga.subtotale.toStringAsFixed(2)}'
+                      '${riga.motivoReso != null ? ' (${riga.motivoReso})' : ''}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                ],
                 if (s.rettifiche.isNotEmpty) ...[
                   const Divider(),
                   Text(
@@ -375,7 +388,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await _dialogRettificaScontrino(context, s);
+              await _dialogRettificaScontrino(this.context, s);
             },
             child: Text(context.l10n.cassaRettifica),
           ),
@@ -384,7 +397,7 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
                 ? null
                 : () async {
                     Navigator.pop(context);
-                    await _dialogAnnullaScontrino(context, s);
+                    await _dialogAnnullaScontrino(this.context, s);
                   },
             child: Text(context.l10n.commonAnnulla),
           ),
@@ -412,9 +425,10 @@ class _StoricoCassaPageState extends State<StoricoCassaPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           title: Text(
+            // Generated as (nome, tipo): the order of the placeholders.
             context.l10n.cassaTitoloVincolato(
-              cambio ? context.l10n.cassaCambio : context.l10n.cassaReso,
               riga.nome,
+              cambio ? context.l10n.cassaCambio : context.l10n.cassaReso,
             ),
           ),
           content: SingleChildScrollView(

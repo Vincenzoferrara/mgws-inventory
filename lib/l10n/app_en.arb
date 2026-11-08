@@ -164,11 +164,11 @@
   "@inventoryHintChooseModule": {
     "description": "Hint shown when no module is selected"
   },
-  "inventoryEmptyStateTitle": "Choose a module from the top bar",
+  "inventoryEmptyStateTitle": "Choose what to do from the bar above",
   "@inventoryEmptyStateTitle": {
     "description": "Title shown in the empty state of the inventory module selector"
   },
-  "inventoryEmptyStateDescription": "Add to insert pieces, Fix to correct, Move to transfer",
+  "inventoryEmptyStateDescription": "Add to load pieces, Adjust to correct, Move now to shift pieces between warehouses, Movements for the history",
   "@inventoryEmptyStateDescription": {
     "description": "Description shown in the empty state explaining available actions"
   },
@@ -176,11 +176,11 @@
   "@inventoryLabelSede": {
     "description": "Label of the site selection field (required)"
   },
-  "inventoryLabelDettagli": "Details",
+  "inventoryLabelDettagli": "Note (optional)",
   "@inventoryLabelDettagli": {
     "description": "Label of the details field"
   },
-  "inventoryHintNotaMovimento": "Operative movement note (optional)",
+  "inventoryHintNotaMovimento": "E.g. goods delivered by courier, damaged piece…",
   "@inventoryHintNotaMovimento": {
     "description": "Hint shown in the movement details field"
   },
@@ -1971,11 +1971,11 @@
   "@inventoryRettificaTitolo": {
     "description": "Title of the inventory adjustment screen"
   },
-  "inventoryRettificaSottotitolo": "Adjust stock levels by scanning or entering quantities",
+  "inventoryRettificaSottotitolo": "Scan or search the products, then enter the correction or the counted quantity.",
   "@inventoryRettificaSottotitolo": {
     "description": "Subtitle explaining the adjustment screen purpose"
   },
-  "inventoryRettificaScegliQuanti": "How many?",
+  "inventoryRettificaScegliQuanti": "1 piece per scan",
   "@inventoryRettificaScegliQuanti": {
     "description": "Label for the quantity selector in adjustment"
   },
@@ -3099,7 +3099,7 @@
   "@inventoryAzioneAggiungi5": {
     "description": "Localized string inventoryAzioneAggiungi5"
   },
-  "inventoryBarcodeNonTrovatoCatalogo": "Barcode {code} not found in the product catalogue",
+  "inventoryBarcodeNonTrovatoCatalogo": "No product with barcode or code {code}",
   "@inventoryBarcodeNonTrovatoCatalogo": {
     "description": "Localized string inventoryBarcodeNonTrovatoCatalogo",
     "placeholders": {
@@ -3371,7 +3371,7 @@
   "@inventoryHelperSedeObbligatoria": {
     "description": "Localized string inventoryHelperSedeObbligatoria"
   },
-  "inventoryHintInserisciOscansionaBarcode": "Enter or scan a barcode...",
+  "inventoryHintInserisciOscansionaBarcode": "Scan the barcode or type the article code",
   "@inventoryHintInserisciOscansionaBarcode": {
     "description": "Localized string inventoryHintInserisciOscansionaBarcode"
   },
@@ -3399,11 +3399,11 @@
   "@inventoryModuleDescMovimenti": {
     "description": "Localized string inventoryModuleDescMovimenti"
   },
-  "inventoryModuleDescRettifica": "Bring the actual warehouse quantity to the value you counted.",
+  "inventoryModuleDescRettifica": "Correct the stock: add or remove pieces, or type how many you counted.",
   "@inventoryModuleDescRettifica": {
     "description": "Localized string inventoryModuleDescRettifica"
   },
-  "inventoryModuleDescSposta": "Transfer items from one site/warehouse to another.",
+  "inventoryModuleDescSposta": "Move pieces from one warehouse to another in a single step: stock changes as soon as you confirm. For goods travelling between sites use \"Shipped transfers\" in More tools.",
   "@inventoryModuleDescSposta": {
     "description": "Localized string inventoryModuleDescSposta"
   },
@@ -3419,7 +3419,7 @@
   "@inventoryModuleScegli": {
     "description": "Localized string inventoryModuleScegli"
   },
-  "inventoryModuleSposta": "Transfer",
+  "inventoryModuleSposta": "Move now",
   "@inventoryModuleSposta": {
     "description": "Localized string inventoryModuleSposta"
   },
@@ -3466,11 +3466,11 @@
   "@inventoryNotaConConvalida": {
     "description": "Localized string inventoryNotaConConvalida"
   },
-  "inventoryNotaConfermaCarico": "MGWS receives a stock-in for each line, in sequence. If some lines fail, you can retry just those.",
+  "inventoryNotaConfermaCarico": "Each line is loaded on its own: if one fails, you can retry just that one.",
   "@inventoryNotaConfermaCarico": {
     "description": "Localized string inventoryNotaConfermaCarico"
   },
-  "inventoryNotaConfermaOrdine": "MGWS receives a stock-in for each line and records the same lines on the order. Adding the supplier does not change the quantity in the warehouse.",
+  "inventoryNotaConfermaOrdine": "Each line enters the warehouse and is recorded on the order. The supplier does not change the stock.",
   "@inventoryNotaConfermaOrdine": {
     "description": "Localized string inventoryNotaConfermaOrdine"
   },
@@ -3643,7 +3643,7 @@
   "@inventorySpostaServonoPartenzaArrivoPezzi": {
     "description": "Localized string inventorySpostaServonoPartenzaArrivoPezzi"
   },
-  "inventorySpostaSottotitolo": "Transfer items from one warehouse to another. The product's total stock does not change.",
+  "inventorySpostaSottotitolo": "The pieces pass from one warehouse to another as soon as you confirm. The product's total stock does not change.",
   "@inventorySpostaSottotitolo": {
     "description": "Localized string inventorySpostaSottotitolo"
   },
@@ -3651,7 +3651,7 @@
   "@inventorySpostaStockNonDisponibile": {
     "description": "Localized string inventorySpostaStockNonDisponibile"
   },
-  "inventorySpostaTitolo": "Transfer between sites",
+  "inventorySpostaTitolo": "Move now",
   "@inventorySpostaTitolo": {
     "description": "Localized string inventorySpostaTitolo"
   },
@@ -4516,7 +4516,7 @@
   "@inventoryModalitaOrdine": {
     "description": "Localized string inventoryModalitaOrdine"
   },
-  "inventoryModalitaOrdineDescrizione": "Set the supplier and generate an order with the same lines. With the Validate tick the receipt stays locked until approval.",
+  "inventoryModalitaOrdineDescrizione": "Also creates a supplier order with the same lines. With Validate the receipt waits for approval.",
   "@inventoryModalitaOrdineDescrizione": {
     "description": "Localized string inventoryModalitaOrdineDescrizione"
   },
@@ -4524,7 +4524,7 @@
   "@inventoryModalitaSemplice": {
     "description": "Localized string inventoryModalitaSemplice"
   },
-  "inventoryModalitaSempliceDescrizione": "Entry only: the items go into the warehouse without opening any documents.",
+  "inventoryModalitaSempliceDescrizione": "The pieces go into stock, with no documents.",
   "@inventoryModalitaSempliceDescrizione": {
     "description": "Localized string inventoryModalitaSempliceDescrizione"
   },
@@ -4756,7 +4756,7 @@
   "@cassaVoceVendita": {
     "description": "Localized string cassaVoceVendita"
   },
-  "cassaTitoloVincolato": "{tipo} bound to - {nome}",
+  "cassaTitoloVincolato": "{tipo} of {nome}",
   "@cassaTitoloVincolato": {
     "description": "Localized string cassaTitoloVincolato",
     "placeholders": {
@@ -4785,7 +4785,7 @@
       "giornata": {}
     }
   },
-  "cassaEtichettaTurno": "Shift: {turno}",
+  "cassaEtichettaTurno": "Shift opened: {turno}",
   "@cassaEtichettaTurno": {
     "description": "Localized string cassaEtichettaTurno",
     "placeholders": {
@@ -6677,6 +6677,10 @@
   "@reportSignatureCountedBy": {
     "description": "Signature line label"
   },
+  "reportSignatureCustomer": "Customer signature",
+  "@reportSignatureCustomer": {
+    "description": "Signature line label"
+  },
   "reportFigureTakings": "Total takings",
   "@reportFigureTakings": {
     "description": "Report summary figure"
@@ -6968,6 +6972,14 @@
   "dashboardWidgetMetricLowStockProducts": "Low-stock products",
   "@dashboardWidgetMetricLowStockProducts": {
     "description": "Dashboard: dashboardWidgetMetricLowStockProducts"
+  },
+  "dashboardWidgetMetricStockDivergences": "Stock divergences",
+  "@dashboardWidgetMetricStockDivergences": {
+    "description": "Dashboard: dashboardWidgetMetricStockDivergences"
+  },
+  "dashboardWidgetStockDivergencesCaveat": "Only items with a WooCommerce total are compared: “0 divergences” means everything with two numbers agrees.",
+  "@dashboardWidgetStockDivergencesCaveat": {
+    "description": "Dashboard: what a zero in the stock divergences card means"
   },
   "dashboardWidgetChartNumber": "Number",
   "@dashboardWidgetChartNumber": {
@@ -7442,6 +7454,10 @@
   "@dashboardReportAreaCash": {
     "description": "Dashboard report: dashboardReportAreaCash"
   },
+  "dashboardReportAreaStock": "Stock",
+  "@dashboardReportAreaStock": {
+    "description": "Dashboard report: dashboardReportAreaStock"
+  },
   "dashboardReportMeasureRevenue": "Revenue",
   "@dashboardReportMeasureRevenue": {
     "description": "Dashboard report: dashboardReportMeasureRevenue"
@@ -7574,6 +7590,65 @@
   "@dashboardReportMeasureClosings": {
     "description": "Dashboard report: dashboardReportMeasureClosings"
   },
+  "dashboardReportMeasureCost": "Cost of goods sold",
+  "@dashboardReportMeasureCost": {
+    "description": "Dashboard report: dashboardReportMeasureCost"
+  },
+  "dashboardReportMeasureMargin": "Margin",
+  "@dashboardReportMeasureMargin": {
+    "description": "Dashboard report: dashboardReportMeasureMargin"
+  },
+  "dashboardReportMeasureMarginRate": "Margin %",
+  "@dashboardReportMeasureMarginRate": {
+    "description": "Dashboard report: dashboardReportMeasureMarginRate"
+  },
+  "dashboardReportMeasureCostCoverage": "Cost coverage",
+  "@dashboardReportMeasureCostCoverage": {
+    "description": "Dashboard report: dashboardReportMeasureCostCoverage"
+  },
+  "dashboardReportMeasureRevenueShare": "Revenue share %",
+  "@dashboardReportMeasureRevenueShare": {
+    "description": "Dashboard report: dashboardReportMeasureRevenueShare"
+  },
+  "dashboardReportMeasureQtyOnHand": "Units in stock",
+  "@dashboardReportMeasureQtyOnHand": {
+    "description": "Dashboard report: dashboardReportMeasureQtyOnHand"
+  },
+  "dashboardReportMeasureStockValue": "Stock value",
+  "@dashboardReportMeasureStockValue": {
+    "description": "Dashboard report: dashboardReportMeasureStockValue"
+  },
+  "dashboardReportMeasureUnvaluedQty": "Units without value",
+  "@dashboardReportMeasureUnvaluedQty": {
+    "description": "Dashboard report: dashboardReportMeasureUnvaluedQty"
+  },
+  "dashboardReportMeasureStockCostCoverage": "Value coverage",
+  "@dashboardReportMeasureStockCostCoverage": {
+    "description": "Dashboard report: dashboardReportMeasureStockCostCoverage"
+  },
+  "dashboardReportMeasureSoldQty": "Units sold in period",
+  "@dashboardReportMeasureSoldQty": {
+    "description": "Dashboard report: dashboardReportMeasureSoldQty"
+  },
+  "dashboardReportMeasureRotation": "Rotation (sold/on hand)",
+  "@dashboardReportMeasureRotation": {
+    "description": "Dashboard report: dashboardReportMeasureRotation"
+  },
+  "dashboardReportMeasureDaysWithoutSale": "Days without a sale",
+  "@dashboardReportMeasureDaysWithoutSale": {
+    "description": "Dashboard report: dashboardReportMeasureDaysWithoutSale"
+  },
+  "dashboardReportCostCoveragePartial": "Cost coverage {percent}%",
+  "@dashboardReportCostCoveragePartial": {
+    "description": "Dashboard report: margin is only partly covered by known costs",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "dashboardReportNeverSold": "never sold",
+  "@dashboardReportNeverSold": {
+    "description": "Dashboard report: a stock row with no sale in its history"
+  },
   "dashboardReportDimensionHour": "Hour",
   "@dashboardReportDimensionHour": {
     "description": "Dashboard report: dashboardReportDimensionHour"
@@ -7638,6 +7713,14 @@
   "@dashboardReportDimensionPaymentMethod": {
     "description": "Dashboard report: dashboardReportDimensionPaymentMethod"
   },
+  "dashboardReportDimensionSite": "Site",
+  "@dashboardReportDimensionSite": {
+    "description": "Dashboard report: dashboardReportDimensionSite"
+  },
+  "dashboardReportDimensionWarehouse": "Warehouse",
+  "@dashboardReportDimensionWarehouse": {
+    "description": "Dashboard report: dashboardReportDimensionWarehouse"
+  },
   "dashboardReportPresetProductSales": "Pieces sold of a product",
   "@dashboardReportPresetProductSales": {
     "description": "Dashboard report: dashboardReportPresetProductSales"
@@ -7690,94 +7773,21 @@
   "@dashboardReportPresetCashDifferences": {
     "description": "Dashboard report: dashboardReportPresetCashDifferences"
   },
-  "notificationsTitle": "Notifications",
-  "@notificationsTitle": {
-    "description": "Notification bell panel title"
+  "dashboardReportPresetMargin": "Margin by product",
+  "@dashboardReportPresetMargin": {
+    "description": "Dashboard report: dashboardReportPresetMargin"
   },
-  "notificationsTooltip": "Notifications",
-  "@notificationsTooltip": {
-    "description": "Tooltip of the notification bell"
+  "dashboardReportPresetDeadStock": "Never-sold products",
+  "@dashboardReportPresetDeadStock": {
+    "description": "Dashboard report: dashboardReportPresetDeadStock"
   },
-  "notificationsMarkAllRead": "Mark all as read",
-  "@notificationsMarkAllRead": {
-    "description": "Notification panel button"
+  "dashboardReportPresetAbcCurve": "Revenue ABC curve",
+  "@dashboardReportPresetAbcCurve": {
+    "description": "Dashboard report: dashboardReportPresetAbcCurve"
   },
-  "notificationsEmpty": "No notifications",
-  "@notificationsEmpty": {
-    "description": "Notification panel empty state"
-  },
-  "notificationsUpdateTitle": "Update available",
-  "@notificationsUpdateTitle": {
-    "description": "Notification: new app version"
-  },
-  "notificationsUpdateMessage": "Version {version} of the app is available.",
-  "@notificationsUpdateMessage": {
-    "description": "Notification: new app version",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsOrdersToFulfilTitle": "Orders to fulfil",
-  "@notificationsOrdersToFulfilTitle": {
-    "description": "Notification: paid orders to prepare"
-  },
-  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 paid order waiting to be fulfilled.} other{{count} paid orders waiting to be fulfilled.}}",
-  "@notificationsOrdersToFulfilMessage": {
-    "description": "Notification: paid orders to prepare",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsOrdersUnpaidTitle": "Unpaid orders",
-  "@notificationsOrdersUnpaidTitle": {
-    "description": "Notification: orders pending payment or on hold"
-  },
-  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 order not paid yet: do not ship it until the payment is received.} other{{count} orders not paid yet: do not ship them until the payment is received.}}",
-  "@notificationsOrdersUnpaidMessage": {
-    "description": "Notification: orders pending payment or on hold",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsLowStockTitle": "Low stock",
-  "@notificationsLowStockTitle": {
-    "description": "Notification: products under their low stock threshold"
-  },
-  "notificationsLowStockMessage": "{count, plural, =1{1 product is below its low stock threshold.} other{{count} products are below their low stock threshold.}}",
-  "@notificationsLowStockMessage": {
-    "description": "Notification: products under their low stock threshold",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "notificationsFiscalRegisterTitle": "Fiscal register",
-  "@notificationsFiscalRegisterTitle": {
-    "description": "Notification: fiscal register unreachable"
-  },
-  "notificationsFiscalRegisterMessage": "The fiscal register of till {name} is not responding.",
-  "@notificationsFiscalRegisterMessage": {
-    "description": "Notification: fiscal register unreachable",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "notificationsSettingsTitle": "Notifications",
-  "@notificationsSettingsTitle": {
-    "description": "Settings section for the notification bell"
-  },
-  "notificationsSettingsDescription": "Choose what the bell in the top bar reports. Low stock only covers products with their own low stock threshold in WooCommerce; the fiscal register only when a till name/number is set.",
-  "@notificationsSettingsDescription": {
-    "description": "Settings section for the notification bell"
+  "dashboardReportPresetStockValue": "Stock value by category",
+  "@dashboardReportPresetStockValue": {
+    "description": "Dashboard report: dashboardReportPresetStockValue"
   },
   "reportSeparatorQuestion": "What goes between colour and size?",
   "@reportSeparatorQuestion": {
@@ -8207,14 +8217,6 @@
       }
     }
   },
-  "notificationSourceMedia": "Media library",
-  "@notificationSourceMedia": {
-    "description": "Title of message bars raised by the media picker"
-  },
-  "notificationSourceLogs": "Logs",
-  "@notificationSourceLogs": {
-    "description": "Title of message bars raised by the log viewer"
-  },
   "cassaErrorShiftAlreadyOpen": "A shift is already open for this register. Close it before opening another one.",
   "@cassaErrorShiftAlreadyOpen": {
     "description": "Localized string cassaErrorShiftAlreadyOpen"
@@ -8491,7 +8493,7 @@
   "@cassaNoProductSelected": {
     "description": "Localized string cassaNoProductSelected"
   },
-  "cassaProductsAdded": "{count} products added to the register",
+  "cassaProductsAdded": "{count, plural, =1{1 product added to the register} other{{count} products added to the register}}",
   "@cassaProductsAdded": {
     "description": "Localized string cassaProductsAdded",
     "placeholders": {
@@ -8500,7 +8502,7 @@
       }
     }
   },
-  "cassaProductsPartlyAdded": "{added} products added. {failed} not added because of insufficient stock.",
+  "cassaProductsPartlyAdded": "{added, plural, =1{1 product added} other{{added} products added}}. {failed} not added because of insufficient stock.",
   "@cassaProductsPartlyAdded": {
     "description": "Localized string cassaProductsPartlyAdded",
     "placeholders": {
@@ -8554,7 +8556,7 @@
   "@cassaNoCoupon": {
     "description": "Localized string cassaNoCoupon"
   },
-  "cassaSuspendedCount": "{count} suspended",
+  "cassaSuspendedCount": "{count, plural, =1{1 suspended receipt} other{{count} suspended receipts}}",
   "@cassaSuspendedCount": {
     "description": "Localized string cassaSuspendedCount",
     "placeholders": {
@@ -8844,7 +8846,7 @@
   "@cassaAdd": {
     "description": "Localized string cassaAdd"
   },
-  "cassaHistoryCount": "{count} POS receipts (POS channel, kept apart from Woo orders)",
+  "cassaHistoryCount": "{count, plural, =1{1 receipt} other{{count} receipts}}",
   "@cassaHistoryCount": {
     "description": "Localized string cassaHistoryCount",
     "placeholders": {
@@ -8888,7 +8890,7 @@
       }
     }
   },
-  "cassaLinkedOrder": "Linked Woo/MGWS order: {id} (reference only, separate cycle)",
+  "cassaLinkedOrder": "Linked order: {id}",
   "@cassaLinkedOrder": {
     "description": "Localized string cassaLinkedOrder",
     "placeholders": {
@@ -8901,7 +8903,7 @@
   "@cassaSoldLinesTitle": {
     "description": "Localized string cassaSoldLinesTitle"
   },
-  "cassaReturnableLine": "Internal barcode {barcode} · sold {sold} · already returned {returned} · returnable {returnable}",
+  "cassaReturnableLine": "Code {barcode} · sold: {sold} · already returned: {returned} · returnable: {returnable}",
   "@cassaReturnableLine": {
     "description": "Localized string cassaReturnableLine",
     "placeholders": {
@@ -8919,7 +8921,7 @@
       }
     }
   },
-  "cassaRecordedLinesTitle": "Recorded lines",
+  "cassaRecordedLinesTitle": "Receipt lines",
   "@cassaRecordedLinesTitle": {
     "description": "Localized string cassaRecordedLinesTitle"
   },
@@ -8949,11 +8951,11 @@
       }
     }
   },
-  "cassaExchangePrepared": "Exchange prepared: add the replacement product and complete the checkout.",
+  "cassaExchangePrepared": "Exchange in the cart: add the replacement product and press PAY.",
   "@cassaExchangePrepared": {
     "description": "Localized string cassaExchangePrepared"
   },
-  "cassaReturnPrepared": "Return added to the cart: complete the checkout to record it.",
+  "cassaReturnPrepared": "Return in the cart: press REFUND to record it.",
   "@cassaReturnPrepared": {
     "description": "Localized string cassaReturnPrepared"
   },
@@ -9805,7 +9807,7 @@
   "@inventoryKindAdjustment": {
     "description": "Localized string inventoryKindAdjustment"
   },
-  "inventoryKindMove": "Transfer",
+  "inventoryKindMove": "Move",
   "@inventoryKindMove": {
     "description": "Localized string inventoryKindMove"
   },
@@ -11629,6 +11631,14 @@
   "@usersRoleCustomer": {
     "description": "WooCommerce role name"
   },
+  "usersRoleMgwsWarehouse": "Warehouse operator",
+  "@usersRoleMgwsWarehouse": {
+    "description": "MGWS role name"
+  },
+  "usersRoleMgwsCashier": "Cashier",
+  "@usersRoleMgwsCashier": {
+    "description": "MGWS role name"
+  },
   "usersSelectUser": "Select a user",
   "@usersSelectUser": {
     "description": "Empty details panel of the users list"
@@ -13296,6 +13306,34 @@
   "@loginNeedsApplicationPassword": {
     "description": "Localized string loginNeedsApplicationPassword"
   },
+  "loginWpAuthorizeHint": "In the browser you log in on your WordPress site: the button opens its page, where you enter your usual password and approve the app. Then you come back here, already logged in.",
+  "@loginWpAuthorizeHint": {
+    "description": "Localized string loginWpAuthorizeHint"
+  },
+  "loginWpAuthorizeButton": "Log in with WordPress",
+  "@loginWpAuthorizeButton": {
+    "description": "Localized string loginWpAuthorizeButton"
+  },
+  "loginWpAuthorizeRejected": "Login cancelled: the app was not approved on WordPress.",
+  "@loginWpAuthorizeRejected": {
+    "description": "Localized string loginWpAuthorizeRejected"
+  },
+  "loginWpAuthorizeUnexpected": "WordPress sent an answer this browser did not ask for. Log in again.",
+  "@loginWpAuthorizeUnexpected": {
+    "description": "Localized string loginWpAuthorizeUnexpected"
+  },
+  "loginWpUseAppPassword": "I already have an application password",
+  "@loginWpUseAppPassword": {
+    "description": "Localized string loginWpUseAppPassword"
+  },
+  "loginWpUseWordPressPage": "Log in from the WordPress page",
+  "@loginWpUseWordPressPage": {
+    "description": "Localized string loginWpUseWordPressPage"
+  },
+  "loginAppPasswordLabel": "Application password",
+  "@loginAppPasswordLabel": {
+    "description": "Localized string loginAppPasswordLabel"
+  },
   "loginInvalidCredentialsOrServer": "Invalid credentials or server error.",
   "@loginInvalidCredentialsOrServer": {
     "description": "Localized string loginInvalidCredentialsOrServer"
@@ -13845,5 +13883,610 @@
   "settingsLogButtonInAppBarDescription": "The log viewer is always available from its card and the side menu. Turn this on to also keep the shortcut at the top of the home.",
   "@settingsLogButtonInAppBarDescription": {
     "description": "Description of the switch that shows the log button in the home top bar"
-  }
+  },
+  "inventoryQuickLoadUnitCost": "Unit cost",
+  "@inventoryQuickLoadUnitCost": {
+    "description": "MGWS costs: inventoryQuickLoadUnitCost"
+  },
+  "inventoryQuickLoadUnitCostHint": "Optional. Empty means the cost is unknown, not zero: the stock value stays as it is.",
+  "@inventoryQuickLoadUnitCostHint": {
+    "description": "MGWS costs: inventoryQuickLoadUnitCostHint"
+  },
+  "productsCost": "Cost",
+  "@productsCost": {
+    "description": "MGWS costs: productsCost"
+  },
+  "productsCostHint": "Optional. Empty means the cost is unknown, not zero. A variable product declares it once and the variants inherit it.",
+  "@productsCostHint": {
+    "description": "MGWS costs: productsCostHint"
+  },
+  "productsRevalueStock": "Revalue stock at this cost",
+  "@productsRevalueStock": {
+    "description": "MGWS costs: productsRevalueStock"
+  },
+  "productsRevalueStockHint": "Sets what the pieces already in stock are worth to this cost. It moves no quantity and writes no movement.",
+  "@productsRevalueStockHint": {
+    "description": "MGWS costs: productsRevalueStockHint"
+  },
+  "productsCostSaved": "Cost saved",
+  "@productsCostSaved": {
+    "description": "MGWS costs: productsCostSaved"
+  },
+  "productsCostWithdrawn": "Cost withdrawn",
+  "@productsCostWithdrawn": {
+    "description": "MGWS costs: productsCostWithdrawn"
+  },
+  "productsCostNoStock": "No stock to revalue",
+  "@productsCostNoStock": {
+    "description": "MGWS costs: productsCostNoStock"
+  },
+  "productsCostReadFailed": "Cost not available: the inventory service did not answer. The field is left empty and no cost is declared.",
+  "@productsCostReadFailed": {
+    "description": "MGWS costs: productsCostReadFailed"
+  },
+  "dashboardWidgetMetricProductsWithoutCost": "Products without cost",
+  "@dashboardWidgetMetricProductsWithoutCost": {
+    "description": "MGWS costs: dashboardWidgetMetricProductsWithoutCost"
+  },
+  "productsCostInvalid": "Invalid cost",
+  "@productsCostInvalid": {
+    "description": "MGWS costs: productsCostInvalid"
+  },
+  "productsCostNotSaved": "Cost not saved",
+  "@productsCostNotSaved": {
+    "description": "MGWS costs: productsCostNotSaved"
+  },
+  "productsSaveStepCost": "Recording the cost...",
+  "@productsSaveStepCost": {
+    "description": "MGWS costs: productsSaveStepCost"
+  },
+  "permissionSetsTitle": "Roles and permissions",
+  "permissionSetsSubtitle": "Permission sets applied as WordPress roles.",
+  "permissionSetsNew": "New set",
+  "permissionSetsEdit": "Edit set",
+  "permissionSetsDelete": "Delete set",
+  "permissionSetsDeleteConfirm": "Delete the set «{label}»?",
+  "permissionSetsInUse": "In use by {count} users: not editable.",
+  "permissionSetsReadOnly": "Read only",
+  "permissionSetsEmpty": "No permission sets.",
+  "permissionSetsForbidden": "Insufficient permissions to manage roles.",
+  "permissionSetsLoadError": "Load error: {error}",
+  "permissionSetsSaveError": "Save error: {error}",
+  "permissionSetsCreated": "Set created",
+  "permissionSetsUpdated": "Set updated",
+  "permissionSetsDeleted": "Set deleted",
+  "permissionSetsSlug": "Slug (technical name)",
+  "permissionSetsLabel": "Label",
+  "permissionSetsCapabilities": "Capabilities",
+  "permissionSetsSlugInvalid": "Invalid slug: 2-32 chars, lowercase letters, digits, dash or underscore.",
+  "permissionSetsLabelRequired": "Label is required.",
+  "permissionSetsAtLeastOneCapability": "Select at least one capability.",
+  "permissionSetsCapabilityEscalation": "You cannot grant a capability you do not hold.",
+  "permissionSetsRoleExists": "A set or role with this slug already exists.",
+  "permissionSetsInUseDetail": "The set is assigned to {count} users and cannot be changed.",
+  "permissionSetsToolbarTooltip": "Manage roles",
+  "permissionSetsCanManageHint": "Sets in use can only be changed when no user has them.",
+  "capRead": "Back office access",
+  "capEditProducts": "Edit products",
+  "capEditShopOrders": "Edit shop orders",
+  "capMgwsStockRead": "Read stock",
+  "capMgwsStockMove": "Move stock",
+  "capMgwsOrderAccept": "Accept orders",
+  "capMgwsSupplierManage": "Manage suppliers",
+  "capMgwsPurchaseApprove": "Approve purchases",
+  "capMgwsManageEmployees": "Manage employees",
+  "capMgwsManageUserPermissions": "Manage user permissions",
+  "capMgwsManageCredentials": "Manage credentials",
+  "capMgwsReportsRead": "Read reports",
+  "capMgwsCostsRead": "Read costs",
+  "capMgwsCostsManage": "Manage costs",
+  "capMgwsRolesRead": "Read permission sets",
+  "capMgwsRolesManage": "Manage permission sets",
+  "lotsTitle": "Lots",
+  "lotsEmpty": "No lots for this item.",
+  "lotsNew": "New lot",
+  "lotsEdit": "Edit lot",
+  "lotsDelete": "Delete lot",
+  "lotsDeleteConfirm": "Delete the lot «{code}»?",
+  "lotsCreated": "Lot created",
+  "lotsUpdated": "Lot updated",
+  "lotsDeleted": "Lot deleted",
+  "lotsLoadError": "Load error: {error}",
+  "lotsSaveError": "Save error: {error}",
+  "lotsForbidden": "Insufficient permissions to manage lots.",
+  "lotsCode": "Lot code",
+  "lotsSupplier": "Supplier",
+  "lotsExpiresAt": "Expires at",
+  "lotsReceivedAt": "Received at",
+  "lotsNote": "Note",
+  "lotsNoSupplier": "Unknown supplier",
+  "lotsExpired": "Expired",
+  "lotsExpiringSoon": "Expiring soon",
+  "lotsLevelQuantity": "Quantity on level",
+  "lotsAddLevel": "Add level",
+  "lotsLevelAdded": "Level updated",
+  "lotsAtLeastCode": "Enter at least the lot code.",
+  "transfersTitle": "Shipped transfers",
+  "transfersEmpty": "No transfers.",
+  "transfersNew": "New transfer",
+  "transfersCreated": "Transfer created",
+  "transfersSent": "Transfer sent",
+  "transfersReceived": "Transfer received",
+  "transfersCancelled": "Transfer cancelled",
+  "transfersLoadError": "Load error: {error}",
+  "transfersSaveError": "Save error: {error}",
+  "transfersForbidden": "Insufficient permissions to manage transfers.",
+  "transfersStatusDraft": "Draft",
+  "transfersStatusSent": "Sent",
+  "transfersStatusReceived": "Received",
+  "transfersStatusCancelled": "Cancelled",
+  "transfersFrom": "From",
+  "transfersTo": "To",
+  "transfersSend": "Send",
+  "transfersReceive": "Receive",
+  "transfersCancel": "Cancel",
+  "transfersSendConfirm": "Send the transfer? The goods will leave the source warehouse.",
+  "transfersReceiveConfirm": "Receive the transfer? The goods will enter the destination warehouse.",
+  "transfersCancelConfirm": "Cancel the transfer?",
+  "priceListsTitle": "Price lists",
+  "priceListsEmpty": "No price lists.",
+  "priceListsNew": "New price list",
+  "priceListsCreated": "Price list created",
+  "priceListsUpdated": "Price list updated",
+  "priceListsDeleted": "Price list deleted",
+  "priceListsLoadError": "Load error: {error}",
+  "priceListsSaveError": "Save error: {error}",
+  "priceListsForbidden": "Insufficient permissions to manage price lists.",
+  "priceListsName": "List name",
+  "priceListsCustomer": "Customer",
+  "priceListsSupplier": "Supplier",
+  "priceListsCurrency": "Currency",
+  "priceListsValidFrom": "Valid from",
+  "priceListsValidTo": "Valid to",
+  "priceListsAddItem": "Add item",
+  "priceListsItemAdded": "Item updated",
+  "priceListsItemRemoved": "Item removed",
+  "priceListsPrice": "Price",
+  "priceListsMinQty": "Minimum quantity",
+  "priceListsNoName": "Enter the list name.",
+  "approvalRulesTitle": "Approval rules",
+  "approvalRulesEmpty": "No approval rules.",
+  "approvalRulesNew": "New rule",
+  "approvalRulesCreated": "Rule created",
+  "approvalRulesUpdated": "Rule updated",
+  "approvalRulesDeleted": "Rule deleted",
+  "approvalRulesLoadError": "Load error: {error}",
+  "approvalRulesSaveError": "Save error: {error}",
+  "approvalRulesForbidden": "Insufficient permissions to manage approval rules.",
+  "approvalRulesDocumentType": "Document type",
+  "approvalRulesThreshold": "Threshold",
+  "approvalRulesCapability": "Required capability",
+  "approvalRulesActive": "Active",
+  "approvalRulesNoType": "Enter the document type.",
+  "approvalRulesNoCapability": "Enter the required capability.",
+  "approvalRulesCheckTitle": "Check approval",
+  "approvalRulesCheckAmount": "Amount",
+  "approvalRulesCheckButton": "Check",
+  "approvalRulesCheckRequired": "Approval required: {capability}",
+  "approvalRulesCheckNotRequired": "No approval required.",
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications",
+  "notificationsMarkAllRead": "Mark all as read",
+  "notificationsSettingsTitle": "Notifications",
+  "notificationsSettingsDescription": "Choose what the bell in the top bar reports. Low stock only covers products with their own low stock threshold in WooCommerce; the fiscal register only when a till name/number is set.",
+  "notificationsTooltip": "Notifications",
+  "@notificationsTitle": {
+    "description": "Notification bell panel title"
+  },
+  "@notificationsTooltip": {
+    "description": "Tooltip of the notification bell"
+  },
+  "@notificationsMarkAllRead": {
+    "description": "Notification panel button"
+  },
+  "@notificationsEmpty": {
+    "description": "Notification panel empty state"
+  },
+  "notificationsUpdateTitle": "Update available",
+  "@notificationsUpdateTitle": {
+    "description": "Notification: new app version"
+  },
+  "notificationsUpdateMessage": "Version {version} of the app is available.",
+  "@notificationsUpdateMessage": {
+    "description": "Notification: new app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsOrdersToFulfilTitle": "Orders to fulfil",
+  "@notificationsOrdersToFulfilTitle": {
+    "description": "Notification: paid orders to prepare"
+  },
+  "notificationsOrdersToFulfilMessage": "{count, plural, =1{1 paid order waiting to be fulfilled.} other{{count} paid orders waiting to be fulfilled.}}",
+  "@notificationsOrdersToFulfilMessage": {
+    "description": "Notification: paid orders to prepare",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsOrdersUnpaidTitle": "Unpaid orders",
+  "@notificationsOrdersUnpaidTitle": {
+    "description": "Notification: orders pending payment or on hold"
+  },
+  "notificationsOrdersUnpaidMessage": "{count, plural, =1{1 order not paid yet: do not ship it until the payment is received.} other{{count} orders not paid yet: do not ship them until the payment is received.}}",
+  "@notificationsOrdersUnpaidMessage": {
+    "description": "Notification: orders pending payment or on hold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsLowStockTitle": "Low stock",
+  "@notificationsLowStockTitle": {
+    "description": "Notification: products under their low stock threshold"
+  },
+  "notificationsLowStockMessage": "{count, plural, =1{1 product is below its low stock threshold.} other{{count} products are below their low stock threshold.}}",
+  "@notificationsLowStockMessage": {
+    "description": "Notification: products under their low stock threshold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsFiscalRegisterTitle": "Fiscal register",
+  "@notificationsFiscalRegisterTitle": {
+    "description": "Notification: fiscal register unreachable"
+  },
+  "notificationsFiscalRegisterMessage": "The fiscal register of till {name} is not responding.",
+  "@notificationsFiscalRegisterMessage": {
+    "description": "Notification: fiscal register unreachable",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@notificationsSettingsTitle": {
+    "description": "Settings section for the notification bell"
+  },
+  "@notificationsSettingsDescription": {
+    "description": "Settings section for the notification bell"
+  },
+  "notificationSourceMedia": "Media library",
+  "@notificationSourceMedia": {
+    "description": "Title of message bars raised by the media picker"
+  },
+  "notificationSourceLogs": "Logs",
+  "@notificationSourceLogs": {
+    "description": "Title of message bars raised by the log viewer"
+  },
+  "returnsTitle": "Returns",
+  "returnsEmpty": "No returns.",
+  "returnsLoadError": "Loading error: {error}",
+  "returnsSaveError": "Save error: {error}",
+  "returnsForbidden": "Insufficient permissions to manage returns.",
+  "returnsFilterAll": "All",
+  "returnsStatusRequested": "Requested",
+  "returnsStatusApproved": "Approved",
+  "returnsStatusReceived": "Received",
+  "returnsStatusRefunded": "Refunded",
+  "returnsStatusRejected": "Rejected",
+  "returnsOrder": "Order",
+  "returnsNoLines": "No lines.",
+  "returnsLineProduct": "Item",
+  "returnsApprove": "Approve",
+  "returnsReceive": "Receive",
+  "returnsReject": "Reject",
+  "returnsClose": "Close",
+  "returnsApproved": "Return approved",
+  "returnsReceived": "Return marked as received",
+  "returnsRejected": "Return rejected",
+  "returnsClosed": "Return closed as refunded",
+  "returnsApproveConfirm": "Approve this return?",
+  "returnsReceiveConfirm": "Mark this return as received? The stock re-entry is recorded by WooCommerce (refund/order).",
+  "returnsRejectConfirm": "Reject this return?",
+  "returnsCloseConfirm": "Close this return as refunded? The refund itself is manual.",
+  "homeTitoloTrasferimenti": "Transfers",
+  "homeSottotitoloTrasferimenti": "Move stock between warehouses",
+  "homeTitoloListini": "Price lists",
+  "homeSottotitoloListini": "Customer and supplier prices",
+  "homeTitoloApprovazioni": "Approval rules",
+  "homeSottotitoloApprovazioni": "Thresholds and permissions",
+  "homeTitoloResi": "Returns",
+  "homeSottotitoloResi": "Returns tied to orders",
+  "capMgwsLotsManage": "Manage stock lots",
+  "capMgwsTransfersManage": "Manage stock transfers",
+  "capMgwsPriceListsManage": "Manage price lists",
+  "capMgwsApprovalRulesManage": "Manage approval rules",
+  "capMgwsReturnsManage": "Manage returns",
+  "capMgwsStockResetManage": "Mass stock reset",
+  "capMgwsCountSchedulesManage": "Manage scheduled counts",
+  "capMgwsKitsManage": "Manage kits",
+  "capMgwsReservationsManage": "Manage reservations",
+  "capMgwsShipmentsManage": "Manage shipments",
+  "capMgwsProductBarcodesManage": "Manage product barcodes",
+  "capMgwsSupplierPricesManage": "Manage supplier prices",
+  "capMgwsDocumentsManage": "Manage documents",
+  "capMgwsPaymentsManage": "Manage payments",
+  "mgwsSupplierPricesTitle": "Supplier price history",
+  "mgwsSupplierPriceNew": "New supplier price",
+  "mgwsSupplierId": "Supplier ID",
+  "mgwsProductId": "Product ID",
+  "mgwsPriceCents": "Price (cents)",
+  "mgwsCancel": "Cancel",
+  "mgwsCreate": "Create",
+  "mgwsSupplierProductLine": "Supplier {supplier} · Product {product}",
+  "@mgwsSupplierProductLine": {"placeholders": {"supplier": {}, "product": {}}},
+  "mgwsPriceCentsLine": "Price: {cents} cents",
+  "@mgwsPriceCentsLine": {"placeholders": {"cents": {}}},
+  "mgwsCountSchedulesTitle": "Scheduled counts",
+  "mgwsCountScheduleNew": "New scheduled count",
+  "mgwsSiteId": "Site ID",
+  "mgwsWarehouseId": "Warehouse ID",
+  "mgwsFrequencyDays": "Frequency (days)",
+  "mgwsRunDue": "Run due",
+  "mgwsAdvancedCount": "Advanced: {count}",
+  "@mgwsAdvancedCount": {"placeholders": {"count": {}}},
+  "mgwsScheduleLine": "Schedule {id}",
+  "@mgwsScheduleLine": {"placeholders": {"id": {}}},
+  "mgwsScheduleSubtitle": "Site {site} · Warehouse {warehouse} · every {days} days",
+  "@mgwsScheduleSubtitle": {"placeholders": {"site": {}, "warehouse": {}, "days": {}}},
+  "mgwsShipmentsTitle": "Shipments",
+  "mgwsShipmentNew": "New shipment",
+  "mgwsReferenceType": "Reference type",
+  "mgwsReferenceId": "Reference ID",
+  "mgwsCarrier": "Carrier",
+  "mgwsTracking": "Tracking",
+  "mgwsShipmentStatusTitle": "Shipment status",
+  "mgwsStatusPendingSentDelivered": "Status (pending/sent/delivered)",
+  "mgwsUpdate": "Update",
+  "mgwsShipmentLine": "{type} #{id}",
+  "@mgwsShipmentLine": {"placeholders": {"type": {}, "id": {}}},
+  "mgwsShipmentSubtitle": "Status: {status} · {carrier} {tracking}",
+  "@mgwsShipmentSubtitle": {"placeholders": {"status": {}, "carrier": {}, "tracking": {}}},
+  "mgwsReservationsTitle": "Reservations",
+  "mgwsReservationNew": "New reservation",
+  "mgwsQuantity": "Quantity",
+  "mgwsReservationLine": "Reservation {id} · Product {product}",
+  "@mgwsReservationLine": {"placeholders": {"id": {}, "product": {}}},
+  "mgwsReservationSubtitle": "Qty {qty} · Status {status}",
+  "@mgwsReservationSubtitle": {"placeholders": {"qty": {}, "status": {}}},
+  "mgwsConsume": "Consume",
+  "mgwsRelease": "Release",
+  "mgwsPaymentsTitle": "Payments",
+  "mgwsPaymentNew": "New payment",
+  "mgwsAmountCents": "Amount (cents)",
+  "mgwsAgingLine": "Aging: {value}",
+  "@mgwsAgingLine": {"placeholders": {"value": {}}},
+  "mgwsPaymentLine": "{type} #{id}",
+  "@mgwsPaymentLine": {"placeholders": {"type": {}, "id": {}}},
+  "mgwsPaymentSubtitle": "Amount: {cents} cents",
+  "@mgwsPaymentSubtitle": {"placeholders": {"cents": {}}},
+  "mgwsDocumentsTitle": "Documents",
+  "mgwsDocumentNew": "New document",
+  "mgwsDocumentTypeLabel": "Type (ddt/invoice/credit_note)",
+  "mgwsDocumentNumber": "Number",
+  "mgwsDocumentStatusTitle": "Document status",
+  "mgwsStatusDraftIssuedSentCancelled": "Status (draft/issued/sent/cancelled)",
+  "mgwsDocumentLine": "{type} {number}",
+  "@mgwsDocumentLine": {"placeholders": {"type": {}, "number": {}}},
+  "mgwsDocumentSubtitle": "Status: {status}",
+  "@mgwsDocumentSubtitle": {"placeholders": {"status": {}}},
+  "mgwsProductBarcodesTitle": "Product barcodes",
+  "mgwsBarcode": "Barcode",
+  "mgwsSearch": "Search",
+  "mgwsSave": "Save",
+  "mgwsResultLine": "Result: {value}",
+  "@mgwsResultLine": {"placeholders": {"value": {}}},
+  "mgwsStockResetTitle": "Bulk stock reset",
+  "mgwsInvalidWarehouse": "Invalid warehouse",
+  "mgwsResetResult": "Reset: {reset} rows, {failed} failed",
+  "@mgwsResetResult": {"placeholders": {"reset": {}, "failed": {}}},
+  "mgwsRunReset": "Run reset",
+  "mgwsTargetQuantity": "Target quantity",
+  "mgwsResetTargetRequired": "Enter the target quantity (0 included)",
+  "mgwsResetError": "Reset failed",
+  "mgwsResetNothingToChange": "Nothing to change: the warehouse is already at the target",
+  "mgwsResetConfirmTitle": "Confirm the reset?",
+  "mgwsResetConfirmBody": "Warehouse {warehouse}: {levels} levels go to {target} pieces ({pieces} pieces change in total). This writes one movement per level and updates WooCommerce.",
+  "@mgwsResetConfirmBody": {"placeholders": {"warehouse": {}, "levels": {}, "pieces": {}, "target": {}}},
+  "mgwsResetWooFailed": "Warning: WooCommerce did not accept {count} products; the reconciliation will close the gap",
+  "@mgwsResetWooFailed": {"placeholders": {"count": {}}},
+  "mgwsResetWarehouse": "Warehouse",
+  "mgwsResetWarehousesUnavailable": "Could not load the warehouses",
+  "mgwsKitDeductionTitle": "Kit deduction",
+  "mgwsKitDeductionTitleWithName": "Kit deduction: {name}",
+  "@mgwsKitDeductionTitleWithName": {"placeholders": {"name": {}}},
+  "mgwsEnterKitProductId": "Enter a kit product ID",
+  "mgwsKitProductId": "Kit product ID:",
+  "mgwsKitQuantity": "Kit quantity:",
+  "mgwsRefresh": "Refresh",
+  "mgwsSelectSite": "Select a site",
+  "mgwsDeductionOkShortfall": "Deduction OK: {shortfall} pieces missing",
+  "@mgwsDeductionOkShortfall": {"placeholders": {"shortfall": {}}},
+  "mgwsPhysicalSitesAvailable": "Available physical sites",
+  "mgwsSiteFallbackName": "Site {id}",
+  "@mgwsSiteFallbackName": {"placeholders": {"id": {}}},
+  "mgwsKitsAvailable": "Available: {count} kits",
+  "@mgwsKitsAvailable": {"placeholders": {"count": {}}},
+  "mgwsNotAvailableInSite": "Not available at this site",
+  "mgwsRoom": "Room {value}",
+  "@mgwsRoom": {"placeholders": {"value": {}}},
+  "mgwsRack": "Rack {value}",
+  "@mgwsRack": {"placeholders": {"value": {}}},
+  "mgwsShelf": "Shelf {value}",
+  "@mgwsShelf": {"placeholders": {"value": {}}},
+  "mgwsComponentLine": "Component {id}: {available} avail. (needs {needed}/kit){location}",
+  "@mgwsComponentLine": {"placeholders": {"id": {}, "available": {}, "needed": {}, "location": {}}},
+  "mgwsDeductFromSelectedSite": "Deduct components from selected site",
+  "mgwsToolReservations": "Reservations",
+  "mgwsToolCountSchedules": "Scheduled counts",
+  "mgwsToolKitDeduction": "Kit deduction",
+  "mgwsToolProductBarcodes": "Product barcodes",
+  "mgwsToolShipments": "Shipments",
+  "mgwsToolPayments": "Payments",
+  "mgwsToolDocuments": "Documents",
+  "mgwsToolStockReset": "Stock reset",
+  "mgwsToolTransfers": "Shipped transfers",
+  "mgwsToolApprovalRules": "Approval rules",
+  "mgwsKitAvailabilityAdvisoryTitle": "Kit availability (advisory)",
+  "mgwsKitAvailabilityNoSite": "Kit \"{name}\": no site can fulfill {qty}.",
+  "@mgwsKitAvailabilityNoSite": {"placeholders": {"name": {"type": "String"}, "qty": {"type": "String"}}},
+  "mgwsKitAvailabilityPartial": "Kit \"{name}\": {ok} site(s) can fulfill, {short} short (server deducts from register site).",
+  "@mgwsKitAvailabilityPartial": {"placeholders": {"name": {"type": "String"}, "ok": {"type": "String"}, "short": {"type": "String"}}},
+  "mgwsContinueAnyway": "Continue anyway",
+  "mgwsOpenSkuBarcodePatterns": "SKU/barcode patterns",
+  "mgwsOpenProductBarcodesMgws": "MGWS product barcodes",
+  "transfersPickFrom": "Source warehouse",
+  "transfersPickTo": "Destination warehouse",
+  "transfersNoLines": "No lines: add items before sending.",
+  "transfersAddLines": "Add items",
+  "transfersRemoveLine": "Remove line",
+  "transfersLinesFailed": "{count} lines not saved",
+  "@transfersLinesFailed": {"placeholders": {"count": {}}},
+  "returnsNew": "New return",
+  "returnsOrderOptional": "Order number (optional)",
+  "returnsReason": "Reason",
+  "priceListsNoItems": "No items in this price list.",
+  "priceListsInvalidPrice": "Invalid price",
+  "kitsTitle": "Kits",
+  "kitsNew": "New kit",
+  "kitsEmpty": "No kits defined.",
+  "kitsCreated": "Kit created: now add its components",
+  "kitsSaveError": "Kit not saved",
+  "kitsForbidden": "Insufficient permissions to manage kits.",
+  "kitsNoComponents": "No components: selling this kit deducts nothing.",
+  "kitsAddComponents": "Add components",
+  "kitsDeleteConfirm": "Delete kit {name}?",
+  "@kitsDeleteConfirm": {"placeholders": {"name": {}}},
+  "mgwsToolKits": "Kits",
+  "approvalRulesCheckType": "Document type",
+  "employeesAccessTitle": "App access",
+  "employeesAccessCreate": "Create user",
+  "employeesAccessLink": "Link existing",
+  "employeesPermissionSet": "Permission set",
+  "employeesPermissionSetNone": "None for now",
+  "employeesSendInvite": "Email a link to choose the password",
+  "employeesSendInviteHelper": "The password never goes through the app: the employee sets it from the link.",
+  "employeesLinkChoose": "Choose user",
+  "employeesLinkNoneChosen": "Choose the WordPress user to link",
+  "employeesLinkSearch": "Search by name, login or email",
+  "employeesLinkSearchHint": "Type at least 2 characters. Only users not linked yet are listed.",
+  "employeesWorkEmail": "Work email",
+  "employeesWorkEmailHelper": "The app sign-in email: the username is made from it.",
+  "employeesWorkEmailRequired": "A work email is needed to create the user",
+  "employeesPersonalEmail": "Personal email",
+  "employeesLoginWillBe": "Sign-in: {email}",
+  "employeesContractTitle": "Contract",
+  "employeesContractTypeNone": "Not set",
+  "employeesContractPermanent": "Permanent",
+  "employeesContractFixedTerm": "Fixed term",
+  "employeesContractApprenticeship": "Apprenticeship",
+  "employeesContractInternship": "Internship",
+  "employeesContractOther": "Other",
+  "employeesContractLevel": "Level",
+  "employeesContractStart": "Contract start",
+  "employeesContractEnd": "Contract end",
+  "employeesContractEndBeforeStart": "The end is before the start",
+  "employeesContractHours": "Weekly contract hours",
+  "employeesContractHoursHelper": "For example 40 or 38:30",
+  "employeesContractHoursInvalid": "Write the hours as 40 or 38:30",
+  "employeesScheduleTitle": "Usual week",
+  "employeesScheduleHelper": "The hours of each day. Shifts are copied from here.",
+  "employeesScheduleAddSlot": "Add time slot",
+  "employeesScheduleDayOff": "Day off",
+  "employeesScheduleTotal": "Week total: {hours}",
+  "@employeesScheduleVsContract": {"placeholders": {"planned": {"type": "String"}, "contract": {"type": "String"}}},
+  "employeesScheduleVsContract": "Usual week {planned} · contract {contract}",
+  "employeesScheduleOverlap": "The time slots of {day} overlap",
+  "employeesScheduleSlotInvalid": "A time slot of {day} ends before it starts",
+  "employeesShiftsTitle": "Shifts",
+  "employeesShiftsOpen": "Open shifts",
+  "employeesShiftsPlanned": "Planned",
+  "employeesShiftsContract": "Contract",
+  "employeesShiftsDifference": "Difference",
+  "employeesShiftsCopyWeek": "Copy usual week",
+  "employeesShiftsCopyDone": "Shifts created: {count}",
+  "employeesShiftsReplaceTitle": "Some days already have shifts",
+  "employeesShiftsReplaceBody": "Replace them with the usual week, or fill only the empty days?",
+  "employeesShiftsReplace": "Replace",
+  "employeesShiftsKeep": "Empty days only",
+  "employeesShiftsNoSchedule": "The employee has no usual week: set it in the record.",
+  "employeesShiftsPrevWeek": "Previous week",
+  "employeesShiftsNextWeek": "Next week",
+  "employeesShiftsWeekOf": "Week from {from} to {to}",
+  "employeesShiftsError": "Shifts unavailable: {error}",
+  "employeesShiftAdd": "Add shift",
+  "employeesShiftEdit": "Edit shift",
+  "employeesShiftStart": "Start",
+  "employeesShiftEnd": "End",
+  "employeesShiftBreak": "Break (minutes)",
+  "employeesShiftBreakInvalid": "The break must be shorter than the shift",
+  "employeesShiftNote": "Note",
+  "employeesShiftNone": "No shift",
+  "employeesShiftDeleteTitle": "Delete the shift?",
+  "employeesShiftSaveError": "Shift not saved: {error}",
+  "employeesDocumentsEmpty": "No documents uploaded.",
+  "employeesDocumentsAfterSave": "Documents and shifts are added from the record, after saving the employee.",
+  "employeesDocumentUpload": "Upload document",
+  "employeesDocumentKind": "Document type",
+  "employeesDocumentContract": "Contract",
+  "employeesDocumentIdCard": "ID document",
+  "employeesDocumentOther": "Other",
+  "employeesDocumentTitle": "Title",
+  "employeesDocumentChooseFile": "Choose file (PDF or image)",
+  "employeesDocumentTooLarge": "The file is larger than 10 MB",
+  "employeesDocumentSaved": "Saved: {path}",
+  "employeesDocumentDeleteTitle": "Delete the document {title}?",
+  "employeesDocumentsError": "Documents unavailable: {error}",
+  "employeesDocumentDownload": "Download",
+  "employeesPersonalInfo": "Employee details",
+  "employeesErrShiftOverlap": "The shift overlaps another shift of the same employee",
+  "employeesErrEmailExists": "A WordPress user with this email already exists: use “Link existing”",
+  "employeesErrUsernameExists": "The username is already taken",
+  "employeesErrAccountRequired": "The employee needs a WordPress user",
+  "employeesErrBadFileType": "Only PDF, JPEG, PNG and WebP are accepted",
+  "employeesErrForbidden": "You do not have permission for this",
+  "employeesErrEscalation": "You cannot grant permissions you do not hold",
+  "employeesPermissionSetNoneWarning": "Without a set the employee can sign in but do nothing",
+  "employeesScheduleMismatch": "Does not match the contract ({diff})",
+  "employeesScheduleCopyMonday": "Copy Monday to Tuesday–Friday",
+  "employeesShiftTimeInvalid": "Write start and end as 9:00, 930 or 9",
+  "employeesEmailLinkedTo": "This email already signs in {name}",
+  "employeesCreated": "Employee {name} created",
+  "employeesChangesSaved": "Changes saved",
+  "permissionSetCashier": "Cashier",
+  "permissionSetWarehouse": "Warehouse operator",
+  "inventoryToolsMenu": "More tools",
+  "inventoryToolsGroupDocuments": "Documents and deliveries",
+  "inventoryToolsGroupCatalog": "Catalog",
+  "inventoryToolsGroupControl": "Stock control",
+  "inventoryWarehouseAuto": "Automatic",
+  "inventoryWarehouseAutoHelper": "Where the product already is, otherwise the site's default.",
+  "@inventoryRighePezzi": {"placeholders": {"righe": {"type": "int"}, "pezzi": {"type": "int"}}},
+  "inventoryRighePezzi": "{righe, plural, =1{1 line} other{{righe} lines}} · {pezzi, plural, =1{1 piece} other{{pezzi} pieces}}",
+  "inventoryWarehouseChosenHelper": "The whole load goes to {name}.",
+  "@inventoryRettificaConfermaTitolo": {"placeholders": {"count": {"type": "int"}}},
+  "inventoryRettificaConfermaTitolo": "{count, plural, =1{Confirm adjustment of 1 product} other{Confirm adjustment of {count} products}}",
+  "inventoryWarehouseUnassigned": "Unassigned",
+  "inventorySpostaArrivoUgualePartenza": "Source and destination are the same warehouse: pick another.",
+  "@inventorySpostaConfermaTitolo": {"placeholders": {"count": {"type": "int"}}},
+  "inventorySpostaConfermaTitolo": "{count, plural, =1{Confirm move of 1 product} other{Confirm move of {count} products}}",
+  "@inventoryStepStockChangedNome": {"placeholders": {"name": {"type": "String"}, "before": {"type": "String"}, "after": {"type": "int"}}},
+  "inventoryStepStockChangedNome": "{name}: stock {before} → {after}",
+  "@inventoryPezziCount": {"placeholders": {"count": {"type": "int"}}},
+  "inventoryPezziCount": "{count, plural, =1{1 piece} other{{count} pieces}}",
+  "transfersIntro": "Goods leave the source warehouse when you send and enter the destination when you receive: in between they are in transit. To move pieces right away use \"Move now\" on the Inventory page.",
+  "cassaRimuoviRiga": "Remove from the receipt",
+  "@cassaMetricsSummary": {"placeholders": {"sales": {"type": "int"}, "returns": {"type": "int"}, "net": {"type": "String"}}},
+  "cassaMetricsSummary": "Summary: {sales, plural, =1{1 sale} other{{sales} sales}} · {returns, plural, =1{1 return} other{{returns} returns}} · balance {net}",
+  "cassaRefundButton": "REFUND",
+  "@cassaExpectedCash": {"placeholders": {"amount": {"type": "String"}}},
+  "cassaExpectedCash": "Expected cash in the drawer: {amount}"
 }

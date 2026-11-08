@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 
 import '../login/jwt_api/query_woocommerce/woo_query_report.dart';
+import '../login/mgws/query/query_mgws_inventory.dart';
 import '../l10n/extensions.dart';
 import 'dashboard.code.dart';
 import 'dashboard_layout.dart';
@@ -24,6 +25,10 @@ class DashboardDataBundle {
     this.salesReportFailed = false,
     this.productsByCategoryFailed = false,
     this.lowStockFailed = const {},
+    this.missingCostItems,
+    this.missingCostFailed = false,
+    this.divergences,
+    this.divergencesFailed = false,
     this.reportResults = const {},
     this.reportFailures = const {},
   });
@@ -35,6 +40,17 @@ class DashboardDataBundle {
   final bool salesReportFailed;
   final bool productsByCategoryFailed;
   final Set<int> lowStockFailed;
+
+  /// Items in stock with at least one level whose value is unknown. Null while
+  /// not loaded yet; an empty list is a real answer ("nothing to fix").
+  final List<MgwsMissingCostItem>? missingCostItems;
+  final bool missingCostFailed;
+
+  /// Items the WooCommerce stock and the ledger disagree on, read from the
+  /// read-only comparison route. Null while not loaded; an empty list is a
+  /// real answer, because it means "every item that has two totals agrees".
+  final List<MgwsStockDivergence>? divergences;
+  final bool divergencesFailed;
 
   /// MGWS report answers, keyed by [dashboardReportKey].
   final Map<String, DashboardReportResult> reportResults;
@@ -48,6 +64,10 @@ class DashboardDataBundle {
     bool? salesReportFailed,
     bool? productsByCategoryFailed,
     Set<int>? lowStockFailed,
+    List<MgwsMissingCostItem>? missingCostItems,
+    bool? missingCostFailed,
+    List<MgwsStockDivergence>? divergences,
+    bool? divergencesFailed,
     Map<String, DashboardReportResult>? reportResults,
     Map<String, ReportFailure>? reportFailures,
   }) => DashboardDataBundle(
@@ -59,6 +79,10 @@ class DashboardDataBundle {
     productsByCategoryFailed:
         productsByCategoryFailed ?? this.productsByCategoryFailed,
     lowStockFailed: lowStockFailed ?? this.lowStockFailed,
+    missingCostItems: missingCostItems ?? this.missingCostItems,
+    missingCostFailed: missingCostFailed ?? this.missingCostFailed,
+    divergences: divergences ?? this.divergences,
+    divergencesFailed: divergencesFailed ?? this.divergencesFailed,
     reportResults: reportResults ?? this.reportResults,
     reportFailures: reportFailures ?? this.reportFailures,
   );
@@ -112,6 +136,7 @@ class DashboardDataset {
     this.points = const [],
     this.monthly = false,
     this.message,
+    this.note,
   });
 
   const DashboardDataset.loading(DashboardValueFormat format)
@@ -131,23 +156,27 @@ class DashboardDataset {
     required double value,
     double? reference,
     bool referenceIsPrevious = false,
+    String? note,
   }) : this._(
          status: DashboardDatasetStatus.ready,
          format: format,
          value: value,
          reference: reference,
          referenceIsPrevious: referenceIsPrevious,
+         note: note,
        );
 
   const DashboardDataset.series({
     required DashboardValueFormat format,
     required List<DashboardPoint> points,
     bool monthly = false,
+    String? note,
   }) : this._(
          status: DashboardDatasetStatus.ready,
          format: format,
          points: points,
          monthly: monthly,
+         note: note,
        );
 
   final DashboardDatasetStatus status;
@@ -170,6 +199,10 @@ class DashboardDataset {
 
   /// Why the data is unavailable, when known.
   final String? message;
+
+  /// Caveat the widget must show next to its numbers, e.g. a partial cost
+  /// coverage behind a margin.
+  final String? note;
 
   /// No value to show. A time series of zeros counts as empty, a ranking of
   /// zeros does not: a product with no stock left is still a row to show.
@@ -204,6 +237,20 @@ DashboardDataset resolveDashboardDataset({
   final format = widget.format;
   if (metric == DashboardMetric.report) {
     return _resolveReport(widget, bundle, filters, l10n);
+  }
+  if (metric == DashboardMetric.productsWithoutCost) {
+    // Counted from the MGWS stock levels, so it does not wait for the shop
+    // summary: the two sources answer different questions and fail separately.
+    final items = bundle.missingCostItems;
+    if (items == null) {
+      return bundle.missingCostFailed
+          ? DashboardDataset.unavailable(format)
+          : DashboardDataset.loading(format);
+    }
+    return DashboardDataset.single(
+      format: format,
+      value: items.length.toDouble(),
+    );
   }
   final summary = bundle.summary;
   if (summary == null) return DashboardDataset.loading(format);
@@ -259,6 +306,32 @@ DashboardDataset resolveDashboardDataset({
     case DashboardMetric.report:
       // Handled before the summary is needed.
       return DashboardDataset.loading(format);
+    case DashboardMetric.productsWithoutCost:
+      // Handled before the summary is needed, like the free questions.
+      return DashboardDataset.loading(format);
+    case DashboardMetric.stockDivergences: {
+      // Handled before the summary is needed: the comparison is a current
+      // state of the two totals, not a period.
+      final rows = bundle.divergences;
+      if (rows == null) {
+        return bundle.divergencesFailed
+            ? DashboardDataset.unavailable(format)
+            : DashboardDataset.loading(format);
+      }
+      return DashboardDataset.series(
+        format: format,
+        // Only items with two totals can disagree: zero divergences is not the
+        // same as everything aligned.
+        note: l10n.dashboardWidgetStockDivergencesCaveat,
+        points: _rank(widget, [
+          for (final item in rows)
+            DashboardPoint(
+              label: item.name,
+              value: item.difference.toDouble(),
+            ),
+        ]),
+      );
+    }
     case DashboardMetric.salesTotal:
       return single(
         sales.totaleVendite,
@@ -446,6 +519,7 @@ DashboardDataset _resolveReport(
   final result = bundle.reportResults[key];
   if (result == null) return DashboardDataset.loading(format);
 
+  final note = _reportNote(l10n, result);
   final dimension = result.dimension;
   if (dimension == null) {
     return DashboardDataset.single(
@@ -453,24 +527,49 @@ DashboardDataset _resolveReport(
       value: result.total ?? 0,
       reference: result.compareTotal,
       referenceIsPrevious: true,
+      note: note,
     );
   }
   if (!dimension.isTime) {
     return DashboardDataset.series(
       format: format,
+      note: note,
       points: _rank(widget, [
         for (final row in result.rows)
-          DashboardPoint(
-            label: _reportRowLabel(l10n, dimension, row),
-            value: row.value ?? 0,
-          ),
+          _reportPoint(l10n, dimension, result.measure, row),
       ]),
     );
   }
   return DashboardDataset.series(
     format: format,
     monthly: dimension == ReportDimension.month,
+    note: note,
     points: _timePoints(l10n, result),
+  );
+}
+
+/// A margin is only as good as the costs behind it: when the query carried a
+/// coverage below 100%, the widget says so instead of showing a full margin.
+String? _reportNote(AppLocalizations l10n, DashboardReportResult result) {
+  if (result.measure != 'margin' && result.measure != 'margin_rate') return null;
+  final coverage = result.costCoverage;
+  if (coverage == null || coverage >= 100) return null;
+  return l10n.dashboardReportCostCoveragePartial(coverage.round());
+}
+
+/// One ranking point: a row with no value is still a row to show, and in the
+/// stock source a missing "days without sale" means the product never sold.
+DashboardPoint _reportPoint(
+  AppLocalizations l10n,
+  ReportDimension dimension,
+  String measure,
+  ReportRow row,
+) {
+  final label = _reportRowLabel(l10n, dimension, row);
+  final neverSold = measure == 'days_without_sale' && row.value == null;
+  return DashboardPoint(
+    label: neverSold ? '$label · ${l10n.dashboardReportNeverSold}' : label,
+    value: row.value ?? 0,
   );
 }
 

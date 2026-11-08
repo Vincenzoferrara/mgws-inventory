@@ -11,6 +11,14 @@
   coupons, customers. MGWS owns the shop operations: stock, movement
   ledger, point of sale, loyalty, employees, suppliers, print templates,
   reports.
+- The stock **total** belongs to whoever owns the movement: WooCommerce for
+  orders, the point of sale, returns, cancellations and order acceptance;
+  MGWS for loads, receipts, counts, transfers and admin adjustments. MGWS
+  owns the **distribution** (which shelf holds the pieces) and the product
+  **cost**, and applies its own movements to WooCommerce as a delta, never
+  as an absolute total. A difference between the two totals is recorded as
+  a movement, not overwritten: surplus goes to the per-site *Unassigned*
+  warehouse, shortage leaves real shelves in a deterministic order.
 - Data that is persistent and shared by users or devices lives on
   WordPress/MGWS. Temporary or UI-only state stays in Flutter.
 - UI, screen logic, domain services and backend connectors stay separate.
@@ -140,8 +148,163 @@ owner of the MGWS state. No module keeps its own copy, and
 
 A home section that cannot work without MGWS declares `requiresMgws: true`
 in its `_HomeSection`: the card does not open and shows the notice. Today
-these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
-`Employees` and `Templates and print`.
+these are `Cashier`, `MGWS Inventory`, `Transfers`, `Price lists`, `Approval
+rules`, `Returns`, `Suppliers`, `Loyalty Cards` and `CalDAV`.
+
+The home is the launcher of the standalone modules: each module screen has
+its own `Scaffold` and is opened from a card. `ProductLotsScreen` is the
+exception, because it needs a `productId`: it is a row action ("Lots") on the
+products list, next to "Print labels" and "Delete".
+
+## Permissions and roles
+
+Employees are managed in `employees/`. A WordPress user's capabilities
+reach the app through `PATCH /users/{id}/permissions`, which carries an
+allow-list of eight capabilities (`editable_capability_whitelist`) plus
+the user's roles. The app filters the card with the whitelist returned by
+the server (`capability_whitelist`), not with a hard-coded list, so a newer
+plugin can expose new capabilities without an app update.
+
+Roles on top of WordPress: `mg_permission_sets` is the template table;
+each set is applied as an ordinary WordPress role `mgws_{slug}`. The app
+lists them through `QueryMgwsPermissionSets` and edits them in
+`PermissionSetsScreen`, reachable from the employees list toolbar. A set in
+use is immutable and undeletable, and the last administrator cannot be
+removed. `QueryMgwsPermissionSets.list()` returns `items`, `catalog` and
+`can_manage` in one call.
+
+The catalog is an allow-list of 21 capabilities, each tagged with an area
+(`stock`, `orders`, `costs`, `roles`, `lots`, `transfers`, `price_lists`,
+`approvals`, `returns`, ...). A capability outside it is refused with `400`,
+not ignored; `manage_options` stays out of the catalog, so no set can turn
+someone into an administrator. The app has a label for every known key and
+falls back to the server label for keys it does not know.
+
+## Approval rules (`approvals/`)
+
+Approval rules (`mg_approval_rules`) store a threshold above which a document
+type requires a capability. `QueryMgwsApprovalRules` lists/creates/updates/
+deletes rules and runs the stateless check (`check`). The rule only says
+"approval required"; the workflow is a separate concern.
+
+## Price lists (`b2b/`)
+
+Price lists (`mg_price_lists` + `mg_price_list_items`) store a named set of
+per-item prices, optionally scoped to a customer or a supplier, with a validity
+window and a minimum quantity per tier. A price list is not the WooCommerce
+retail price (`_price`): it is a separate price consulted by the app and by
+internal flows (no external B2B portal exists). `QueryMgwsPriceLists`
+lists/creates/updates/deletes lists and upserts/removes items.
+
+## Stock transfers (`inventory/`)
+
+Stateful transfers (`mg_stock_transfers` + `mg_stock_transfer_lines`) track a
+transfer as draft → sent → received, or cancelled. `sent` takes the quantity out
+of the source warehouse, `received` puts it into the destination, `cancelled`
+from `sent` compensates the source. Each transition writes its own movement
+rows (`source_type: stock_transfer`). `QueryMgwsTransfers` lists/creates/sends/
+receives/cancels. The instant transfer route is untouched.
+
+## Returns (`returns/`)
+
+Returns (RMA) live in `mg_returns` + `mg_return_lines` and follow requested →
+approved → received → refunded, or rejected from requested/approved. A return is
+a trail, not a stock writer: the stock total of a return/refund belongs to
+WooCommerce, so `receive` is stock-neutral (no `mg_stock_moves` row, no level
+change) and the existing reconciler mirrors the new WooCommerce total into the
+levels. `warehouse_id` records where the goods were physically put back
+(`0` = not recorded). The refund itself is not automated: `close` only marks the
+return as refunded. `QueryMgwsReturns` lists/creates/adds lines/approves/
+receives/rejects/closes. `mgws_returns_manage` gates every write.
+
+## Stock lots (`products/`)
+
+Lots group pieces of the same item by origin and expiry date. `mg_stock_lots`
+carries the supplier, the lot code, the expiry and the receipt date;
+`mg_stock_lots_levels` tracks how many pieces of that lot sit on each location.
+A lot is a label, not a movement: it creates no stock movement, changes no
+level quantity and carries no cost (the WAC in `mg_product_costs` stays the
+cost authority). `QueryMgwsLots` lists/creates/updates/deletes lots and
+upserts their quantity per level.
+
+## Back-office modules
+
+The modules below are server-side records with a thin app surface. Each one is
+a table plus a class in the plugin; none of them takes authority over the
+WooCommerce total, so none of them writes `mg_stock_levels` or `mg_stock_moves`
+unless it says so.
+
+- **Mass stock reset** (`inventory/stock_reset.gui.dart`,
+  `QueryMgwsStockReset`). `POST /inventory/stock/reset` sets every level of a
+  warehouse — or the chosen `product_ids` only — to `target_qty`, writes one
+  `adjust` movement per level and mirrors the net change to WooCommerce through
+  `MGWS_Woo_Stock::commit_delta()`. It is the bulk version of a single
+  adjustment, so it follows the same authority rule: the ledger is the source,
+  WooCommerce receives a delta.
+- **SKU patterns and barcodes** (`products/sku_barcode_generator.dart`,
+  `products/sku_barcode_screen.gui.dart`). `SkuBarcodeGenerator` builds a SKU
+  from a pattern and produces valid EAN-13/UPC-A codes (`isValidEan13`,
+  `isValidUpcA`). The plugin side stores one code per item in
+  `mg_product_barcodes` (`POST /inventory/product-barcodes`,
+  `GET`/`DELETE /inventory/product-barcodes/{product_id}`), so a scanned code
+  resolves without a meta lookup.
+- **Supplier price history** (`mg_supplier_price_history`). Append-only prices
+  paid to a supplier, separate from `_price` and from the WAC: it is a record of
+  what was quoted, not a valuation input. `GET/POST /inventory/supplier-prices`.
+- **Scheduled cycle counts** (`mg_count_schedules`). A schedule is a warehouse
+  plus a frequency. A daily cron at 04:00 (`mgws_run_count_schedules`) opens a
+  draft count session for every due schedule and moves `next_run_gmt` forward; a
+  failed write leaves the schedule due so the next run retries it. The schedule
+  decides *when*, the existing count session decides *what*.
+  `GET/POST /inventory/count-schedules`, `PATCH`/`DELETE .../{id}`,
+  `POST .../run-due`.
+- **Kits** (`mg_kits` + `mg_kit_components`). A kit names a bundle and its
+  pieces with quantities. The kit product is what WooCommerce sells and counts;
+  the components are separate products whose stock must also move. Deduction is
+  never automatic: the caller decides *when* and *from which physical site*.
+  - **Site = physical location** (negozio, magazzino centrale, filiale). The
+    site is the unit of deduction: POS always deducts from the site linked to
+    the cash register; for a WooCommerce order the operator chooses the site
+    from the availability list.
+  - **Warehouse = virtual grouping** inside a site (es. "Magliette", "Scarpe").
+    It is a logical separator, not a deduction unit: availability is summed
+    across every warehouse of the chosen site.
+  - **Room / rack / shelf = final physical location** of the piece inside the
+    warehouse; shown at picking time and recorded on the movement.
+  - Availability: `GET /inventory/kits/availability?product_id=&variation_id=&qty=`
+    returns one entry per physical site with `available_kits` and an
+    `available` flag; sites without enough components are listed as
+    `available: false` (non disponibile in questa sede), with no fallback to
+    other sites.
+  - Deduction: `POST /inventory/kits/deduct` takes `site_id`, `product_id`,
+    `variation_id`, `qty`, optional `ref_order_id`; writes `out` movements for
+    the components from that site only.
+  - Restore: `POST /inventory/kits/restore` gives the components back to the
+    same site (used on cancel/refund/RMA).
+  - Order acceptance: `POST /inventory/orders/{id}/accept` expands kit lines
+    into component deductions from the site chosen by the operator.
+  - POS checkout: `/pos/checkout` expands kit components server-side in the
+    same transaction. The Flutter POS shows advisory kit/component availability
+    warnings (via `GET /inventory/kits/availability`) before checkout; the
+    server remains authoritative for deduction.
+  `GET/POST /inventory/kits`, `GET`/`DELETE .../{id}`,
+  `POST .../{id}/components`, `DELETE .../components/{id}`.
+- **Documents** (`mg_documents`). DDT, invoices and credit notes as metadata:
+  type, number, reference, status (`draft` → `issued` → `sent`, or `cancelled`),
+  issue date and PDF path. The row is the record; rendering and delivery stay
+  with the caller. `POST /inventory/purchase-orders/{id}/send` uses this table
+  to record a sent purchase order and emails the supplier when an address
+  exists.
+- **Payments and aging** (`mg_payments`). A payment is an amount against a
+  `reference_type`/`reference_id`, not a link to a real invoice (documents are
+  metadata). `GET /inventory/payments/aging` buckets the outstanding amounts
+  into `0-30`, `31-60`, `61-90` and `90+` days.
+- **Shipments** (`mg_shipments`). Generic over `reference_type`/`reference_id`,
+  with `pending` → `shipped` → `delivered` and `cancelled`. A shipment is a
+  trail, not a movement.
+- **Reservations** (`mg_reservations`). `active` → `released`/`consumed`; a
+  reservation never changes a level, it records intent. `release`/`consume`
+  answer `409` when the reservation is not `active`.
 
 ## Point of sale (`checkout/`)
 
@@ -246,6 +409,55 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   transfer and undo. Suppliers, reorder, purchase orders, delivery drafts
   and counts are stock-neutral.
 
+### Costs and stock value
+
+- MGWS owns the cost: `mg_product_costs` holds the declared cost of a
+  product or variation as an append-only history, and a correction is a new
+  declaration, never an edit. A variation without its own declaration
+  inherits the parent's. A missing cost is `null`, not `0`: a zero margin and
+  an unknown margin are different facts and the app must not draw them the
+  same way.
+- Money crosses the wire as integer minor units (`cost_cents`,
+  `value_cents`, `unit_cost_cents`) plus a `minor_unit` factor that the
+  server fixes at installation from WooCommerce's price decimals. The app
+  never re-derives the scale from its own locale, because the shop's stored
+  values keep the scale they were written with.
+- `mg_stock_levels.stock_value_cents` is the value of the pieces on one
+  shelf. It moves with the quantity at the level's average cost, so a
+  movement can change the value without anyone declaring a price. It is
+  nullable, and an unknown value stays unknown rather than becoming zero.
+  Declaring a cost sets the basis for the pieces that arrive next; it does
+  not rewrite the value of the pieces already on the shelf.
+- Revaluation is the only path that changes the value without a movement:
+  `POST /inventory/costs` with `revalue_stock` sets `stock_value_cents` to
+  quantity × cost on the item and, when the declaration is on the parent, on
+  the variants that have no declaration of their own. A variant with its own
+  withdrawal is excluded: it said it does not know the cost. A withdrawal
+  (`cost: null`) never revalues (`revalue_skipped: "cost_missing"`), and the
+  declaration is written before the value so the new value always has a
+  declaration behind it.
+- The declared cost is projected one way to WooCommerce's Cost of Goods Sold
+  field when that feature is on. MGWS values stock either way: the
+  projection is what makes order margins readable in WooCommerce, not what
+  makes the stock value correct.
+- `purchase_price` was a dead field in the unified inventory model and is
+  gone; the cost of an item is read from the cost route, not inferred from
+  the stock payload. The order-line form still sends `0` as its unit cost
+  when the load line carries none: a receipt has no cost field of its own,
+  so the order line is the only carrier, and `0` there means "not filled",
+  which the receipt turns back into an unknown cost rather than a free item.
+- There is no separate Costs screen. The cost lives where the work happens:
+  a per-row field in the quick load, a card in the product editor (one
+  question per product, the parent for a variable product, with the
+  revaluation switch), and a "products without cost" card on the dashboard.
+  "Without cost" means "without value": an item with quantity and at least
+  one level whose `stock_value_cents` is null, not an item without a
+  declaration.
+- The app normalizes the decimal separator only (comma to dot) and never
+  rounds: the plugin converts to minor units with the scale fixed at
+  installation. A cost equal to the saved one is not re-declared, so the
+  append-only history does not grow a row per save.
+
 ## Products (`products/`)
 
 - `product_list/` publishes each WooCommerce page as soon as it loads
@@ -276,6 +488,12 @@ these are `Cashier`, `MGWS Inventory`, `Suppliers`, `Loyalty Cards`,
   is `global_unique_id`; `barcodeProduttore` (product) and
   `barcodeFornitore` (variant) are `barcode_manufacturer`. SKU and barcodes
   are never used as fallbacks for each other.
+- The editor's cost card (`_buildCostoProdotto`) declares the cost on the
+  parent (`variation_id = 0`) so the variants inherit it, after the MGWS
+  stock is written so a revaluation reads the final quantity. An empty field
+  is a withdrawal only if the product had a cost; an unreadable cost leaves
+  the field empty and declares nothing (`_costoNonDisponibile`), because a
+  missing answer is not a missing cost.
 
 ## Templates and print (`report/`)
 
@@ -295,7 +513,8 @@ keeps what is specific to the shop:
   through `QueryMgwsPrint`. The content travels as the `data_json` string,
   because WordPress decodes JSON bodies into PHP arrays where `{}` would
   become `[]`.
-- `print_template_catalog.dart`: the ready-made templates and categories,
+- `print_template_catalog.dart`: the ready-made templates and categories
+  (labels, shop signs, reports including invoices/Fattura and quotes/Preventivo),
   built with `PrintDesign`.
 - `print_sample_data.dart`: the fields. `ShopTemplateKind` (product label,
   shop sign, report) is an app setting stored as `kind`; templates without
@@ -335,9 +554,41 @@ keeps what is specific to the shop:
   question (`dashboardReportKey`). A new measure is added first to the MGWS
   engine (`includes/class-mgws-reports.php`), then to `reportMeasures` and
   `reportMeasureLabel`, with translations.
+- A report has one of three sources and never mixes them: `sales` (POS
+  receipts and online orders), `closings` (till sessions) and `stock` (the
+  levels as they are now, not as they were in the period). The stock
+  measures are `qty_on_hand`, `stock_value`, `unvalued_qty`,
+  `stock_cost_coverage`, `sold_qty`, `rotation` and `days_without_sale`;
+  `cost_coverage` belongs to `sales`. `sold_qty` is null when the rows are
+  sites or warehouses, and a null `days_without_sale` means the product
+  never sold, so the row is labelled "never sold" instead of showing zero.
+- A margin is only as good as the costs behind it. POS receipt lines carry
+  the cost snapshot taken when the receipt was issued
+  (`cost_total_cents`, `unit_cost_cents`); online orders have no line cost
+  yet, so a margin there is mostly uncovered. For this reason, when a widget
+  asks for `margin` or `margin_rate` the request also carries
+  `cost_coverage`, and the card declares a coverage below 100% next to the
+  value instead of showing a full margin. `revenue_share` is the ABC curve:
+  the share of the period revenue each group carries.
+- `DashboardMetric.stockDivergences` reads
+  `GET /inventory/stock/divergences`: one row per item whose WooCommerce
+  total differs from the MGWS total, with the difference (`woo - mgws`).
+  It is read-only and never corrects. Items WooCommerce does not manage have
+  no second number and are skipped, so "0 divergences" means "everything
+  with two numbers agrees", not "everything is aligned".
 - The dashboard filters are period, comparison and order statuses, plus a
   text filter and a limit per widget. Brands, variants and attributes are
   not offered as controls until the data layer aggregates them.
+- `DashboardMetric.productsWithoutCost` and
+  `DashboardMetric.stockDivergences` are the two metrics read from MGWS
+  instead of WooCommerce: the first counts the items in stock with an
+  unvalued level (`GET /inventory/costs/missing`), the second ranks the
+  items whose totals disagree (`GET /inventory/stock/divergences`). Both
+  ignore the period, and a failure shows as "unavailable", never as zero.
+  `DashboardDataBundle` carries them in
+  `missingCostItems`/`missingCostFailed` and
+  `divergences`/`divergencesFailed`, loaded in `_loadSecondary` next to the
+  other heavy sources.
 
 ## Logging
 

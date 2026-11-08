@@ -183,6 +183,9 @@ String dashboardMetricLabel(
     l10n.dashboardWidgetMetricCustomersActivity,
   DashboardMetric.lowStockProducts =>
     l10n.dashboardWidgetMetricLowStockProducts,
+  DashboardMetric.productsWithoutCost =>
+    l10n.dashboardWidgetMetricProductsWithoutCost,
+  DashboardMetric.stockDivergences => l10n.dashboardWidgetMetricStockDivergences,
   DashboardMetric.report => l10n.dashboardReportCustom,
 };
 
@@ -242,6 +245,18 @@ String reportMeasureLabel(AppLocalizations l10n, String key) => switch (key) {
   'cash_difference' => l10n.dashboardReportMeasureCashDifference,
   'card_difference' => l10n.dashboardReportMeasureCardDifference,
   'closings' => l10n.dashboardReportMeasureClosings,
+  'cost' => l10n.dashboardReportMeasureCost,
+  'margin' => l10n.dashboardReportMeasureMargin,
+  'margin_rate' => l10n.dashboardReportMeasureMarginRate,
+  'cost_coverage' => l10n.dashboardReportMeasureCostCoverage,
+  'revenue_share' => l10n.dashboardReportMeasureRevenueShare,
+  'qty_on_hand' => l10n.dashboardReportMeasureQtyOnHand,
+  'stock_value' => l10n.dashboardReportMeasureStockValue,
+  'unvalued_qty' => l10n.dashboardReportMeasureUnvaluedQty,
+  'stock_cost_coverage' => l10n.dashboardReportMeasureStockCostCoverage,
+  'sold_qty' => l10n.dashboardReportMeasureSoldQty,
+  'rotation' => l10n.dashboardReportMeasureRotation,
+  'days_without_sale' => l10n.dashboardReportMeasureDaysWithoutSale,
   _ => key,
 };
 
@@ -264,6 +279,8 @@ String reportDimensionLabel(AppLocalizations l10n, ReportDimension d) =>
       ReportDimension.operator => l10n.dashboardReportDimensionOperator,
       ReportDimension.paymentMethod =>
         l10n.dashboardReportDimensionPaymentMethod,
+      ReportDimension.site => l10n.dashboardReportDimensionSite,
+      ReportDimension.warehouse => l10n.dashboardReportDimensionWarehouse,
     };
 
 String reportFilterKindLabel(AppLocalizations l10n, ReportFilterKind k) =>
@@ -277,6 +294,8 @@ String reportFilterKindLabel(AppLocalizations l10n, ReportFilterKind k) =>
       ReportFilterKind.operator => l10n.dashboardReportDimensionOperator,
       ReportFilterKind.paymentMethod =>
         l10n.dashboardReportDimensionPaymentMethod,
+      ReportFilterKind.site => l10n.dashboardReportDimensionSite,
+      ReportFilterKind.warehouse => l10n.dashboardReportDimensionWarehouse,
     };
 
 /// Localized chart type name.
@@ -391,7 +410,9 @@ class DashboardWidgetCard extends StatelessWidget {
 
   String? _subtitle(AppLocalizations l10n) {
     final reportFilters = config.report?.filters ?? const [];
+    final note = dataset.note;
     final parts = <String>[
+      if (note != null) note,
       if (reportFilters.isNotEmpty)
         reportFilters.map((filter) => filter.label).join(', '),
       if (config.metric.hasStockThreshold)

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../jwt_api/error_list.dart';
 import '../jwt_api/jwt_connect.dart';
@@ -5,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/theme.dart';
 import '../../l10n/extensions.dart';
 import 'login.code.dart';
+import 'login_local_dev.code.dart';
 import '../jwt_api/url_validator.dart';
 import '../smartcard/smartcard_login_widget.dart';
 
@@ -29,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   static const String _prefKeySiteUrl = 'login_site_url';
 
   final _formKey = GlobalKey<FormState>();
+  final _siteUrlFieldKey = GlobalKey();
   final _siteUrlController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -46,15 +49,33 @@ class _LoginPageState extends State<LoginPage> {
   bool _allowLocalhost = false;
   bool _obscurePassword = true;
 
+  /// Web, "WordPress admin": the user already has an Application Password and
+  /// types it, instead of going through the WordPress approval page.
+  bool _webAppPassword = false;
+
+  /// Web, "WordPress admin": login through the WordPress approval page, where
+  /// the normal password works (the browser cannot use it directly).
+  bool get _webAuthorize =>
+      kIsWeb && _authType == AuthType.wordpress && !_webAppPassword;
+
   @override
   void initState() {
     super.initState();
     _loadPreferences();
+    final authorizeError = loginCode.takeWpAuthorizeError();
+    if (authorizeError != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _errorMessage = authorizeError(context.l10n));
+        }
+      });
+    }
   }
 
   /// Carica le preferenze salvate
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
 
     setState(() {
       // Carica il tipo di autenticazione (default: WordPress)
@@ -70,6 +91,12 @@ class _LoginPageState extends State<LoginPage> {
       // Carica l'URL del sito (prima dalle preferenze, poi dalla cache)
       final savedUrl = prefs.getString(_prefKeySiteUrl);
       _siteUrlController.text = savedUrl ?? loginCode.cachedSiteUrl ?? '';
+
+      // The local development checkbox comes back only for a local site.
+      _allowLocalhost = loginLoadAllowLocalDev(
+        prefs,
+        siteUrl: _siteUrlController.text,
+      );
     });
   }
 
@@ -94,6 +121,11 @@ class _LoginPageState extends State<LoginPage> {
 
     // Salva l'URL del sito
     await prefs.setString(_prefKeySiteUrl, _siteUrlController.text);
+    await loginSaveAllowLocalDev(
+      prefs,
+      siteUrl: _siteUrlController.text,
+      allowed: _allowLocalhost,
+    );
   }
 
   @override
@@ -119,23 +151,23 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 24),
 
                   TextFormField(
+                    key: _siteUrlFieldKey,
                     controller: _siteUrlController,
                     decoration: InputDecoration(
                       labelText: context.l10n.loginUrlSito,
                       hintText: 'https://tuosito.com',
                       prefixIcon: const Icon(Icons.public),
+                      // The error line has its space even when empty: an
+                      // error shown while typing does not push the local
+                      // development checkbox down under the pointer. Only an
+                      // error longer than one line still adds height.
+                      helperText: ' ',
+                      errorMaxLines: 2,
                     ),
                     keyboardType: TextInputType.url,
-                    validator: (value) {
-                      final correctedUrl = _autoCorrectUrl(value);
-                      return UrlValidator.validateUrl(
-                        correctedUrl,
-                        allowLocalhost: _allowLocalhost,
-                      )?.call(context.l10n);
-                    },
+                    validator: _validateSiteUrl,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
-                  const SizedBox(height: 8),
 
                   // Checkbox per connessioni locali
                   Row(
@@ -275,7 +307,31 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Campi per WordPress Admin (solo se credenziali standard)
                   if (_loginMethod == LoginMethod.credentials &&
-                      _authType == AuthType.wordpress) ...[
+                      _webAuthorize) ...[
+                    Text(
+                      context.l10n.loginWpAuthorizeHint,
+                      style: context.text.bodyMedium,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () => setState(() => _webAppPassword = true),
+                        child: Text(context.l10n.loginWpUseAppPassword),
+                      ),
+                    ),
+                  ],
+                  if (_loginMethod == LoginMethod.credentials &&
+                      _authType == AuthType.wordpress &&
+                      !_webAuthorize) ...[
+                    if (kIsWeb)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () =>
+                              setState(() => _webAppPassword = false),
+                          child: Text(context.l10n.loginWpUseWordPressPage),
+                        ),
+                      ),
                     TextFormField(
                       controller: _usernameController,
                       decoration: InputDecoration(
@@ -292,7 +348,9 @@ class _LoginPageState extends State<LoginPage> {
                     TextFormField(
                       controller: _passwordController,
                       decoration: InputDecoration(
-                        labelText: context.l10n.loginPasswordWordpress,
+                        labelText: kIsWeb
+                            ? context.l10n.loginAppPasswordLabel
+                            : context.l10n.loginPasswordWordpress,
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -506,7 +564,11 @@ class _LoginPageState extends State<LoginPage> {
                                 color: context.colors.onColoredSurface,
                               ),
                             )
-                          : Text(context.l10n.loginAccedi),
+                          : Text(
+                              _webAuthorize
+                                  ? context.l10n.loginWpAuthorizeButton
+                                  : context.l10n.loginAccedi,
+                            ),
                     ),
                 ],
               ),
@@ -517,18 +579,44 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  String? _validateSiteUrl(String? value) => UrlValidator.validateUrl(
+    _autoCorrectUrl(value),
+    allowLocalhost: _allowLocalhost,
+  )?.call(context.l10n);
+
   Future<void> _submitLogin() async {
     // Corregge l'URL prima della validazione
     final correctedUrl = _autoCorrectUrl(_siteUrlController.text);
     _siteUrlController.text = correctedUrl ?? '';
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      // The site URL is at the top of the form, far from the button: bring
+      // its error into view, otherwise the press seems to do nothing.
+      final urlContext = _siteUrlFieldKey.currentContext;
+      if (_validateSiteUrl(_siteUrlController.text) != null &&
+          urlContext != null) {
+        await Scrollable.ensureVisible(
+          urlContext,
+          duration: const Duration(milliseconds: 300),
+          alignment: 0.1,
+        );
+      }
+      return;
+    }
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
       _successMessage = null;
     });
+
+    if (_webAuthorize) {
+      // The page is left for WordPress: the choices are saved now, the login
+      // ends at the return (LoginCode.completeWpAuthorizeReturn).
+      await _savePreferences();
+      await loginCode.startWpAuthorize(_siteUrlController.text);
+      return;
+    }
 
     // Le stringhe dei messaggi sono risolte prima degli await: dopo un await non
     // e garantito che il widget sia ancora montato, quindi non posso usare

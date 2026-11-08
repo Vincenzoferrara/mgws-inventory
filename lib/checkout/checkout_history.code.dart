@@ -242,11 +242,17 @@ class StoricoCassaServer {
   /// chiave legata al turno, cosi' un doppio invio non ne crea due.
   /// Records the closing of the shift just closed server-side. The key is
   /// tied to the shift, so a double submit cannot create two closings.
+  ///
+  /// [verificaCausale] false quando il turno e' gia' chiuso sul server: la
+  /// causale e' stata controllata prima, e rifiutare adesso lascerebbe un
+  /// turno chiuso senza chiusura registrata.
   Future<EsitoReso> registraChiusura(
     ChiusuraCassa chiusura, {
     int? serverShiftId,
+    bool verificaCausale = true,
   }) async {
-    if (chiusura.hasDifferenze &&
+    if (verificaCausale &&
+        chiusura.hasDifferenze &&
         (chiusura.causaleDifferenza ?? '').trim().isEmpty) {
       return const EsitoReso.ko(
         CassaFailure(CassaFailureCode.differenceReasonRequired),
@@ -528,7 +534,10 @@ class StoricoCassaServer {
             RigaRendibile(
               chiaveRiga: linea.chiaveRiga,
               nome: linea.nomeCompleto,
-              barcodeInterno: mappa['barcode']?.toString() ?? '',
+              // Without a barcode the article code still names the item.
+              barcodeInterno: [mappa['barcode'], mappa['sku']]
+                  .map((v) => v?.toString().trim() ?? '')
+                  .firstWhere((v) => v.isNotEmpty, orElse: () => ''),
               prezzoUnitario: linea.prezzoUnitario,
               quantitaVenduta: venduta,
               // Un documento annullato non ha piu' nulla da rendere.

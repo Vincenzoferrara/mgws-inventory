@@ -121,7 +121,32 @@ class InventoryQuickLoadCatalogController extends ChangeNotifier {
         }
       }
     }
+    // The article code, typed by hand when there is no barcode at hand.
+    // Only after every barcode, so a barcode equal to someone's code still
+    // wins; case does not matter because people type codes as they come.
+    for (final product in products) {
+      final varianti = product.varianti ?? const <VarianteProductGlobal>[];
+      if (varianti.isEmpty && _sameCode(product.codiceProdotto, code)) {
+        return InventoryQuickLoadMatch(product: product, barcode: code);
+      }
+      for (final variation in varianti) {
+        if (_sameCode(variation.codiceProdotto, code)) {
+          return InventoryQuickLoadMatch(
+            product: product,
+            variation: variation,
+            barcode: code,
+          );
+        }
+      }
+    }
     return null;
+  }
+
+  static bool _sameCode(String? value, String code) {
+    final normalized = value?.trim().toLowerCase();
+    return normalized != null &&
+        normalized.isNotEmpty &&
+        normalized == code.toLowerCase();
   }
 
   static bool _matches(String? value, String code) {

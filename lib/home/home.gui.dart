@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:docking/docking.dart';
 
 import '../l10n/extensions.dart';
+import '../b2b/price_lists.gui.dart';
 import '../caldav/caldav_gui.dart';
 import '../loyalty_cards/loyalty_cards.gui.dart';
 import '../checkout/checkout.gui.dart';
 import '../customers/customer_list.gui.dart';
-import '../users/users_list.gui.dart';
 import '../coupons/coupon_list/coupon_list_view.gui.dart';
 import '../dashboard/dashboard_customization.dart';
 import '../employees/employees.gui.dart';
@@ -231,6 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
         requiresMgws: true,
         builder: () => const InventoryPage(),
       ),
+
       _HomeSection(
         id: 'nuovo-prodotto',
         title: context.l10n.homeTitoloNuovoProdotto,
@@ -250,6 +251,16 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: () => const CouponGestisciView(),
       ),
       _HomeSection(
+        id: 'listini',
+        title: context.l10n.homeTitoloListini,
+        subtitle: context.l10n.homeSottotitoloListini,
+        icon: Icons.sell_outlined,
+        iconColor: accents.coupon,
+        openMode: HomeTabOpenMode.singleton,
+        requiresMgws: true,
+        builder: () => const PriceListsScreen(),
+      ),
+      _HomeSection(
         id: 'ordini',
         title: context.l10n.homeTitoloOrdini,
         subtitle: context.l10n.homeSottotitoloOrdini,
@@ -266,15 +277,6 @@ class _HomeScreenState extends State<HomeScreen> {
         iconColor: accents.clienti,
         openMode: HomeTabOpenMode.duplicate,
         builder: () => const ClientiGestisciPage(),
-      ),
-      _HomeSection(
-        id: 'utenti',
-        title: context.l10n.homeTitoloUtenti,
-        subtitle: context.l10n.homeSottotitoloUtenti,
-        icon: Icons.manage_accounts,
-        iconColor: context.colors.infoColor,
-        openMode: HomeTabOpenMode.duplicate,
-        builder: () => const UtentiGestisciPage(),
       ),
       _HomeSection(
         id: 'fornitori',

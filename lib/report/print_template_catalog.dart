@@ -940,6 +940,238 @@ class PrintTemplateCatalog {
       );
     notes(movements, 226, 50);
 
+    // Purchase order (ordine fornitore): documento per il fornitore, con
+    // righe prodotto, quantita' e costo unitario. Il PDF viene generato
+    // dall'app a partire da questo template; il plugin crea solo il
+    // documento e invia l'email.
+    final purchaseOrder = page('Ordine fornitore', _navy)
+      ..field(
+        'numeroDocumento',
+        14,
+        27.5,
+        90,
+        5,
+        size: 3.4,
+        color: _grey,
+        prefix: 'Doc. ',
+      )
+      ..field(
+        'dataDocumento',
+        104,
+        27.5,
+        92,
+        5,
+        size: 3.4,
+        color: _grey,
+        align: 'right',
+      )
+      ..text(
+        'Fornitore',
+        14,
+        36,
+        182,
+        6,
+        size: 3.6,
+        bold: true,
+        color: _navy,
+      )
+      ..field('fornitore', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text(
+        'Righe ordine',
+        14,
+        52,
+        182,
+        7,
+        size: 3.9,
+        bold: true,
+        color: _navy,
+      )
+      ..table(
+        'righe',
+        14,
+        60,
+        182,
+        150,
+        accent: _navy,
+        columns: [
+          PrintColumn('prodotto', 'Prodotto', 92),
+          PrintColumn('qty', 'Qty', 24, alignRight: true),
+          PrintColumn('costo', 'Costo unit.', 34, alignRight: true),
+          PrintColumn('totale', 'Totale', 32, alignRight: true),
+        ],
+      )
+      ..field(
+        'totaleOrdine',
+        14,
+        216,
+        182,
+        8,
+        size: 4.6,
+        bold: true,
+        align: 'right',
+        prefix: 'Totale: ',
+      );
+    notes(purchaseOrder, 230, 40);
+    signatures(purchaseOrder, [
+      l10n.reportSignatureOperator,
+      l10n.reportSignatureManager,
+    ]);
+
+    // DDT (documento di trasporto)
+    final ddt = page('DDT - Documento di trasporto', _teal)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Destinatario', 14, 36, 182, 6, size: 3.6, bold: true, color: _teal)
+      ..field('destinatario', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text('Vettore', 14, 52, 90, 6, size: 3.4, bold: true, color: _teal)
+      ..field('vettore', 14, 58, 90, 6, size: 3.4, color: _ink)
+      ..text('Causale', 104, 52, 92, 6, size: 3.4, bold: true, color: _teal)
+      ..field('causale', 104, 58, 92, 6, size: 3.4, color: _ink)
+      ..text('Righe', 14, 68, 182, 7, size: 3.9, bold: true, color: _teal)
+      ..table('righe', 14, 76, 182, 130, accent: _teal, columns: [
+        PrintColumn('prodotto', 'Prodotto', 92),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('um', 'U.M.', 24),
+        PrintColumn('note', 'Note', 42),
+      ])
+      ..field('totaleColli', 14, 212, 90, 6, size: 3.4, bold: true, prefix: 'Colli: ')
+      ..field('peso', 104, 212, 92, 6, size: 3.4, align: 'right', prefix: 'Peso: ');
+    notes(ddt, 226, 30);
+    signatures(ddt, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Nota di credito
+    final notaCredito = page('Nota di credito', _red)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Cliente', 14, 36, 182, 6, size: 3.6, bold: true, color: _red)
+      ..field('cliente', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text('Riferimento', 14, 52, 182, 6, size: 3.4, bold: true, color: _red)
+      ..field('riferimento', 14, 58, 182, 6, size: 3.4, color: _ink)
+      ..text('Righe', 14, 68, 182, 7, size: 3.9, bold: true, color: _red)
+      ..table('righe', 14, 76, 182, 130, accent: _red, columns: [
+        PrintColumn('prodotto', 'Prodotto', 92),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('prezzo', 'Prezzo', 34, alignRight: true),
+        PrintColumn('totale', 'Totale', 32, alignRight: true),
+      ])
+      ..field('totaleNota', 14, 212, 182, 8, size: 4.6, bold: true, align: 'right', prefix: 'Totale: ');
+    notes(notaCredito, 226, 40);
+    signatures(notaCredito, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Ricevimento merce
+    final ricevimento = page('Ricevimento merce', _teal)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Fornitore', 14, 36, 182, 6, size: 3.6, bold: true, color: _teal)
+      ..field('fornitore', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text('Magazzino', 14, 52, 182, 6, size: 3.4, bold: true, color: _teal)
+      ..field('magazzino', 14, 58, 182, 6, size: 3.4, color: _ink)
+      ..text('Righe ricevute', 14, 68, 182, 7, size: 3.9, bold: true, color: _teal)
+      ..table('righe', 14, 76, 182, 130, accent: _teal, columns: [
+        PrintColumn('prodotto', 'Prodotto', 92),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('lotto', 'Lotto', 34),
+        PrintColumn('scadenza', 'Scad.', 32),
+      ])
+      ..field('totalePezzi', 14, 212, 182, 6, size: 3.4, bold: true, align: 'right', prefix: 'Pezzi: ');
+    notes(ricevimento, 226, 40);
+    signatures(ricevimento, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Trasferimento tra sedi
+    final trasferimento = page('Trasferimento tra sedi', _purple)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Da', 14, 36, 90, 6, size: 3.6, bold: true, color: _purple)
+      ..field('sedeOrigine', 14, 42, 90, 6, size: 3.4, color: _ink)
+      ..text('A', 104, 36, 92, 6, size: 3.6, bold: true, color: _purple)
+      ..field('sedeDestinazione', 104, 42, 92, 6, size: 3.4, color: _ink)
+      ..text('Righe', 14, 52, 182, 7, size: 3.9, bold: true, color: _purple)
+      ..table('righe', 14, 60, 182, 140, accent: _purple, columns: [
+        PrintColumn('prodotto', 'Prodotto', 92),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('da', 'Da', 33),
+        PrintColumn('a', 'A', 33),
+      ])
+      ..field('totalePezzi', 14, 206, 182, 6, size: 3.4, bold: true, align: 'right', prefix: 'Pezzi: ');
+    notes(trasferimento, 220, 40);
+    signatures(trasferimento, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Conteggio inventario
+    final conteggio = page('Conteggio inventario', _gold)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Magazzino', 14, 36, 182, 6, size: 3.6, bold: true, color: _gold)
+      ..field('magazzino', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text('Righe conteggio', 14, 52, 182, 7, size: 3.9, bold: true, color: _gold)
+      ..table('righe', 14, 60, 182, 140, accent: _gold, columns: [
+        PrintColumn('prodotto', 'Prodotto', 70),
+        PrintColumn('teorico', 'Teorico', 28, alignRight: true),
+        PrintColumn('fisico', 'Fisico', 28, alignRight: true),
+        PrintColumn('diff', 'Diff.', 28, alignRight: true),
+        PrintColumn('ubicazione', 'Ubi.', 28),
+      ])
+      ..field('totaleDiff', 14, 206, 182, 6, size: 3.4, bold: true, align: 'right', prefix: 'Diff. totale: ');
+    notes(conteggio, 220, 40);
+    signatures(conteggio, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Reso / RMA
+    final reso = page('Reso / RMA', _red)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Cliente', 14, 36, 182, 6, size: 3.6, bold: true, color: _red)
+      ..field('cliente', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..text('Motivo', 14, 52, 182, 6, size: 3.4, bold: true, color: _red)
+      ..field('motivo', 14, 58, 182, 6, size: 3.4, color: _ink)
+      ..text('Righe', 14, 68, 182, 7, size: 3.9, bold: true, color: _red)
+      ..table('righe', 14, 76, 182, 130, accent: _red, columns: [
+        PrintColumn('prodotto', 'Prodotto', 92),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('stato', 'Stato', 34),
+        PrintColumn('note', 'Note', 32),
+      ])
+      ..field('totalePezzi', 14, 212, 182, 6, size: 3.4, bold: true, align: 'right', prefix: 'Pezzi: ');
+    notes(reso, 226, 40);
+    signatures(reso, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Fattura
+    final fattura = page('Fattura', _navy)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Cliente', 14, 36, 182, 6, size: 3.6, bold: true, color: _navy)
+      ..field('cliente', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..field('partitaIva', 14, 48, 182, 5, size: 3.2, color: _grey, prefix: 'P.IVA/CF: ')
+      ..text('Righe', 14, 58, 182, 7, size: 3.9, bold: true, color: _navy)
+      ..table('righe', 14, 66, 182, 124, accent: _navy, columns: [
+        PrintColumn('prodotto', 'Prodotto', 76),
+        PrintColumn('qty', 'Qty', 22, alignRight: true),
+        PrintColumn('prezzo', 'Prezzo', 28, alignRight: true),
+        PrintColumn('iva', 'IVA', 20, alignRight: true),
+        PrintColumn('totale', 'Totale', 36, alignRight: true),
+      ])
+      ..field('imponibile', 14, 194, 182, 5, size: 3.4, align: 'right', prefix: 'Imponibile: ')
+      ..field('ivaTotale', 14, 200, 182, 5, size: 3.4, align: 'right', prefix: 'IVA: ')
+      ..field('totaleDocumento', 14, 206, 182, 8, size: 4.6, bold: true, align: 'right', prefix: 'Totale: ');
+    notes(fattura, 220, 36);
+    signatures(fattura, [l10n.reportSignatureOperator, l10n.reportSignatureManager]);
+
+    // Preventivo
+    final preventivo = page('Preventivo', _teal)
+      ..field('numeroDocumento', 14, 27.5, 90, 5, size: 3.4, color: _grey, prefix: 'Doc. ')
+      ..field('dataDocumento', 104, 27.5, 92, 5, size: 3.4, color: _grey, align: 'right')
+      ..text('Cliente', 14, 36, 182, 6, size: 3.6, bold: true, color: _teal)
+      ..field('cliente', 14, 42, 182, 6, size: 3.4, color: _ink)
+      ..field('validita', 14, 48, 182, 5, size: 3.2, color: _grey, prefix: 'Validità: ')
+      ..text('Righe', 14, 58, 182, 7, size: 3.9, bold: true, color: _teal)
+      ..table('righe', 14, 66, 182, 130, accent: _teal, columns: [
+        PrintColumn('prodotto', 'Prodotto', 86),
+        PrintColumn('qty', 'Qty', 24, alignRight: true),
+        PrintColumn('prezzo', 'Prezzo', 36, alignRight: true),
+        PrintColumn('totale', 'Totale', 36, alignRight: true),
+      ])
+      ..field('totaleDocumento', 14, 202, 182, 8, size: 4.6, bold: true, align: 'right', prefix: 'Totale: ');
+    notes(preventivo, 216, 40);
+    signatures(preventivo, [l10n.reportSignatureOperator, l10n.reportSignatureCustomer]);
+
     return [
       _builtIn(
         id: 'builtin_report_daily_closing',
@@ -969,6 +1201,21 @@ class PrintTemplateCatalog {
         paperFormatId: 'a4_portrait',
         design: movements,
       ),
+      _builtIn(
+        id: 'builtin_report_purchase_order',
+        name: 'Ordine fornitore',
+        kind: kind,
+        paperFormatId: 'a4_portrait',
+        design: purchaseOrder,
+      ),
+      _builtIn(id: 'builtin_report_ddt', name: 'DDT', kind: kind, paperFormatId: 'a4_portrait', design: ddt),
+      _builtIn(id: 'builtin_report_credit_note', name: 'Nota di credito', kind: kind, paperFormatId: 'a4_portrait', design: notaCredito),
+      _builtIn(id: 'builtin_report_goods_receipt', name: 'Ricevimento merce', kind: kind, paperFormatId: 'a4_portrait', design: ricevimento),
+      _builtIn(id: 'builtin_report_transfer', name: 'Trasferimento', kind: kind, paperFormatId: 'a4_portrait', design: trasferimento),
+      _builtIn(id: 'builtin_report_stock_count', name: 'Conteggio inventario', kind: kind, paperFormatId: 'a4_portrait', design: conteggio),
+      _builtIn(id: 'builtin_report_return', name: 'Reso / RMA', kind: kind, paperFormatId: 'a4_portrait', design: reso),
+      _builtIn(id: 'builtin_report_invoice', name: 'Fattura', kind: kind, paperFormatId: 'a4_portrait', design: fattura),
+      _builtIn(id: 'builtin_report_quote', name: 'Preventivo', kind: kind, paperFormatId: 'a4_portrait', design: preventivo),
     ];
   }
 

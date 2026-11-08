@@ -56,6 +56,20 @@ class InventoryLocationDirectory {
   String warehouseLabel(AppLocalizations l10n, int id) =>
       warehouseName(id) ?? '${l10n.inventoryEtichettaMagazzino} $id';
 
+  /// Warehouse of a stock level: the shop's name when known, else the name
+  /// MGWS sent with the level. The system warehouse of pieces without a
+  /// place is named in the app's language.
+  String levelWarehouseLabel(AppLocalizations l10n, InventoryStockLevel level) {
+    final known = warehouseName(level.warehouseId);
+    if (known != null) return known;
+    final sent = level.warehouseName.trim();
+    if (sent.toLowerCase() == 'unassigned') {
+      return l10n.inventoryWarehouseUnassigned;
+    }
+    if (sent.isNotEmpty && !sent.startsWith('#')) return sent;
+    return warehouseLabel(l10n, level.warehouseId);
+  }
+
   static String? _nameOf(List<InventoryPlace> places, int id) {
     for (final place in places) {
       if (place.id == id && place.name.isNotEmpty) return place.name;

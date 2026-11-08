@@ -26,10 +26,16 @@ class InventoryStockLevel {
     this.room = '',
     this.rack = '',
     this.shelf = '',
+    this.warehouseName = '',
   });
 
   final int siteId;
   final int warehouseId;
+
+  /// Name sent by MGWS with the level. Needed for the warehouses the site
+  /// list leaves out, like the system "Unassigned" one, which otherwise
+  /// showed as "Magazzino 11767".
+  final String warehouseName;
   final int qty;
   final String room;
   final String rack;
@@ -64,6 +70,7 @@ class InventoryStockLevel {
       room: _text(record['room']),
       rack: _text(record['rack']),
       shelf: _text(record['shelf']),
+      warehouseName: _text(record['warehouse_name']),
     );
   }
 }
@@ -454,6 +461,7 @@ class InventoryRettificaPlan {
         InventoryRettificaCommand(
           productId: line.productId,
           variationId: line.variationId,
+          label: line.label,
           correctStock: line.targetStock,
           reason: reasonTextFor(line, l10n),
           siteId: siteId,
@@ -475,6 +483,7 @@ class InventoryRettificaPlan {
         InventoryRettificaCommand(
           productId: line.productId,
           variationId: line.variationId,
+          label: line.label,
           correctStock: line.stockBefore!,
           reason: restoreReasonTextFor(line, l10n),
           siteId: siteId,
@@ -496,10 +505,15 @@ class InventoryRettificaCommand {
     required this.siteId,
     this.movementKey,
     this.variationId = 0,
+    this.label = '',
   });
 
   final int productId;
   final int variationId;
+
+  /// Product name for the result, so it reads "Maglia: 8 → 6" and not the
+  /// product's number.
+  final String label;
   final int correctStock;
   final String reason;
 
@@ -621,11 +635,17 @@ class InventoryRettificaController with InventoryFeedbackController {
             if (feedback.success) {
               final before = '${result?.previousStock ?? '?'}';
               steps.add(
-                (l10n) => l10n.inventoryStepStockChanged(
-                  command.productId,
-                  before,
-                  command.correctStock,
-                ),
+                (l10n) => command.label.trim().isEmpty
+                    ? l10n.inventoryStepStockChanged(
+                        command.productId,
+                        before,
+                        command.correctStock,
+                      )
+                    : l10n.inventoryStepStockChangedNome(
+                        command.label.trim(),
+                        before,
+                        command.correctStock,
+                      ),
               );
             } else {
               failed++;

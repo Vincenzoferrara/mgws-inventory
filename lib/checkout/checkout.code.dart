@@ -2,6 +2,8 @@
 
 import 'dart:async';
 
+import 'package:intl/intl.dart';
+
 import 'package:woocommerce_flutter_api/woocommerce_flutter_api.dart'
     show WooCoupon;
 
@@ -18,8 +20,57 @@ import 'checkout_history.code.dart';
 import '../log_viewer/app_logger.dart';
 import '../login/jwt_api/adapter/platform_manager.dart';
 import '../login/mgws/connection/mgws_connection.dart';
+import '../login/mgws/query/query_mgws_kits.dart';
+import '../login/mgws/query/query_mgws_pos.dart';
 import '../login/mgws/query/query_mgws_site.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../settings/checkout_settings.dart';
+
+/// Data e ora di uno scontrino come le legge l'operatore: "07/11/2026 21:20",
+/// senza secondi e millesimi.
+String formatDataCassa(DateTime data) =>
+    DateFormat('dd/MM/yyyy HH:mm').format(data.toLocal());
+
+/// Apertura del turno: l'ora se e' di oggi, altrimenti anche la data. Un
+/// turno aperto settimane fa e mai chiuso deve vedersi, non sembrare di
+/// stamattina.
+String formatAperturaTurno(DateTime apertura, DateTime adesso) {
+  final locale = apertura.toLocal();
+  final oggi = adesso.toLocal();
+  final stessoGiorno =
+      locale.year == oggi.year &&
+      locale.month == oggi.month &&
+      locale.day == oggi.day;
+  return DateFormat(stessoGiorno ? 'HH:mm' : 'dd/MM/yyyy HH:mm').format(locale);
+}
+
+/// Contanti attesi nel cassetto a fine turno: fondo + incassi in contanti -
+/// rimborsi. E' la formula di [ChiusuraCassa.contanteAtteso], senza i
+/// movimenti manuali che la cassa non registra.
+double contantiAttesiTurno(double fondo, Map<String, double> totali) =>
+    fondo + (totali['contanti'] ?? 0) - (totali['rimborsi'] ?? 0);
+
+/// Il contato non torna con l'atteso: la chiusura vuole una causale.
+bool serveCausaleChiusura({
+  required double fondo,
+  required Map<String, double> totali,
+  required double contanti,
+  required double carta,
+}) =>
+    (contanti - contantiAttesiTurno(fondo, totali)).abs() > 0.009 ||
+    (carta - (totali['carta'] ?? 0)).abs() > 0.009;
+
+/// Importo scritto dall'operatore: accetta la virgola italiana ("20,50") e
+/// il punto. `null` se il testo non e' un numero.
+double? parseImportoCassa(String testo) {
+  final pulito = testo.trim().replaceAll(' ', '').replaceAll('€', '');
+  if (pulito.isEmpty) return null;
+  // "1.234,50": il punto separa le migliaia quando c'e' anche la virgola.
+  final normale = pulito.contains(',')
+      ? pulito.replaceAll('.', '').replaceAll(',', '.')
+      : pulito;
+  return double.tryParse(normale);
+}
 
 /// Rappresenta un elemento della lista cassa (può essere un prodotto o una variante)
 class ElementoCassa {
@@ -159,6 +210,7 @@ class CassaController {
 
   /// Sede in uso su MGWS, `null` finche' non e' letta o senza MGWS.
   String? _sedeMgws;
+  int _sedeMgwsId = 0;
 
   /// Sede scritta su turni e scontrini.
   ///
@@ -182,6 +234,7 @@ class CassaController {
     try {
       final stato = await QueryMgwsSite().getMySite();
       _sedeMgws = stato.hasSite ? stato.siteName.trim() : null;
+      _sedeMgwsId = stato.hasSite ? stato.siteId : 0;
     } on MgwsSiteException {
       // Resta la sede di prima.
     }
@@ -227,7 +280,7 @@ class CassaController {
   String? get turnoOraApertura {
     final turno = turnoCorrente;
     if (turno == null) return null;
-    return '${turno.dataApertura.hour.toString().padLeft(2, '0')}:${turno.dataApertura.minute.toString().padLeft(2, '0')}';
+    return formatAperturaTurno(turno.dataApertura, DateTime.now());
   }
 
   TipoOperazioneCassa get tipoOperazioneCorrente =>
@@ -379,6 +432,21 @@ class CassaController {
         CassaFailure(CassaFailureCode.closeReceiptBeforeShiftClose),
       );
     }
+    // La causale si controlla PRIMA di chiudere sul server: dopo, il turno
+    // sarebbe gia' chiuso e la chiusura resterebbe senza riepilogo.
+    // The reason is checked BEFORE closing server-side: afterwards the shift
+    // would already be closed with no closing record.
+    if ((causaleDifferenza ?? '').trim().isEmpty &&
+        serveCausaleChiusura(
+          fondo: turno.fondoIniziale,
+          totali: await totaliTurnoCorrente(),
+          contanti: contanteContato,
+          carta: cartaContato,
+        )) {
+      return const EsitoReso.ko(
+        CassaFailure(CassaFailureCode.differenceReasonRequired),
+      );
+    }
     // Enforcement server-first: si chiude lo shift MGWS col «contato» PRIMA
     // della chiusura locale. Il server calcola expected_totals dagli ordini
     // (HPOS-safe) e restituisce le differenze; l'app manda SOLO i conteggi.
@@ -427,6 +495,9 @@ class CassaController {
     final esito = await storico.registraChiusura(
       chiusura,
       serverShiftId: shiftId is num ? shiftId.toInt() : null,
+      // The shift is already closed server-side: record it whatever the
+      // server's totals say (they can differ from the summary).
+      verificaCausale: false,
     );
     _applicaContestoCassa(_scontrinoCorrente);
     await aggiornaMetriche();
@@ -742,9 +813,69 @@ class CassaController {
 
   /// Rimuove una riga dallo scontrino
   void rimuoviRiga(int index) {
+    if (index < 0 || index >= _scontrinoCorrente.righe.length) return;
+    final riga = _scontrinoCorrente.righe[index];
+    _annotaAnnullamento(MotivoAnnullamento.rigaRimossa, [
+      (riga: riga, quantita: riga.quantita),
+    ]);
     _scontrinoCorrente.rimuoviRiga(index);
-    //AppLogger.info('Riga rimossa. Totale righe: ${_scontrinoCorrente.righe.length}');
   }
+
+  // Righe annullate (scansionate e poi tolte) non ancora scritte su MGWS.
+  final List<Map<String, dynamic>> _annullamentiInSospeso = [];
+  bool _invioAnnullamentiInCorso = false;
+
+  /// Annullamenti in attesa di arrivare al libro movimenti.
+  List<Map<String, dynamic>> get annullamentiInSospeso =>
+      List.unmodifiable(_annullamentiInSospeso);
+
+  /// Un pezzo tolto dal carrello non va sullo scontrino del cliente, ma resta
+  /// nel libro movimenti di MGWS: chi l'ha tolto, quando, a che prezzo.
+  void _annotaAnnullamento(
+    MotivoAnnullamento motivo,
+    List<({RigaScontrino riga, int quantita})> righe,
+  ) {
+    final daInviare = righe.where((r) => r.quantita > 0).toList();
+    if (daInviare.isEmpty) return;
+    _annullamentiInSospeso.add(
+      buildMgwsVoidPayload(
+        scontrino: _scontrinoCorrente,
+        motivo: motivo,
+        righe: daInviare,
+        siteId: _sedeMgwsId,
+      ),
+    );
+    unawaited(inviaAnnullamenti());
+  }
+
+  /// Scrive su MGWS gli annullamenti in sospeso. Senza connessione restano
+  /// in coda e partono al prossimo annullamento o alla prossima vendita.
+  Future<void> inviaAnnullamenti() async {
+    if (_invioAnnullamentiInCorso || _annullamentiInSospeso.isEmpty) return;
+    _invioAnnullamentiInCorso = true;
+    try {
+      if (!await MgwsConnection.instance.ensureConnected()) return;
+      final pos = QueryMgwsPos();
+      while (_annullamentiInSospeso.isNotEmpty) {
+        final esito = await pos.recordVoids(_annullamentiInSospeso.first);
+        if (esito['ok'] != true) {
+          AppLogger().w('⚠️ Righe annullate non registrate: $esito');
+          return;
+        }
+        _annullamentiInSospeso.removeAt(0);
+      }
+    } catch (e) {
+      AppLogger().w('⚠️ Righe annullate non registrate: $e');
+    } finally {
+      _invioAnnullamentiInCorso = false;
+    }
+  }
+
+  /// Un articolo esaurito non si vende ma si puo' rendere: in reso e in
+  /// cambio la giacenza la controllano solo le righe di vendita.
+  bool bloccaEsauritoScansionato(ElementoCassa elemento) =>
+      tipoOperazioneCorrente == TipoOperazioneCassa.vendita &&
+      (elemento.quantitaStock <= 0 || !elemento.isDisponibile);
 
   /// Aggiorna la quantità di una riga
   CassaFailure? aggiornaQuantitaRiga(int index, int nuovaQuantita) {
@@ -770,6 +901,11 @@ class CassaController {
       }
     }
 
+    if (nuovaQuantita < riga.quantita) {
+      _annotaAnnullamento(MotivoAnnullamento.quantitaRidotta, [
+        (riga: riga, quantita: riga.quantita - nuovaQuantita),
+      ]);
+    }
     riga.aggiornaQuantita(nuovaQuantita);
     _scontrinoCorrente.calcolaTotale();
     return null;
@@ -789,6 +925,9 @@ class CassaController {
     if (index >= 0 && index < _scontrinoCorrente.righe.length) {
       final riga = _scontrinoCorrente.righe[index];
       if (riga.quantita > 1) {
+        _annotaAnnullamento(MotivoAnnullamento.quantitaRidotta, [
+          (riga: riga, quantita: 1),
+        ]);
         riga.decrementaQuantita();
         _scontrinoCorrente.calcolaTotale();
       } else {
@@ -799,6 +938,10 @@ class CassaController {
 
   /// Svuota il carrello
   void svuotaCarrello() {
+    _annotaAnnullamento(MotivoAnnullamento.carrelloSvuotato, [
+      for (final riga in _scontrinoCorrente.righe)
+        (riga: riga, quantita: riga.quantita),
+    ]);
     final tipoOperazione = _scontrinoCorrente.tipoOperazione;
     _scontrinoCorrente.reset();
     _scontrinoCorrente.tipoOperazione = tipoOperazione;
@@ -877,7 +1020,78 @@ class CassaController {
     return null;
   }
 
+  /// Advisory kit/component availability warnings for sale lines.
+  /// Server-side /pos/checkout remains authoritative for kit deduction.
+  Future<List<String>> kitAvailabilityAdvisories(AppLocalizations l10n) async {
+    final saleLines = _scontrinoCorrente.righe
+        .where((r) => r.tipoMovimento == TipoRigaCassa.vendita)
+        .toList();
+    if (saleLines.isEmpty) return const <String>[];
+
+    final byItem =
+        <String, ({int productId, int variationId, int qty, String name})>{};
+    for (final line in saleLines) {
+      final pid = line.prodotto.id;
+      if (pid == null || pid <= 0) continue;
+      final vid = line.variante?.id ?? 0;
+      final key = '$pid:$vid';
+      final prev = byItem[key];
+      final qty = (prev?.qty ?? 0) + line.quantita;
+      byItem[key] = (
+        productId: pid,
+        variationId: vid,
+        qty: qty,
+        name: line.nomeCompleto,
+      );
+    }
+    if (byItem.isEmpty) return const <String>[];
+
+    final api = QueryMgwsKits();
+    final warnings = <String>[];
+    final checks = byItem.values.map((item) async {
+      try {
+        final res = await api.availability(
+          productId: item.productId,
+          variationId: item.variationId,
+          qty: item.qty,
+        );
+        final sitesRaw = res['sites'];
+        if (sitesRaw is! List || sitesRaw.isEmpty) return; // not a kit
+        final sites = sitesRaw.whereType<Map>().toList();
+        if (sites.isEmpty) return;
+        var okSites = 0;
+        var shortSites = 0;
+        for (final s in sites) {
+          final available = s['available'] == true;
+          if (available) {
+            okSites++;
+          } else {
+            shortSites++;
+          }
+        }
+        if (okSites == 0) {
+          warnings.add(
+            l10n.mgwsKitAvailabilityNoSite(item.name, '${item.qty}'),
+          );
+        } else if (shortSites > 0) {
+          warnings.add(
+            l10n.mgwsKitAvailabilityPartial(
+              item.name,
+              '$okSites',
+              '$shortSites',
+            ),
+          );
+        }
+      } catch (_) {
+        // Advisory only: ignore errors/timeouts.
+      }
+    });
+    await Future.wait(checks);
+    return warnings;
+  }
+
   Future<bool> completaOperazione() async {
+    unawaited(inviaAnnullamenti());
     if (_scontrinoCorrente.isVuoto) {
       AppLogger().w('⚠️ Impossibile completare: scontrino vuoto');
       return false;
@@ -960,7 +1174,7 @@ class CassaController {
       );
 
       // Crea un nuovo scontrino per la prossima vendita
-      _nuovoScontrino();
+      _nuovoScontrino(tornaAllaVendita: true);
       await aggiornaMetriche();
 
       return true;
@@ -974,9 +1188,15 @@ class CassaController {
     }
   }
 
-  /// Crea un nuovo scontrino vuoto
-  void _nuovoScontrino() {
-    final tipoOperazione = _scontrinoCorrente.tipoOperazione;
+  /// Crea un nuovo scontrino vuoto.
+  ///
+  /// Dopo un reso o un cambio completato si torna alla vendita: il cliente
+  /// dopo quasi sempre compra, e restare in "Reso" farebbe registrare la sua
+  /// merce come rientrata.
+  void _nuovoScontrino({bool tornaAllaVendita = false}) {
+    final tipoOperazione = tornaAllaVendita
+        ? TipoOperazioneCassa.vendita
+        : _scontrinoCorrente.tipoOperazione;
     _scontrinoCorrente = Scontrino(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       data: DateTime.now(),
