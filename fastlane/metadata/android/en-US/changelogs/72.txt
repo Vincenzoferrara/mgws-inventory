@@ -1,0 +1,2 @@
+- Restore the widget tests
+- Add the MGWS back-office screens, employee HR and till voids
