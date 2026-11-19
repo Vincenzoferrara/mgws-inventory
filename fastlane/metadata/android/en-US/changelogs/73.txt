@@ -1,0 +1,1 @@
+- Align F-Droid recipe with Flutter build template
