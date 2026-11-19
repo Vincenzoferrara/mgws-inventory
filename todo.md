@@ -1420,14 +1420,6 @@ Repository: <https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>
   - perche: la MR usa `1.0.72`, la copia locale e' rimasta alla versione precedente e puo' generare confusione al prossimo aggiornamento
   - verifica minima: diff vuoto tra le due ricette
 
-- [ ] Pubblicare su GitHub il `flutter pub get --enforce-lockfile` nel workflow di rilascio
-  - tipo: devops
-  - priorita: medium
-  - obiettivo: committare e pushare `.github/workflows/velopack-release.yml` con il flag aggiunto, insieme a `fdroid/README.md`
-  - perche: il workflow di rilascio generera' l'APK di riferimento senza il flag e la prossima build F-Droid non sara' piu' riproducibile
-  - nota: non fare commit senza richiesta esplicita dell'utente (regola 11 di OPENCODE.md)
-  - verifica minima: il workflow su GitHub contiene `flutter pub get --enforce-lockfile` nella sezione `Build signed Android APK`
-
 - [ ] Rispondere a un'eventuale richiesta di path rewrite letterale dal revisore F-Droid
   - tipo: release
   - priorita: low
