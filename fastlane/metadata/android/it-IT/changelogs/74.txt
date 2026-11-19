@@ -1,0 +1,1 @@
+- Remove resolved F-Droid workflow follow-up
