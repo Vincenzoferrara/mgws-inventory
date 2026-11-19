@@ -30,6 +30,15 @@ flags and Flutter version as this recipe:
 
 Otherwise F-Droid's rebuild no longer matches and it stops updating the app.
 
+The upstream release is built at `/home/vagrant/build/it.mgws.mgws_inventory`,
+which is already the F-Droid build server path, so the recipe does not need the
+`sudo mkdir` / `mv` path rewrite shown in the F-Droid Flutter template: adding
+it would change the Dart snapshot and break verification. For the same reason
+the recipe builds one universal APK; `--split-per-abi` would change the output
+paths and needs one signed reference APK per ABI in the GitHub release. Both
+builds run `flutter pub get --enforce-lockfile` so dependency resolution is
+locked as well.
+
 Texts, screenshots and changelogs come from `fastlane/metadata/android/` in
 this repository. After inclusion F-Droid builds every new `v*` tag by
 itself: the release workflow writes the same version into `pubspec.yaml`,

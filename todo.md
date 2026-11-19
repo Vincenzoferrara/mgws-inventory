@@ -1410,8 +1410,30 @@ Repository: <https://github.com/Vincenzoferrara/mgws-inventory-wordpress-plugin>
   - tipo: release
   - priorita: high
   - obiettivo: account gitlab.com, merge request a `fdroid/fdroiddata`, risposte ai revisori; facoltativo: build riproducibili per pubblicare con la propria firma
-  - stato: merge request !54223 aperta (chiusa da linsui il 26 ottobre per la regola dei 3 mesi, poi riaperta dopo la risposta); ricetta su `1.0.66` con un solo APK (`mgws_inventory.apk`, avviso aggiornamenti acceso, dichiarato in NonFreeNet), pipeline verde e build "successfully verified" il 27 ottobre 2026; commento per i revisori su permessi, traffico in chiaro e avviso aggiornamenti da pubblicare; in attesa della revisione
+  - stato: merge request !54223 aperta su `1.0.72` / versionCode `72` (commit `4263f5bb`), ricetta allineata a `templates/build-flutter.yml` nella sostanza; pipeline ufficiale `3091231272` verde con tutti i 9 job (inclusi `fdroid build` e `check apk`), build riproducibile verificata contro l'APK firmato della release GitHub; due risposte dettagliate al revisore `seekme-seekyou` sul thread del template; checklist MR completata tranne la voce opzionale ABI split; in attesa della revisione finale
   - verifica minima: app su <https://f-droid.org/packages/it.mgws.mgws_inventory/>
+
+- [ ] Allineare la ricetta F-Droid locale alla versione pubblicata
+  - tipo: release/manutenzione
+  - priorita: medium
+  - obiettivo: portare `fdroid/it.mgws.mgws_inventory.yml` da `1.0.66` a `1.0.72`, identica a `metadata/it.mgws.mgws_inventory.yml` della MR
+  - perche: la MR usa `1.0.72`, la copia locale e' rimasta alla versione precedente e puo' generare confusione al prossimo aggiornamento
+  - verifica minima: diff vuoto tra le due ricette
+
+- [ ] Pubblicare su GitHub il `flutter pub get --enforce-lockfile` nel workflow di rilascio
+  - tipo: devops
+  - priorita: medium
+  - obiettivo: committare e pushare `.github/workflows/velopack-release.yml` con il flag aggiunto, insieme a `fdroid/README.md`
+  - perche: il workflow di rilascio generera' l'APK di riferimento senza il flag e la prossima build F-Droid non sara' piu' riproducibile
+  - nota: non fare commit senza richiesta esplicita dell'utente (regola 11 di OPENCODE.md)
+  - verifica minima: il workflow su GitHub contiene `flutter pub get --enforce-lockfile` nella sezione `Build signed Android APK`
+
+- [ ] Rispondere a un'eventuale richiesta di path rewrite letterale dal revisore F-Droid
+  - tipo: release
+  - priorita: low
+  - obiettivo: se il revisore insiste su `sudo mkdir /upstream/path/...` + `mv`, applicare il rewrite solo cambiando anche `.github/workflows/velopack-release.yml` per mantenere lo stesso path di build
+  - perche: il workflow upstream compila gia' in `/home/vagrant/build/it.mgws.mgws_inventory`, quindi il rewrite sposterebbe i sorgenti e cambierebbe lo snapshot Dart, rompendo la riproducibilita'
+  - verifica minima: `fdroid build` locale confronta ancora l'APK con quello firmato della release
 
 - [ ] Fare il backup sicuro della chiave di firma Android
   - tipo: sicurezza

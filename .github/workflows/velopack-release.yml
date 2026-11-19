@@ -504,7 +504,7 @@ jobs:
           cd "$fdroid_dir"
           export PUB_CACHE="$(pwd)/.pub-cache"
           flutter config --no-analytics
-          flutter pub get
+          flutter pub get --enforce-lockfile
           flutter build apk --release
           cp build/app/outputs/flutter-apk/app-release.apk "$dist_dir/${ANDROID_APK_NAME}"
 
