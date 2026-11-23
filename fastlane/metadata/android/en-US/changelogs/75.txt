@@ -1,0 +1,1 @@
+- Upgrade dependencies and migrate updater to Velopack 0.3
