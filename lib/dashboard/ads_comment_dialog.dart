@@ -2,7 +2,7 @@
 //
 // UI semplice per gestire i commenti sulle ads
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../notification/notification_service.dart';
 import 'ads_comment_manager.dart';
 import '../l10n/extensions.dart';

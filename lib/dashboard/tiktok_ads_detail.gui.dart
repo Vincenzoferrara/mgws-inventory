@@ -1,6 +1,6 @@
 // TikTok Ads Detail - Finestra dettagliata per TikTok Ads
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'ads_dashboard.code.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';

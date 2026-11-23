@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../login/gui/login.code.dart';
 import '../settings/inventory_quick_load_settings.dart';

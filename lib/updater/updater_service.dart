@@ -38,9 +38,44 @@ class UpdaterService {
 
   static bool _runtimeInitialized = false;
 
-  static bool get isDesktopUpdateSupported {
+  /// Velopack runs only on Windows and Linux, only when the build enables the
+  /// update check and is not a Flatpak.
+  static bool get _isManagedDesktopPlatform {
     if (kIsWeb || !_updateCheckEnabled || _isFlatpak) return false;
     return Platform.isWindows || Platform.isLinux;
+  }
+
+  static bool get isDesktopUpdateSupported =>
+      _isManagedDesktopPlatform && _isVelopackInstall;
+
+  /// Desktop build with the updater enabled that Velopack did not install: a
+  /// `flutter run` build, a portable copy or a distro package.
+  static bool get isUninstalledDesktopBuild =>
+      _isManagedDesktopPlatform && !_isVelopackInstall;
+
+  /// Velopack can update only the app it installed: it finds its launcher and
+  /// manifest next to the executable (`Update.exe` on Windows, `UpdateNix`
+  /// under `<root>/usr/bin` on Linux). A development build, a portable copy or
+  /// a distro package has neither, and the native library answers with an
+  /// error. That error is built with a backtrace, and the backtrace ends up in
+  /// Flutter's own libunwind symbols, which crashes the process, so the native
+  /// runtime must not be touched at all outside a real Velopack install.
+  static bool get _isVelopackInstall {
+    final executable = Platform.resolvedExecutable;
+
+    if (Platform.isLinux) {
+      final binIndex = executable.lastIndexOf('/usr/bin/');
+      if (binIndex < 0) return false;
+      final rootDir = executable.substring(0, binIndex);
+      return File('$rootDir/usr/bin/UpdateNix').existsSync();
+    }
+
+    final parentDir = File(executable).parent;
+    if (File('${parentDir.path}\\Update.exe').existsSync()) return true;
+    final currentIndex = executable.toLowerCase().lastIndexOf('\\current\\');
+    if (currentIndex < 0) return false;
+    final rootDir = executable.substring(0, currentIndex);
+    return File('$rootDir\\Update.exe').existsSync();
   }
 
   /// Le build per Flathub e Google Play si compilano con
@@ -87,7 +122,7 @@ class UpdaterService {
     if (!isDesktopUpdateSupported || _runtimeInitialized) return;
 
     try {
-      await RustLib.init();
+      await initializeVelopack(url: updateUrl);
       _runtimeInitialized = true;
       if (_isVelopackLifecycleCommand(args)) {
         exit(0);
@@ -122,7 +157,7 @@ class UpdaterService {
       return await latestNewerRelease() != null;
     }
     _ensureSupported();
-    return isUpdateAvailable(url: updateUrl);
+    return isUpdateAvailable();
   }
 
   /// Ultima release GitHub se e' piu recente della versione installata.
@@ -143,7 +178,7 @@ class UpdaterService {
       return (await latestNewerRelease())?.version;
     }
     if (!_runtimeInitialized) return null;
-    if (!await isUpdateAvailable(url: updateUrl)) return null;
+    if (!await isUpdateAvailable()) return null;
     // Il numero di versione serve per l'avviso e per non ripeterlo.
     return (await _fetchLatestRelease())?.version;
   }
@@ -168,7 +203,7 @@ class UpdaterService {
 
   Future<void> installAndRestart() async {
     _ensureSupported();
-    await waitExitThenUpdate(url: updateUrl, silent: false, restart: true);
+    await waitExitThenUpdate(silent: false, restart: true);
     exit(0);
   }
 
@@ -177,7 +212,7 @@ class UpdaterService {
     bool restart = true,
   }) async {
     _ensureSupported();
-    await waitExitThenUpdate(url: updateUrl, silent: silent, restart: restart);
+    await waitExitThenUpdate(silent: silent, restart: restart);
   }
 
   Future<UpdaterReleaseNotes?> releaseNotesForInstalledUpdate() async {

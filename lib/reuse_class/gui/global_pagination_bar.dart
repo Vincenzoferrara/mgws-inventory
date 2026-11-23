@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../settings/app_settings.dart';
 import '../logic/global_pagination_controller.dart';

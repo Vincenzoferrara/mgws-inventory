@@ -4,7 +4,7 @@
 // Gestisce grafica, fotocamera, permessi/errori e restituisce al chiamante
 // solo String? per compatibilita con le schermate esistenti.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import '../../theme/theme.dart';
 import '../../l10n/extensions.dart';

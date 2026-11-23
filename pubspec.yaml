@@ -51,7 +51,7 @@ dependencies:
 
   # Smartcard support
   nfc_manager: ^4.2.1        # NFC per Android/iOS
-  usb_serial: ^0.5.2         # Lettori USB (Desktop/Android OTG)
+  usb_serial: ^0.6.0         # Lettori USB (Desktop/Android OTG)
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -62,8 +62,8 @@ dependencies:
   encrypt: ^5.0.3
   dart_jsonwebtoken: ^3.1.1
   flutter_colorpicker: ^1.1.0
-  dropdown_search: ^7.0.0
-  data_table_2: ^2.7.2
+  dropdown_search: ^8.1.0
+  data_table_2: ^3.0.0
   barcode: ^2.2.9                # Generazione/validazione barcode (Code128, EAN, QR)
   provider: ^6.1.5+1
   shared_preferences: ^2.3.5
@@ -78,7 +78,7 @@ dependencies:
   desktop_drop: ^0.8.4             # Drag & drop su desktop
   mime: ^2.0.0                     # Rilevamento tipo MIME dei file
   package_info_plus: ^10.2.1        # Versione e build dell'app
-  velopack_flutter: ^0.1.0          # Aggiornamenti desktop Windows/Linux via Velopack
+  velopack_flutter: ^0.3.3          # Aggiornamenti desktop Windows/Linux via Velopack
   flutter_zxing: ^3.1.0            # Scanner QR/Barcode FOSS basato su ZXing C++
   qr_flutter: ^4.1.0               # Generazione QR code
   fl_chart: ^1.2.0               # Grafici e charts interattivi
@@ -100,15 +100,18 @@ dependencies:
 
  # AI providers
   dart_openai: ^8.0.0             # OpenAI (GPT-4, ChatGPT)
-  anthropic_sdk_dart: ^9.0.0      # Anthropic (Claude)
+  anthropic_sdk_dart: ^11.0.0      # Anthropic (Claude)
   google_generative_ai: ^0.4.6    # Google AI (Gemini)
   mistralai_dart: ^8.0.0        # Mistral AI
   flutter_cohere: ^0.0.2          # Cohere
-  ollama_dart: ^4.0.0             # Ollama (locale)
-  wordpress_client: ^9.3.0
+  ollama_dart: ^5.0.0             # Ollama (locale)
+  wordpress_client: ^10.2.0
 
    # WordPress packages
 
+  material_ui: ^1.11.1
+  xml: ^6.6.1
+  uuid: ^4.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

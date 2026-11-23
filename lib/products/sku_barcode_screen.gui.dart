@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../inventory/product_barcodes.gui.dart';
 import '../l10n/extensions.dart';

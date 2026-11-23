@@ -10,7 +10,7 @@
 // tasto non e' disponibile, la schermata dice perche' invece di accenderlo e
 // far perdere tempo, o peggio far credere che il pulsante funzioni.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';

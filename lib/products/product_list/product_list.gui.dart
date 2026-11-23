@@ -1,7 +1,7 @@
 import '../../l10n/error_text.dart';
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'product_list.code.dart';
 import '../class_products.dart';
 import '../product_grid_fields.dart';

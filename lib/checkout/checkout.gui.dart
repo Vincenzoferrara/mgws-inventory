@@ -1,5 +1,5 @@
 import '../l10n/error_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'class_receipt.dart';
 import 'checkout.code.dart';

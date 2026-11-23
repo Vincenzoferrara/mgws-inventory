@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../login/mgws/query/query_mgws_approval_rules.dart';
 import '../l10n/extensions.dart';

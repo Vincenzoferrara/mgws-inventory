@@ -2,7 +2,7 @@
 // schermate che mostrano una parte MGWS dentro una pagina che si apre anche
 // senza (Impostazioni).
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../l10n/extensions.dart';
 import '../../login/mgws/connection/mgws_auth.dart';

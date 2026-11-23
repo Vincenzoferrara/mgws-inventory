@@ -12,7 +12,7 @@
 // la spunta "1 pezzo senza chiedere": l'operatore impara una schermata sola e
 // non tre.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../reuse_class/barcode/barcode_scanner.dart';
 import '../reuse_class/datagridview/datagridview_image_preview.dart';

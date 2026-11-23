@@ -4,7 +4,7 @@
 // Utilizza fl_chart per visualizzazioni professionali e animate
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'dashboard.code.dart';
 import 'class_report.dart';
 import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;

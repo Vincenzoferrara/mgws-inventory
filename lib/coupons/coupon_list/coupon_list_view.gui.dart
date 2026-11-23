@@ -1,5 +1,5 @@
 import '../../l10n/error_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../notification/notification_service.dart';
 import '../class_coupon.dart';
 import '../../theme/theme.dart';

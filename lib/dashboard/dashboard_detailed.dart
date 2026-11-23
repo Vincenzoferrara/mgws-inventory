@@ -6,7 +6,7 @@
 // - Report Ordini Dettagliato
 
 import '../l10n/error_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'dashboard.code.dart';
 import 'dashboard_charts.dart';
 import 'dashboard_widget_data.dart' show dashboardOrderStatusLabel;

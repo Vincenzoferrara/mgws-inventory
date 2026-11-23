@@ -6,6 +6,11 @@ output-dir: lib/l10n/generated
 output-localization-file: app_localizations.dart
 output-class: AppLocalizations
 
+# gen-l10n still emits the legacy flutter_localizations delegates in the
+# generated file. The app uses GlobalMaterialLocalizations.delegates from
+# material_ui instead, so the unused generated list is exempted here.
+header: "// ignore_for_file: deprecated_member_use"
+
 # app_en.arb e il template: ogni chiave nasce qui e genera un getter tipizzato.
 template-arb-file: app_en.arb
 

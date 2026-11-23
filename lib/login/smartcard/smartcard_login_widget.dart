@@ -1,5 +1,5 @@
 import '../../l10n/error_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'smartcard_service.dart';
 import '../../l10n/extensions.dart';
 import '../../theme/theme.dart';

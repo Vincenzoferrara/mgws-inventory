@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'updater_service.dart';
 import '../l10n/extensions.dart';
@@ -50,7 +50,9 @@ class UpdaterLogic extends ChangeNotifier {
 
     if (!isSupported) {
       _status = UpdaterStatus.unsupported;
-      _message = l10n.updaterUnsupportedMessage;
+      _message = UpdaterService.isUninstalledDesktopBuild
+          ? l10n.updaterNotInstalledMessage
+          : l10n.updaterUnsupportedMessage;
     } else {
       _status = UpdaterStatus.idle;
       _message = isNotifyOnly

@@ -8,7 +8,7 @@
 // copie avrebbero finito per divergere, e i due moduli finirebbero per
 // chiedere cose diverse all'operatore.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../class_products.dart';
 import 'product_list.gui.dart';

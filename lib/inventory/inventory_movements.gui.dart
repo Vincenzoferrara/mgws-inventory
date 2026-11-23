@@ -12,7 +12,7 @@
 // apre la schermata dell'operazione, da li' si sceglie se riaprirla nel pannello
 // che l'ha prodotta o se annullarla per contromovimento.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';

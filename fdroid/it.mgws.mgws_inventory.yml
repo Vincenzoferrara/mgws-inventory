@@ -22,9 +22,9 @@ Binaries:
   https://github.com/Vincenzoferrara/mgws-inventory/releases/download/v%v/mgws_inventory.apk
 
 Builds:
-  - versionName: 1.0.66
-    versionCode: 66
-    commit: de0e62efdc5b4031503c07f0e275e2925d3b28a4
+  - versionName: 1.0.73
+    versionCode: 73
+    commit: 4dea1f70aec008d97806cad43efa17b6673adfbb
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
       - flutter@3.47.5
@@ -49,5 +49,5 @@ AllowedAPKSigningKeys: e57507b7f01b5a815ac399264c67a0de49f8cc9d2fc0b479d54931080
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.66
-CurrentVersionCode: 66
+CurrentVersion: 1.0.73
+CurrentVersionCode: 73

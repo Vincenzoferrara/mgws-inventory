@@ -11,7 +11,7 @@
 //    vedono bloccata.
 
 import '../l10n/known_messages.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../login/mgws/query/query_mgws_site.dart';
 import '../l10n/extensions.dart';

@@ -10,7 +10,7 @@
 // partenza perde i pezzi, quello di arrivo li guadagna, e il pannello lo
 // dice sempre prima di confermare.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../products/product_list/product_picker.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';

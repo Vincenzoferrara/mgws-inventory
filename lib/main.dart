@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:report_flutter/report_flutter.dart' show ReportLocalizations;
 import 'updater/updater_service.dart';
@@ -83,7 +83,8 @@ class MyApp extends StatelessWidget {
                 // non solo le stringhe dell'app.
                 // The report_flutter print screens bring their own texts.
                 localizationsDelegates: const [
-                  ...AppLocalizations.localizationsDelegates,
+                  AppLocalizations.delegate,
+                  ...GlobalMaterialLocalizations.delegates,
                   ReportLocalizations.delegate,
                 ],
 

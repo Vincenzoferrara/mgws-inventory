@@ -2,7 +2,7 @@ import '../l10n/error_text.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import '../theme/theme.dart';
 import 'package:share_plus/share_plus.dart';

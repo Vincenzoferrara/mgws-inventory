@@ -5971,6 +5971,10 @@
   "@updaterUnsupportedMessage": {
     "description": "Localized string updaterUnsupportedMessage"
   },
+  "updaterNotInstalledMessage": "Questa copia non è stata installata dall'aggiornatore, quindi non può aggiornarsi da sola. Per ricevere gli aggiornamenti automatici installa l'app da un pacchetto di release.",
+  "@updaterNotInstalledMessage": {
+    "description": "Shown when a desktop copy was not installed by Velopack and therefore cannot update itself"
+  },
   "updaterReadyMessage": "Pronto per controllare aggiornamenti desktop.",
   "@updaterReadyMessage": {
     "description": "Localized string updaterReadyMessage"

@@ -1,6 +1,6 @@
 // Google Ads Detail - Finestra dettagliata per Google Ads
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../theme/theme.dart';
 import 'ads_dashboard.code.dart';
 

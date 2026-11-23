@@ -14,7 +14,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../products/product_list/product_picker.dart';
