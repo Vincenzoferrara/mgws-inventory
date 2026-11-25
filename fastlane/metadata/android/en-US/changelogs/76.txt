@@ -1,0 +1,3 @@
+- Apply pending app changes across inventory, login and UI
+- Add RFID UHF associations to inventory Add
+- Translate source comments and scripts to English
