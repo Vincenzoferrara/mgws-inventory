@@ -1,20 +1,20 @@
 import 'generated/app_localizations.dart';
 import 'known_messages.dart';
 
-/// Testo che il codice senza `BuildContext` prepara e la GUI traduce.
+/// Text prepared by code without `BuildContext`, then translated by the GUI.
 ///
-/// Il codice di modulo (`*.code.dart`, query) non conosce la lingua corrente:
-/// restituisce una funzione che sceglie la chiave ARB e i parametri, e la GUI
-/// la chiama con `context.l10n` quando mostra il messaggio. Cosi il testo
-/// segue la lingua attiva anche se cambia dopo che il messaggio e nato.
+/// Module code (`*.code.dart`, queries) does not know the current language:
+/// it returns a function that selects an ARB key and parameters, and the GUI
+/// calls it with `context.l10n` when displaying the message. This keeps text
+/// aligned with the active locale even when it changes after the message is created.
 typedef LocalizedText = String Function(AppLocalizations l10n);
 
-/// Testo gia pronto, ad esempio un messaggio restituito dal server.
+/// Text that is already complete, such as a message returned by the server.
 ///
-/// I testi fissi di [AppMessages] vengono comunque tradotti.
+/// Fixed texts in [AppMessages] are always translated.
 LocalizedText literalText(String text) =>
     (l10n) => knownMessageText(l10n, text);
 
-/// Elenco di testi gia pronti, ad esempio gli errori restituiti dal server.
+/// Complete texts, such as server-returned errors.
 List<LocalizedText> literalTexts(Iterable<String> texts) =>
     texts.map(literalText).toList(growable: false);

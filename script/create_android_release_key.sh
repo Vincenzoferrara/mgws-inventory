@@ -11,13 +11,13 @@ KEY_ALIAS="gestione_negozio_abbigliamento"
 mkdir -p "$KEY_DIR"
 
 if [[ -e "$KEYSTORE_PATH" ]]; then
-  printf 'Keystore gia presente: %s\n' "$KEYSTORE_PATH" >&2
+  printf 'Keystore already exists: %s\n' "$KEYSTORE_PATH" >&2
   exit 1
 fi
 
-read -r -s -p "Password keystore Android: " STORE_PASSWORD
+read -r -s -p "Android keystore password: " STORE_PASSWORD
 printf '\n'
-read -r -s -p "Password chiave Android: " KEY_PASSWORD
+read -r -s -p "Android key password: " KEY_PASSWORD
 printf '\n'
 
 keytool -genkeypair \

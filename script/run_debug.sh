@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-# Avvio debug locale con contatore build solo-debug.
-# Il numero NON tocca pubspec.yaml ne le release CI/GitHub: viaggia solo
-# via --dart-define e l'app lo mostra solo nelle build debug (kDebugMode).
-# Uso: script/run_debug.sh -d emulator-5554 [altri argomenti flutter run]
+# Start a local debug build with a debug-only build counter.
+# The number does not modify pubspec.yaml or CI/GitHub releases: it is passed
+# only through --dart-define and is shown by the app only in debug builds (kDebugMode).
+# Usage: script/run_debug.sh -d emulator-5554 [additional flutter run arguments]
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,5 +17,5 @@ fi
 n=$((n + 1))
 echo "$n" >"$COUNTER"
 
-echo "Build debug locale #$n"
+echo "Local debug build #$n"
 exec flutter run --dart-define="DEBUG_BUILD_NR=$n" "$@"

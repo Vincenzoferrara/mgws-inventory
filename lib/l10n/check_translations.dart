@@ -1,41 +1,39 @@
-// Verifica che le traduzioni siano complete e coerenti.
+// Verifies that translations are complete and consistent.
 //
-// Controlla che ogni chiave presente nel template inglese esista anche nel file
-// italiano, che non ci siano chiavi obsolete rimaste nel file italiano, che i
-// valori non siano vuoti e che i placeholder siano allineati fra le due lingue.
+// Checks that every key in the English template exists in every translation,
+// that there are no obsolete keys, that values are not empty, and that placeholders
+// match across languages.
 //
-// E' pensato per girare in CI: esce con codice 1 se trova problemi, cosi la pull
-// request di chi aggiunge una stringa viene bloccata se si dimentica di
-// tradurla.
+// This script is intended to run in CI: it exits with code 1 when it detects a
+// problem, blocking a pull request if a contributor adds a string and forgets
+// to translate it.
 //
-// Uso:
+// Usage:
 //   dart run lib/l10n/check_translations.dart
 
 import 'dart:convert';
 import 'dart:io';
 
-/// Dove si trovano i file ARB, relativo alla radice del progetto.
+/// Where the ARB files are located, relative to the project root.
 const String _cartellaArb = 'lib/l10n';
 
-/// Template da cui nascono tutte le chiavi.
+/// Template from which all keys are derived.
 const String _template = 'app_en.arb';
 
-/// Lingue che devono restare allineate al template.
+/// Languages that must remain aligned with the template.
 const List<String> _traduzioni = ['app_it.arb'];
 
 void main(List<String> args) {
   final cartella = Directory(_cartellaArb);
 
   if (!cartelleEsiste(cartella)) {
-    stderr.writeln('Cartella ARB non trovata: $_cartellaArb');
+    stderr.writeln('ARB folder not found: $_cartellaArb');
     exit(2);
   }
 
   final template = _leggi(cartella, _template);
   if (template == null) {
-    stderr.writeln(
-      'Template non trovato o non valido: $_cartellaArb/$_template',
-    );
+    stderr.writeln('Template not found or invalid: $_cartellaArb/$_template');
     exit(2);
   }
 
@@ -44,7 +42,7 @@ void main(List<String> args) {
   for (final nome in _traduzioni) {
     final traduzioni = _leggi(cartella, nome);
     if (traduzioni == null) {
-      errori.add('File non trovato o non valido: $_cartellaArb/$nome');
+      errori.add('File not found or invalid: $_cartellaArb/$nome');
       continue;
     }
 
@@ -53,27 +51,27 @@ void main(List<String> args) {
 
   if (errori.isEmpty) {
     stdout.writeln(
-      'Traduzioni OK: '
-      '${_chiaviVisibili(template).length} chiavi verificate in '
-      '${_traduzioni.length + 1} lingue.',
+      'Translations OK: '
+      '${_chiaviVisibili(template).length} keys verified in '
+      '${_traduzioni.length + 1} languages.',
     );
     exit(0);
   }
 
-  stderr.writeln('Traduzioni incomplete o incoerenti:');
+  stderr.writeln('Incomplete or inconsistent translations:');
   for (final errore in errori) {
     stderr.writeln('  - $errore');
   }
   stderr.writeln('');
   stderr.writeln(
-    'Correggi i problemi elencati sopra. Ogni chiave del template deve '
-    'essere presente e non vuota in ogni file di traduzione, con gli stessi '
-    'placeholder.',
+    'Fix the issues listed above. Each key in the template must '
+    'be present and non-empty in every translation file, with the same '
+    'placeholders.',
   );
   exit(1);
 }
 
-/// Confronta una traduzione con il template e restituisce i problemi trovati.
+/// Compares a translation with the template and returns any problems found.
 List<String> _confronta(
   String nomeTraduzione,
   Map<String, dynamic> template,
@@ -84,40 +82,40 @@ List<String> _confronta(
   final chiaviTemplate = _chiaviVisibili(template).toSet();
   final chiaviTraduzione = _chiaviVisibili(traduzioni).toSet();
 
-  // Chiavi presenti nel template ma assenti dalla traduzione.
+  // Keys present in the template but missing from the translation.
   final mancanti = chiaviTemplate.difference(chiaviTraduzione).toList()..sort();
   for (final chiave in mancanti) {
-    problemi.add('$nomeTraduzione: chiave mancante "$chiave"');
+    problemi.add('$nomeTraduzione: missing key "$chiave"');
   }
 
-  // Chiavi rimaste nella traduzione dopo che il template le ha rimosse.
+  // Keys left in the translation after being removed from the template.
   final obsolete = chiaviTraduzione.difference(chiaviTemplate).toList()..sort();
   for (final chiave in obsolete) {
     problemi.add(
-      '$nomeTraduzione: chiave obsoleta "$chiave", non piu nel template',
+      '$nomeTraduzione: obsolete key "$chiave", no longer in the template',
     );
   }
 
-  // Controlli sulle chiave presenti in entrambi.
+  // Checks on keys present in both.
   for (final chiave in chiaviTemplate.intersection(chiaviTraduzione)) {
     final valore = traduzioni[chiave];
 
     if (valore is! String) {
-      problemi.add('$nomeTraduzione: "$chiave" non e una stringa');
+      problemi.add('$nomeTraduzione: "$chiave" is not a string');
       continue;
     }
 
     if (valore.trim().isEmpty) {
-      problemi.add('$nomeTraduzione: "$chiave" ha un valore vuoto');
+      problemi.add('$nomeTraduzione: "$chiave" has an empty value');
       continue;
     }
 
-    // Un valore lasciato identico al placeholder non e una traduzione.
+    // A value left identical to the placeholder is not a translation.
     final segnaposto = RegExp(r'\{[a-zA-Z0-9_]+\}');
     if (valore.trim() == segnaposto.firstMatch(valore)?.group(0)) {
       problemi.add(
-        '$nomeTraduzione: "$chiave" contiene solo un placeholder, '
-        'manca il testo circostante',
+        '$nomeTraduzione: "$chiave" contains only a placeholder, '
+        'missing surrounding text',
       );
     }
 
@@ -127,17 +125,17 @@ List<String> _confronta(
 
     if (mancantiQui.isNotEmpty) {
       problemi.add(
-        '$nomeTraduzione: "$chiave" non usa i placeholder '
-        '${mancantiQui.join(", ")} presenti nel template',
+        '$nomeTraduzione: "$chiave" does not use the placeholder '
+        '${mancantiQui.join(", ")} present in the template',
       );
     }
 
-    // Placeholder usati in piu' o diversi rispetto al template.
+    // Placeholders used in a different number or manner than the template.
     final estranei = trovati.difference(attesi);
     if (estranei.isNotEmpty) {
       problemi.add(
-        '$nomeTraduzione: "$chiave" usa placeholder '
-        '${estranei.join(", ")} assenti nel template',
+        '$nomeTraduzione: "$chiave" uses placeholder '
+        '${estranei.join(", ")} not present in the template',
       );
     }
   }
@@ -145,17 +143,17 @@ List<String> _confronta(
   return problemi;
 }
 
-/// Le chiavi visibili sono quelle che non iniziano con `@`.
+/// Visible keys are those that do not start with `@`.
 ///
-/// In ARB le chiavi che iniziano con `@` sono metadati: descrizioni, esempi e
-/// definizioni dei placeholder. Non sono stringhe da tradurre.
+/// In ARB, keys starting with `@` are metadata: descriptions, examples, and
+/// placeholder definitions. They are not strings to be translated.
 Set<String> _chiaviVisibili(Map<String, dynamic> dati) =>
     dati.keys.where((k) => !k.startsWith('@')).toSet();
 
-/// I nomi dei placeholder presenti in un testo ICU.
+/// The names of the placeholders present in an ICU text.
 ///
-/// Copre sia i placeholder semplici (`{nome}`) sia le forme con plural e
-/// genere (`{n, plural, ...}`), servendo il nome che segue la graffa.
+/// Covers both simple placeholders (`{name}`) and those with plural and
+/// gender forms (`{n, plural, ...}`), serving the name that follows the brace.
 Set<String> _placeholderDi(Object? valore) {
   if (valore is! String) return const <String>{};
 
@@ -170,7 +168,7 @@ Set<String> _placeholderDi(Object? valore) {
   return trovati;
 }
 
-/// Legge un file ARB, restituendo `null` se manca o non e JSON valido.
+/// Reads an ARB file, returning `null` if it is missing or not valid JSON.
 Map<String, dynamic>? _leggi(Directory cartella, String nome) {
   final file = File('${cartella.path}/$nome');
   if (!file.existsSync()) return null;
@@ -179,11 +177,11 @@ Map<String, dynamic>? _leggi(Directory cartella, String nome) {
     final contenuto = jsonDecode(file.readAsStringSync());
     if (contenuto is Map<String, dynamic>) return contenuto;
   } on FormatException catch (e) {
-    stderr.writeln('$nome non e JSON valido: ${e.message}');
+    stderr.writeln('$nome is not valid JSON: ${e.message}');
   }
 
   return null;
 }
 
-/// `true` se la cartella esiste.
+/// `true` if the folder exists.
 bool cartelleEsiste(Directory cartella) => cartella.existsSync();

@@ -7,24 +7,25 @@ import 'notification/notification_service.dart';
 import 'settings/theme/theme_settings.dart';
 import 'l10n/extensions.dart';
 import 'l10n/locale_settings.dart';
+import 'settings/app_settings.dart';
 import 'welcome/welcome_gate.dart';
 import 'welcome/welcome_preferences.dart';
 import 'welcome/welcome_tour_controller.dart';
 
 Future<void> main(List<String> args) async {
-  // Assicurati che Flutter sia inizializzato
+  // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
   await UpdaterService.initializeVelopackRuntime(args);
 
-  // Inizializza il logger
+  // Initialize the logger
   await log.init();
 
-  // Inizializza il theme manager
+  // Initialize the theme manager
   final themeSettings = ThemeSettings();
   await themeSettings.init();
 
-  // Inizializza la gestione della lingua dell'interfaccia
+  // Initialize interface language management
   final localeSettings = LocaleSettings();
   await localeSettings.init();
 
@@ -35,29 +36,36 @@ Future<void> main(List<String> args) async {
     preferences: welcomePreferences,
   );
 
+  // Initialize general application settings
+  final appSettings = AppSettings();
+  await appSettings.init();
+
   log.d('Application started');
 
-  // La funzione runApp avvia l'applicazione Flutter con il widget radice.
+  // runApp starts the Flutter application with the root widget.
   runApp(
     MyApp(
       themeSettings: themeSettings,
       localeSettings: localeSettings,
       welcomeTourController: welcomeTourController,
+      appSettings: appSettings,
     ),
   );
 }
 
-// MyApp è il widget radice (root) della tua intera applicazione.
+// MyApp is the root widget of your entire application.
 class MyApp extends StatelessWidget {
   final ThemeSettings themeSettings;
   final LocaleSettings localeSettings;
   final WelcomeTourController welcomeTourController;
+  final AppSettings appSettings;
 
   const MyApp({
     super.key,
     required this.themeSettings,
     required this.localeSettings,
     required this.welcomeTourController,
+    required this.appSettings,
   });
 
   @override
@@ -70,6 +78,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<WelcomeTourController>.value(
           value: welcomeTourController,
         ),
+        ChangeNotifierProvider<AppSettings>.value(value: appSettings),
       ],
       child: Consumer<ThemeSettings>(
         builder: (context, themeSettings, child) {

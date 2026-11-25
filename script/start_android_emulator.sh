@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Avvia un AVD Android locale e attende il completamento del boot.
+# Start a local Android AVD and wait until the boot completes.
 set -euo pipefail
 
 AVD_NAME="${1:-pixel_36}"
@@ -10,13 +10,13 @@ ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
 EMULATOR_LOG="${TMPDIR:-/tmp}/flutter-android-emulator-${AVD_NAME}.log"
 
 if [[ ! -x "$EMULATOR" || ! -x "$ADB" ]]; then
-  echo "Android SDK locale non trovato in: $ANDROID_SDK_ROOT" >&2
-  echo "Imposta ANDROID_SDK_ROOT oppure installa emulator e platform-tools." >&2
+  echo "Local Android SDK not found in: $ANDROID_SDK_ROOT" >&2
+  echo "Set ANDROID_SDK_ROOT or install emulator and platform-tools." >&2
   exit 1
 fi
 
 if ! "$EMULATOR" -list-avds | grep -Fxq "$AVD_NAME"; then
-  echo "AVD '$AVD_NAME' non trovato. AVD disponibili:" >&2
+  echo "AVD '$AVD_NAME' not found. Available AVDs:" >&2
   "$EMULATOR" -list-avds >&2
   exit 1
 fi
@@ -33,24 +33,24 @@ configure_reverse_proxy() {
   for port in 8080 8081; do
     "$ADB" reverse "tcp:$port" "tcp:$port"
   done
-  echo "Inoltro ADB attivo: localhost:8080 e localhost:8081 dell'emulatore puntano al PC."
+  echo "ADB forwarding active: localhost:8080 and localhost:8081 on the emulator point to the PC." 
 }
 
 if "$ADB" devices | awk 'NR > 1 && $1 ~ /^emulator-/ && $2 == "device" { found = 1 } END { exit !found }'; then
-  echo "Un emulatore Android e' gia' avviato."
-  echo "Verifico che Android sia pronto..."
+  echo "An Android emulator is already running."
+  echo "Checking whether Android is ready..."
   wait_for_android_boot
   configure_reverse_proxy
   exit 0
 fi
 
-echo "Avvio dell'emulatore Android locale '$AVD_NAME'..."
-# setsid separa l'emulatore dal task VS Code: il task puo terminare senza
-# inviare il proprio segnale di arresto anche al processo dell'emulatore.
+echo "Starting local Android emulator '$AVD_NAME'..."
+# setsid separates the emulator from the VS Code task: the task can terminate
+# without sending its own stop signal to the emulator process.
 setsid --fork "$EMULATOR" -avd "$AVD_NAME" -no-snapshot-load >"$EMULATOR_LOG" 2>&1
 
-echo "Attendo il completamento del boot..."
+echo "Waiting for boot to complete..."
 wait_for_android_boot
 
-echo "Emulatore '$AVD_NAME' pronto."
+echo "Emulator '$AVD_NAME' is ready."
 configure_reverse_proxy

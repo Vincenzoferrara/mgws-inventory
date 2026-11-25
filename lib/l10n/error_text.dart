@@ -2,10 +2,10 @@ import '../login/jwt_api/error_list.dart';
 import 'generated/app_localizations.dart';
 import 'known_messages.dart';
 
-/// Testo di un errore da mostrare all'operatore.
+/// Error text to display to the operator.
 ///
-/// Le eccezioni dell'app ([AppException]) portano un testo tradotto; le altre
-/// mostrano la propria descrizione, che di solito arriva da librerie o server.
+/// Application exceptions ([AppException]) carry translated text; all other
+/// exceptions expose their own description, usually received from a library or server.
 String localizedErrorText(AppLocalizations l10n, Object error) {
   if (error is AppException) return error.localizedMessage(l10n);
   final text = error.toString();

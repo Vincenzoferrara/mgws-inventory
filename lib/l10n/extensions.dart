@@ -2,19 +2,19 @@ import 'package:flutter/widgets.dart';
 
 import 'generated/app_localizations.dart';
 
-// Chi importa questo file ha a disposizione anche AppLocalizations.
+// Importing this file also exposes AppLocalizations.
 export 'generated/app_localizations.dart';
 
-/// Accesso rapido alle traduzioni dell'app.
+/// Quick access to application translations.
 ///
-/// Si usa come `context.l10n.cassaTotale`. E' il modo consigliato per leggere
-/// una stringa visibile: rende evidente a chi legge il codice che quel testo
-/// dipende dalla lingua e va tradotto in entrambi i file ARB.
-extension TraduzioneContext on BuildContext {
-  /// Le traduzioni correnti per il contesto dato.
+/// Use it as `context.l10n.checkoutTotal`. It is the recommended way to read
+/// a visible string: it makes it clear to source readers that the text depends
+/// on the active language and must be translated in both ARB files.
+extension TranslationContext on BuildContext {
+  /// The current translations for the given context.
   ///
-  /// Con `nullable-getter: false` in `l10n.yaml` questo valore non e mai nullo:
-  /// se fosse nullo significa che il widget non ha `MaterialApp` come antenato,
-  /// cioe che mancano le localizzazioni nell'albero dei widget.
+  /// With `nullable-getter: false` in `l10n.yaml`, this value is never null:
+  /// a null value would mean that the widget has no `MaterialApp` ancestor,
+  /// which means localizations are missing from the widget tree.
   AppLocalizations get l10n => AppLocalizations.of(this);
 }

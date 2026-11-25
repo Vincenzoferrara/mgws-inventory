@@ -1,5 +1,5 @@
-# Configurazione della generazione delle traduzioni.
-# I file ARB sorgente e il codice generato stanno entrambi sotto lib/l10n.
+# Localization generation configuration.
+# ARB source files and generated code are both stored under lib/l10n.
 
 arb-dir: lib/l10n
 output-dir: lib/l10n/generated
@@ -11,23 +11,23 @@ output-class: AppLocalizations
 # material_ui instead, so the unused generated list is exempted here.
 header: "// ignore_for_file: deprecated_member_use"
 
-# app_en.arb e il template: ogni chiave nasce qui e genera un getter tipizzato.
+# `app_en.arb` is the template: every key is defined here and generates a typed getter.
 template-arb-file: app_en.arb
 
-# In Flutter 3.41 il codice viene scritto direttamente nel progetto (output-dir),
-# quindi restiamo dentro lib/l10n senza package sintetico.
+# Flutter 3.41 writes generated code directly into the project (output-dir),
+# so we stay inside lib/l10n without a synthetic package.
 
-# Le chiavi devono essere nomi di metodo Dart validi: camelCase, in inglese,
-# prefissate dal modulo di appartenenza (cassaTotal, productsAdd, settingsLanguage).
-# gen_l10n non accetta chiavi annidate ne punti.
+# Keys must be valid Dart method names: camelCase, in English, and prefixed
+# with the owning module (for example checkoutTotal, productsAdd, settingsLanguage).
+# gen_l10n does not accept nested keys or dots.
 
-# Lingue supportate. Per aggiungerne una basta creare il file ARB corrispondente.
+# Supported languages. To add one, create the corresponding ARB file.
 preferred-supported-locales:
   - en
   - it
 
-# Le chiavi non tradotte nelle altre lingue finiscono qui, utili in CI.
+# Strings missing in other languages are listed here and used in CI.
 untranslated-messages-file: lib/l10n/untranslated.json
 
-# AppLocalizations.of(context) restituisce il valore diretto, senza nullable.
+# AppLocalizations.of(context) returns a direct value, without nullability.
 nullable-getter: false
