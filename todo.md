@@ -478,6 +478,14 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - obiettivo: decidere se i metodi RFID placeholder devono essere funzionali o dichiarati non supportati
   - perche: i placeholder attuali possono far sembrare disponibile una funzione che in realta non esiste
 
+- [ ] Verificare il flusso RFID UHF di Add su MGWS reale
+  - tipo: verifica/manuale
+  - priorita: medium
+  - obiettivo: provare scansione, risoluzione GS1/opaca e invio solo delle righe associate su un sito MGWS con `mg_rfid_tags` popolata
+  - perche: i test coprono contratto e controller, ma non una installazione WordPress reale ne un lettore fisico
+  - rischio: il trasporto lettore resta un placeholder, quindi la verifica finale richiede un reader reale o un'iniezione di tag
+  - verifica minima: due EPC dello stesso prodotto diventano quantita 2 in Add e lo stock cambia solo con `Check and stock in`
+
 - [x] Correggere le URL dell'updater rotte dal refuso del nome del repository
   - tipo: bug/app
   - priorita: high

@@ -89,7 +89,11 @@ server and sends nothing outside. See the [privacy policy](../../PRIVACY.md).
 ## RFID
 
 Reader connection (USB or Wi-Fi) and scanning parameters. Bluetooth is not
-available while the module is in alpha.
+available while the module is in alpha. The `RFID UHF` button in inventory
+`Add` uses the same reader callback. Reader transport is not implemented yet:
+`RFIDManager.connect()` reports false and `readTags()` returns sample tags, so
+scans in this release use sample data. EPC → product assignments are kept in
+the MGWS EPC registry on the site and are set in the product editor, not here.
 
 ## Shortcuts
 

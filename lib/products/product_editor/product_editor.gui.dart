@@ -18,8 +18,10 @@ import '../../reuse_class/image_url_resolver.dart';
 import '../../reuse_class/barcode/barcode_generator.dart';
 import '../../l10n/extensions.dart';
 import 'product_editor.code.dart';
+import '../../rfid/uhf/uhf_tag_assignment.code.dart';
 import 'variant_combinations.dart';
 import 'widgets/media_selector_dialog.dart';
+import '../../rfid/uhf/widgets/uhf_tag_assignment_section.gui.dart';
 
 Future<bool?> openProductEditor(
   BuildContext context, {
@@ -84,6 +86,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   final _quickVarianteTagliaController = TextEditingController();
   final _quickVarianteColoreController = TextEditingController();
   final _mgwsStockController = TextEditingController();
+  final RfidTagAssignmentController _rfidTagAssignment =
+      RfidTagAssignmentController();
 
   /// Sede in cui il totale di stock appena salvato viene scritto.
   ///
@@ -458,6 +462,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     });
 
     await _caricaCostoProdotto(productId);
+    await _caricaRfidTagsProdottoEsistente(productId);
 
     NotificationService.instance.messageBar(
       'successo',
@@ -488,6 +493,64 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _costoSalvato = cost.isEmpty ? null : cost;
       _rivalutaStockAlSalvataggio = false;
     });
+  }
+
+  /// Legge gli EPC gia' associati al prodotto e alle sue varianti salvate.
+  /// Un errore del registro non blocca il caricamento del prodotto.
+  Future<void> _caricaRfidTagsProdottoEsistente(int productId) async {
+    if (productId <= 0) return;
+    await _rfidTagAssignment.load(productId, 0);
+    for (final variante in _varianti) {
+      final variationId = variante.id ?? 0;
+      if (variationId > 0) {
+        await _rfidTagAssignment.load(productId, variationId);
+      }
+    }
+    if (mounted) setState(() {});
+  }
+
+  /// Positive ids address a saved variation; negative keys stage an unsaved
+  /// variation until the product save returns its real ids. The key belongs to
+  /// the variation object, not to its current position in the list.
+  int _rfidKeyForVariante(int index) {
+    if (index < 0 || index >= _varianti.length) return 0;
+    return _varianti[index].rfidKey;
+  }
+
+  int _rfidVariationIdCorrente() {
+    final index = _selectedVarianteIndex;
+    if (index == null || index < 0 || index >= _varianti.length) return 0;
+    return _varianti[index].id ?? 0;
+  }
+
+  /// Stable identity of a variation for the post-save EPC remap. Attribute
+  /// order is irrelevant: WooCommerce may return the same combination in a
+  /// different order.
+  Set<String> _rfidVariationSignature(List<AttributoVariante> attributi) {
+    final parts = <String>[];
+    for (final attributo in attributi) {
+      final nome = attributo.nome.trim().toLowerCase();
+      final opzione = attributo.opzione.trim().toLowerCase();
+      if (nome.isNotEmpty && opzione.isNotEmpty) parts.add('$nome=$opzione');
+    }
+    return parts.toSet();
+  }
+
+  Widget _buildRfidAssignmentSection(int key) {
+    return RfidTagAssignmentSection(
+      epcs: _rfidTagAssignment.epcsFor(key),
+      onAdd: (raw) {
+        _rfidTagAssignment.selectTarget(key);
+        final added = _rfidTagAssignment.addEpc(raw);
+        if (added && mounted) setState(() {});
+        return added;
+      },
+      onRemove: (raw) {
+        _rfidTagAssignment.selectTarget(key);
+        _rfidTagAssignment.removeEpc(raw);
+        if (mounted) setState(() {});
+      },
+    );
   }
 
   void _resetForm() {
@@ -525,6 +588,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       _costoSalvato = null;
       _costoNonDisponibile = false;
       _rivalutaStockAlSalvataggio = false;
+      _rfidTagAssignment.reset();
       for (final attributo in _attributiProdottoSelezionati) {
         attributo.dispose();
       }
@@ -1654,6 +1718,10 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               subtitle: Text(context.l10n.productsWeightPerVariantHint),
             ),
           ),
+        if (_productType == ProductTypeSelection.simple) ...[
+          const SizedBox(height: 12),
+          _buildRfidAssignmentSection(0),
+        ],
       ],
     );
   }
@@ -2074,7 +2142,15 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       ),
       child: ExpansionTile(
         onExpansionChanged: (expanded) {
-          if (expanded) setState(() => _selectedVarianteIndex = index);
+          if (!expanded) return;
+          setState(() => _selectedVarianteIndex = index);
+          final variationId = variante.id ?? 0;
+          final productId = _prodottoOriginale?.id ?? 0;
+          if (variationId > 0 && productId > 0) {
+            _rfidTagAssignment.load(productId, variationId).then((_) {
+              if (mounted) setState(() {});
+            });
+          }
         },
         tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -2472,6 +2548,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
         ),
         const SizedBox(height: 12),
         _buildAttributiVariante(variante, index),
+        const SizedBox(height: 12),
+        _buildRfidAssignmentSection(_rfidKeyForVariante(index)),
       ],
     );
   }
@@ -4887,6 +4965,87 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
       } else {
         ProdottiCache.clearAll();
       }
+
+      // The EPC registry is accessory: its failure must not undo the saved
+      // product, but it has to appear in the editor feedback.
+      String? rfidFailureMessage;
+      if (savedProductId > 0) {
+        // New variations have no local id. The save returns only ids, so the
+        // variations are reloaded and new ones are matched by attributes: the
+        // server response order is not a guarantee.
+        final idsByRfidKey = <int, int?>{
+          for (final temp in _varianti)
+            if (temp.rfidKey > 0) temp.rfidKey: temp.rfidKey,
+        };
+        final unsavedRfidKeys = <int>{
+          for (final temp in _varianti)
+            if (temp.rfidKey < 0) temp.rfidKey,
+        };
+        final tempsByRfidKey = <int, VarianteTemp>{
+          for (final temp in _varianti) temp.rfidKey: temp,
+        };
+        if (_rfidTagAssignment.hasStagedChanges && _varianti.isNotEmpty) {
+          List<VarianteProductGlobal>? savedVariations;
+          try {
+            savedVariations = await _prodottiController!.getAllVarianti(
+              savedProductId,
+              attributiProdotto: prodotto.attributi,
+            );
+          } catch (e) {
+            log.w(
+              'PCREA_RFID_VARIANTS_RELOAD_FAILED productId=$savedProductId error=$e',
+            );
+          }
+          if (savedVariations != null) {
+            final savedIds = savedVariations.map((v) => v.id).toSet();
+            idsByRfidKey.removeWhere(
+              (key, value) => value == null || !savedIds.contains(value),
+            );
+            final stagedSignatures = <int, Set<String>>{
+              for (final key in unsavedRfidKeys)
+                key: _rfidVariationSignature(
+                  tempsByRfidKey[key]?.attributi ?? const <AttributoVariante>[],
+                ),
+            };
+            final savedSignatures = <int, Set<String>>{
+              for (final v in savedVariations)
+                v.id: _rfidVariationSignature(v.attributi),
+            };
+            final matched =
+                RfidTagAssignmentController.matchVariationIdsBySignature(
+              stagedSignatures: stagedSignatures,
+              savedSignatures: savedSignatures,
+            );
+            idsByRfidKey.addAll(matched);
+            for (final entry in matched.entries) {
+              final temp = tempsByRfidKey[entry.key];
+              final realId = entry.value;
+              if (temp != null && realId != null && realId > 0) {
+                temp.rfidKey = realId;
+              }
+            }
+          }
+        }
+        final unresolvedKeys = unsavedRfidKeys.where(
+          (key) =>
+              (idsByRfidKey[key] ?? 0) <= 0 &&
+              _rfidTagAssignment.epcsFor(key).isNotEmpty,
+        );
+        _rfidTagAssignment.applySavedVariationIds(idsByRfidKey);
+        rfidFailureMessage = await _rfidTagAssignment.save(
+          savedProductId,
+          _rfidVariationIdCorrente(),
+        );
+        if (unresolvedKeys.isNotEmpty) {
+          final warning = context.l10n.productsRfidVariationsUnresolved;
+          rfidFailureMessage = rfidFailureMessage == null
+              ? warning
+              : '$rfidFailureMessage $warning';
+        }
+        if (rfidFailureMessage != null) {
+          log.w('PCREA_RFID_SAVE_PARTIAL productId=$savedProductId');
+        }
+      }
       log.d(
         'PCREA_SAVE_DONE savedProductId=${savedProduct.id} sku=${savedProduct.barcodeInterno}',
       );
@@ -4955,20 +5114,26 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
       if (mounted) {
         final isFullSuccess = verify.productExists && verify.variantsComplete;
-        final mgwsOk = (mgwsFeedback?.success ?? true) && costOk;
+        final rfidOk = rfidFailureMessage == null;
+        final rfidMessage = rfidFailureMessage == null
+            ? null
+            : '${context.l10n.productsRfidSaveFailed} $rfidFailureMessage';
+        final secondaryOk =
+            (mgwsFeedback?.success ?? true) && costOk && rfidOk;
         final message = [
           _buildVerifyMessage(verify),
           if (mgwsFeedback != null) mgwsFeedback.message,
           if (mgwsFeedback != null && mgwsFeedback.details.isNotEmpty)
             mgwsFeedback.details.join(' '),
           if (costMessage != null) costMessage,
+          if (rfidMessage != null) rfidMessage,
         ].join(' ');
         NotificationService.instance.messageBar(
-          isFullSuccess && mgwsOk ? 'successo' : 'partial',
+          isFullSuccess && secondaryOk ? 'successo' : 'partial',
           'prodotti_crea',
           message,
         );
-        if (isFullSuccess && mgwsOk) {
+        if (isFullSuccess && secondaryOk) {
           Navigator.of(context).pop(true);
         }
       }
@@ -5656,6 +5821,11 @@ class _ImagePixelSize {
 // Classe helper per gestire le varianti temporanee durante l'editing
 class VarianteTemp {
   final Object uiKey = Object();
+
+  /// Stable target key for the EPC registry. A saved variation keeps its real
+  /// id; an unsaved one gets a unique negative key that survives reordering,
+  /// duplication and removal of other variations.
+  int rfidKey;
   int? id;
   String nome;
   String codiceProdotto;
@@ -5688,9 +5858,15 @@ class VarianteTemp {
     ProductImageUiConfig? imageConfig,
     List<AttributoVariante>? attributi,
     this.metadatiCustom,
-  }) : imageSetUrls = imageSetUrls ?? [],
+  }) : rfidKey = _allocateRfidKey(id),
+       imageSetUrls = imageSetUrls ?? [],
        imageConfig = imageConfig ?? ProductImageUiConfig(),
        attributi = attributi ?? [];
+
+  static int _nextUnsavedRfidKey = -1;
+
+  static int _allocateRfidKey(int? id) =>
+      id != null && id > 0 ? id : _nextUnsavedRfidKey--;
 
   static VarianteTemp fromVarianteProductGlobal(
     VarianteProductGlobal variante,

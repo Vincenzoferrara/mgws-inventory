@@ -33,6 +33,13 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       '$_inventoryPath/movements/${Uri.encodeComponent(movementId.toString())}';
   static String countSessionPath(int sessionId) =>
       '$_inventoryPath/count-sessions/${Uri.encodeComponent(sessionId.toString())}';
+  static String rfidTagPath(String epc) =>
+      '$_inventoryPath/rfid/tags/${Uri.encodeComponent(epc)}';
+
+  /// The registry stores NULL for a simple product. Callers use 0 for the same
+  /// concept, so it is translated here at the gateway boundary.
+  static int? rfidVariationId(int? variationId) =>
+      variationId != null && variationId > 0 ? variationId : null;
 
   static String encodedQueryPath(String path, Map<String, Object?> query) {
     final parameters = <String, String>{};
@@ -196,27 +203,28 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
   @override
   Future<MgwsRfidScanResult> resolveRfidScan({
     required List<String> tagIds,
+    Map<String, String> gtinHints = const {},
+    String? lookup,
   }) async {
     if (!await _availability.ensureConnected()) {
-      return const MgwsRfidScanResult(
-        success: false,
-        message: AppMessages.mgwsUnavailable,
-        errors: [AppMessages.mgwsUnavailable],
-        resolved: [],
-        unresolved: [],
-        stockUpdates: 0,
-        movementCount: 0,
-        mode: 'resolve_only',
-      );
+      return _unavailableRfidScanResult();
     }
-    final response = await _base.post(
-      '/wp-json/mgws/v1/inventory/rfid/scan',
-      data: {'tags': tagIds},
-    );
-    return MgwsRfidScanResult.fromResponse(
-      response.data,
-      statusCode: response.statusCode,
-    );
+    try {
+      final response = await _base.post(
+        '/wp-json/mgws/v1/inventory/rfid/scan',
+        data: <String, dynamic>{
+          'tags': tagIds,
+          if (lookup != null) 'lookup': lookup,
+          if (gtinHints.isNotEmpty) 'gtins': gtinHints,
+        },
+      );
+      return MgwsRfidScanResult.fromResponse(
+        response.data,
+        statusCode: response.statusCode,
+      );
+    } catch (_) {
+      return _unavailableRfidScanResult();
+    }
   }
 
   Future<MgwsRfidScanResult> updateStockFromTags({
@@ -224,6 +232,47 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
   }) {
     return resolveRfidScan(tagIds: tagIds);
   }
+
+  @override
+  Future<MgwsRestockResult<dynamic>> listRfidTags({
+    String? epc,
+    int? productId,
+    int? variationId,
+  }) => _objects<dynamic>(
+    () => _transport.get(
+      '$_inventoryPath/rfid/tags',
+      queryParameters: _query({
+        'epc': epc,
+        'product_id': productId,
+        'variation_id': rfidVariationId(variationId),
+      }),
+    ),
+    MgwsRestockParser.map,
+  );
+
+  @override
+  Future<MgwsRestockResult<dynamic>> upsertRfidTag({
+    required String epc,
+    int? productId,
+    int? variationId,
+  }) => _object<dynamic>(
+    () => _transport.post(
+      '$_inventoryPath/rfid/tags',
+      data: _query({
+        'epc': epc,
+        'product_id': productId,
+        'variation_id': rfidVariationId(variationId),
+      }),
+    ),
+    MgwsRestockParser.map,
+  );
+
+  @override
+  Future<MgwsRestockResult<dynamic>> deleteRfidTag(String epc) =>
+      _object<dynamic>(
+        () => _transport.delete(rfidTagPath(epc)),
+        MgwsRestockParser.map,
+      );
 
   @override
   Future<MgwsMoveResult> moveStock({
@@ -721,6 +770,19 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       Map<String, Object?>.fromEntries(
         values.entries.where((entry) => entry.value != null),
       );
+
+  MgwsRfidScanResult _unavailableRfidScanResult() {
+    return const MgwsRfidScanResult(
+      success: false,
+      message: AppMessages.mgwsUnavailable,
+      errors: [AppMessages.mgwsUnavailable],
+      resolved: [],
+      unresolved: [],
+      stockUpdates: 0,
+      movementCount: 0,
+      mode: 'resolve_only',
+    );
+  }
 
   MgwsRestockResult<T> _unavailableRestockResult<T>() {
     return MgwsRestockResult.failure(

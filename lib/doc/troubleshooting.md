@@ -134,6 +134,14 @@ duplicates.
 | `403` | The WordPress user lacks the capability of that route. |
 | `503` | MGWS storage or tables not ready. |
 
-`POST /inventory/rfid/scan` only resolves a tag or barcode and never
-changes stock. `InventoryGlobal.reconcileInventory(fixDiscrepancies)`
+`POST /inventory/rfid/scan` only resolves a tag or barcode and never changes
+stock. With `lookup: 'split'` a decoded GS1 EPC is looked up by GTIN and then
+in the EPC registry; an opaque EPC uses only the registry. In the RFID panel,
+`Not associated` means neither lookup found a GS1 tag, `EPC not registered`
+means an opaque EPC is absent from the registry, and `MGWS unavailable` means
+the resolution request failed: the tags stay visible but unassociated. Assign
+the EPCs in the product editor's `RFID EPCs` section, then press
+`Refresh associations`. If the editor warns that EPCs on a new variant were
+not saved, the variant could not be matched to its saved id; add those EPCs
+again from the saved variant. `InventoryGlobal.reconcileInventory(fixDiscrepancies)`
 proposes corrections and never applies them by itself.

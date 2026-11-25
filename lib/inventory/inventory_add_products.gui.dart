@@ -15,6 +15,8 @@ import 'package:uuid/uuid.dart';
 
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../products/product_list/product_picker.dart';
+import '../rfid/rfid.dart';
+import '../rfid/uhf/uhf_panel_route.dart';
 import '../settings/inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
@@ -890,6 +892,29 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       busy: _controller.isSubmitting,
       barcodeLauncher: widget.barcodeLauncher,
       emptyHint: context.l10n.inventoryAggiungiVuotoProdotti,
+      pickExistingTrailing: OutlinedButton.icon(
+        key: const ValueKey('inventory-add-rfid-open'),
+        onPressed: _controller.isSubmitting
+            ? null
+            : () => showUhfRfidPanel(
+                context,
+                gateway: QueryMgwsInventory(),
+                readTags: RFIDManager().readTags,
+                onSend: (lines) {
+                  _mergeLines(lines);
+                  if (!mounted) return;
+                  _showFeedback(
+                    InventoryActionFeedback(
+                      success: true,
+                      message: (l10n) =>
+                          l10n.inventoryRfidSentCount(lines.length),
+                    ),
+                  );
+                },
+              ),
+        icon: const Icon(Icons.nfc, size: 18),
+        label: Text(context.l10n.inventoryRfidOpen),
+      ),
       trailingBuilder: (context, line) => InventoryInlineQuantity(
         quantity: line.quantity,
         onChanged: (quantity) => _changeQuantity(line, quantity),

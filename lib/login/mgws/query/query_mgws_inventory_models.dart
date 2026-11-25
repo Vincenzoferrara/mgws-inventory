@@ -38,7 +38,29 @@ abstract class MgwsInventoryGateway {
     /// products.
     int variationId = 0,
   });
-  Future<MgwsRfidScanResult> resolveRfidScan({required List<String> tagIds});
+  Future<MgwsRfidScanResult> resolveRfidScan({
+    required List<String> tagIds,
+    Map<String, String> gtinHints = const {},
+    String? lookup,
+  });
+
+  /// Reads the manual EPC registry. [epc] reads one row, while
+  /// [productId]/[variationId] read the rows assigned to an item.
+  Future<MgwsRestockResult<dynamic>> listRfidTags({
+    String? epc,
+    int? productId,
+    int? variationId,
+  });
+
+  /// Creates or updates one EPC in the manual registry.
+  Future<MgwsRestockResult<dynamic>> upsertRfidTag({
+    required String epc,
+    int? productId,
+    int? variationId,
+  });
+
+  /// Removes one EPC from the manual registry.
+  Future<MgwsRestockResult<dynamic>> deleteRfidTag(String epc);
 
   /// Trasferisce pezzi da una sede/magazzino a un altro. Lo stock totale del
   /// prodotto non cambia: cambia solo dove si trovano i pezzi.
@@ -281,12 +303,20 @@ class MgwsResolvedTag {
     this.productId,
     this.barcodeInterno,
     this.productName,
+    this.variationId,
+    this.resolution,
+    this.gtin,
+    this.serial,
   });
 
   final String tag;
   final int? productId;
   final String? barcodeInterno;
   final String? productName;
+  final int? variationId;
+  final String? resolution;
+  final String? gtin;
+  final String? serial;
 
   factory MgwsResolvedTag.fromResponse(Object? raw) {
     if (raw is String) return MgwsResolvedTag(tag: raw);
@@ -296,6 +326,10 @@ class MgwsResolvedTag {
       productId: MgwsInventoryParser.parseIntValue(data['product_id']),
       barcodeInterno: data['sku']?.toString(),
       productName: (data['product_name'] ?? data['name'])?.toString(),
+      variationId: MgwsInventoryParser.parseIntValue(data['variation_id']),
+      resolution: data['resolution']?.toString(),
+      gtin: data['gtin']?.toString(),
+      serial: data['serial']?.toString(),
     );
   }
 }

@@ -15,6 +15,7 @@ orders, customers, loyalty cards, employees and reports.
 - [Lists](#lists)
 - [Products](#products)
 - [MGWS Inventory](#mgws-inventory)
+- [RFID UHF tags](#rfid-uhf-tags)
 - [Suppliers](#suppliers)
 - [Templates and print](#templates-and-print)
 - [Orders and coupons](#orders-and-coupons)
@@ -222,6 +223,11 @@ prices and stock, images, details and variants.
   information badge but are not blocked.
 - Variants can have their own image, barcode, price, sale price and
   quantity.
+- The `RFID EPCs` section assigns UHF tag codes to the product or to a
+  variant. The codes read in inventory `Add` are matched against these
+  assignments. EPCs added to a new variant are matched to its saved id by
+  attributes; if that match is ambiguous, the editor warns and those EPCs
+  must be added again from the saved variant.
 - The automatic barcode button creates a numeric Code 128 code that is not
   already in the form.
 - Before saving changes, a summary shows the new values and the missing
@@ -258,6 +264,26 @@ the list of rows. The page's `Details` field travels with the movement.
    sent and MGWS uses the first allowed warehouse.
 4. Confirm. Each row is sent on its own: the rows that succeed are booked
    at once and the failed ones stay in the list to retry.
+
+### RFID UHF tags
+
+`RFID UHF`, next to `Add existing product`, opens the tag panel. Press `Scan`
+to read the tags; an EPC read twice stays one row. Both tabs show the same
+list:
+
+- `Read tags`: the EPCs read, one row each with its decoded GTIN and serial
+  underneath when the EPC is a GS1 SGTIN. Those details are shown even when
+  no product matches.
+- `Associations`: the product, where the match came from (`GS1` or `Table`)
+  and, for unmatched rows, why (`Not associated`, `EPC not registered` or
+  `MGWS unavailable`). Associated rows are green.
+
+The footer shows how many products are associated and how many EPCs are not.
+Use `Refresh associations` after assigning EPCs in the product editor. Press
+`Send` to copy only the associated rows into the `Add` list; when some EPCs
+are not associated, a confirmation shows their count and the others stay
+visible. An inline confirmation reports how many associated products were sent.
+The stock movement is still written by `Check and stock in`, not by this panel.
 
 ### Adjustment
 

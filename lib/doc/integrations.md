@@ -60,7 +60,7 @@ The clients live in `lib/login/mgws/query/`:
 | Client | Routes |
 |--------|--------|
 | `QueryMgwsPos` | `pos/settings`, `pos/shifts`, `pos/checkout`, `pos/receipts`, `pos/closings` |
-| `QueryMgwsInventory` | `inventory/*` (stock, movements, suppliers, reorder, purchase orders, receipts, counts, sites) |
+| `QueryMgwsInventory` | `inventory/*` (stock, movements, suppliers, reorder, purchase orders, receipts, counts, sites, RFID tag registry) |
 | `QueryMgwsLoyalty` | `loyalty/*` |
 | `QueryMgwsEmployees` | `employees`, `users/{wp_user_id}/…` |
 | `QueryMgwsUserSettings` | `me/settings` |
@@ -136,11 +136,31 @@ synchronised projection.
 - `POST /inventory/stock/move`: moves pieces between locations without
   changing the total; it has `note` and `to_room`. Used for transfers and
   for undoing them, never for adjustments.
+- `GET/POST/DELETE /inventory/rfid/tags`: the EPC registry in the MGWS table
+  `mg_rfid_tags`. `GET` reads one `epc` or the rows of a `product_id` (with
+  optional `variation_id`); `POST` upserts `epc`, `product_id` and
+  `variation_id`; `DELETE /inventory/rfid/tags/{epc}` removes one row. A simple
+  product has a NULL `variation_id`, so the app omits the field for variation
+  `0`. The backend rejects a variation that does not belong to the product.
+  The product editor writes this registry; the scan flow only reads it. There
+  is no `source` column and no local copy in the app.
 - `POST /inventory/rfid/scan`: resolves a tag or barcode; never changes
-  stock.
+  stock. It answers `mode: resolve_only` with `summary.stock_updates` and
+  `summary.movement_count` at `0` in both modes.
+  - Without `lookup`, the legacy path resolves tags as stored barcodes.
+  - With `lookup: 'split'`, the app sends `tags` and a `gtins` map of
+    EPC → decoded GTIN. A tag with a GTIN hint is looked up by GTIN among
+    product barcodes first, then in the EPC registry if that misses; a tag
+    without a hint is looked up only in the registry. `resolved[]` carries
+    `product_id`, `variation_id`, `product_name`, `resolution`
+    (`gs1`, `table` or legacy `barcode`), `gtin` and `serial`;
+    `unresolved[]` carries `tag` and a reason (`not_associated` for a GS1
+    EPC, `epc_not_registered` for an opaque one). GTIN and serial are
+    informational: Flutter decodes and displays them locally.
 
-All three write routes accept an optional `movement_key`: the app sends
-one request per product with the same key, and MGWS creates the movement
+The three stock write routes above (`quick-load`, `stock/reconcile`,
+`stock/move`) accept an optional `movement_key`: the app sends one request
+per product with the same key, and MGWS creates the movement
 header (`mg_stock_movements`) with the first and reuses it. Rows written by
 the plugin's internal flows have no key and no header.
 

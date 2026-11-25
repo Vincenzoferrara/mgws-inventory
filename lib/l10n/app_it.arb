@@ -14461,5 +14461,161 @@
   "cassaMetricsSummary": "Riepilogo: {sales, plural, =1{1 vendita} other{{sales} vendite}} · {returns, plural, =1{1 reso} other{{returns} resi}} · saldo {net}",
   "cassaRefundButton": "RIMBORSA",
   "@cassaExpectedCash": {"placeholders": {"amount": {"type": "String"}}},
-  "cassaExpectedCash": "Contanti attesi in cassa: {amount}"
+  "cassaExpectedCash": "Contanti attesi in cassa: {amount}",
+  "inventoryRfidTitle": "Tag RFID",
+  "@inventoryRfidTitle": {
+    "description": "Title of the RFID tag panel in the inventory Add view"
+  },
+  "inventoryRfidTabRead": "Leggi tag",
+  "@inventoryRfidTabRead": {
+    "description": "Label of the tab showing the raw tags read by the reader"
+  },
+  "inventoryRfidTabAssociations": "Associazioni",
+  "@inventoryRfidTabAssociations": {
+    "description": "Label of the tab showing tags enriched with product and variation"
+  },
+  "inventoryRfidColumnEpc": "EPC",
+  "@inventoryRfidColumnEpc": {
+    "description": "Column header of the tag EPC"
+  },
+  "inventoryRfidColumnProduct": "Prodotto",
+  "@inventoryRfidColumnProduct": {
+    "description": "Column header of the product associated with the tag"
+  },
+  "inventoryRfidColumnGtin": "GTIN",
+  "@inventoryRfidColumnGtin": {
+    "description": "Column header of the GTIN decoded from a GS1 EPC"
+  },
+  "inventoryRfidColumnSerial": "Serie",
+  "@inventoryRfidColumnSerial": {
+    "description": "Column header of the serial decoded from a GS1 EPC"
+  },
+  "inventoryRfidColumnStatus": "Stato",
+  "@inventoryRfidColumnStatus": {
+    "description": "Column header of the association status of a tag"
+  },
+  "inventoryRfidEmpty": "Nessun tag letto.",
+  "@inventoryRfidEmpty": {
+    "description": "Empty state of the RFID tag list"
+  },
+  "inventoryRfidScan": "Scansiona",
+  "@inventoryRfidScan": {
+    "description": "Label of the button that reads tags from the RFID reader"
+  },
+  "inventoryRfidRefresh": "Aggiorna associazioni",
+  "@inventoryRfidRefresh": {
+    "description": "Label of the button that resolves tags against MGWS again"
+  },
+  "inventoryRfidSend": "Invia",
+  "@inventoryRfidSend": {
+    "description": "Label of the button that copies associated tags into the load list"
+  },
+  "inventoryRfidSentCount": "Inviati {count} prodotti associati.",
+  "@inventoryRfidSentCount": {
+    "description": "Inline confirmation after associated RFID tags are copied into the load list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRfidOpen": "RFID UHF",
+  "@inventoryRfidOpen": {
+    "description": "Label of the button that opens the RFID tag panel"
+  },
+  "inventoryRfidAssociatedCount": "Prodotti associati: {count}",
+  "@inventoryRfidAssociatedCount": {
+    "description": "Total of associated tags shown at the bottom of the panel",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRfidUnassociatedCount": "EPC non associati: {count}",
+  "@inventoryRfidUnassociatedCount": {
+    "description": "Count of read EPCs without an associated product",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRfidSendConfirm": "Inviare solo i prodotti associati? {count} EPC non associati.",
+  "@inventoryRfidSendConfirm": {
+    "description": "Confirmation shown before sending only the associated tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryRfidResolutionGs1": "GS1",
+  "@inventoryRfidResolutionGs1": {
+    "description": "Status label for a tag resolved by GTIN"
+  },
+  "inventoryRfidResolutionTable": "Tabella",
+  "@inventoryRfidResolutionTable": {
+    "description": "Status label for a tag resolved from the EPC registry"
+  },
+  "inventoryRfidReasonNotAssociated": "Non associato",
+  "@inventoryRfidReasonNotAssociated": {
+    "description": "Reason shown when a GS1 tag has no matching product or registry entry"
+  },
+  "inventoryRfidReasonEpcNotRegistered": "EPC non registrato",
+  "@inventoryRfidReasonEpcNotRegistered": {
+    "description": "Reason shown when an opaque EPC is not present in the registry"
+  },
+  "inventoryRfidReasonMgwsUnavailable": "MGWS non disponibile",
+  "@inventoryRfidReasonMgwsUnavailable": {
+    "description": "Reason shown when tags cannot be resolved because MGWS is unavailable"
+  },
+  "inventoryRfidScanFailed": "Impossibile leggere i tag.",
+  "@inventoryRfidScanFailed": {
+    "description": "Error shown when reading tags from the RFID reader fails"
+  },
+  "inventoryRfidResolveFailed": "Impossibile aggiornare le associazioni.",
+  "@inventoryRfidResolveFailed": {
+    "description": "Error shown when resolving tags against MGWS fails"
+  },
+  "productsRfidTitle": "EPC RFID",
+  "@productsRfidTitle": {
+    "description": "Title of the EPC assignment section in the product editor"
+  },
+  "productsRfidHint": "Associa gli EPC a questo prodotto o a questa variante.",
+  "@productsRfidHint": {
+    "description": "Hint below the EPC assignment section title"
+  },
+  "productsRfidEpcLabel": "EPC",
+  "@productsRfidEpcLabel": {
+    "description": "Label of the EPC input field in the product editor"
+  },
+  "productsRfidAdd": "Aggiungi EPC",
+  "@productsRfidAdd": {
+    "description": "Label of the button that adds an EPC to the product"
+  },
+  "productsRfidEmpty": "Nessun EPC associato.",
+  "@productsRfidEmpty": {
+    "description": "Empty state of the product EPC list"
+  },
+  "productsRfidRemove": "Rimuovi EPC",
+  "@productsRfidRemove": {
+    "description": "Tooltip of the button that removes an EPC from the product"
+  },
+  "productsRfidDuplicate": "Questo EPC è già nella lista.",
+  "@productsRfidDuplicate": {
+    "description": "Error shown when the same EPC is added twice"
+  },
+  "productsRfidInvalid": "EPC non valido.",
+  "@productsRfidInvalid": {
+    "description": "Error shown when an EPC is empty or malformed"
+  },
+  "productsRfidSaveFailed": "Gli EPC non sono stati salvati.",
+  "@productsRfidSaveFailed": {
+    "description": "Error shown when the product EPC registry could not be saved"
+  },
+  "productsRfidVariationsUnresolved": "Gli EPC aggiunti alle nuove varianti non sono stati salvati. Aggiungili di nuovo dopo aver salvato il prodotto.",
+  "@productsRfidVariationsUnresolved": {
+    "description": "Warning when a new variation could not be matched to its saved id"
+  }
 }

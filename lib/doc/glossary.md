@@ -15,8 +15,17 @@
 - **Checkout history** – the receipts of this till, kept on the device and
   checked against MGWS; separate from WooCommerce orders.
 - **DataGridView** – the shared table used by the operational lists.
+- **EPC** – Electronic Product Code read from an RFID tag. The app stores the
+  reader's text unchanged and uses a normalized EPC (uppercase, no prefixes,
+  spaces or hyphens) as the lookup key.
+- **EPC registry** – the MGWS table `mg_rfid_tags` that maps a normalized EPC
+  to a product and optional variation. The product editor writes it; the RFID
+  scan flow only reads it.
 - **Fiscal register** – a device that issues legal receipts; without one,
   the till works in simulation mode.
+- **GS1 / SGTIN-96** – a 96-bit EPC holding a GTIN and a serial. The app
+  decodes it in Flutter, so both values are visible even when no product is
+  found; MGWS then tries the GTIN before the EPC registry.
 - **Idempotency key** – a unique key sent with each sale or stock request,
   so a request sent twice is executed once.
 - **Loyalty card** – a card linked to a customer's MGWS loyalty account and

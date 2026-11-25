@@ -55,6 +55,7 @@ large enough, UI and logic are split into sibling files:
 | `checkout/` | Point of sale, checkout history, fiscal register |
 | `products/` | Products list, details and editor |
 | `inventory/` | MGWS stock operations and the movement ledger |
+| `rfid/` | `RFIDManager` reader callback and `uhf/`: UHF panel, SGTIN-96 decoder and EPC assignment for the product editor |
 | `report/` | The shop side of `Templates and print` |
 | `dashboard/` | Widgets, reports and exports |
 | `ai/` | AI service and the consent dialog |
@@ -371,6 +372,36 @@ unless it says so.
 - `reconcile` has no note field: `inventoryMovementText` appends the
   details to the reason when they are not already there. `quick-load` and
   `stock/move` have a real note.
+
+### RFID UHF in Add
+
+The `RFID UHF` button in the product section of `Add` opens
+`showUhfRfidPanel()` from `lib/rfid/uhf/`; the Add screen only injects the
+gateway, the reader callback and `_mergeLines` as the destination. All UHF
+logic and GUI live under `lib/rfid/`:
+
+- `uhf_scan.code.dart` keeps the read tags in RAM only. `addRawTags()`
+  preserves the reader's text and deduplicates on the normalized EPC;
+  `RfidGs1Decoder` decodes SGTIN-96 locally, so GTIN and serial are visible
+  even on unassociated rows.
+- `resolve()` asks MGWS for `lookup: 'split'` with the locally decoded GTIN
+  hints. GS1 EPCs resolve by GTIN first and fall back to the EPC registry;
+  opaque EPCs use only the registry. This call never changes stock.
+- `toLoadLines()` returns one load draft per associated row (`variationId`
+  `0` for a simple product), which Add merges with `_mergeLines`: two EPCs of
+  the same item become quantity 2. `Check and stock in` remains the only stock
+  writer.
+
+The server registry `mg_rfid_tags` maps a normalized EPC to an optional
+product and variation. It is read by the scan flow and written only by the
+product create/edit screen through the EPC section in `lib/rfid/uhf/`; the
+product editor keeps just the load/save hooks. Unsaved variations keep a
+stable local key until the product save returns their real ids. The editor
+reloads the saved variations and matches new ones by normalized attribute
+signature, never by response order; an unmatched key is reported and is never
+written at product level. A late or failed registry read does not discard
+staged edits. There is no `source` column and no local RFID database. Reader
+transport is still a placeholder in `RFIDManager`.
 
 ### The movement ledger
 

@@ -73,8 +73,9 @@ portal.
   cards), photos (product images) and local network (a WordPress site on
   your network).
 - **Smart cards**: check that the device has NFC, or use a USB reader.
-- **RFID**: USB and Wi-Fi readers are supported. Bluetooth is not available
-  while the RFID module is in alpha.
+- **RFID**: USB and Wi-Fi readers are planned; Bluetooth is not available
+  while the RFID module is in alpha. Reader transport is not implemented yet,
+  so the UHF panel works with sample tags.
 
 ## Updates
 
