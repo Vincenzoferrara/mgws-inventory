@@ -9828,9 +9828,9 @@
   "@inventoryResumeBlockMove": {
     "description": "Localized string inventoryResumeBlockMove"
   },
-  "inventoryResumeBlockAdd": "Il carico è l'unica rotta del gruppo e sa solo aumentare lo stock: un carico corretto in meno è una diminuzione, che da lì non si può scrivere.",
-  "@inventoryResumeBlockAdd": {
-    "description": "Localized string inventoryResumeBlockAdd"
+  "inventoryResumeBlockNotLast": "Si può modificare solo l'ultimo movimento: un movimento più recente ha già cambiato lo stock dopo questo.",
+  "@inventoryResumeBlockNotLast": {
+    "description": "Shown when Edit is unavailable because newer movements exist"
   },
   "inventoryResumeBlockCount": "Un conteggio fisico è registrato da MGWS e non da un pannello: riaprirlo qui produrrebbe una correzione, non un conteggio.",
   "@inventoryResumeBlockCount": {

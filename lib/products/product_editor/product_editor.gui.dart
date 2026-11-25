@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
@@ -1669,8 +1670,8 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
     final current = _costoNormalizzato();
     if (current == null) return _costoSalvato != null;
     if (_costoSalvato == null) return true;
-    final currentValue = double.tryParse(current);
-    final savedValue = double.tryParse(_costoSalvato!);
+    final currentValue = double.tryParse(current.replaceAll(',', '.'));
+    final savedValue = double.tryParse((_costoSalvato ?? '').replaceAll(',', '.'));
     if (currentValue == null || savedValue == null) {
       return current != _costoSalvato;
     }
@@ -1680,7 +1681,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
   String? _validateCosto(String? value) {
     final text = (value ?? '').trim().replaceAll(',', '.');
     if (text.isEmpty) return null;
-    final parsed = double.tryParse(text);
+    final parsed = double.tryParse(text.replaceAll(',', '.'));
     if (parsed == null || parsed < 0) return context.l10n.productsCostInvalid;
     return null;
   }
@@ -2517,7 +2518,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
               child: TextFormField(
                 initialValue: variante.prezzo.toString(),
                 onChanged: (value) =>
-                    variante.prezzo = double.tryParse(value) ?? 0.0,
+                    variante.prezzo = double.tryParse(value.replaceAll(',', '.')) ?? 0.0,
                 decoration: InputDecoration(
                   labelText: context.l10n.commonPrice,
                   prefixIcon: Icon(Icons.euro),
@@ -4446,7 +4447,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           codiceProdotto: _quickVarianteBarcodeController.text.trim(),
           barcodeInterno: _quickVarianteBarcodeInternoController.text.trim(),
           barcode: '',
-          prezzo: double.tryParse(_prezzoNormaleController.text) ?? 0.0,
+          prezzo: double.tryParse(_prezzoNormaleController.text.replaceAll(',', '.')) ?? 0.0,
           quantita: int.tryParse(_quickVarianteQuantitaController.text) ?? 0,
           peso: _pesoController.text.trim().isEmpty
               ? null
@@ -4529,7 +4530,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
             ),
             barcodeInterno: '',
             barcode: '',
-            prezzo: double.tryParse(_prezzoNormaleController.text) ?? 0.0,
+            prezzo: double.tryParse(_prezzoNormaleController.text.replaceAll(',', '.')) ?? 0.0,
             quantita: 0,
             peso: _pesoController.text.trim().isEmpty
                 ? null
@@ -4697,8 +4698,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     setState(() => _isGeneratingShortDesc = true);
     try {
-      final settings = AppSettings();
-      await settings.init();
+      final settings = context.read<AppSettings>();
       if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
@@ -4734,8 +4734,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     setState(() => _isGeneratingLongDesc = true);
     try {
-      final settings = AppSettings();
-      await settings.init();
+      final settings = context.read<AppSettings>();
       if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
@@ -4771,8 +4770,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     setState(() => _isGeneratingCategories = true);
     try {
-      final settings = AppSettings();
-      await settings.init();
+      final settings = context.read<AppSettings>();
       if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
@@ -4825,8 +4823,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
 
     setState(() => _isGeneratingTags = true);
     try {
-      final settings = AppSettings();
-      await settings.init();
+      final settings = context.read<AppSettings>();
       if (!mounted || !await ensureAiConsent(context, settings)) return;
       final aiService = AIService(settings);
 
@@ -5642,7 +5639,7 @@ class _ProdottiCreaPageState extends State<ProdottiCreaPage>
           : _barcodeProduttoreController.text.trim(),
       prezzoNormale: double.tryParse(_prezzoNormaleController.text) ?? 0.0,
       prezzoScontato: _hasPrezzoScontato
-          ? double.tryParse(_prezzoScontatoController.text)
+          ? double.tryParse(_prezzoScontatoController.text.replaceAll(',', '.'))
           : null,
       descrizioneBreve: _descrizioneBreveController.text.trim(),
       descrizioneCompleta: _descrizioneCompletaController.text.trim().isEmpty

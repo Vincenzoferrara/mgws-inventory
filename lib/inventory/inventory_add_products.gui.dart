@@ -21,7 +21,9 @@ import '../settings/inventory_quick_load_settings.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 import 'inventory_add_products.code.dart';
+import 'inventory_module.code.dart';
 import 'inventory_move.code.dart';
+import 'inventory_movement_groups.code.dart';
 import 'inventory_product_section.gui.dart';
 import 'inventory_quick_load.code.dart';
 import 'inventory_quick_load_catalog.code.dart';
@@ -72,6 +74,7 @@ class InventoryAddProductsPanel extends StatefulWidget {
     this.detailsController,
     this.siteController,
     this.warehouseLoader,
+    this.seed,
   });
 
   final InventoryAddProductsController? controller;
@@ -91,6 +94,10 @@ class InventoryAddProductsPanel extends StatefulWidget {
   final TextEditingController? siteController;
 
   final InventoryAddProductsWarehouseLoader? warehouseLoader;
+
+  /// Movimento "Aggiungi" riaperto dal ledger, in attesa di essere applicato.
+  /// Si consuma una sola volta, riconosciuto dall'impronta.
+  final InventoryPanelSeed? seed;
 
   @override
   State<InventoryAddProductsPanel> createState() =>
@@ -129,6 +136,17 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   /// true = un pezzo senza chiedere, false = l'operatore dice quanti sono.
   bool _autoAdd = true;
 
+  /// Riga del libro associata a cada riga in lista, quando il pannello e'
+  /// riaperto su un movimento: serve per indirizzare la PATCH.
+  final _editMovementIds = <String, int>{};
+
+  int? _appliedSeedStamp;
+
+  /// `false` in [initState], dove non si puo' chiamare `setState`.
+  bool _ready = false;
+
+  bool get _isEditing => _editMovementIds.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -144,8 +162,61 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     // La sede e' della pagina: quando cambia, i magazzini vanno ricaricati
     // perche' la lista e' quella della sede dichiarata.
     widget.siteController?.addListener(_onSiteChanged);
+    _ready = true;
+    // Le etichette del seme passano dalle traduzioni, che in initState non
+    // si possono ancora leggere: il primo frame mostra il pannello vuoto, il
+    // callback lo riempie prima che l'operatore possa interagirci.
+    final seed = widget.seed;
+    if (seed != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _applySeed(seed);
+      });
+    }
     _loadSettings();
     _loadMasterData();
+  }
+
+  @override
+  void didUpdateWidget(InventoryAddProductsPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _applySeed(widget.seed);
+  }
+
+  /// Riapre un "Aggiungi" dal ledger senza creare un movimento nuovo.
+  ///
+  /// Le righe vengono sostituite, non accodate, e la quantita' e' il valore
+  /// assoluto del movimento: zero e' lecito e resta nello storico.
+  /// L'impronta evita di applicare due volte lo stesso seme, per esempio
+  /// tornando su questo modulo dopo averne visitato un altro.
+  void _applySeed(InventoryPanelSeed? seed) {
+    if (seed == null || seed.module != InventoryModule.add) return;
+    if (_appliedSeedStamp == seed.stamp) return;
+    _appliedSeedStamp = seed.stamp;
+
+    final ids = <String, int>{};
+    final seeded = <InventoryQuickLoadLineDraft>[];
+    for (final movement in seed.movements) {
+      final key = '${movement.productId}:${movement.variationId}';
+      ids[key] = movement.id;
+      seeded.add(
+        InventoryQuickLoadLineDraft(
+          productId: movement.productId,
+          variationId: movement.variationId,
+          label: context.l10n.inventoryProdottoNumero(
+            movement.productId.toString(),
+          ),
+          quantity: movement.quantityDelta,
+          idempotencyKey: 'edit-${movement.id}',
+        ),
+      );
+    }
+    _editMovementIds
+      ..clear()
+      ..addAll(ids);
+    _lines = List<InventoryQuickLoadLineDraft>.unmodifiable(seeded);
+    widget.detailsController?.text = seed.details;
+    _feedback = null;
+    if (_ready) setState(() {});
   }
 
   @override
@@ -376,7 +447,9 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
   }
 
   void _changeQuantity(InventoryQuickLoadLineDraft line, int quantity) {
-    if (quantity <= 0) return;
+    // In modifica zero e' un valore finale lecito: la riga resta nel libro con
+    // zero pezzi. In un carico nuovo, invece, zero non ha senso.
+    if (quantity < 0 || (quantity == 0 && !_isEditing)) return;
     setState(() {
       _lines = List<InventoryQuickLoadLineDraft>.unmodifiable([
         for (final item in _lines)
@@ -417,7 +490,37 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
     );
   }
 
+  /// Il piano della modifica: la quantita' e' assoluta e la nota resta quella
+  /// del movimento, perche' il backend la conserva e appende la propria nota
+  /// di audit.
+  InventoryMovementEditPlan _editPlan() {
+    return InventoryMovementEditPlan(
+      lines: [
+        for (final line in _lines)
+          InventoryMovementEditLine(
+            movementId: _editMovementIds[line.key] ?? 0,
+            quantity: line.quantity,
+            unitCost: line.normalizedUnitCost,
+          ),
+      ],
+    );
+  }
+
   Future<void> _submit() async {
+    if (_isEditing) {
+      final feedback = await _controller.submitEditPlan(_editPlan());
+      if (!mounted) return;
+      setState(() {
+        _feedback = feedback;
+        if (feedback.success) {
+          _editMovementIds.clear();
+          _appliedSeedStamp = null;
+          _lines = const <InventoryQuickLoadLineDraft>[];
+        }
+      });
+      _snack(feedback.message(context.l10n), success: feedback.success);
+      return;
+    }
     final plan = _plan();
     final parsed = plan.parse();
     if (parsed case InventoryFormInvalid(:final message)) {
@@ -505,6 +608,18 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
                 ),
               ),
             ),
+            if (_isEditing)
+              Padding(
+                key: const ValueKey('inventory-add-edit-badge'),
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  context.l10n.inventoryModifica,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             const SizedBox(height: 6),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -917,6 +1032,7 @@ class _InventoryAddProductsPanelState extends State<InventoryAddProductsPanel> {
       ),
       trailingBuilder: (context, line) => InventoryInlineQuantity(
         quantity: line.quantity,
+        min: _isEditing ? 0 : 1,
         onChanged: (quantity) => _changeQuantity(line, quantity),
       ),
     );

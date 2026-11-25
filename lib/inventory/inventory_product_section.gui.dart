@@ -48,6 +48,7 @@ class InventoryProductSection extends StatefulWidget {
     this.icon = Icons.inventory_2_outlined,
     this.trailingBuilder,
     this.autoAddTrailing,
+    this.pickExistingTrailing,
     this.barcodeLauncher,
     this.busy = false,
     this.emptyHint,
@@ -96,6 +97,9 @@ class InventoryProductSection extends StatefulWidget {
   /// parte va letta insieme alla prima, non riga per riga: se sta nella riga
   /// compare solo dopo la scansione, e cioe' quando ormai serve.
   final Widget? autoAddTrailing;
+
+  /// Altro controllo accanto al pulsante 'Aggiungi prodotto esistente'.
+  final Widget? pickExistingTrailing;
 
   final InventoryProductSectionBarcodeLauncher? barcodeLauncher;
   final bool busy;
@@ -253,13 +257,24 @@ class _InventoryProductSectionState extends State<InventoryProductSection> {
           icon: const Icon(Icons.playlist_add_check),
           label: Text(context.l10n.inventoryAggiungiProdottoEsistente),
         );
+        final trailing = widget.pickExistingTrailing;
         // Affiancati quando c'e' spazio, uno sotto l'altro quando no: il campo
         // barcode non deve diventare una fessura per far spazio all'etichetta
         // del pulsante.
         if (!affiancato) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [field, const SizedBox(height: 8), button],
+            children: [
+              field,
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: button),
+                  if (trailing != null) const SizedBox(width: 8),
+                  if (trailing != null) trailing,
+                ],
+              ),
+            ],
           );
         }
         return Row(
@@ -268,6 +283,8 @@ class _InventoryProductSectionState extends State<InventoryProductSection> {
             Expanded(child: field),
             const SizedBox(width: 8),
             button,
+            if (trailing != null) const SizedBox(width: 8),
+            if (trailing != null) trailing,
           ],
         );
       },

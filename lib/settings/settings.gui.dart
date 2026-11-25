@@ -40,10 +40,9 @@ class _SettingsPageState extends State<SettingsPage>
   }
 
   Future<void> _initSettings() async {
-    _appSettings = AppSettings();
+    _appSettings = context.read<AppSettings>();
     _productImageSettings = ProductImageWarningSettings();
     await Future.wait([
-      _appSettings.init(),
       _productImageSettings.init(),
       inventoryQuickLoadSettings.init(),
       cassaSettings.init(),

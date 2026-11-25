@@ -365,10 +365,11 @@ unless it says so.
   only concrete variants become rows, and `findByBarcode` searches simple
   products then variants.
 - `InventoryRettificaController` prepares `reconcileStock` with a required
-  reason and writes only when sent. The direction (`Increase`/`Decrease`)
-  belongs to the section, not to the row. `InventoryRettificaPlan` sends
-  every row and collects all results in `lastResults` instead of stopping
-  at the first error.
+  reason and writes only when sent. The `Direction` radio group above the rows
+  is only the default for rows added by a later barcode scan: each row has its
+  own `Increase`/`Decrease` chooser, and changing a row never rewrites the
+  quantity already typed for it. `InventoryRettificaPlan` sends every row and
+  collects all results in `lastResults` instead of stopping at the first error.
 - `reconcile` has no note field: `inventoryMovementText` appends the
   details to the reason when they are not already there. `quick-load` and
   `stock/move` have a real note.
@@ -417,19 +418,49 @@ transport is still a placeholder in `RFIDManager`.
 - A transfer has two rows per product whose deltas cancel out:
   `InventoryMovementGroup.products` merges them and the detail shows
   `movedQuantity` and the route `from -> to`, not `+0`.
-- MGWS paginates the ledger and `MgwsMovementFilter` has no document
-  filter, so a very large operation can be split: the default page is 100
-  rows and the panel warns when the answer is incomplete.
+- The ledger uses the shared `DataGridFiltersBar`, `DataGridListController`
+  and `GlobalPaginationBar`, like product management. Filter-only fields map
+  to `MgwsMovementFilter` (product, variation, date range, source, operator,
+  reason and stock effect); grouping still happens after the page is read.
+  `Choose columns` uses the shared `SearchableCheckboxDialog` and stores the
+  visible column ids in shared preferences. The default page is 100 rows,
+  the server maximum: a larger operation can be split because
+  `MgwsMovementFilter` has no document filter and grouping only sees rows in
+  the current page. The panel warns when the server reports another page.
+  `Rows` is persisted with its own key, so the global page-size preference of
+  the other grids cannot reset this 100-row grouping default.
 - Reopening (`Edit`) works for `Adjustment` (from the absolute value left by
-  the movement) and `Transfer` (from the route written in each row as
+  the movement), `Transfer` (from the route written in each row as
   `warehouse_from`/`warehouse_to`, with the sites, because the same
-  warehouse number can exist in two sites). A stock-in is never reopened:
-  its route can only increase stock. `InventoryPanelSeed` is consumed once
-  (`stamp`). Seeded rows use the absolute `stockAfter`, quick mode is
-  switched off, and products removed from a reopened adjustment become
+  warehouse number can exist in two sites) and `Add` (a quick load, only while
+  it is the most recent movement). Classification also reads `reasonCode`:
+  adjustments written by the panel have an empty `source.type` and only
+  `adjust` in `stockEffect`/`type`, so without the reason they would appear
+  as "Other" and `Edit` would stay disabled. `canResumeNow` is the UI gate:
+  a stock-in whose operation has been followed by another one shows why it
+  cannot be edited; MGWS repeats the check on the write.
+  `InventoryPanelSeed` is consumed once (`stamp`), and its stamp also includes
+  the ledger rows, so reopening two operations with the same products cannot
+  reuse a stale panel state. Seeded rows use the absolute `stockAfter`, quick
+  mode is switched off, and products removed from a reopened adjustment become
   explicit restores (`InventoryRettificaRestoreLine`).
-- The ledger has no update or delete route, and must not have one.
-  `InventoryMovementRevertController.prepare` undoes a movement by writing
+- The movement detail does not trust the ledger for images: MGWS stores only
+  `product_id` and `variation_id`, so `loadInventoryMovementImages` resolves
+  the photos from the product cache and, for the missing ids only, from the
+  catalogue API. A variant's own image wins; an empty one falls back to the
+  parent product's image. Both lookups are optional: a catalogue failure
+  leaves the detail readable with a placeholder instead of blocking the
+  movement. The `preview` column reuses `DataGridViewImagePreview`, already
+  used by product management and quick load.
+- Editing a quick load is the only ledger write, and it is deliberately
+  narrow. `QueryMgwsInventory.patchMovement` sends an absolute, non-negative
+  `quantity` to `PATCH /inventory/movements/{movementId}`; `0` is valid and
+  keeps the row in the ledger with no pieces. MGWS updates the newest
+  `quick_load` row in place with the signed difference, moves only that
+  difference in `mg_stock_levels`, projects it to WooCommerce after the
+  commit, keeps the old note and appends an audit line. An idempotent re-send
+  changes nothing. `InventoryMovementRevertController.prepare` undoes the
+  other movements by writing
   a new one: a counter-movement with `stock/reconcile` back to
   `stock_before`, allowed only while the current stock still equals
   `stock_after`; for a transfer, a reverse transfer with `stock/move`,

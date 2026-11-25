@@ -308,21 +308,38 @@ The stock movement is still written by `Check and stock in`, not by this panel.
 
 ### Movements
 
-1. Filter by product, variant, date, source, operator or reason. There is
-   one row per operation, not per product.
+1. Use the shared filter bar to narrow the ledger by product, variant, date
+   range, source, operator, reason or stock effect, or type in quick search.
+   `Clear all` removes every filter and the page controls load the next or
+   previous page. The default is 100 rows per page and the chosen `Rows`
+   value is remembered on this device, independently of other grids. There
+   is one row per operation, not per product. `Choose columns` selects which
+   columns to show and remembers the choice on this device. A notice appears
+   when another page exists, because a very large operation can be split
+   across pages.
 2. Double-click a row, or `Open the movement`, to see the stock of each product
-   before and after (for a move: the pieces and the route `from -> to`).
-3. `Edit` reopens the operation in its module. It works for `Adjustment` and
-   `Transfer`; a stock-in cannot be reopened. When it is not possible, the
-   button explains why.
+   before and after (for a move: the pieces and the route `from -> to`). The
+   `Preview` column shows the product photo from the catalogue, so you can
+   check at a glance which article the movement touched: a variant uses its
+   own photo when it has one, otherwise the product's photo. If the catalogue
+   is unavailable, the row still opens and shows a placeholder.
+3. `Edit` reopens the operation in its module. It works for `Adjustment`,
+   `Transfer` and `Add`. An `Add` is edited in place and only while it is the
+   most recent operation: once another movement follows it, the button is off
+   and says why. In the reopened `Add` panel you can lower a row to `0` pieces
+   (the row stays in the history) and `Check and stock in` sends the correction;
+   in `Adjustment` the `Direction` above the rows is only the default for new
+   barcode scans, and each product keeps its own `Increase`/`Decrease` choice.
 4. `Cancel movement` brings each product back to the stock it had before. It
    writes a **new** movement and never deletes the old one, so the history
    shows both. If a product changed in the meantime, its row is blocked
    and named. A move is undone with a move in the opposite direction, and
    only if the pieces are still in the destination warehouse.
 
-The ledger cannot be edited or deleted: it is the record of what happened
-in the warehouse. The operator column shows the WordPress user number.
+The ledger cannot be deleted, and only the most recent `Add` can be corrected
+in place: everything else is recorded by writing a new movement, so the history
+keeps what happened in the warehouse. The operator column shows the WordPress
+user number.
 
 ## Suppliers
 

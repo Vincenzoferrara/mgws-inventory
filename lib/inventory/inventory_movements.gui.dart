@@ -1,21 +1,34 @@
 // inventory_movements.gui.dart
 //
-// Il ledger MGWS, letto per operazione.
+// The MGWS ledger, read one operation at a time.
 //
-// Una riga e' un'operazione, non un prodotto: MGWS registra una riga per
-// prodotto, quindi i movimenti che condividono origine e documento vengono
-// accorpati da `groupMovements`. L'operatore ragiona per operazione ("quel
-// carico di ieri sera"), quindi e' questo il taglio giusto.
+// A row is an operation, not a product: MGWS writes one row per product, so
+// movements sharing source and document are merged by `groupMovements`. The
+// operator thinks in operations ("that load last night"), so this is the
+// useful cut.
 //
-// Il pannello non modifica il ledger: lo legge, e le due azioni che offre
-// partono da un movimento per produrre un movimento nuovo. Il doppio click
-// apre la schermata dell'operazione, da li' si sceglie se riaprirla nel pannello
-// che l'ha prodotta o se annullarla per contromovimento.
+// Double-clicking opens the operation dialog, where the operator can reopen it
+// in the panel that created it or undo it with a counter-movement. Adjustments
+// and transfers write a new movement. A stock-in is the one exception: it is
+// edited in place through MGWS PATCH, and only while it is the last movement.
+//
+// Filtering uses DataGridFiltersBar (the same component as product
+// management) and pagination uses GlobalPaginationBar.
+
+import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
-import '../reuse_class/datagridview/datagridview.code.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../login/mgws/query/query_mgws_inventory.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
+import '../reuse_class/datagridview/datagridview_filters_bar.gui.dart';
+import '../reuse_class/datagridview/datagridview_list.gui.dart';
+import '../reuse_class/gui/global_pagination_bar.dart';
+import '../reuse_class/gui/searchable_checkbox_dialog.dart';
+import '../settings/app_settings.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 import 'inventory.code.dart';
@@ -23,17 +36,9 @@ import 'inventory_movement_groups.code.dart';
 import 'inventory_movements_detail.gui.dart';
 
 class InventoryMovementLedgerPanel extends StatefulWidget {
-  InventoryMovementLedgerPanel({
-    super.key,
-    InventoryMovementController? controller,
-    this.onReopen,
-  }) : controller = controller ?? InventoryMovementController();
+  InventoryMovementLedgerPanel({super.key, this.gateway, this.onReopen});
 
-  final InventoryMovementController controller;
-
-  /// Chiamata quando l'operatore sceglie "Modifica": la pagina che ospita il
-  /// pannello fa il salto di modulo. Qui non si sa cosa ci sia fuori, quindi
-  /// il pannello passa il seme e non decide nulla.
+  final MgwsRestockGateway? gateway;
   final void Function(InventoryPanelSeed seed)? onReopen;
 
   @override
@@ -43,84 +48,320 @@ class InventoryMovementLedgerPanel extends StatefulWidget {
 
 class _InventoryMovementLedgerPanelState
     extends State<InventoryMovementLedgerPanel> {
-  final _productController = TextEditingController();
-  final _variationController = TextEditingController();
-  final _fromController = TextEditingController();
-  final _toController = TextEditingController();
-  final _sourceController = TextEditingController();
-  final _operatorController = TextEditingController();
-  final _reasonController = TextEditingController();
-  final _effectController = TextEditingController();
+  late final MgwsRestockGateway _gateway;
+  late final DataGridListController<InventoryMovementGroup> _controller;
 
-  /// L'annullamento ha il suo controller perche' il piano di ripristino e'
-  /// diverso da quello di una rettifica normale: verifica lo stock attuale
-  /// prima di toccare qualcosa.
+  /// Undo has its own controller because its restore plan differs from a
+  /// normal adjustment: it checks the current stock before changing it.
   final _revert = InventoryMovementRevertController();
 
+  static const String _columnsKey = 'inventory-movement-columns';
+  static const String _pageSizeKey = 'inventory-movement-page-size';
+  static const int _defaultPageSize = 100;
+  static const List<String> _defaultColumns = <String>[
+    'time',
+    'kind',
+    'operator',
+    'delta',
+    'products',
+    'last',
+    'reason',
+  ];
+
   InventoryActionFeedback? _feedback;
-  InventoryMovementGroup? _selected;
-  bool _loading = true;
+  List<String> _visibleColumns = _defaultColumns;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    _loadVisibleColumns();
+    _gateway = widget.gateway ?? QueryMgwsInventory();
+    _controller = DataGridListController<InventoryMovementGroup>(
+      fields: _fields(),
+      idOf: (g) => g.key,
+      loadPage: _loadPage,
+      cacheKey: 'inventory-movements',
+      serverFiltering: true,
+      serverSearch: true,
+    );
+    // MGWS returns one row per product: to merge an operation into a single
+    // row, its products must be in the same page. 100 is the server maximum
+    // and the panel's historical default; the operator can still change it
+    // from the pagination bar. The value is kept per ledger, not in the
+    // global page-size setting shared by every grid.
+    _controller.pagination.setPageSize(_defaultPageSize, notify: false);
+    _controller.addListener(_onControllerChanged);
+    unawaited(_loadPageSizeAndList());
+  }
+
+  /// Applies the ledger's saved page size before the first request, so the
+  /// global grid default can never override the 100-row grouping default.
+  Future<void> _loadPageSizeAndList() async {
+    var size = _defaultPageSize;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getInt(_pageSizeKey);
+      if (saved != null && saved > 0) size = saved;
+    } catch (_) {
+      // A storage failure must not hide the ledger.
+    }
+    if (!mounted) return;
+    _controller.pagination.setPageSize(size, notify: false);
+    await _load();
+  }
+
+  Future<void> _persistPageSize(int size) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_pageSizeKey, size);
+    } catch (_) {
+      // A storage failure must not break pagination.
+    }
+  }
+
+  Future<void> _loadVisibleColumns() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList(_columnsKey);
+      if (!mounted || saved == null || saved.isEmpty) return;
+      final known = _defaultColumns.toSet();
+      final next = saved.where(known.contains).toList();
+      if (next.isNotEmpty) setState(() => _visibleColumns = next);
+    } catch (_) {
+      // A storage failure must not hide the ledger.
+    }
+  }
+
+  Future<void> _openColumnPicker() async {
+    final columns = _allColumns();
+    final labels = <String, String>{
+      for (final column in columns) column.id: column.label,
+    };
+    final selected = await SearchableCheckboxDialog.show(
+      context,
+      title: context.l10n.prodottiColonneVisibili,
+      inputLabel: context.l10n.prodottiCercaColonna,
+      input_list: [for (final id in _defaultColumns) labels[id]!],
+      preselected_list: [
+        for (final id in _visibleColumns)
+          if (labels.containsKey(id)) labels[id]!,
+      ],
+    );
+    if (!mounted || selected == null || selected.isEmpty) return;
+    final next = _defaultColumns
+        .where((id) => selected.contains(labels[id]))
+        .toList();
+    if (next.isEmpty) return;
+    setState(() => _visibleColumns = next);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_columnsKey, next);
+    } catch (_) {
+      // The choice still applies for this session.
+    }
+  }
+
+  List<DataGridField<InventoryMovementGroup>> _fields() {
+    return <DataGridField<InventoryMovementGroup>>[
+      DataGridField<InventoryMovementGroup>(
+        name: 'product_id',
+        label: (l) => l.inventoryEtichettaProductId,
+        type: DataGridFieldType.numero,
+        read: (g) => [for (final p in g.products) p.productId],
+        serverParam: 'product_id',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'variation_id',
+        label: (l) => l.inventoryEtichettaVariationId,
+        type: DataGridFieldType.numero,
+        read: (g) => [for (final p in g.products) p.variationId],
+        serverParam: 'variation_id',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'date_from',
+        label: (l) => l.inventoryEtichettaDaData,
+        type: DataGridFieldType.data,
+        read: (g) => [
+          DateTime.tryParse(g.occurredAtGmt.replaceFirst(' ', 'T')),
+        ],
+        serverParam: 'date_from',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'date_to',
+        label: (l) => l.inventoryEtichettaAData,
+        type: DataGridFieldType.data,
+        read: (g) => [
+          DateTime.tryParse(g.occurredAtGmt.replaceFirst(' ', 'T')),
+        ],
+        serverParam: 'date_to',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'source_type',
+        label: (l) => l.inventoryEtichettaSource,
+        type: DataGridFieldType.testo,
+        read: (g) => [g.sourceType],
+        serverParam: 'source_type',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'operator',
+        label: (l) => l.inventoryEtichettaOperatore,
+        type: DataGridFieldType.numero,
+        read: (g) => [g.operatorUserId],
+        serverParam: 'user_id',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'reason',
+        label: (l) => l.inventoryEtichettaReason,
+        type: DataGridFieldType.testo,
+        read: (g) => [g.reason],
+        serverParam: 'reason_code',
+        filterable: true,
+        column: false,
+      ),
+      DataGridField<InventoryMovementGroup>(
+        name: 'stock_effect',
+        label: (l) => l.inventoryEtichettaEffetto,
+        type: DataGridFieldType.testo,
+        read: (g) => [
+          g.movements.isNotEmpty ? g.movements.first.stockEffect : '',
+        ],
+        serverParam: 'stock_effect',
+        filterable: true,
+        column: false,
+      ),
+    ];
+  }
+
+  Future<PaginatedResult<InventoryMovementGroup>> _loadPage(
+    DataGridPageRequest request,
+  ) async {
+    // Convert the DataGrid filters into MgwsMovementFilter.
+    int? productId;
+    int? variationId;
+    String? dateFrom;
+    String? dateTo;
+    String? sourceType;
+    int? operatorUserId;
+    String? reasonCode;
+    String? stockEffect;
+
+    for (final f in request.filters) {
+      final val = f.valori.isNotEmpty ? f.valori.first : '';
+      switch (f.fieldName) {
+        case 'product_id':
+          productId = int.tryParse(val);
+          break;
+        case 'variation_id':
+          variationId = int.tryParse(val);
+          break;
+        case 'date_from':
+          dateFrom = val.isNotEmpty ? val : null;
+          break;
+        case 'date_to':
+          dateTo = val.isNotEmpty ? val : null;
+          break;
+        case 'source_type':
+          sourceType = val.isNotEmpty ? val : null;
+          break;
+        case 'operator':
+          operatorUserId = int.tryParse(val);
+          break;
+        case 'reason':
+          reasonCode = val.isNotEmpty ? val : null;
+          break;
+        case 'stock_effect':
+          stockEffect = val.isNotEmpty ? val : null;
+          break;
+      }
+    }
+
+    final filter = MgwsMovementFilter(
+      productId: productId,
+      variationId: variationId,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      sourceType: sourceType,
+      operatorUserId: operatorUserId,
+      reasonCode: reasonCode,
+      stockEffect: stockEffect,
+      page: request.page,
+      perPage: request.perPage,
+    );
+
+    final result = await _gateway.listMovements(filter);
+    if (!result.success || result.data == null) {
+      return PaginatedResult<InventoryMovementGroup>(
+        items: const [],
+        page: request.page,
+        perPage: request.perPage,
+        totalItems: 0,
+      );
+    }
+    final groups = groupMovements(result.data!.items);
+    return PaginatedResult<InventoryMovementGroup>(
+      items: groups,
+      page: result.data!.page,
+      perPage: result.data!.perPage,
+      totalItems: result.data!.total,
+      hasMore: result.data!.page < result.data!.totalPages,
+    );
   }
 
   @override
   void dispose() {
-    _productController.dispose();
-    _variationController.dispose();
-    _fromController.dispose();
-    _toController.dispose();
-    _sourceController.dispose();
-    _operatorController.dispose();
-    _reasonController.dispose();
-    _effectController.dispose();
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     super.dispose();
   }
 
-  InventoryMovementFilterForm _form() => InventoryMovementFilterForm(
-    productIdText: _productController.text,
-    variationIdText: _variationController.text,
-    dateFromText: _fromController.text,
-    dateToText: _toController.text,
-    sourceTypeText: _sourceController.text,
-    operatorUserIdText: _operatorController.text,
-    reasonCodeText: _reasonController.text,
-    stockEffectText: _effectController.text,
-  );
-
-  List<InventoryMovementGroup> get _groups =>
-      groupMovements(widget.controller.movements);
-
-  /// `true` se il backend ha tagliato la risposta.
-  ///
-  /// Il raggruppamento per operazione si regge su una cosa sola: i prodotti della
-  /// stessa operazione devono arrivare insieme. MGWS pagina e non filtra per
-  /// documento, quindi un'operazione piu' grande di una pagina verrebbe
-  /// accordata in due righe, e l'operatore vedrebbe due operazioni dove ce
-  /// n'e' una sola. Meglio dirlo che farlo notare a metta.
-  bool get _pageIsTruncated {
-    final page = widget.controller.movementPage;
-    if (page == null) return false;
-    return widget.controller.movements.length < page.total;
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
-    final feedback = await widget.controller.load(_form());
-    if (!mounted) return;
-    setState(() {
-      _feedback = feedback;
-      _loading = false;
-      _selected = null;
-    });
+    await _controller.reload(force: true);
   }
 
+  List<InventoryMovementGroup> get _groups => _controller.visibleItems;
+
+  /// True when MGWS has more rows than the loaded page.
+  ///
+  /// Do not compare the number of groups with the total: MGWS counts movement
+  /// rows (one per product), while several rows can make one group here.
+  /// The meaningful comparison is between pages, not between rows.
+  bool get _pageIsTruncated => _controller.pagination.hasMore;
+
+  /// Whether [group] holds the most recent movement of the whole ledger.
+  ///
+  /// Only an unfiltered first page is ordered newest-first end to end, so any
+  /// search, filter, custom sort, or later page makes the answer unknown. In
+  /// that case we say "not latest" and let the server reject an edit that is
+  /// no longer valid; a false "latest" here would offer an action that cannot
+  /// succeed.
+  bool _isLatestMovement(InventoryMovementGroup group) =>
+      !_controller.hasActiveFilters &&
+      _controller.pagination.currentPage == 1 &&
+      _groups.isNotEmpty &&
+      _groups.first.key == group.key;
+
   Future<void> _openGroup(InventoryMovementGroup group) async {
-    setState(() => _selected = group);
-    final action = await showInventoryMovementDialog(context, group);
+    final action = await showInventoryMovementDialog(
+      context,
+      group,
+      isLatestMovement: _isLatestMovement(group),
+    );
     if (!mounted) return;
     switch (action) {
       case InventoryMovementAction.reopen:
@@ -132,11 +373,6 @@ class _InventoryMovementLedgerPanelState
     }
   }
 
-  /// Riapre l'operazione nel pannello che l'ha prodotta.
-  ///
-  /// Il seme porta solo i prodotti, il motivo e i dettagli: sono i dati che il
-  /// ledger registra davvero. Se il pannello non e' collegato a nessuna pagina
-  /// non si fa niente in silenzio, si dice.
   void _reopen(InventoryMovementGroup group) {
     final callback = widget.onReopen;
     final module = group.resumeModule;
@@ -152,19 +388,13 @@ class _InventoryMovementLedgerPanelState
     );
   }
 
-  /// Prepara il contromovimento, mostra cosa succedera' e solo dopo chiede.
-  ///
-  /// Il piano si costruisce leggendo lo stock attuale di ogni prodotto: se
-  /// nel frattempo qualcun altro ha mosso la merce, l'annullamento di quel
-  /// prodotto viene bloccato e l'operatore vede il nome del prodotto e il
-  /// motivo, non un errore generico.
   Future<void> _revertGroup(InventoryMovementGroup group) async {
     setState(() => _feedback = null);
     final prepared = await _revert.prepare(group);
     if (!mounted) return;
     final plan = _revert.lastPlan;
     if (plan == null || !plan.canRevert) {
-      setState(() => _feedback = prepared);
+      setState(() => _feedback = prepared as InventoryActionFeedback?);
       return;
     }
     final confirmed = await _confirmRevert(plan);
@@ -172,16 +402,11 @@ class _InventoryMovementLedgerPanelState
     final feedback = await _revert.execute(context.l10n, plan);
     if (!mounted) return;
     setState(() => _feedback = feedback);
-    // Il ledger e' cambiato: senza ricaricare la lista mostrerebbe uno stock
-    // che non esiste piu' e l'operatore prenderebbe decisioni su numeri vecchi.
     await _load();
   }
 
   Future<bool?> _confirmRevert(InventoryMovementRevertPlan plan) {
     final isMove = plan.group.isMove;
-    // Su uno spostamento la riga non riporta il totale a un numero: dice
-    // quanti pezzi tornano indietro e da quale magazzino a quale. Dire "da 40 a
-    // 40" sarebbe un annullamento che non annulla niente.
     final lines = <String>[
       for (final line in plan.revertable)
         if (line.isReverseMove)
@@ -247,196 +472,136 @@ class _InventoryMovementLedgerPanelState
       elevation: 0,
       color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.timeline, color: theme.colorScheme.primary),
-                title: Text(
-                  context.l10n.inventoryMovimentiTitolo,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                subtitle: Text(
-                  context.l10n.inventoryMovimentiSottotitolo,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.subtitleColor,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.timeline, color: theme.colorScheme.primary),
+              title: Text(
+                context.l10n.inventoryMovimentiTitolo,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
+              subtitle: Text(
+                context.l10n.inventoryMovimentiSottotitolo,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.subtitleColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            DataGridFiltersBar<InventoryMovementGroup>(
+              controller: _controller,
+              fields: _controller.fields,
+              onRefresh: () => _controller.reload(force: true),
+              onOpenColumns: _openColumnPicker,
+            ),
+            const SizedBox(height: 10),
+            if (_pageIsTruncated) ...[
+              _truncationNotice(),
               const SizedBox(height: 10),
-              _filters(),
-              const SizedBox(height: 10),
-              if (_pageIsTruncated) ...[
-                _truncationNotice(),
-                const SizedBox(height: 10),
-              ],
-              if (_loading)
-                const Center(child: CircularProgressIndicator())
-              else if (groups.isEmpty)
-                _empty(colors)
-              else
-                SizedBox(height: 320, child: _grid(groups)),
-              const SizedBox(height: 10),
-              if (_feedback != null)
-                InventoryMovementFeedback(feedback: _feedback!),
             ],
-          ),
+            if (_controller.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (groups.isEmpty)
+              _empty(colors)
+            else
+              SizedBox(height: 320, child: _grid(groups)),
+            const SizedBox(height: 10),
+            GlobalPaginationBar(
+              settings: context.read<AppSettings>(),
+              controller: _controller.pagination,
+              totalRows: _controller.totalRows,
+              selectedRows: 0,
+              onFirstPage: () => _controller.goToFirstPage(),
+              onPreviousPage: () => _controller.goToPreviousPage(),
+              onNextPage: () => _controller.goToNextPage(),
+              onLastPage: () => _controller.goToLastPage(),
+              onModeOrPageSizeChanged: (mode, size) =>
+                  _controller.pageSizeOrModeChanged(),
+              persistPageSize: _persistPageSize,
+            ),
+            const SizedBox(height: 10),
+            if (_feedback != null)
+              InventoryMovementFeedback(feedback: _feedback!),
+          ],
         ),
       ),
     );
   }
 
-  /// Larghezza dei campi filtro: 180 px, ma su telefono due per riga, così
-  /// non resta mezza riga vuota accanto a ogni campo.
-  double _larghezzaCampo = 180;
+  List<DataGridViewColumn> _allColumns() => <DataGridViewColumn>[
+    DataGridViewColumn(id: 'time', label: context.l10n.commonDate, width: 175),
+    DataGridViewColumn(
+      id: 'kind',
+      label: context.l10n.inventoryEtichettaTipo,
+      width: 120,
+    ),
+    DataGridViewColumn(
+      id: 'operator',
+      label: context.l10n.inventoryEtichettaOperatore,
+      width: 110,
+    ),
+    DataGridViewColumn(
+      id: 'delta',
+      label: context.l10n.inventoryEtichettaPezzi,
+      width: 80,
+      numeric: true,
+    ),
+    DataGridViewColumn(
+      id: 'products',
+      label: context.l10n.inventoryEtichettaProdotti,
+      width: 90,
+      numeric: true,
+    ),
+    DataGridViewColumn(
+      id: 'last',
+      label: context.l10n.inventoryEtichettaUltimaModifica,
+      width: 175,
+    ),
+    DataGridViewColumn(
+      id: 'reason',
+      label: context.l10n.inventoryEtichettaMotivoEDettagli,
+      flexible: true,
+    ),
+  ];
 
-  Widget _filters() => LayoutBuilder(
-    builder: (context, constraints) {
-      const spacing = 12.0;
-      _larghezzaCampo = constraints.maxWidth < 180 * 2 + spacing
-          ? (constraints.maxWidth - spacing) / 2
-          : 180;
-      return _filtersWrap();
-    },
-  );
-
-  Widget _filtersWrap() => Wrap(
-    spacing: 12,
-    runSpacing: 12,
-    crossAxisAlignment: WrapCrossAlignment.center,
-    children: [
-      _field(
-        _productController,
-        context.l10n.inventoryEtichettaProductId,
-        'inventory-movement-product-field',
-      ),
-      _field(
-        _variationController,
-        context.l10n.inventoryEtichettaVariationId,
-        'inventory-movement-variation-field',
-      ),
-      _field(
-        _fromController,
-        context.l10n.inventoryEtichettaDaData,
-        'inventory-movement-from-field',
-      ),
-      _field(
-        _toController,
-        context.l10n.inventoryEtichettaAData,
-        'inventory-movement-to-field',
-      ),
-      _field(
-        _sourceController,
-        context.l10n.inventoryEtichettaSource,
-        'inventory-movement-source-field',
-      ),
-      _field(
-        _operatorController,
-        context.l10n.inventoryEtichettaOperatore,
-        'inventory-movement-operator-field',
-      ),
-      _field(
-        _reasonController,
-        context.l10n.inventoryEtichettaReason,
-        'inventory-movement-reason-field',
-      ),
-      _field(
-        _effectController,
-        context.l10n.inventoryEtichettaEffetto,
-        'inventory-movement-effect-field',
-      ),
-      OutlinedButton.icon(
-        key: const ValueKey('inventory-movement-refresh'),
-        onPressed: _loading ? null : _load,
-        icon: const Icon(Icons.refresh),
-        label: Text(context.l10n.inventoryAggiornaMovimenti),
-      ),
-    ],
-  );
-
-  Widget _grid(List<InventoryMovementGroup> groups) =>
-      DataGridView<InventoryMovementGroup>(
-        columns: [
-          DataGridViewColumn(
-            id: 'time',
-            label: context.l10n.commonDate,
-            width: 175,
-          ),
-          DataGridViewColumn(
-            id: 'kind',
-            label: context.l10n.inventoryEtichettaTipo,
-            width: 120,
-          ),
-          DataGridViewColumn(
-            id: 'operator',
-            label: context.l10n.inventoryEtichettaOperatore,
-            width: 110,
-          ),
-          DataGridViewColumn(
-            id: 'delta',
-            label: context.l10n.inventoryEtichettaPezzi,
-            width: 80,
-            numeric: true,
-          ),
-          DataGridViewColumn(
-            id: 'products',
-            label: context.l10n.inventoryEtichettaProdotti,
-            width: 90,
-            numeric: true,
-          ),
-          DataGridViewColumn(
-            id: 'last',
-            label: context.l10n.inventoryEtichettaUltimaModifica,
-            width: 175,
-          ),
-          DataGridViewColumn(
-            id: 'reason',
-            label: context.l10n.inventoryEtichettaMotivoEDettagli,
-            flexible: true,
-          ),
-        ],
-        rows: [for (final group in groups) _row(group)],
-        selectedRowId: _selected?.key,
-        onRowSelected: (group) => setState(() => _selected = group),
-        onRowDoubleTap: _openGroup,
-        // Su telefono il doppio tocco non lo prova nessuno: basta un tocco.
-        onRowTap: MediaQuery.sizeOf(context).width < 600 ? _openGroup : null,
-        contextActions: [
-          DataGridViewContextAction<InventoryMovementGroup>(
-            label: context.l10n.inventoryApriMovimento,
-            icon: Icons.open_in_new,
-            onSelected: _openGroup,
-          ),
-        ],
-      );
+  Widget _grid(List<InventoryMovementGroup> groups) {
+    final allColumns = _allColumns();
+    final visible = allColumns
+        .where((column) => _visibleColumns.contains(column.id))
+        .toList();
+    final columns = visible.isEmpty ? allColumns : visible;
+    return DataGridView<InventoryMovementGroup>(
+      columns: columns,
+      rows: [for (final group in groups) _row(group)],
+      selectedRowId: _controller.selected.value?.key ?? '',
+      onRowSelected: (group) => _controller.select(group),
+      onRowDoubleTap: _openGroup,
+      onRowTap: MediaQuery.sizeOf(context).width < 600 ? _openGroup : null,
+      contextActions: [
+        DataGridViewContextAction<InventoryMovementGroup>(
+          label: context.l10n.inventoryApriMovimento,
+          icon: Icons.open_in_new,
+          onSelected: _openGroup,
+        ),
+      ],
+    );
+  }
 
   DataGridViewRowData<InventoryMovementGroup> _row(
     InventoryMovementGroup group,
   ) {
     final colors = Theme.of(context).extension<AppColorExtension>()!;
-    // Il colore del delta ha tre casi, non due. Lo spostamento non cambia il
-    // totale, quindi il suo delta e' zero per costruzione: colorarlo di verde
-    // come un aumento direbbe "e' andata bene", che e' un'altra informazione da
-    // quella che la riga sta dando. Un delta zero dice solo che il totale non si
-    // e' mosso, e il totale non muoversi e' il fatto normale, non una buona
-    // notizia. Il colore del testo di base e' quello giusto per un dato che non
-    // ha un peso.
     final tone = group.quantityDelta == 0
         ? Theme.of(context).colorScheme.onSurface
         : (group.quantityDelta > 0
               ? colors.successColor
               : colors.errorColorStatus);
-    // Sullo spostamento la colonna del delta mostrerebbe uno zero che non dice
-    // niente, mentre l'informazione utile e' quanti pezzi hanno cambiato
-    // magazzino. La riga e' gia' etichettata come spostamento nella colonna
-    // della tipologia, quindi qui basta il numero senza segno: il segno
-    // suggerirebbe una variazione che non c'e' stata.
     final deltaCell = group.isMove
         ? Text('${group.movedQuantity} ${context.l10n.inventoryParolaPezzi}')
         : Text(movementSigned(group.quantityDelta));
@@ -446,9 +611,6 @@ class _InventoryMovementLedgerPanelState
       foregroundColor: tone,
       cells: {
         'time': Text(formatMovementDate(group.occurredAtGmt)),
-        // Il tipo che MGWS scrive resta visibile accanto all'etichetta quando
-        // non e' uno che l'app conosce: meglio una parola grezza che un
-        //-etichetta indovinata.
         'kind': Text(
           group.kind == InventoryMovementKind.altro
               ? '${group.kindLabel(context.l10n)} (${group.rawType})'
@@ -463,23 +625,15 @@ class _InventoryMovementLedgerPanelState
     );
   }
 
-  Widget _field(TextEditingController controller, String label, String key) {
-    return SizedBox(
-      width: _larghezzaCampo,
-      child: TextField(
-        key: ValueKey(key),
-        controller: controller,
-        decoration: InputDecoration(labelText: label),
-      ),
-    );
-  }
-
-  /// Avviso che la risposta e' stata tagliata dal backend.
   Widget _truncationNotice() {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColorExtension>()!;
-    final total = widget.controller.movementPage!.total;
-    final shown = widget.controller.movements.length;
+    final total = _controller.totalRows;
+    // Raw MGWS movement rows loaded so far, not groups: groups are always
+    // fewer than or equal to the rows.
+    final shown =
+        _controller.pagination.currentPage * _controller.pagination.pageSize;
+    final shownCapped = total < shown ? total : shown;
     return Container(
       key: const ValueKey('inventory-movement-truncated'),
       padding: const EdgeInsets.all(12),
@@ -495,7 +649,7 @@ class _InventoryMovementLedgerPanelState
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              context.l10n.inventoryMovimentiAvviso('$shown', '$total'),
+              context.l10n.inventoryMovimentiAvviso('$shownCapped', '$total'),
               style: theme.textTheme.bodySmall,
             ),
           ),

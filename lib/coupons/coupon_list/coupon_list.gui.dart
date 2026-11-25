@@ -508,15 +508,10 @@ class _CouponValidationWidgetState extends State<CouponValidationWidget> {
 
     widget.onValidate?.call(_controller.text);
 
-    // Simulazione validazione (in realtà dovrebbe chiamare il servizio)
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _isValidating = false;
-          _isValid = true; // Esempio
-          _validationMessage = context.l10n.couponsValido;
-        });
-      }
+    // Non simulare mai un esito positivo: l'esito reale arriva dal servizio
+    // di validazione invocato da `onValidate` (o dal chiamante).
+    setState(() {
+      _isValidating = false;
     });
   }
 

@@ -8,8 +8,9 @@
 // che si sta per toccare. Poi ogni prodotto riceve la sua correzione.
 //
 // La spunta in testa alla sezione sceglie il modo di correggere:
-//  - spuntata: l'operatore sceglie il verso con le due radio (incremento o
-//    diminuzione) e poi quanti pezzi
+//  - spuntata: l'operatore dice quanti pezzi e il verso di ogni singolo
+//    prodotto; le radio in testa servono solo da default per le nuove righe
+//    che arrivano da una scansione
 //  - non spuntata: l'operatore scrive la quantita' davvero contata
 
 import 'dart:async';
@@ -171,10 +172,12 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
   bool _autoAdd = true;
   InventoryActionFeedback? _feedback;
 
-  /// Verso della correzione, scelto una volta per la sezione.
+  /// Verso di default delle nuove righe, scelto in testa alla sezione.
   ///
   /// Parte da "Incremento" con zero pezzi: cosi' l'operatore vede la scelta
   /// gia' in testa e vede che non sta succedendo niente finche non la conferma.
+  /// Non e' il verso della correzione in corso: ogni prodotto ha il suo, e
+  /// cambiarlo qui non riscrive le righe gia' in lista.
   InventoryRettificaDirection _direction = InventoryRettificaDirection.increase;
 
   /// `true` dopo [initState]: in quel momento non si puo' chiamare `setState`,
@@ -202,7 +205,14 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       );
     }
     _ready = true;
-    _applySeed(widget.seed);
+    // Le etichette del seme vengono dalle traduzioni, non ancora leggibili in
+    // initState: il primo frame mostra il pannello, il callback lo riempie.
+    final seed = widget.seed;
+    if (seed != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _applySeed(seed);
+      });
+    }
   }
 
   @override
@@ -336,10 +346,9 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
       barcodeInterno: match.barcodeInterno.isEmpty
           ? null
           : match.barcodeInterno,
-      // Il prodotto entra con il verso che l'operatore ha scelto in testa: se
-      // la scelta cambiasse a meta' operazione, i prodotti gia' corretti
-      // resterebbero col verso vecchio e il piano non sarebbe piu' quello che
-      // l'operatore crede di aver scritto.
+      // Il verso scelto in testa e' il default di questa riga appena nata;
+      // cambiarlo in seguito non la riscrive, perche' da li' in poi e' una
+      // scelta del prodotto e si cambia accanto al suo conteggio.
       direction: _direction,
     );
     // The first scan is already the first piece.
@@ -424,31 +433,34 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
 
   // ── Correzione ────────────────────────────────────────────────────
 
-  /// Sceglie il verso della correzione, per tutta la sezione.
+  /// Sceglie il verso di default per le righe nuove.
   ///
-  /// Il verso non e' una proprieta' del prodotto ma della correzione: e' la
-  /// risposta alla domanda "quando scanno un barcode, aumento o diminuisco?",
-  /// quindi sta una volta sola accanto alla spunta, dove si vede prima ancora
-  /// di aver scansionato qualcosa.
-  ///
-  /// Cambiare verso riparte da un pezzo invece di sommare: dopo tre incrementi
-  /// scegliere la diminuzione vuol dire un pezzo sotto, non quattro sotto.
-  /// L'operatore ha deciso "ora correggo verso il basso", non "ora aggiungo
-  /// altri tre pezzi sotto".
-  ///
-  /// Le righe gia' in lista cambiano verso insieme: una rettifica e' una
-  /// correzione sola, e due versi opposti nella stessa operazione significherebbero
-  /// che il magazzino e' sbagliato in due direzioni diverse, che e' una cosa da
-  /// sapere prima di mandare, non dopo.
+  /// Le radio in testa rispondono alla domanda "quando scanno un barcode,
+  /// aumento o diminuisco?": servono prima della scansione, non dopo. Le righe
+  /// gia' in lista hanno il loro verso, scelto accanto al conteggio di quel
+  /// prodotto, e restano come sono: una rettifica puo' correggere piu' capi
+  /// in versi diversi, perche' il magazzino puo' essere sbagliato in due
+  /// direzioni diverse su due prodotti diversi.
   void _setDirection(InventoryRettificaDirection direction) {
     if (_direction == direction) return;
     setState(() {
       _direction = direction;
-      for (final row in _rows) {
-        if (row.direction == direction) continue;
-        row.direction = direction;
-        row.delta = 1;
-      }
+      _feedback = null;
+    });
+  }
+
+  /// Cambia il verso di un singolo prodotto, senza toccare gli altri.
+  ///
+  /// La quantita' resta quella gia' scelta: se l'operatore ha contato tre pezzi
+  /// e si accorge che li deve togliere, tre pezzi sotto e' quello che vuole,
+  /// non un pezzo solo.
+  void _setRowDirection(
+    _RettificaRow row,
+    InventoryRettificaDirection direction,
+  ) {
+    if (row.direction == direction) return;
+    setState(() {
+      row.direction = direction;
       _feedback = null;
     });
   }
@@ -684,13 +696,12 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
         '${plan.siteId > 0 ? ' ${l10n.inventoryRettificaInSede((widget.siteName ?? '').trim().isNotEmpty ? widget.siteName!.trim() : plan.siteId.toString())}' : ''}';
   }
 
-  /// Le due radio del verso, accanto alla spunta.
+  /// Le due radio del verso di default, accanto alla spunta.
   ///
-  /// Vivono in testa alla sezione e non dentro le righe perche' rispondono alla
-  /// domanda che l'operatore si fa mentre scansiona, non a una domanda sul
-  /// singolo prodotto: dentro la riga comparivano solo dopo la scansione, cioe'
-  /// quando la domanda e' gia' stata posta. E senza spunta non compaiono
-  /// affatto, perche' con il conteggio scritto a mano il verso non serve.
+  /// Rispondono alla domanda che l'operatore si fa mentre scansiona, non a una
+  /// domanda sul singolo prodotto: il verso di ogni prodotto si cambia nella
+  /// sua riga. Senza spunta non compaiono, perche' con il conteggio scritto a
+  /// mano il verso non serve.
   Widget _buildDirectionChooser() {
     final theme = Theme.of(context);
     return RadioGroup<InventoryRettificaDirection>(
@@ -740,11 +751,50 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
     );
   }
 
+  /// Verso di questo prodotto, accanto al suo conteggio.
+  ///
+  /// Le chiavi sono univoche per prodotto/variante: due righe diverse devono
+  /// poter essere selezionate e verificate indipendentemente.
+  Widget _buildRowDirectionChooser(_RettificaRow row) {
+    final l10n = context.l10n;
+    return RadioGroup<InventoryRettificaDirection>(
+      key: ValueKey('inventory-rettifica-row-direction-group-${row.key}'),
+      groupValue: row.direction,
+      onChanged: (value) {
+        if (_controller.isSubmitting || value == null) return;
+        _setRowDirection(row, value);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Tooltip(
+            message: l10n.inventoryVersoIncremento,
+            child: Radio<InventoryRettificaDirection>(
+              key: ValueKey(
+                'inventory-rettifica-row-direction-increase-${row.key}',
+              ),
+              value: InventoryRettificaDirection.increase,
+            ),
+          ),
+          Tooltip(
+            message: l10n.inventoryVersoDiminuzione,
+            child: Radio<InventoryRettificaDirection>(
+              key: ValueKey(
+                'inventory-rettifica-row-direction-decrease-${row.key}',
+              ),
+              value: InventoryRettificaDirection.decrease,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Controlli di correzione del singolo prodotto.
   ///
-  /// Con la spunta attiva la correzione si sceglie in due gesti: il verso con
-  /// le due radio, poi quanti pezzi con il contatore. Senza spunta
-  /// l'operatore scrive il conteggio reale, che vince su qualsiasi somma.
+  /// Con la spunta attiva la correzione si sceglie in due gesti: il verso di
+  /// quel prodotto con le sue radio, poi quanti pezzi con il contatore. Senza
+  /// spunta l'operatore scrive il conteggio reale, che vince su qualsiasi somma.
   Widget _buildRow(_RettificaRow row) {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColorExtension>()!;
@@ -775,6 +825,21 @@ class _InventoryRettificaPanelState extends State<InventoryRettificaPanel> {
             context.l10n.inventoryRettificaStockNonDisponibile,
             style: theme.textTheme.bodySmall?.copyWith(
               color: colors.warningColor,
+            ),
+          ),
+        if (_autoAdd)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.inventoryEtichettaVerso,
+                  style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(width: 6),
+                _buildRowDirectionChooser(row),
+              ],
             ),
           ),
         if (_autoAdd) ...[

@@ -907,9 +907,8 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                           border: OutlineInputBorder(),
                         ),
                         textCapitalization: TextCapitalization.characters,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? context.l10n.commonFieldRequired
-                            : null,
+                        validator: (value) =>
+                            CouponValidator.validateCode(context.l10n, value),
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
@@ -949,9 +948,11 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                           suffixText: _discountType == 'percent' ? '%' : '€',
                         ),
                         keyboardType: TextInputType.number,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? context.l10n.commonFieldRequired
-                            : null,
+                        validator: (value) => CouponValidator.validateAmount(
+                          context.l10n,
+                          value,
+                          _discountType,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -1015,23 +1016,23 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: _usageLimitController,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.couponUsageLimit,
-                                border: OutlineInputBorder(),
-                              ),
                               keyboardType: TextInputType.number,
+                              validator: (value) =>
+                                  CouponValidator.validateUsageLimit(
+                                    context.l10n,
+                                    value,
+                                  ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: TextFormField(
-                              controller: _usageLimitPerUserController,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.couponLimitPerUser,
-                                border: OutlineInputBorder(),
-                              ),
                               keyboardType: TextInputType.number,
+                              validator: (value) =>
+                                  CouponValidator.validateUsageLimit(
+                                    context.l10n,
+                                    value,
+                                  ),
                             ),
                           ),
                         ],
@@ -1041,25 +1042,25 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: _minimumAmountController,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.couponMinimumAmount,
-                                border: OutlineInputBorder(),
-                                prefixText: '€ ',
-                              ),
                               keyboardType: TextInputType.number,
+                              validator: (value) =>
+                                  CouponValidator.validateMinimumAmount(
+                                    context.l10n,
+                                    value,
+                                    _maximumAmountController.text,
+                                  ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: TextFormField(
-                              controller: _maximumAmountController,
-                              decoration: InputDecoration(
-                                labelText: context.l10n.couponMaximumAmount,
-                                border: OutlineInputBorder(),
-                                prefixText: '€ ',
-                              ),
                               keyboardType: TextInputType.number,
+                              validator: (value) =>
+                                  CouponValidator.validateMaximumAmount(
+                                    context.l10n,
+                                    value,
+                                    _minimumAmountController.text,
+                                  ),
                             ),
                           ),
                         ],

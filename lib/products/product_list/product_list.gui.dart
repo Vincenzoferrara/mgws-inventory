@@ -2,6 +2,7 @@ import '../../l10n/error_text.dart';
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'product_list.code.dart';
 import '../class_products.dart';
 import '../product_grid_fields.dart';
@@ -180,7 +181,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
     with AutomaticKeepAliveClientMixin<ProdottiGestisciPage> {
   // ── Controller e settings ────────────────────────────────────────────────
   final _controller = ProdottiGestioneController();
-  final _appSettings = AppSettings();
+  late final AppSettings _appSettings;
   final _machineUiPreferences = MachineUiPreferences();
   late final DataGridListController<ProdottoGlobal> _listController;
   final ValueNotifier<ProdottoGlobal?> _selectedProductNotifier =
@@ -222,6 +223,7 @@ class ProdottiGestisciPageState extends State<ProdottiGestisciPage>
   @override
   void initState() {
     super.initState();
+    _appSettings = context.read<AppSettings>();
     _listController = DataGridListController<ProdottoGlobal>(
       fields: ProdottoGlobal.gridFields,
       idOf: _idOf,

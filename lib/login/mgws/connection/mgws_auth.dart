@@ -43,7 +43,7 @@ class MgwsAuth {
 
   /// Versione minima del plugin MGWS che questa app sa usare. Va alzata
   /// quando l'app comincia a dipendere da una rotta o da un campo nuovo.
-  static const String minPluginVersion = '2.4.0';
+  static const String minPluginVersion = '2.15.0';
 
   /// Verifica MGWS e restituisce l'esito con il motivo dell'eventuale
   /// fallimento. Non solleva eccezioni: un errore di rete e' un esito

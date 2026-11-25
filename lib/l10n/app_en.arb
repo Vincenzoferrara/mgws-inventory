@@ -9831,9 +9831,9 @@
   "@inventoryResumeBlockMove": {
     "description": "Localized string inventoryResumeBlockMove"
   },
-  "inventoryResumeBlockAdd": "Stock-in is the only route of the group and it can only increase stock: a stock-in corrected downwards is a decrease, which cannot be written from there.",
-  "@inventoryResumeBlockAdd": {
-    "description": "Localized string inventoryResumeBlockAdd"
+  "inventoryResumeBlockNotLast": "Only the most recent movement can be edited: a newer movement has already changed the stock after this one.",
+  "@inventoryResumeBlockNotLast": {
+    "description": "Shown when Edit is unavailable because newer movements exist"
   },
   "inventoryResumeBlockCount": "A physical count is recorded by MGWS and not by a panel: reopening it here would produce a correction, not a count.",
   "@inventoryResumeBlockCount": {

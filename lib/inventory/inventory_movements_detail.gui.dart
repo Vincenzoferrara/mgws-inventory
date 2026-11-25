@@ -15,10 +15,12 @@ import 'package:material_ui/material_ui.dart';
 import '../login/mgws/query/query_mgws_inventory.dart';
 import '../reuse_class/datagridview/datagridview.code.dart';
 import '../reuse_class/datagridview/datagridview.gui.dart';
+import '../reuse_class/datagridview/datagridview_image_preview.dart';
 import '../theme/theme.dart';
 import '../l10n/extensions.dart';
 import 'inventory.code.dart';
 import 'inventory_movement_groups.code.dart';
+import 'inventory_movement_images.code.dart';
 
 /// Cosa ha chiesto l'operatore sulla schermata del movimento.
 enum InventoryMovementAction { reopen, revert }
@@ -29,18 +31,41 @@ enum InventoryMovementAction { reopen, revert }
 /// modo normale per cui si esce da una schermata di lettura.
 Future<InventoryMovementAction?> showInventoryMovementDialog(
   BuildContext context,
-  InventoryMovementGroup group,
-) {
+  InventoryMovementGroup group, {
+  required bool isLatestMovement,
+}) async {
+  final imageUrls = await loadInventoryMovementImages(group.products);
+  if (!context.mounted) return null;
   return showDialog<InventoryMovementAction>(
     context: context,
-    builder: (context) => _InventoryMovementDialog(group: group),
+    builder: (context) => InventoryMovementDialog(
+      group: group,
+      imageUrls: imageUrls,
+      isLatestMovement: isLatestMovement,
+    ),
   );
 }
 
-class _InventoryMovementDialog extends StatelessWidget {
-  const _InventoryMovementDialog({required this.group});
+class InventoryMovementDialog extends StatelessWidget {
+  const InventoryMovementDialog({
+    super.key,
+    required this.group,
+    required this.imageUrls,
+    this.isLatestMovement = true,
+  });
 
   final InventoryMovementGroup group;
+
+  /// Whether no newer movement exists in the ledger.
+  ///
+  /// A stock-in is edited in place, so it can only be reopened while it is the
+  /// most recent operation. The value comes from the ledger page; MGWS repeats
+  /// the check on write and is the authoritative guard.
+  final bool isLatestMovement;
+
+  /// Immagini recuperate dal catalogo, indicizzate come `productId:variationId`.
+  /// Manchino pure: il dettaglio resta leggibile e mostra il segnaposto.
+  final Map<String, String?> imageUrls;
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +298,11 @@ class _InventoryMovementDialog extends StatelessWidget {
   Widget _productsGrid(BuildContext context) {
     final columns = <DataGridViewColumn>[
       DataGridViewColumn(
+        id: 'preview',
+        label: context.l10n.prodottiColonnaAnteprima,
+        width: 76,
+      ),
+      DataGridViewColumn(
         id: 'product',
         label: context.l10n.inventoryEtichettaProdotto,
         width: 150,
@@ -333,6 +363,7 @@ class _InventoryMovementDialog extends StatelessWidget {
     InventoryMovementProduct product,
   ) {
     final colors = Theme.of(context).extension<AppColorExtension>()!;
+    final rowKey = '${product.productId}:${product.variationId}';
     // Uno spostamento ha delta zero e pezzi > 0: colorarlo di rosso o di verde
     // come una correzione sarebbe falso. Il tono segue l'effetto sul totale, e
     // quando l'effetto e' nullo la riga resta col colore del testo normale.
@@ -342,10 +373,18 @@ class _InventoryMovementDialog extends StatelessWidget {
               ? colors.errorColorStatus
               : Theme.of(context).colorScheme.onSurface);
     return DataGridViewRowData(
-      id: '${product.productId}:${product.variationId}',
+      id: rowKey,
       value: product,
       foregroundColor: tone,
       cells: {
+        'preview': Center(
+          child: DataGridViewImagePreview(
+            key: ValueKey('inventory-movement-image-$rowKey'),
+            imageUrl: imageUrls[rowKey],
+            semanticLabel: context.l10n.inventorySemanticaCopertina(rowKey),
+            size: 40,
+          ),
+        ),
         'product': Text('#${product.productId}'),
         'variation': Text(
           product.variationId > 0 ? '${product.variationId}' : '-',
@@ -380,7 +419,7 @@ class _InventoryMovementDialog extends StatelessWidget {
     AppColorExtension colors,
   ) {
     final theme = Theme.of(context);
-    final canReopen = group.canResume;
+    final canReopen = group.canResumeNow(isLatestMovement: isLatestMovement);
     final canRevert = group.canRevert;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
@@ -396,7 +435,10 @@ class _InventoryMovementDialog extends StatelessWidget {
           // posto da dover cercare.
           if (!canReopen)
             Text(
-              group.resumeBlockMessage(context.l10n),
+              group.resumeBlockMessage(
+                context.l10n,
+                isLatestMovement: isLatestMovement,
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colors.warningColor,
               ),

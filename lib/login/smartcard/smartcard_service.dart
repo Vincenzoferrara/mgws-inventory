@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import '../../log_viewer/app_logger.dart';
 
 /// Tipi di smartcard supportati
@@ -43,19 +45,77 @@ class SmartcardData {
     );
   }
 
-  /// Converte i dati in stringa cifrata (base64)
+  /// Converte i dati in stringa cifrata (AES-256).
+  ///
+  /// Il prefisso `aes:` distingue il formato cifrato dal vecchio formato
+  /// base64 (ancora leggibile per compatibilita' con card scritte in
+  /// precedenza, ma mai piu' prodotto).
   String toEncryptedString() {
     final jsonString = jsonEncode(toJson());
-    final bytes = utf8.encode(jsonString);
-    return base64Encode(bytes);
+    final seed = 'smartcard_encryption_key_mgws_inventory';
+    final keyBytes = sha256.convert(utf8.encode(seed)).bytes;
+    final key = encrypt.Key(Uint8List.fromList(keyBytes));
+    final iv = encrypt.IV.fromLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+    final encrypted = encrypter.encrypt(jsonString, iv: iv);
+    return 'aes:${iv.base64}:${encrypted.base64}';
   }
 
-  /// Decodifica una stringa cifrata
+  /// Decodifica una stringa cifrata (AES) o, in fallback, base64 legacy.
   static SmartcardData fromEncryptedString(String encrypted) {
-    final bytes = base64Decode(encrypted);
-    final jsonString = utf8.decode(bytes);
-    final json = jsonDecode(jsonString);
-    return SmartcardData.fromJson(json);
+    // Valida l'URL prima di decodificare: nessun bypass su HTTP non sicuro.
+    String? siteUrl;
+    try {
+      if (encrypted.startsWith('aes:')) {
+        final parts = encrypted.split(':');
+        // aes:<iv>:<payload> (il payload base64 non contiene ':')
+        if (parts.length < 3) throw const FormatException('formato aes non valido');
+        final iv = encrypt.IV.fromBase64(parts[1]);
+        final payload = parts.sublist(2).join(':');
+        final seed = 'smartcard_encryption_key_mgws_inventory';
+        final keyBytes = sha256.convert(utf8.encode(seed)).bytes;
+        final key = encrypt.Key(Uint8List.fromList(keyBytes));
+        final encrypter = encrypt.Encrypter(encrypt.AES(key));
+        final jsonString = encrypter.decrypt64(payload, iv: iv);
+        final json = jsonDecode(jsonString) as Map<String, dynamic>;
+        siteUrl = json['site_url']?.toString();
+        _validateSiteUrl(siteUrl);
+        return SmartcardData.fromJson(json);
+      }
+      // Fallback legacy base64 (card scritte prima della cifratura reale).
+      final bytes = base64Decode(encrypted);
+      final jsonString = utf8.decode(bytes);
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      siteUrl = json['site_url']?.toString();
+      _validateSiteUrl(siteUrl);
+      return SmartcardData.fromJson(json);
+    } catch (e) {
+      throw FormatException('Impossibile decodificare i dati smartcard: $e');
+    }
+  }
+
+  /// Rifiuta URL non sicuri (HTTP su host non locale) per evitare bypass.
+  static void _validateSiteUrl(String? siteUrl) {
+    if (siteUrl == null || siteUrl.isEmpty) {
+      throw const FormatException('site_url mancante');
+    }
+    final uri = Uri.tryParse(siteUrl);
+    if (uri == null || !uri.isAbsolute) {
+      throw const FormatException('site_url non valido');
+    }
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme != 'https' && scheme != 'http') {
+      throw const FormatException('schema non supportato');
+    }
+    if (scheme == 'http') {
+      final host = uri.host.toLowerCase();
+      final isLocal = host == 'localhost' ||
+          host == '127.0.0.1' ||
+          host == '::1';
+      if (!isLocal) {
+        throw const FormatException('HTTP consentito solo su localhost');
+      }
+    }
   }
 }
 

@@ -29,12 +29,39 @@ class CalDavService {
   }
 
   String _buildFullUrl(String site, String parameter) {
-    final base = site.startsWith('http') ? site : 'https://$site';
+    final trimmed = site.trim();
+    String base;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      base = trimmed;
+    } else {
+      base = 'https://$trimmed';
+    }
     return parameter.isEmpty ? base : '$base$parameter';
+  }
+
+  /// True se l'URL e' sicuro per inviare credenziali Basic Auth
+  /// (HTTPS, oppure HTTP solo su localhost/127.0.0.1 per sviluppo locale).
+  bool _isSecureUrl(String? url) {
+    if (url == null || url.isEmpty) return false;
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    if (uri.scheme == 'https') return true;
+    if (uri.scheme == 'http') {
+      final host = uri.host.toLowerCase();
+      return host == 'localhost' ||
+          host == '127.0.0.1' ||
+          host == '::1';
+    }
+    return false;
   }
 
   void _configureDio() {
     if (baseUrl == null || username == null || password == null) return;
+    // Non inviare mai credenziali Basic Auth su HTTP non sicuro.
+    if (!_isSecureUrl(baseUrl)) {
+      dio = null;
+      return;
+    }
     final url = baseUrl!.endsWith('/') ? baseUrl! : '$baseUrl/';
     dio = Dio(
       BaseOptions(

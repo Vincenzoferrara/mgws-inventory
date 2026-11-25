@@ -1,5 +1,6 @@
 import 'dart:io';
 import '../woo_connect.dart';
+import '../url_validator.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import '../error_list.dart';
@@ -90,6 +91,20 @@ class WooQueryMedia {
     String? title,
     String? altText,
   }) async {
+    // Validazione SSRF: l'URL remoto non deve puntare a IP locali/riservati
+    // né usare schemi diversi da http/https.
+    final uri = Uri.tryParse(imageUrl);
+    if (uri == null ||
+        !uri.isAbsolute ||
+        (uri.scheme != 'http' && uri.scheme != 'https')) {
+      throw ArgumentError('URL remoto non valido: $imageUrl');
+    }
+    if (UrlValidator.isLocalOrReservedIp(uri.host)) {
+      throw ArgumentError(
+        'URL remoto non consentito (host locale/riservato): ${uri.host}',
+      );
+    }
+
     try {
       final data = <String, dynamic>{
         'url': imageUrl,

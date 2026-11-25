@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -195,7 +196,7 @@ class DataGridListView<T> extends StatefulWidget {
 
 class _DataGridListViewState<T> extends State<DataGridListView<T>>
     with AutomaticKeepAliveClientMixin<DataGridListView<T>> {
-  final _appSettings = AppSettings();
+  late final AppSettings _appSettings;
   final _scrollController = ScrollController();
   late final MultiSplitViewController _splitViewController;
   late DataGridListController<T> _controller;
@@ -213,6 +214,7 @@ class _DataGridListViewState<T> extends State<DataGridListView<T>>
   @override
   void initState() {
     super.initState();
+    _appSettings = context.read<AppSettings>();
     _splitRatio = _normalizeRatio(widget.initialSplitRatio ?? 0.6);
     _splitViewController = MultiSplitViewController(
       areas: _splitAreasForRatio(_splitRatio),

@@ -123,6 +123,77 @@ class InventoryAddProductsPlan {
   }
 }
 
+/// Una riga del movimento "Aggiungi" riaperto dal ledger.
+///
+/// [movementId] e' l'id della riga del libro da modificare, non l'id
+/// dell'intestazione: sul backend la PATCH si indirizza alla riga.
+/// [quantity] e' il numero assoluto di pezzi che deve restare, non uno
+/// scarto: zero e' valido e conserva la riga nello storico.
+class InventoryMovementEditLine {
+  const InventoryMovementEditLine({
+    required this.movementId,
+    required this.quantity,
+    this.note,
+    this.unitCost,
+  });
+
+  final int movementId;
+  final int quantity;
+
+  /// Nota scritta dall'operatore, o null per lasciare quella del movimento.
+  final String? note;
+
+  /// Costo di un pezzo come digitato, o null se non dichiarato.
+  final String? unitCost;
+}
+
+/// Coppia indirizzo/corpo di una PATCH: il primo e' la riga del libro, il
+/// secondo il valore assoluto da scriverci.
+class InventoryMovementEditTarget {
+  const InventoryMovementEditTarget(this.movementId, this.request);
+
+  final int movementId;
+  final MgwsMovementEditRequest request;
+}
+
+/// Piano della modifica in place di un "Aggiungi" dal ledger.
+///
+/// Non riutilizza [InventoryQuickLoadSubmissionPlan]: quello e' un carico
+/// nuovo, chiede quantita' positive e manda POST. Qui la quantita' e' il
+/// valore finale e puo' essere zero.
+class InventoryMovementEditPlan {
+  const InventoryMovementEditPlan({required this.lines});
+
+  final List<InventoryMovementEditLine> lines;
+
+  InventoryFormParse<List<InventoryMovementEditTarget>> parse() {
+    if (lines.isEmpty) {
+      return InventoryFormInvalid(
+        (l10n) => l10n.inventorySelectProductOrVariant,
+      );
+    }
+    for (final line in lines) {
+      if (line.movementId <= 0) {
+        return InventoryFormInvalid(invalidFieldText('movement_id'));
+      }
+      if (line.quantity < 0) {
+        return InventoryFormInvalid((l10n) => l10n.inventoryInvalidQuantity);
+      }
+    }
+    return InventoryFormValid([
+      for (final line in lines)
+        InventoryMovementEditTarget(
+          line.movementId,
+          MgwsMovementEditRequest(
+            quantity: line.quantity,
+            note: line.note,
+            unitCost: line.unitCost,
+          ),
+        ),
+    ]);
+  }
+}
+
 /// Piano validato, pronto per essere eseguito dal controller.
 class InventoryAddProductsCommand {
   const InventoryAddProductsCommand({
@@ -297,6 +368,62 @@ class InventoryAddProductsController with InventoryFeedbackController {
             _summary(l10n, plan, success, load.message(l10n)),
             [...details, for (final detail in load.details) detail(l10n)],
             steps: steps,
+          );
+        } finally {
+          isSubmitting = false;
+        }
+    }
+  }
+
+  /// Modifica in place le righe di un "Aggiungi" riaperto dal ledger.
+  ///
+  /// Non passa da [submit]: quella e' una strada di carico nuovo, che manda
+  /// POST e rifiuta le quantita' nulle. Qui ogni riga ha gia' il suo indirizzo
+  /// e la quantita' e' assoluta, quindi basta la PATCH auditata dal backend.
+  Future<InventoryActionFeedback> submitEditPlan(
+    InventoryMovementEditPlan plan,
+  ) async {
+    final parsed = plan.parse();
+    switch (parsed) {
+      case InventoryFormInvalid(:final message):
+        return invalid(message);
+      case InventoryFormValid(:final value):
+        if (isSubmitting)
+          return invalid((l10n) => l10n.inventoryQuickLoadInProgress);
+        isSubmitting = true;
+        final details = <LocalizedText>[];
+        try {
+          for (final target in value) {
+            final result = await quickLoadController.gateway.patchMovement(
+              target.movementId,
+              target.request,
+            );
+            if (!result.success) {
+              return remember(
+                InventoryActionFeedback(
+                  success: false,
+                  message: literalText(result.message),
+                  details: [
+                    ...details,
+                    ...literalTexts(result.details),
+                  ],
+                ),
+              );
+            }
+            final edit = result.data;
+            if (edit != null) {
+              details.add(
+                literalText('${edit.previousQuantity} → ${edit.quantity}'),
+              );
+            }
+          }
+          return remember(
+            InventoryActionFeedback(
+              success: true,
+              message: (l10n) =>
+                  l10n.inventoryQuickLoadDone(details.length, value.length),
+              details: List<LocalizedText>.unmodifiable(details),
+            ),
           );
         } finally {
           isSubmitting = false;

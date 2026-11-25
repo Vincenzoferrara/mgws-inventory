@@ -822,10 +822,9 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
                   _buildTotaleRow(
                     context,
                     context.l10n.ordersSubtotal,
-                    (_ordine.total ??
-                            0 -
-                                (_ordine.shippingTotal ?? 0) -
-                                (_ordine.totalTax ?? 0))
+                    ((_ordine.total ?? 0) -
+                            (_ordine.shippingTotal ?? 0) -
+                            (_ordine.totalTax ?? 0))
                         .toString(),
                     _ordine.currency,
                   ),
@@ -914,6 +913,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   }
 
   Future<void> _mostraDialogCambiaStato(BuildContext context) async {
+    if (_ordine.id == null) return;
     final controller = widget.controller;
     final nuovoStato = await showDialog<OrdineStatus>(
       context: context,
@@ -940,6 +940,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   }
 
   Future<void> _mostraDialogAggiungiNota(BuildContext context) async {
+    if (_ordine.id == null) return;
     final controller = widget.controller;
     final nota = await showDialog<String>(
       context: context,
@@ -959,6 +960,7 @@ class _OrdineDettagliState extends State<_OrdineDettagli> {
   }
 
   Future<void> _mostraDialogElimina(BuildContext context) async {
+    if (_ordine.id == null) return;
     final controller = widget.controller;
     final conferma = await showDialog<bool>(
       context: context,

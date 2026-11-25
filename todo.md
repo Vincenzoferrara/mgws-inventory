@@ -318,12 +318,12 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
   - priorita: medium
   - obiettivo: evitare errori inutili e messaggi di errore senza modifiche reali
 
-- [ ] Utenti: rimuovere assunzione `true // Assume admin`
+- [x] Utenti: rimuovere assunzione `true // Assume admin`
   - tipo: sicurezza/app
   - priorita: high
   - obiettivo: evitare che la UI costruisca permessi come se l'utente fosse sempre admin
 
-- [ ] Utenti: proteggere generazione App Password e Woo API Key con autorizzazioni forti
+- [x] Utenti: proteggere generazione App Password e Woo API Key con autorizzazioni forti
   - tipo: sicurezza/app-plugin
   - priorita: high
   - obiettivo: evitare esposizione di segreti sensibili a utenti non autorizzati
@@ -332,7 +332,7 @@ Backlog unico del progetto. Contiene idee, task e dubbi ancora aperti; ogni voce
 
 Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV`, default `false`, in `lib/home/home.gui.dart`). Le voci CalDAV qui sotto servono prima di riattivarlo; `CalDavLoginTab` in `lib/login/gui/caldav_login.gui.dart` non e' usato da nessuna schermata.
 
-- [ ] CalDAV: bloccare Basic Auth su HTTP
+- [x] CalDAV: bloccare Basic Auth su HTTP
   - tipo: bug/security
   - priorita: high
   - obiettivo: impedire invio credenziali su connessioni non cifrate
@@ -382,7 +382,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: evitare CSV rotto o CSV injection
 
-- [ ] Settings: rendere `AppSettings` stato app-wide se deve guidare tutta l'app
+- [x] Settings: rendere `AppSettings` stato app-wide se deve guidare tutta l'app
   - tipo: architettura/app
   - priorita: high
   - obiettivo: evitare che impostazioni globali siano create solo dentro la pagina settings
@@ -419,12 +419,12 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: evitare build fragili fuori dalla struttura attuale del repository
 
-- [ ] IA: non esporre Mistral finché `_callMistral` non è implementato
+- [x] IA: non esporre Mistral finché `_callMistral` non è implementato
   - tipo: bug/app
   - priorita: high
   - obiettivo: evitare una scelta provider che finisce sempre in errore
 
-- [ ] IA: completare o rimuovere Cohere da enum, settings e UI
+- [x] IA: completare o rimuovere Cohere da enum, settings e UI
   - tipo: bug/app
   - priorita: medium
   - obiettivo: allineare configurazione e runtime dei provider IA
@@ -436,7 +436,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
 
 ## Audit esteso - Dubbi e test
 
-- [ ] Import CSV: non accettare righe con errori bloccanti
+- [x] Import CSV: non accettare righe con errori bloccanti
   - tipo: bug/app
   - priorita: high
   - obiettivo: bloccare l'import quando una riga ha errori che rendono il record non valido
@@ -454,13 +454,13 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - obiettivo: confermare che il campo featured venga letto e scritto correttamente
   - perche: il mapping del flag potrebbe essere disallineato con la struttura reale di WooCommerce
 
-- [ ] Cifrare davvero i dati smartcard
+- [x] Cifrare davvero i dati smartcard
   - tipo: bug/security
   - priorita: high
   - obiettivo: sostituire Base64 con una protezione reale dei dati sensibili smartcard
   - perche: Base64 e solo codifica, non cifratura
 
-- [ ] Non bypassare la validazione URL/HTTPS nel login smartcard
+- [x] Non bypassare la validazione URL/HTTPS nel login smartcard
   - tipo: bug/security
   - priorita: high
   - obiettivo: impedire l'accesso se l'endpoint non e valido o non usa HTTPS quando richiesto
@@ -526,7 +526,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: evitare pannello dettagli stale dopo aggiornamento stato ordine
 
-- [ ] Ordini: evitare crash con `ordine.id!`
+- [x] Ordini: evitare crash con `ordine.id!`
   - tipo: bug/app
   - priorita: high
   - obiettivo: rimuovere assunzioni non sicure su ID nullable
@@ -536,7 +536,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: passare la scelta del dialog al metodo di salvataggio nota
 
-- [ ] Ordini: correggere calcolo subtotale
+- [x] Ordini: correggere calcolo subtotale
   - tipo: bug/app
   - priorita: high
   - obiettivo: calcolare correttamente totale meno spedizione e tasse
@@ -548,12 +548,12 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - stato: per ora gli ordini si leggono soltanto; il pulsante `Nuovo ordine` e' nascosto dietro il flag di build `ORDER_CREATE` (default `false`) in `lib/orders/order_list/order_list.gui.dart`, il codice di `lib/orders/order_editor/` resta
   - verifica minima: prima di riattivare il flag, un ordine creato dall'app ha prodotti, quantita e totali corretti in WooCommerce
 
-- [ ] Coupon: non simulare sempre validazione positiva
+- [x] Coupon: non simulare sempre validazione positiva
   - tipo: bug/app
   - priorita: high
   - obiettivo: mostrare il vero esito di validazione coupon
 
-- [ ] Coupon: usare i validator reali nel form
+- [x] Coupon: usare i validator reali nel form
   - tipo: bug/app
   - priorita: high
   - obiettivo: far rispettare formati, limiti importo, date e percentuali
@@ -572,7 +572,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
 
 ## Audit esteso 6 - backend query e sicurezza
 
-- [ ] JWT: supportare token root response per `jwt-auth/v1/token`
+- [x] JWT: supportare token root response per `jwt-auth/v1/token`
   - tipo: bug/app
   - priorita: high
   - obiettivo: non fallire se la risposta usa `token` fuori da `data`
@@ -582,7 +582,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: mostrare errore reale invece di un parsing failure generico
 
-- [ ] JWT: non loggare `error.response?.data` completo
+- [x] JWT: non loggare `error.response?.data` completo
   - tipo: bug/security
   - priorita: high
   - obiettivo: evitare leak di dati sensibili nei log
@@ -598,7 +598,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: non cancellare segreti di altri moduli per errore
 
-- [ ] URL validator: coprire range IP locali/riservati mancanti
+- [x] URL validator: coprire range IP locali/riservati mancanti
   - tipo: bug/security
   - priorita: high
   - obiettivo: ridurre bypass e SSRF in validazione URL
@@ -613,7 +613,7 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: confermare compatibilita con API batch WooCommerce
 
-- [ ] Woo media: validare URL remoto in `uploadFromUrl`
+- [x] Woo media: validare URL remoto in `uploadFromUrl`
   - tipo: bug/security
   - priorita: high
   - obiettivo: evitare URL arbitrari verso backend senza controllo
@@ -641,12 +641,12 @@ Nota: CalDAV e' nascosto dalla home finche' non e' pronto (flag di build `CALDAV
   - priorita: medium
   - obiettivo: non nascondere fallimenti di bootstrap della schermata
 
-- [ ] Nuovo prodotto: validare prezzi con formato locale
+- [x] Nuovo prodotto: validare prezzi con formato locale
   - tipo: bug/app
   - priorita: high
   - obiettivo: evitare conversioni silenziose a 0.0
 
-- [ ] Nuovo prodotto: validare quantità/prezzo varianti
+- [x] Nuovo prodotto: validare quantità/prezzo varianti
   - tipo: bug/app
   - priorita: high
   - obiettivo: prevenire valori invalidi o negativi nelle varianti

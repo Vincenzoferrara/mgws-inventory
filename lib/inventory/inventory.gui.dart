@@ -66,7 +66,6 @@ class InventoryPage extends StatefulWidget {
     this.supplierController,
     this.rettificaController,
     this.moveController,
-    this.movementController,
     this.catalogController,
   });
 
@@ -75,10 +74,6 @@ class InventoryPage extends StatefulWidget {
   final InventorySupplierController? supplierController;
   final InventoryRettificaController? rettificaController;
   final InventoryMoveController? moveController;
-
-  /// Ledger: un controller per pagina, cosi' il ricaricamento non riparte da
-  /// zero a ogni filtro.
-  final InventoryMovementController? movementController;
 
   /// mgws_inventory condiviso: serve a risolvere il barcode in un product
   /// id nei pannelli che non hanno un proprio selettore.
@@ -94,7 +89,6 @@ class _InventoryPageState extends State<InventoryPage> {
   late final InventorySupplierController _supplierController;
   late final InventoryRettificaController _rettificaController;
   late final InventoryMoveController _moveController;
-  late final InventoryMovementController _movementController;
   late final InventoryQuickLoadCatalogController _catalogController;
   late final bool _ownsCatalog;
 
@@ -142,8 +136,6 @@ class _InventoryPageState extends State<InventoryPage> {
         widget.rettificaController ??
         InventoryRettificaController(inventory: _controller);
     _moveController = widget.moveController ?? InventoryMoveController();
-    _movementController =
-        widget.movementController ?? InventoryMovementController();
     _ownsCatalog = widget.catalogController == null;
     _catalogController =
         widget.catalogController ?? InventoryQuickLoadCatalogController();
@@ -278,6 +270,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                 supplierController: _supplierController,
                                 detailsController: _detailsController,
                                 siteController: _siteController,
+                                seed: _pendingSeed,
                               ),
                             if (_activeModule == InventoryModule.fix)
                               InventoryRettificaPanel(
@@ -302,7 +295,6 @@ class _InventoryPageState extends State<InventoryPage> {
                               ),
                             if (_activeModule == InventoryModule.ledger)
                               InventoryMovementLedgerPanel(
-                                controller: _movementController,
                                 onReopen: _resumeMovement,
                               ),
                             if (_activeModule == null) _EmptyModulePrompt(),

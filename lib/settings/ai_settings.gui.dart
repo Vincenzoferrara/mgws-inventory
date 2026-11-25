@@ -20,15 +20,12 @@ class _AISettingsTabState extends State<AISettingsTab> {
   final _openAIController = TextEditingController();
   final _anthropicController = TextEditingController();
   final _googleAIController = TextEditingController();
-  final _mistralController = TextEditingController();
-  final _cohereController = TextEditingController();
   final _ollamaController = TextEditingController();
 
   // Modelli selezionati
   String _selectedOpenAIModel = 'gpt-4o-mini';
   String _selectedAnthropicModel = 'claude-3-5-sonnet-20241022';
   String _selectedGoogleModel = 'gemini-1.5-flash';
-  String _selectedMistralModel = 'mistral-small-latest';
   String _selectedOllamaModel = 'llama3.2';
 
   // Provider attivo
@@ -54,14 +51,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
     'gemini-1.5-flash',
     'gemini-1.5-pro',
     'gemini-1.0-pro',
-  ];
-
-  final List<String> _mistralModels = [
-    'mistral-small-latest',
-    'mistral-medium-latest',
-    'mistral-large-latest',
-    'open-mistral-7b',
-    'open-mixtral-8x7b',
   ];
 
   final List<String> _ollamaModels = [
@@ -90,9 +79,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
         await settings.getAiToken('ai_anthropic_token') ?? '';
     _googleAIController.text =
         await settings.getAiToken('ai_google_token') ?? '';
-    _mistralController.text =
-        await settings.getAiToken('ai_mistral_token') ?? '';
-    _cohereController.text = await settings.getAiToken('ai_cohere_token') ?? '';
     _ollamaController.text = await settings.getAiToken('ai_ollama_url') ?? '';
 
     // Carica modelli selezionati
@@ -103,8 +89,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
         'claude-3-5-sonnet-20241022';
     _selectedGoogleModel =
         await settings.getAiToken('ai_google_model') ?? 'gemini-1.5-flash';
-    _selectedMistralModel =
-        await settings.getAiToken('ai_mistral_model') ?? 'mistral-small-latest';
     _selectedOllamaModel =
         await settings.getAiToken('ai_ollama_model') ?? 'llama3.2';
     _activeProvider =
@@ -130,21 +114,12 @@ class _AISettingsTabState extends State<AISettingsTab> {
         'ai_google_token',
         _googleAIController.text.trim(),
       );
-      await settings.setAiToken(
-        'ai_mistral_token',
-        _mistralController.text.trim(),
-      );
-      await settings.setAiToken(
-        'ai_cohere_token',
-        _cohereController.text.trim(),
-      );
       await settings.setAiToken('ai_ollama_url', _ollamaController.text.trim());
 
       // Salva modelli selezionati
       await settings.setAiToken('ai_openai_model', _selectedOpenAIModel);
       await settings.setAiToken('ai_anthropic_model', _selectedAnthropicModel);
       await settings.setAiToken('ai_google_model', _selectedGoogleModel);
-      await settings.setAiToken('ai_mistral_model', _selectedMistralModel);
       await settings.setAiToken('ai_ollama_model', _selectedOllamaModel);
       await settings.setAiToken('ai_active_provider', _activeProvider);
 
@@ -163,8 +138,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
     _openAIController.dispose();
     _anthropicController.dispose();
     _googleAIController.dispose();
-    _mistralController.dispose();
-    _cohereController.dispose();
     _ollamaController.dispose();
     super.dispose();
   }
@@ -263,10 +236,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
                           value: 'google',
                           child: Text('Google AI (Gemini)'),
                         ),
-                        const DropdownMenuItem(
-                          value: 'mistral',
-                          child: Text('Mistral AI'),
-                        ),
                       ],
                       onChanged: (value) {
                         if (value != null) {
@@ -336,19 +305,6 @@ class _AISettingsTabState extends State<AISettingsTab> {
                   setState(() => _selectedGoogleModel = model),
             ),
             const SizedBox(height: 16),
-
-            // Mistral AI
-            _buildProviderCard(
-              label: 'Mistral AI',
-              hint: context.l10n.settingsAiMistralHint,
-              controller: _mistralController,
-              icon: Icons.air,
-              color: context.colors.infoColor,
-              models: _mistralModels,
-              selectedModel: _selectedMistralModel,
-              onModelChanged: (model) =>
-                  setState(() => _selectedMistralModel = model),
-            ),
 
             const SizedBox(height: 32),
 

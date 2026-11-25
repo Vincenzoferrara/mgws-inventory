@@ -664,6 +664,18 @@ class QueryMgwsInventory implements MgwsInventoryGateway, MgwsRestockGateway {
       );
 
   @override
+  Future<MgwsRestockResult<MgwsMovementEdit>> patchMovement(
+    int movementId,
+    MgwsMovementEditRequest request,
+  ) => _object(
+    () => _transport.patch(
+      movementPath(movementId),
+      data: request.toJson(),
+    ),
+    MgwsMovementEdit.fromMap,
+  );
+
+  @override
   Future<MgwsRestockResult<List<MgwsCountSession>>> listCountSessions({
     int? siteId,
     int? warehouseId,

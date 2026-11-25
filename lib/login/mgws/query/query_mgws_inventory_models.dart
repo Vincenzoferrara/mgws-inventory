@@ -554,6 +554,10 @@ abstract interface class MgwsRestockGateway {
     MgwsMovementFilter filter,
   );
   Future<MgwsRestockResult<MgwsMovement>> getMovement(int movementId);
+  Future<MgwsRestockResult<MgwsMovementEdit>> patchMovement(
+    int movementId,
+    MgwsMovementEditRequest request,
+  );
   Future<MgwsRestockResult<List<MgwsCountSession>>> listCountSessions({
     int? siteId,
     int? warehouseId,
@@ -773,6 +777,95 @@ class MgwsLocation {
             rack: rack,
             shelf: shelf,
           );
+  }
+}
+
+/// Modifica in place dell'ultima riga "Aggiungi": [quantity] e' il numero
+/// assoluto di pezzi che deve restare, non uno scarto da applicare.
+///
+/// Zero e' un valore valido e conserva la riga nel libro: il movimento resta
+/// consultabile con zero pezzi invece di sparire dallo storico.
+class MgwsMovementEditRequest {
+  const MgwsMovementEditRequest({
+    required this.quantity,
+    this.note,
+    this.unitCost,
+  });
+
+  final int quantity;
+  final String? note;
+
+  /// Costo di un pezzo come digitato ("12.50"), o null se non dichiarato.
+  final String? unitCost;
+
+  Map<String, Object?> toJson() => _compact({
+    'quantity': quantity,
+    'note': note,
+    'unit_cost': unitCost,
+  });
+}
+
+/// Esito auditato della modifica: i numeri prima e dopo servono a mostrare
+/// all'operatore esattamente quale riga e' cambiata, non solo un esito generico.
+class MgwsMovementEdit {
+  const MgwsMovementEdit({
+    required this.movementId,
+    required this.ledgerMovementId,
+    required this.productId,
+    required this.variationId,
+    required this.quantity,
+    required this.previousQuantity,
+    required this.quantityDelta,
+    required this.previousStock,
+    required this.currentStock,
+    this.noop = false,
+  });
+
+  final int movementId;
+  final int ledgerMovementId;
+  final int productId;
+  final int variationId;
+  final int quantity;
+  final int previousQuantity;
+  final int quantityDelta;
+  final int previousStock;
+  final int currentStock;
+  final bool noop;
+
+  static MgwsMovementEdit? fromMap(Map<String, Object?> value) {
+    final movementId = MgwsRestockParser.integer(value['movement_id']);
+    final productId = MgwsRestockParser.integer(value['product_id']);
+    final variationId = MgwsRestockParser.integer(value['variation_id']);
+    final quantity = MgwsRestockParser.integer(value['quantity']);
+    final previousQuantity = MgwsRestockParser.integer(
+      value['previous_quantity'],
+    );
+    final quantityDelta = MgwsRestockParser.integer(value['quantity_delta']);
+    final previousStock = MgwsRestockParser.integer(value['previous_stock']);
+    final currentStock = MgwsRestockParser.integer(value['current_stock']);
+    if (movementId == null ||
+        productId == null ||
+        variationId == null ||
+        quantity == null ||
+        previousQuantity == null ||
+        quantityDelta == null ||
+        previousStock == null ||
+        currentStock == null) {
+      return null;
+    }
+    return MgwsMovementEdit(
+      movementId: movementId,
+      ledgerMovementId:
+          MgwsRestockParser.integer(value['ledger_movement_id']) ?? movementId,
+      productId: productId,
+      variationId: variationId,
+      quantity: quantity,
+      previousQuantity: previousQuantity,
+      quantityDelta: quantityDelta,
+      previousStock: previousStock,
+      currentStock: currentStock,
+      noop: MgwsRestockParser.boolean(value['noop']) ?? false,
+    );
   }
 }
 

@@ -8,7 +8,6 @@ const _providerNames = {
   'openai': 'OpenAI',
   'anthropic': 'Anthropic (Claude)',
   'google': 'Google AI (Gemini)',
-  'mistral': 'Mistral AI',
 };
 
 /// Chiede una volta sola, per ogni provider cloud, il consenso a inviare

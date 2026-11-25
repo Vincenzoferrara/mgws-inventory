@@ -5,7 +5,7 @@ import 'package:ollama_dart/ollama_dart.dart' as ollama;
 import '../settings/app_settings.dart';
 
 /// Provider IA disponibili
-enum AIProvider { openai, anthropic, google, mistral, cohere, ollama }
+enum AIProvider { openai, anthropic, google, ollama }
 
 /// Il provider IA selezionato non ha un token configurato.
 ///
@@ -206,15 +206,6 @@ Rispondi SOLO con la descrizione, senza virgolette o intestazioni.
           return await _callGoogle(token, prompt, model);
         }
         break;
-      case 'mistral':
-        token = await _settings.getAiToken('ai_mistral_token');
-        model =
-            await _settings.getAiToken('ai_mistral_model') ??
-            'mistral-small-latest';
-        if (token != null && token.isNotEmpty) {
-          return await _callMistral(token, prompt, model);
-        }
-        break;
     }
 
     throw AiProviderNotConfiguredException(activeProvider);
@@ -283,13 +274,5 @@ Rispondi SOLO con la descrizione, senza virgolette o intestazioni.
       Content.text(prompt),
     ]);
     return response.text ?? '';
-  }
-
-  /// Chiama Mistral AI
-  Future<String> _callMistral(String token, String prompt, String model) async {
-    // Mistral usa API compatibile con OpenAI
-    // Per ora usa dart_openai con base URL diverso
-    // TODO: implementare con mistralai_dart quando supporterà meglio
-    throw const AiProviderNotImplementedException('Mistral AI');
   }
 }

@@ -24,11 +24,14 @@ import 'inventory_module.code.dart';
 /// Cosa ha prodotto il movimento.
 ///
 /// MGWS non ha un vocabolario che l'app conosca: i valori arrivano come
-/// stringhe libere. Per questo la classificazione guarda `sourceType` e `type`
-/// e, quando non riconosce niente, tiene [altro] e mostra la parola grezza
-/// invece di indovinare. Un tipo sconosciuto mostrato male e' un fastidio; un
-/// tipo sconosciuto travestito da "Rettifica" e' un movimento che si riapre
-/// nel pannello sbagliato.
+/// stringhe libere. Per questo la classificazione guarda `stockEffect`,
+/// `sourceType`, `type` e `reasonCode`, e quando non riconosce niente tiene
+/// [altro] e mostra la parola grezza invece di indovinare. Un tipo sconosciuto
+/// mostrato male e' un fastidio; un tipo sconosciuto travestito da "Rettifica"
+/// e' un movimento che si riapre nel pannello sbagliato. `reasonCode` conta
+/// perche' le rettifiche scritte dal pannello hanno `sourceType` vuoto e
+/// `type`/`stockEffect` generici (`adjust`): il solo codice motivo le
+/// distingue.
 enum InventoryMovementKind {
   carico,
   rettifica,
@@ -148,6 +151,7 @@ class InventoryMovementGroup {
   /// quale e' andata la merce. Un tipo che l'app non riconosce non ha modulo:
   /// non si indovina.
   InventoryModule? get resumeModule => switch (kind) {
+    InventoryMovementKind.carico => InventoryModule.add,
     InventoryMovementKind.rettifica => InventoryModule.fix,
     InventoryMovementKind.sposta => InventoryModule.move,
     _ => null,
@@ -172,10 +176,27 @@ class InventoryMovementGroup {
     return true;
   }
 
-  /// Perche' il gruppo non si puo' riaprire, quando non si puo'.
-  String resumeBlockMessage(AppLocalizations l10n) => switch (kind) {
+  /// Whether the group can be reopened right now.
+  ///
+  /// A stock-in is edited in place, so it can only change while it is the most
+  /// recent movement: a later movement may already have moved the stock this
+  /// one wrote. Adjustments and transfers create a new movement instead, so
+  /// they are not subject to that rule.
+  ///
+  /// This is the UI guard only. MGWS repeats the check on the write and refuses
+  /// the edit if the movement is no longer the last one.
+  bool canResumeNow({required bool isLatestMovement}) =>
+      canResume &&
+      (kind != InventoryMovementKind.carico || isLatestMovement);
+
+  /// Why the group cannot be reopened right now, when it cannot.
+  String resumeBlockMessage(
+    AppLocalizations l10n, {
+    required bool isLatestMovement,
+  }) => switch (kind) {
     InventoryMovementKind.sposta => l10n.inventoryResumeBlockMove,
-    InventoryMovementKind.carico => l10n.inventoryResumeBlockAdd,
+    InventoryMovementKind.carico =>
+      isLatestMovement ? '' : l10n.inventoryResumeBlockNotLast,
     InventoryMovementKind.conteggio => l10n.inventoryResumeBlockCount,
     InventoryMovementKind.ricezione => l10n.inventoryResumeBlockReceipt,
     InventoryMovementKind.altro => l10n.inventoryResumeBlockOther(
@@ -960,10 +981,12 @@ InventoryMovementGroup _toGroup(String key, List<MgwsMovement> movements) {
 
 /// Riconosce il modulo dalla parola che MGWS usa.
 ///
-/// Si guarda `stockEffect`, `sourceType` e poi `type`: il primo descrive che
-/// cosa ha fatto l'operazione sullo stock, il secondo da dove arriva, il terzo
-/// che forma ha. Bastano i tre per coprire i moduli dell'app senza una lista di
-/// valori da mantenere.
+/// Si guarda `stockEffect`, `sourceType`, `type` e infine `reasonCode`: il
+/// primo descrive che cosa ha fatto l'operazione sullo stock, il secondo da
+/// dove arriva, il terzo che forma ha, il quarto perche' e' stata fatta.
+/// L'ultimo e' necessario per le rettifiche: MGWS non gli mette un sorgente e
+/// scrive solo `adjust` negli altri campi, quindi senza `reasonCode` verrebbero
+/// mostrate come "Other" e il pulsante Edit resterebbe spento.
 ///
 /// L'ordine dei riscontri e' quello che evita di confondere una ricezione che
 /// contiene "move" nel nome, o un "load" dentro un "quick load": vince il primo
@@ -973,6 +996,7 @@ InventoryMovementKind _classify(MgwsMovement movement) {
     movement.stockEffect.toLowerCase(),
     movement.sourceType.toLowerCase(),
     movement.type.toLowerCase(),
+    movement.reasonCode.toLowerCase(),
   ]) {
     if (candidate.isEmpty) continue;
     if (candidate.contains('reconcile') || candidate.contains('rettific')) {
@@ -1036,7 +1060,13 @@ class InventoryPanelSeed {
     module,
     reason,
     details,
-    for (final item in products) '${item.productId}:${item.variationId}',
+    for (final movement in movements)
+      '${movement.id}:${movement.movementId}:${movement.occurredAtGmt}:'
+      '${movement.productId}:${movement.variationId}:'
+      '${movement.quantityDelta}:${movement.reasonCode}:'
+      '${movement.sourceType}:${movement.sourceId}:${movement.sourceLineId}',
+    for (final item in products)
+      '${item.productId}:${item.variationId}:${item.quantity}',
   ]);
 }
 

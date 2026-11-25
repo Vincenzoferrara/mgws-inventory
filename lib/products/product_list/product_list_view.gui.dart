@@ -1,5 +1,6 @@
 import '../../l10n/error_text.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
 import '../../notification/notification_service.dart';
@@ -594,8 +595,7 @@ class _ProdottoDettagliViewState extends State<ProdottoDettagliView> {
         message: (l10n) => l10n.productsNoDeletion,
       );
       if (isMulti && _bulkDelete) {
-        final settings = AppSettings();
-        await settings.init();
+        final settings = context.read<AppSettings>();
         deleteResult = await controller.deleteSelectedProducts(
           force: settings.forceDelete,
         );

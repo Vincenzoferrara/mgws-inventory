@@ -35,6 +35,11 @@ class GlobalPaginationBar extends StatefulWidget {
   final Future<void> Function()? onLastPage;
   final Future<void> Function(GlobalPageMode mode, int pageSize)?
   onModeOrPageSizeChanged;
+
+  /// Persistenza alternativa del numero di righe. Senza, la barra usa le
+  /// impostazioni globali; una lista che ha un suo default (perche' raggruppa
+  /// le righe) puo' passare qui il proprio salvataggio.
+  final Future<void> Function(int pageSize)? persistPageSize;
   final int? totalRows;
   final int selectedRows;
 
@@ -47,6 +52,7 @@ class GlobalPaginationBar extends StatefulWidget {
     this.onNextPage,
     this.onLastPage,
     this.onModeOrPageSizeChanged,
+    this.persistPageSize,
     this.totalRows,
     this.selectedRows = 0,
   });
@@ -119,7 +125,13 @@ class _GlobalPaginationBarState extends State<GlobalPaginationBar> {
       return;
     }
 
-    await widget.controller.persistPageSize(widget.settings, parsed);
+    final customPersistence = widget.persistPageSize;
+    if (customPersistence == null) {
+      await widget.controller.persistPageSize(widget.settings, parsed);
+    } else {
+      widget.controller.setPageSize(parsed);
+      await customPersistence(parsed);
+    }
     widget.controller.setMode(GlobalPageMode.paged, resetPage: false);
     await widget.onModeOrPageSizeChanged?.call(
       GlobalPageMode.paged,

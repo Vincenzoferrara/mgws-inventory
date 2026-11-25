@@ -56,21 +56,18 @@ extension InventoryModuleX on InventoryModule {
     InventoryModule.choose || InventoryModule.ledger => false,
   };
 
-  /// `true` se il modulo si puo' riaprire da un movimento del ledger.
+  /// Whether this module can reopen a movement from the ledger.
   ///
-  /// Rettifica e Sposta si possono riprendere: entrambe le rotte di scrittura
-  /// ricostruiscono da sole quello che serve a rifare lo stesso gesto. La
-  /// rettifica riporta il prodotto al valore assoluto che il movimento gli aveva
-  /// lasciato, lo spostamento riparte dai due magazzini che le righe portano.
+  /// All three writing modules can be reopened. Each one rebuilds the same
+  /// operation from what the ledger records: Adjustment from the absolute stock
+  /// left by the movement, Transfer from the route carried by its rows, and
+  /// Add from the products and quantities of the stock-in. Editing an Add in
+  /// place writes the stock difference, not a new load.
   ///
-  /// Aggiungi no, e non per scelta: l'unica rotta che ha e' il carico, che sa
-  /// solo aumentare lo stock. Un carico modificato in meno e' una diminuzione, e
-  /// una diminuzione non e' un carico: non c'e' modo di esprimerla li'. Riaprirlo
-  /// produrrebbe un movimento diverso da quello che l'operatore sta guardando,
-  /// che e' il male che questo intero meccanismo cerca di evitare.
-  ///
-  /// Meglio un pulsante assente che un pulsante che produce un movimento
-  /// diverso da quello che l'operatore sta guardando.
-  bool get canResumeFromLedger =>
-      this == InventoryModule.fix || this == InventoryModule.move;
+  /// The "last movement only" rule is not a property of the module: it is a
+  /// separate guard, checked when the movement is opened and enforced by MGWS.
+  bool get canResumeFromLedger => switch (this) {
+    InventoryModule.add || InventoryModule.fix || InventoryModule.move => true,
+    InventoryModule.choose || InventoryModule.ledger => false,
+  };
 }

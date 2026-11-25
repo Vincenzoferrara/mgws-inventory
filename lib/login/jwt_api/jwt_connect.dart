@@ -173,7 +173,8 @@ class JwtConnect implements AuthConnector {
             log.e(
               'Error ${error.response?.statusCode} on ${error.requestOptions.uri}',
             );
-            log.d('Server response: ${error.response?.data}');
+            // Non loggare error.response?.data: può contenere dati sensibili
+            // (token, credenziali, payload utente) nei log dell'app.
 
             // Se ricevo 401 (Unauthorized), provo a refreshare il token
             // UNA SOLA VOLTA: senza guardia il retry rientra in questo
@@ -536,12 +537,16 @@ class JwtConnect implements AuthConnector {
       if (decoded is! Map<String, dynamic>)
         throw InvalidResponseFormatException();
 
-      final tokenData = decoded['data'];
-      final String? token = tokenData?['jwt'] ?? tokenData?['token'];
+      // Alcuni plugin (es. jwt-auth/v1/token) restituiscono il token alla
+      // radice della risposta, altri sotto `data` (simple-jwt-login).
+      final tokenData = decoded['data'] is Map<String, dynamic>
+          ? decoded['data'] as Map<String, dynamic>
+          : decoded;
+      final String? token = tokenData['jwt'] ?? tokenData['token'];
       if (token == null) throw InvalidResponseFormatException();
 
       final int expiresIn =
-          tokenData?['expires_in'] ?? 86400; // Default a 24 ore
+          tokenData['expires_in'] ?? decoded['expires_in'] ?? 86400;
       return UserSession(
         token: token,
         expiresAt: DateTime.now().add(Duration(seconds: expiresIn)),
